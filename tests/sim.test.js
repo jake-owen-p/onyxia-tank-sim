@@ -55,14 +55,13 @@ test('pull: on time when the tank drags her to the wall, missed when the tank st
 
   // Stand still after the pull: she never reaches the wall spot.
   const lazy = makeSim({ start: 'entrance' });
-  let taunted = false, lastSunder = -9;
+  let taunted = false;
   const ev2 = run(lazy, 32, (sm) => {
     const st = sm.state, b = st.world.boss, p = st.world.player;
     const inRange = dist(p.x, p.y, b.x, b.y) - script.boss.radius <= 12;
     if (!inRange) return driveToward(sm, st.world.idealPlayer);
     const cmd = idle();
     if (!taunted) { cmd.abilities.push('taunt'); taunted = true; }
-    else if (st.t - lastSunder > 1.6) { cmd.abilities.push('sunder'); lastSunder = st.t; }
     return cmd;
   });
   const e2 = ev2.find((e) => e.type === 'engage');
@@ -77,7 +76,7 @@ test('pull: on time when the tank drags her to the wall, missed when the tank st
 test('Wing Buffet: the wall stops the knockback, threat is cut, wall and rebuild expectations resolve', () => {
   const sim = makeSim({ start: 'wall', manual: true });
   const s = sim.state, p = s.world.player;
-  s.threat.player = 6000; s.threat.raid = 3500;
+  s.threat.player = 6000; s.threat.raid = 4500;   // the 35% cut drops the tank under the raid
   const before = { x: p.x, y: p.y };
   assert.ok(sim.triggerAction('wingBuffet'));
   assert.equal(s.world.boss.cast.id, 'wingBuffet');
@@ -91,13 +90,16 @@ test('Wing Buffet: the wall stops the knockback, threat is cut, wall and rebuild
   assert.ok(s.threat.player >= cut - 1 && s.threat.player < cut + 150, `threat cut to ~${cut}, got ${s.threat.player}`);
   assert.equal(expectations(ev, 'wall')[0].status, 'ontime');
   assert.equal(s.metrics.buffetsOffWall, undefined);
-  // Rebuild: raid/player = 3500/3900 is inside the danger band, so it stays pending until we Sunder.
+  // The cut puts the raid above the tank: she turns, and the rebuild stays pending until we Taunt her back.
+  assert.ok(ev.some((e) => e.type === 'threatLost'));
+  assert.equal(s.world.boss.target, 'raid');
   assert.equal(expectations(ev, 'rebuild').length, 0);
-  let last = -9;
-  const ev2 = run(sim, 4, (sm) => { const c = idle(); if (sm.state.t - last > 1.6) { c.abilities.push('sunder'); last = sm.state.t; } return c; });
+  const ev2 = run(sim, 1, (sm) => ({ ...idle(), abilities: sm.state.abilities.readyAt.taunt <= sm.state.t ? ['taunt'] : [] }));
   const rebuild = expectations(ev2, 'rebuild');
   assert.equal(rebuild.length, 1);
   assert.equal(rebuild[0].status, 'ontime');
+  assert.equal(s.world.boss.target, 'player');
+  assert.ok(s.threat.player >= 4500 * script.threat.tauntLead, 'Taunt puts the tank clear of the raid');
 });
 
 test('Wing Buffet flush against the wall barely moves the tank', () => {
@@ -109,11 +111,11 @@ test('Wing Buffet flush against the wall barely moves the tank', () => {
   assert.ok(p.y - 53.5 < 1);
 });
 
-test('Wing Buffet away from the wall: full knockback, wall expectation missed, rebuild missed without sundering', () => {
+test('Wing Buffet away from the wall: full knockback, wall expectation missed, rebuild missed without a Taunt', () => {
   const sim = makeSim({ start: 'wall', manual: true });
   const s = sim.state, p = s.world.player, b = s.world.boss;
   b.x = 0; b.y = 20; p.x = 0; p.y = 30;
-  s.threat.player = 6000; s.threat.raid = 3500;
+  s.threat.player = 6000; s.threat.raid = 4500;   // the cut drops the tank under the raid and she turns
   sim.triggerAction('wingBuffet');
   const ev = run(sim, 2);
   assert.ok(ev.some((e) => e.type === 'knockback' && e.offWall === true));
@@ -127,40 +129,94 @@ test('Wing Buffet away from the wall: full knockback, wall expectation missed, r
   assert.equal(rebuild[0].status, 'missed');
 });
 
-test('Bellowing Roar: feared without immunity, resisted with it', () => {
+test('Bellowing Roar fears the tank; the recovery expectation waits for the fear to end', () => {
   const sim = makeSim({ startPhase: 3, start: 'wall', manual: true });
-  const s = sim.state;
+  const s = sim.state, p = s.world.player;
   assert.equal(s.phase, 3);
   sim.triggerAction('bellowingRoar');
-  const ev = run(sim, 4);
+  const ev = run(sim, script.actions.bellowingRoar.cast + 0.2);
   assert.ok(ev.some((e) => e.type === 'feared'));
-  assert.equal(s.metrics.fearsTaken, 1);
-  const roar = expectations(ev, 'roar');
+  assert.ok(p.fearedUntil > s.t);
+  const def = script.phases[2].expectations.find((e) => e.id === 'roar');
+  const inst = s.expectations.find((i) => i.id === 'roar');
+  assert.ok(inst && inst.status === 'pending', 'created at the roar, still pending');
+  assert.ok(inst.notBefore > s.t, 'not judged until the fear has run its course');
+  assert.equal(expectations(run(sim, def.notBefore - 0.5), 'roar').length, 0, 'nothing resolves before notBefore');
+  // The perfect tank walks back between her and the raid: on time or late, never missed.
+  const ev2 = run(sim, def.within + def.grace + 1, perfectTank());
+  const roar = expectations(ev2, 'roar');
   assert.equal(roar.length, 1);
-  assert.equal(roar[0].status, 'missed');
-
-  const sim2 = makeSim({ startPhase: 3, start: 'wall', manual: true });
-  sim2.step({ ...idle(), abilities: ['fearImmune'] }, FIXED_DT);
-  sim2.drainEvents();
-  assert.ok(sim2.state.abilities.buffs.fearImmuneUntil > sim2.state.t);
-  sim2.triggerAction('bellowingRoar');
-  const ev2 = run(sim2, 3);
-  assert.ok(ev2.some((e) => e.type === 'fearResisted'));
-  assert.ok(!ev2.some((e) => e.type === 'feared'));
-  assert.equal(sim2.state.metrics.fearsTaken, undefined);
-  assert.equal(expectations(ev2, 'roar')[0].status, 'ontime');
+  assert.notEqual(roar[0].status, 'missed');
+  assert.equal(s.metrics.fearsTaken, undefined, 'fears are not a scored metric any more');
 });
 
-test('Bellowing Roar: immunity used during the grace window counts as late', () => {
+test('Bellowing Roar: a tank who never comes back misses the recovery', () => {
   const sim = makeSim({ startPhase: 3, start: 'wall', manual: true });
+  const s = sim.state, p = s.world.player;
   sim.triggerAction('bellowingRoar');
-  run(sim, script.actions.bellowingRoar.cast + 0.5);
-  // feared now; Berserker Rage is blocked while feared, so wait it out and press within the 2 s grace
-  const ev = run(sim, 2, (sm) => { const c = idle(); if (sm.state.world.player.fearedUntil <= sm.state.t) c.abilities.push('fearImmune'); return c; });
-  // the fear lasts 3 s, longer than the grace, so this ends up missed
+  run(sim, script.actions.bellowingRoar.cast + script.player.fearDuration + 0.2);
+  const anchor = s.world.raid.anchor, b = s.world.boss;
+  b.x = anchor.x; b.y = anchor.y + 16; b.heading = -Math.PI / 2;  // she chased the feared tank down to the raid...
+  p.x = anchor.x; p.y = anchor.y - 6;   // ...who now stands behind it, so she faces straight into them
+  const def = script.phases[2].expectations.find((e) => e.id === 'roar');
+  const ev = run(sim, def.within + def.grace + 1);
   const roar = expectations(ev, 'roar');
   assert.equal(roar.length, 1);
   assert.equal(roar[0].status, 'missed');
+});
+
+test('aggro pull: the raid overtakes, she turns, a Taunt inside the window is on time', () => {
+  const sim = makeSim({ start: 'wall', manual: true });
+  const s = sim.state, b = s.world.boss;
+  assert.ok(sim.triggerAction('aggroPull'));
+  const ev = run(sim, 0.5);
+  assert.ok(ev.some((e) => e.type === 'action' && e.id === 'aggroPull'));
+  assert.ok(ev.some((e) => e.type === 'threatLost'), 'she turns on the next threat tick');
+  assert.equal(b.target, 'raid');
+  assert.equal(expectations(ev, 'retaunt').length, 0, 'still pending');
+  sim.step({ ...idle(), abilities: ['taunt'] }, FIXED_DT);
+  const ev2 = sim.drainEvents();
+  assert.equal(b.target, 'player');
+  const re = expectations(ev2, 'retaunt');
+  assert.equal(re.length, 1);
+  assert.equal(re[0].status, 'ontime');
+  // Not fired while she is already on the raid or held by a Taunt.
+  assert.equal(sim.triggerAction('aggroPull'), false, 'held by the fresh Taunt');
+});
+
+test('aggro pull with no Taunt: she stays on the raid and the expectation is missed', () => {
+  const sim = makeSim({ start: 'wall', manual: true });
+  sim.triggerAction('aggroPull');
+  const def = script.phases[0].expectations.find((e) => e.id === 'retaunt');
+  const ev = run(sim, def.within + def.grace + 1);
+  const re = expectations(ev, 'retaunt');
+  assert.equal(re.length, 1);
+  assert.equal(re[0].status, 'missed');
+  assert.equal(sim.state.world.boss.target, 'raid');
+});
+
+test('jump: Space lifts the tank on a fixed arc, lands on time, and is refused while feared', () => {
+  const sim = makeSim({ start: 'wall', manual: true });
+  const s = sim.state, p = s.world.player;
+  const J = script.player.jump;
+  const ev = run(sim, FIXED_DT, () => ({ ...idle(), jump: true }));
+  assert.ok(ev.some((e) => e.type === 'jump'));
+  assert.ok(p.z > 0 && p.vz > 0);
+  let peak = 0;
+  run(sim, J.duration / 2, () => { peak = Math.max(peak, p.z); return idle(); });
+  assert.ok(Math.abs(peak - J.height) < 0.1, `peak ${peak} ~ ${J.height}`);
+  run(sim, J.duration / 2 + 0.1);
+  assert.equal(p.z, 0);
+  assert.equal(p.vz, 0);
+  // holding the key does not double-jump mid-air
+  const ev2 = run(sim, 0.3, () => ({ ...idle(), jump: true }));
+  assert.equal(ev2.filter((e) => e.type === 'jump').length, 1);
+  // feared: no jump
+  run(sim, J.duration + 0.1);
+  p.fearedUntil = s.t + 2;
+  const ev3 = run(sim, FIXED_DT, () => ({ ...idle(), jump: true }));
+  assert.ok(!ev3.some((e) => e.type === 'jump'));
+  assert.equal(p.z, 0);
 });
 
 test('Deep Breath lane: standing in it burns, standing outside is on time', () => {
@@ -271,24 +327,22 @@ test('whelps that reach the raid accrue whelpsOnRaid for the off-tank', () => {
   assert.ok(ot.state.metrics.whelpsOnRaid > 0);
 });
 
-test('abilities: cooldowns, GCD, range failures and the Taunt target switch', () => {
+test('Taunt: one press per cooldown, range failures, and passive threat while in melee', () => {
   const sim = makeSim({ start: 'wall', manual: true });
   const s = sim.state;
-  sim.step({ ...idle(), abilities: ['sunder', 'sunder'] }, FIXED_DT);
+  sim.step({ ...idle(), abilities: ['taunt', 'taunt'] }, FIXED_DT);
   const ev = sim.drainEvents();
-  assert.equal(ev.filter((e) => e.type === 'abilityUsed' && e.id === 'sunder').length, 1);
-  assert.ok(ev.some((e) => e.type === 'abilityFailed' && e.reason === 'gcd'));
-  assert.equal(s.threat.player, 6000 + script.threat.sunder + script.threat.autoAttackPerSecond * FIXED_DT);
-  // taunt is off the GCD
-  sim.step({ ...idle(), abilities: ['taunt'] }, FIXED_DT);
-  const ev2 = sim.drainEvents();
-  assert.ok(ev2.some((e) => e.type === 'abilityUsed' && e.id === 'taunt'));
-  sim.step({ ...idle(), abilities: ['taunt'] }, FIXED_DT);
-  assert.ok(sim.drainEvents().some((e) => e.type === 'abilityFailed' && e.reason === 'cooldown'));
-  // out of range (after the GCD has cleared)
-  run(sim, 1.6);
+  assert.equal(ev.filter((e) => e.type === 'abilityUsed' && e.id === 'taunt').length, 1);
+  assert.ok(ev.some((e) => e.type === 'abilityFailed' && e.reason === 'cooldown'));
+  assert.ok(Math.abs(s.threat.player - (Math.max(6000, 3000 * script.threat.tauntLead) + script.threat.tauntBonus + script.threat.autoAttackPerSecond * FIXED_DT)) < 1e-6);
+  // standing in melee range builds threat on its own
+  const before = s.threat.player;
+  run(sim, 1);
+  assert.ok(Math.abs(s.threat.player - before - script.threat.autoAttackPerSecond) < 1, 'about autoAttackPerSecond per second');
+  // out of range (once the cooldown has cleared)
+  run(sim, script.playerAbilities.taunt.cooldown);
   s.world.player.x = 0; s.world.player.y = -40;
-  sim.step({ ...idle(), abilities: ['sunder'] }, FIXED_DT);
+  sim.step({ ...idle(), abilities: ['taunt'] }, FIXED_DT);
   assert.ok(sim.drainEvents().some((e) => e.type === 'abilityFailed' && e.reason === 'range'));
   assert.equal(s.feedback.toast.text, 'Out of range');
 });
@@ -393,7 +447,7 @@ test('snapshot has the contract fields and is JSON-serialisable', () => {
   const snap = snapshot(sim.state);
   for (const k of ['t', 'phase', 'phaseName', 'phaseSubtitle', 'hp', 'role', 'world', 'threat', 'abilities', 'upcoming', 'nextExpected', 'feedback', 'metrics']) assert.ok(k in snap, k);
   for (const k of ['player', 'boss', 'raid', 'whelps', 'hazards', 'projectiles', 'ghost', 'idealPlayer', 'idealBoss', 'coneFlash']) assert.ok(k in snap.world, `world.${k}`);
-  assert.deepEqual(Object.keys(snap.world.player).sort(), ['backpedal', 'fearedUntil', 'heading', 'hp', 'maxHp', 'moving', 'x', 'y']);
+  assert.deepEqual(Object.keys(snap.world.player).sort(), ['backpedal', 'fearedUntil', 'heading', 'hp', 'maxHp', 'moving', 'x', 'y', 'z']);
   assert.equal(snap.world.raid.dots.length, script.raid.size);
   const json = JSON.stringify(snap);
   const back = JSON.parse(json);
@@ -434,6 +488,8 @@ test('after landing she settles for boss.settleAfterLanding before walking at th
   const s = sim.state;
   run(sim, 1 + script.boss.landingDuration + 0.2, idle);
   assert.equal(s.world.boss.state, 'grounded');
+  assert.ok(s.threat.raid >= script.threat.landingRaidThreat && s.threat.raid < script.threat.landingRaidThreat + 20, 'the raid is already on her table when she lands');
+  s.world.player.y = 32;   // out of melee range: no passive threat, so she stays on the raid
   const landedY = s.world.boss.y;
   run(sim, script.boss.settleAfterLanding - 0.4, idle);
   assert.ok(Math.abs(s.world.boss.y - landedY) < 0.5, 'she holds position while settling');

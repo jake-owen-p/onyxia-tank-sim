@@ -313,7 +313,13 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   // --- player
   const feared = p.fearedUntil > t;
   const jitter = feared ? Math.sin(now * 40) * 0.3 : 0;
-  drawFigureFlat(ctx, p.x + jitter, p.y, p.heading, { fill: pal.player, stroke: pal.playerStroke, lineWidth: lw(1.5), radius: compact ? 1.6 : 1.2, shield: pal.playerStroke });
+  const z = p.z || 0;
+  if (z > 0) {
+    ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, 1.3, 0.9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  drawFigureFlat(ctx, p.x + jitter, p.y + z * 0.5, p.heading, { fill: pal.player, stroke: pal.playerStroke, lineWidth: lw(1.5), radius: (compact ? 1.6 : 1.2) * (1 + z * 0.2), shield: pal.playerStroke });
 
   ctx.restore();
 }

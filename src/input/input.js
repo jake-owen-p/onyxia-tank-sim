@@ -2,7 +2,7 @@
 // command object the core consumes, and queues one-shot presses (abilities,
 // view toggle, pause) between polls.
 
-import { ABILITY_ACTIONS, ONESHOT_ACTIONS } from './keybinds.js';
+import { ABILITY_ACTIONS, ONESHOT_ACTIONS, MOVE_ONESHOT_ACTIONS } from './keybinds.js';
 
 /**
  * @param {HTMLElement} element  the canvas; receives mouse events
@@ -13,6 +13,7 @@ export function createInput(element, keybinds, settings) {
   const held = new Set();          // key codes currently down
   const pressedAbilities = [];     // ability ids pressed since last poll
   const oneShots = new Set();      // UI actions pressed since last consume
+  let jumpPressed = false;         // jump key went down since last poll
   let mouseTurn = 0;               // radians accumulated from right-drag
   let wheel = 0;
   let enabled = true;
@@ -37,6 +38,7 @@ export function createInput(element, keybinds, settings) {
     held.add(e.code);
     for (const a of actions) {
       if (ABILITY_ACTIONS.includes(a)) pressedAbilities.push(a);
+      else if (MOVE_ONESHOT_ACTIONS.includes(a)) jumpPressed = true;
       else if (ONESHOT_ACTIONS.includes(a)) oneShots.add(a);
     }
     // Developer/phase-skip keys are not rebindable.
@@ -52,6 +54,7 @@ export function createInput(element, keybinds, settings) {
       if (capture) { e.preventDefault(); const cb = capture; capture = null; cb(code); return; }
       for (const a of keybinds.actionsFor(code)) {
         if (ABILITY_ACTIONS.includes(a)) pressedAbilities.push(a);
+        else if (MOVE_ONESHOT_ACTIONS.includes(a)) jumpPressed = true;
         else if (ONESHOT_ACTIONS.includes(a)) oneShots.add(a);
       }
     }
@@ -84,8 +87,9 @@ export function createInput(element, keybinds, settings) {
   return {
     /** Build the command for this frame. Abilities are those pressed since the last poll. */
     poll() {
-      const cmd = { forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [] };
-      if (!enabled) { pressedAbilities.length = 0; mouseTurn = 0; return cmd; }
+      const cmd = { forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [], jump: false };
+      if (!enabled) { pressedAbilities.length = 0; mouseTurn = 0; jumpPressed = false; return cmd; }
+      cmd.jump = jumpPressed; jumpPressed = false;
       if (down('forward')) cmd.forward += 1;
       if (down('back')) cmd.forward -= 1;
       if (down('turnLeft')) cmd.turn += 1;
@@ -100,7 +104,7 @@ export function createInput(element, keybinds, settings) {
     consume(action) { const had = oneShots.has(action); oneShots.delete(action); return had; },
     wheel() { const w = wheel; wheel = 0; return w; },
     isRightDown() { return rightDown; },
-    setEnabled(v) { enabled = !!v; if (!v) { held.clear(); pressedAbilities.length = 0; mouseTurn = 0; } },
+    setEnabled(v) { enabled = !!v; if (!v) { held.clear(); pressedAbilities.length = 0; mouseTurn = 0; jumpPressed = false; } },
     /** Capture the next key/mouse code for rebinding; resolves via callback. */
     captureNext(cb) { capture = cb; },
     cancelCapture() { capture = null; },

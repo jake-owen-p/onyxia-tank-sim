@@ -31,8 +31,8 @@ actions:[...]|null, bossPassive, manual, duration|null, phaseDurations:{1,2,3}|n
 Returned object: `{ state, script, options, step(cmd, dt), drainEvents(), teleport(preset),
 setPhase(id, elapsed=0), setBossPassive(bool), triggerAction(id), end(result), threatRatio() }`.
 
-`cmd = { forward:-1..1, strafe:-1..1 (+1 = right), turn:-1..1 (+1 = turn left), mouseTurn: radians (+ = left), abilities:['taunt', ...] }`
-Ability ids: `taunt, sunder, shieldBlock, defensive, fearImmune`.
+`cmd = { forward:-1..1, strafe:-1..1 (+1 = right), turn:-1..1 (+1 = turn left), mouseTurn: radians (+ = left), jump: bool (true on the tick the key went down), abilities:['taunt'] }`
+Ability ids: `taunt` only. Threat builds on its own while the tank is in melee range; there is no rotation.
 
 Call `step` with `FIXED_DT` (1/60) at 60 Hz times the speed multiplier (the session
 scales the number of steps per real second, not dt).
@@ -44,7 +44,7 @@ Renderers and HUD read a **view**: either `sim.state` (live) or a snapshot from
 
 ```
 t, phase, phaseName, phaseSubtitle, hp (0..1), role
-world.player   { x, y, heading, hp, maxHp, fearedUntil, moving, backpedal }
+world.player   { x, y, z (jump height, yards), heading, hp, maxHp, fearedUntil, moving, backpedal }
 world.boss     { x, y, z, heading, state:'grounded'|'takeoff'|'airborne'|'landing', target:'player'|'raid'|null, engaged, cast:{id,label,icon,start,end}|null, lastHit }
 world.raid     { anchor:{x,y}, dots:[{x,y,melee}] }
 world.whelps   [{ x, y, heading, target:'raid'|'player'|'ghost', onRaid }]
@@ -55,11 +55,10 @@ world.idealPlayer { x, y, reason:'approach'|'tankSpot'|'pickupSpot'|'dodgeLane'|
 world.idealBoss   { x, y, heading, satisfied } | null
 world.coneFlash   { breath, cleave, tail, buffet }  (time of last hit; flash for ~0.5s after)
 threat         { player, raid, tauntUntil }
-abilities      { gcdUntil, readyAt:{id:t}, buffs:{shieldBlockUntil, defensiveUntil, fearImmuneUntil} }
-debuffs        { sunder:{ stacks, until } }                                   (on the boss)
-rotation       { combo, bestCombo, counts:{perfect,good,missed}, lastHit:{t,ability,status,delta}|null, lastEarly:{t,ability}|null,
-                 beats:[{ uid, cue, ability, label, short, at, early, late, armed, filler, status:'pending'|'perfect'|'good'|'missed', resolvedAt, delta }] }
-               (pending notes plus the ones resolved in the last 1.5 s; the HUD draws them as the press-cue lane)
+abilities      { gcdUntil, readyAt:{id:t} }
+cues           { combo, bestCombo, counts:{perfect,good,missed}, lastHit:{t,ability,status,delta,cue}|null, lastEarly:{t,ability}|null,
+                 beats:[{ uid, cue, ability, label, short, tip, at, early, late, doneBy, phase, status:'pending'|'perfect'|'good'|'missed', resolvedAt, delta }] }
+               (pending Taunt notes plus the ones resolved in the last 1.5 s; the HUD draws them as the note lane)
 upcoming       [{ id, label, icon, at, in, warn, cue, hazard?, phase? }] sorted by time, horizon 30s
 nextExpected   { label, kind:'expectation'|'fix'|'hint'|'hold', deadline?, id? } | null
 feedback       { facingWrong, inHazard, lastTick:{t,status,label,lateBy}|null, toast:{t,text,kind}|null }
@@ -96,7 +95,8 @@ Every event has `t` and `type`.
 | death | source | player died (hp reset) |
 | abilityUsed | id, label | |
 | abilityFailed | id, reason:'range'|'cooldown'|'gcd'|'feared' | |
-| beat | ability, status:'perfect'|'good'|'missed', delta, cue, label, combo, filler | a press-cue note was judged |
+| beat | ability, status:'perfect'|'good'|'missed', delta, cue, label, combo | a Taunt note was judged |
+| jump | | the tank left the ground |
 | whelpPickup | | off-tank picked up whelps |
 | expectation | id, status:'ontime'|'late'|'missed', label, lateBy, phase | scoring result |
 | end | result:'victory'|'drillComplete'|'aborted' | run finished |
@@ -105,12 +105,13 @@ Every event has `t` and `type`.
 
 ```js
 import { computeScore } from './core/scoring.js';
-const score = computeScore(script, sim.state.expectations, sim.state.phaseMetrics, sim.state.phasesPlayed, sim.state.role, sim.state.rotation.log);
+const score = computeScore(script, sim.state.expectations, sim.state.phaseMetrics, sim.state.phasesPlayed, sim.state.role, sim.state.cues.log);
 // { overall, grade,
 //   phases:[{ id, name, subtitle, total, grade, expectations:[inst], counts:{ontime,late,missed}, metrics:[{id,label,unit,value,penalty,severe,info}],
-//             rotation:{ perfect, good, missed, total, score, points } }],
-//   rotation:{ perfect, good, missed, total, bestCombo },
-//   fixes:[{title,tip,kind:'missed'|'late'|'metric'|'rotation',count,detail}] }
+//             cues:{ perfect, good, missed, total, score, points } }],
+//   cues:{ perfect, good, missed, total, bestCombo },
+//   fixes:[{title,tip,kind:'missed'|'late'|'metric'|'cue',count,detail}] }
+// Expectation instances carry `notBefore` (afterEvent only): not judged before that time.
 ```
 
 ## Settings object (src/ui/storage.js owns persistence)
@@ -123,7 +124,7 @@ A plain object shared by reference; modules read it each frame.
   speed: 0.25..1,                // default 1
   role: 'mt' | 'offtank',
   warningLead: 3..8,             // seconds, default 5
-  cueLane: true,                 // draw the press-cue lane above the ability bar
+  cueLane: true,                 // draw the Taunt note lane above the ability bar
   laneLead: 2..5,                // seconds of lookahead the lane shows, default 3
   ghostAlpha: 0..1,              // default 0.6 (0 hides the ghost tank)
   hazardOpacity: 0.2..1,         // default 0.7
@@ -150,7 +151,7 @@ r.zoom(delta);                           // POV camera distance (mouse wheel), c
 r.frame({ view, settings, now, dtReal, abilityKeys, overlay });
 r.destroy();
 ```
-`abilityKeys = { taunt:'1', sunder:'2', ... }` (labels from keybinds).
+`abilityKeys = { taunt:'1' }` (labels from keybinds).
 `overlay = { paused:bool, replay:{ t, duration, playing }|null, dim:bool }`.
 Files: `projection.js` (camera + perspective; the only place that knows how 3D becomes 2D),
 `palette.js` (colours, colourblind variant, fonts), `shapes.js` (boss silhouette, player figure,
@@ -177,8 +178,8 @@ input.consume(action) -> bool   // one-shot UI actions: 'toggleView', 'pause', '
 input.wheel() -> accumulated wheel delta since last call
 input.setEnabled(bool); input.destroy();
 ```
-Actions: `forward, back, turnLeft, turnRight, strafeLeft, strafeRight, taunt, sunder, shieldBlock, defensive, fearImmune, toggleView, pause`.
-Defaults: W S A D Q E, 1 2 3 4 5, Tab, Escape. Arrow keys as secondary movement binds.
+Actions: `forward, back, turnLeft, turnRight, strafeLeft, strafeRight, jump, taunt, toggleView, pause`.
+Defaults: W S A D Q E, Space, 1, Tab, Escape. Arrow keys as secondary movement binds. `jump` is a movement one-shot: `poll()` reports it once as `cmd.jump`.
 Key codes are `KeyboardEvent.code`. Tab must `preventDefault`. Right mouse drag turns (pointer lock optional, context menu suppressed on the canvas).
 
 ## Audio (src/audio/cues.js)

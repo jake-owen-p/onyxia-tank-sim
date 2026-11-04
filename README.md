@@ -3,9 +3,14 @@
 A standalone browser app for rehearsing the main-tank job on the WoW Classic
 Onyxia encounter. The simulator plays Onyxia; you play the tank. It never
 connects to the game. Practise the pull, the wall position, Wing Buffet, the
-Phase 2 Deep Breath lanes, the Phase 3 landing pickup and Bellowing Roar
-immunity until the timings are reflex, then look at a scorecard that tells you
-exactly what to fix.
+Phase 2 Deep Breath lanes, the Phase 3 landing pickup and recovering from
+Bellowing Roar until the timings are reflex, then look at a scorecard that
+tells you exactly what to fix.
+
+It is about *when to Taunt* and *where to stand*, not about a class rotation.
+There is one button, Taunt; threat builds on its own while you are in melee
+range, DPS pull aggro on a timer, Wing Buffet cuts your threat, and the game is
+reacting at the right moment and moving to the right place.
 
 * Vanilla JavaScript ES modules, Canvas 2D, no build step, no backend, no
   dependencies.
@@ -48,35 +53,35 @@ WoW defaults. Every key is rebindable in Settings, with conflict detection.
 | Move forward / back | `W` / `S` (also arrow keys) |
 | Turn left / right | `A` / `D` |
 | Strafe left / right | `Q` / `E` |
+| Jump | `Space` |
 | Mouse turn | hold right mouse button and drag |
 | Zoom (POV view) | mouse wheel |
 | Taunt | `1` |
-| Sunder Armor (threat builder) | `2` |
-| Shield Block | `3` |
-| Shield Wall (defensive cooldown) | `4` |
-| Berserker Rage / Fear Ward (fear immunity) | `5` |
 | Switch view | `Tab` |
 | Pause menu | `Esc` |
 | Phase skip (full fight) | `F1` `F2` `F3` |
 
-Backpedalling (`S`) is slower than walking forward, as in the game.
+Backpedalling (`S`) is slower than walking forward, as in the game. Jumping is
+a fixed arc with full air control and no gameplay effect, so you can bunny-hop
+through the fight the way everyone does.
 
 ## Modes
 
 **Tutorial.** A guided walkthrough of about five minutes. It introduces the
 room, then one mechanic at a time with the ghost tank switched on: moving to
-the tank spot, the pull and positioning, Sunder Armor and the press-cue lane,
-Flame Breath, Wing Buffet and the threat rebuild, Phase 2 and the Deep Breath
-lane, the Phase 3 landing and Bellowing Roar. Boss HP is frozen and the boss only does what the current step
+the tank spot, the pull and positioning, when to Taunt (a DPS pulls aggro and
+a NOW note drops into the lane), Flame Breath, Wing Buffet and keeping her on
+you, Phase 2 and the Deep Breath lane, the Phase 3 landing and recovering from
+Bellowing Roar. Boss HP is frozen and the boss only does what the current step
 triggers. Steps are defined in the encounter script under `tutorial.steps`.
 
 **Drills.** Short loops for one mechanic, defined under `drills` in the script:
 
 | Drill | What it loops |
 |---|---|
-| Pull and Wing Buffet | Pull from the ramp to the wall, hold through three Buffets, rebuild threat after each. 75 s. |
-| Rotation and cooldowns | Already at the wall. Sunder on every global, Shield Block each Flame Breath, Berserker Rage each Roar. Chase a perfect combo. 60 s. |
-| Bellowing Roar immunity | Already at the wall in Phase 3. Pre-empt four Roars, keep her facing the wall. 105 s. |
+| Pull and Wing Buffet | Pull from the ramp to the wall, hold through three Buffets, Taunt her back if she turns. 75 s. |
+| When to Taunt | Already at the wall. DPS keep pulling aggro and Buffets cut your threat. Taunt the instant she turns, never before. 60 s. |
+| Bellowing Roar recovery | Already at the wall in Phase 3. Each Roar fears you off her. Get back between her and the raid before she turns. 105 s. |
 | Phase 3 pickup | She lands in five seconds. Taunt, pick her up, drag her to the wall between the cracks. 45 s. |
 
 Each loop ends on a scorecard; `Enter` runs it again with a fresh random seed.
@@ -89,8 +94,8 @@ colourblind-safe palette, master and per-cue volume, and key rebinding.
 
 In the **off-tank** role Phase 2 adds whelp duty: whelp waves come from both
 caves heading for the raid, you pick them up by running into them (or with
-Taunt or Sunder within range) and hold them on the off-tank spot away from the
-raid. In the **main tank** role a ghost off-tank takes the whelps.
+Taunt within range) and hold them on the off-tank spot away from the raid. In
+the **main tank** role a ghost off-tank takes the whelps.
 
 ## The two views
 
@@ -130,23 +135,19 @@ opacity, fade it as you improve, set it to zero to hide it.
 Boss cast bar with ability name and icon; large centre warnings with lead time
 (for example `WING BUFFET IN 3`); phase indicator with boss HP; a "next
 expected action" line; threat bar with a danger band (and a clear state when
-she is on the raid); ability icons with cooldown sweeps and buff rings; a short
-timeline strip of upcoming events; your HP; a debuff tray under the phase block
-showing her Sunder Armor stacks (with the time left on them) and an active
-Taunt.
+she is on the raid); the Taunt key with its cooldown sweep and a ring while
+she is held on you; a short timeline strip of upcoming events; your HP.
 
-**The press-cue lane.** Above the ability bar is a rhythm-game lane. Each note
-is an ability icon that falls down its own key's column and must be pressed
-when it reaches the icon. Sunder notes come on every global cooldown while she
-is in range; Shield Block notes drop ahead of each Flame Breath (predicted from
-her schedule, armed when the cast bar appears); Berserker Rage notes ahead of
-each Bellowing Roar; a red pulsing Taunt note marked NOW appears the moment
-she turns on the raid, and a Shield Wall note when your health is low. Presses
-grade as PERFECT (within 0.3 s), GOOD (inside the note's window) or MISS, build
-a combo, and feed the scorecard. A note is only shown when the ability can be
-ready for it. Pressing a buff a little ahead of its note still counts if it
-covers the window. The lane can be hidden and its lead time changed in
-Settings. Each warning has its own audio cue
+**The Taunt lane.** Above the Taunt key is a rhythm-game lane. A note drops
+when a Taunt is due and must be pressed when it reaches the key: a red pulsing
+note marked NOW the moment she turns on the raid (a DPS pulled aggro, or a
+Wing Buffet cut your threat under them), a LANDED note a second after she
+touches down in Phase 3 with her threat table empty, and for the off-tank a
+WHELPS note that is satisfied by running into the wave. Presses grade as
+PERFECT (within 0.3 s), GOOD (inside the note's window) or MISS, build a
+streak, and feed the scorecard. A note is only shown when Taunt can be ready
+for it; pressing Taunt with no note up is a wasted cooldown. The lane can be
+hidden and its lead time changed in Settings. Each warning has its own audio cue
 plus a spoken countdown. Live feedback: a subtle red edge flash while she is
 facing the raid, an orange edge while you stand in a hazard, a green tick when
 an expected action lands on time, amber `LATE +2.1s` or red `MISSED` otherwise.
@@ -157,26 +158,32 @@ Every expected action is logged as **on time**, **late** (with the seconds) or
 **missed**. The windows come from the script:
 
 * `within` seconds for on time, then `grace` more seconds for late, then
-  missed. For on-event checks (be against the wall for Wing Buffet, be fear
-  immune for Bellowing Roar, be out of the Deep Breath lane) the check runs at
-  the moment the ability lands; passing during the grace window counts as late.
+  missed. For on-event checks (be against the wall for Wing Buffet, be out of
+  the Deep Breath lane) the check runs at the moment the ability lands; passing
+  during the grace window counts as late. On-event checks are not judged while
+  you are feared, and a window that is still open when the run or the phase
+  ends is dropped rather than failed.
 * The Phase 1 pull clock starts when you engage her; the Phase 3 drag clock
-  starts when she lands.
+  starts when she lands; the Bellowing Roar recovery clock only starts judging
+  once the fear has run its course (`notBefore`).
 
 Continuous metrics are accumulated per phase: seconds with the boss facing the
 raid, Flame Breaths / Cleaves / Tail Sweeps that hit the raid, seconds you stand
 behind her, seconds in an active Deep Breath lane, seconds on an Eruption
-crack, seconds whelps spend on the raid (off-tank), fears taken without
-immunity, Buffets taken away from the wall, times she turned on the raid,
-deaths, and the time to pick her up after landing.
+crack, seconds whelps spend on the raid (off-tank), Buffets taken away from
+the wall, deaths, and for information only the number of times she turned on
+the raid and the time to pick her up after landing. Facing, Cleaves and Tail
+Sweeps on the raid are not charged during the pull, the landing settle, or the
+two seconds around a scripted turn (`threat.turnGrace`): what is scored there
+is how fast you Taunt.
 
 Each phase scores up to 50 points for expectations (on time 1.0, late 0.5,
 missed 0, averaged), 30 metric points minus penalties (per second or per
-count, from `continuousMetrics`), and 20 rotation points for the press cues
+count, from `continuousMetrics`), and 20 cue points for the Taunt notes
 (perfect 1.0, good 0.6, missed 0, averaged; full points when no note was
 judged). The overall score is the mean of the phases played. The scorecard
-lists perfect / good / missed presses per phase, your best combo, and missed
-cues rank among the top three fixes. Grade bands (from `grading.grades`): S 95+, A 85+, B 72+, C 58+,
+lists perfect / good / missed Taunts per phase, your best streak, and missed
+notes rank among the top three fixes. Grade bands (from `grading.grades`): S 95+, A 85+, B 72+, C 58+,
 D 40+, else F.
 
 The end screen shows the grade, the per-phase breakdown, the top three things
@@ -217,8 +224,8 @@ Core modules:
 | `hazards.js` | Deep Breath lanes and Eruption cracks with warning/active lifecycles |
 | `scheduler.js` | per-phase action timers with seeded jitter |
 | `expectations.js` | the named checks the script refers to |
-| `scoring.js` | expectation instances, grades, rotation points, top fixes |
-| `rotation.js` | press-cue notes: filler, predicted and reactive cues, grading windows, combos |
+| `scoring.js` | expectation instances, grades, cue points, top fixes |
+| `presscues.js` | Taunt notes raised by events, grading windows, streaks |
 | `entities.js` | player, boss (ground, takeoff, flight, landing), ghost raid, whelps |
 | `ideal.js` | where the tank and boss should be; the ghost tank |
 | `snapshot.js` | compact replay snapshots |
@@ -240,19 +247,20 @@ names checks, metrics and cues that the code implements.
 | `id`, `name`, `version`, `notes` | identity and free text |
 | `arena` | `floor`: walkable polygons (`{id, poly:[[x,y],...]}`), their union is the floor; `walls`: polylines drawn as walls (`wallHeight` for POV); `backWall`: the polyline the "against the wall" check measures distance to, within `nearWallDistance`; `labels`: map annotations |
 | `positions` | named spots: `playerStart`, `bossStart`, `tankSpot`, `bossSpot` (with `heading`, `tolerance`, `headingTolerance`), `raidWait`, `raidSpotP1/P2/P3` (with `spread`), `hoverIdle` (with `z`), `landSpot`, `pickupSpot`, `offtankWhelpSpot`, `ghostOfftankSpot`, `caveWest`, `caveEast` |
-| `player` | `speed`, `turnRate` (deg/s), `radius`, `hp`, `healPerSecond` (ghost healers), `fearDuration`, `fearSpeed` |
+| `player` | `speed`, `turnRate` (deg/s), `radius`, `hp`, `healPerSecond` (ghost healers), `fearDuration`, `fearSpeed`, `jump` (`height`, `duration` of the fixed arc) |
 | `ghostTank` | `speed`, `turnRate` of the ghost figure |
 | `raid` | `size`, `melee` (dots that stand at her flanks), `threatPerSecond`, `holdAfterPull` (seconds the raid holds DPS after the pull), `meleeFlankDistance`, `whelpContactRange` |
 | `boss` | `radius`, `speed`, `turnRate`, `meleeRange`, `meleeDamage`, `meleeInterval`, `cones` (`breath`, `cleave`, `tail`: `{angle (total degrees), range, label}`), `landingDuration`, `takeoffDuration`, `settleAfterLanding` (she turns but does not walk for this long after landing), `pickupGrace` (facing is not charged for this long after landing) |
-| `threat` | `sunder` threat, `autoAttackPerSecond`, `tauntBonus`, `tauntDuration`, `buffetCut` (fraction removed), `pullMultiplier` (raid pulls when raid > player x this), `dangerBand` (bar fraction painted red), `resetOnLanding` |
-| `gcd`, `playerAbilities` | global cooldown and the five abilities: `label`, `cooldown`, `gcd` (on the GCD or not), `range`, `duration`, `mitigation`, `icon` |
+| `threat` | `autoAttackPerSecond` (the tank's passive threat in melee range), `tauntLead` and `tauntBonus` (Taunt sets the tank to raid x lead + bonus), `tauntDuration` (forced target), `buffetCut` (fraction removed), `pullMultiplier` (raid pulls when raid > player x this), `dangerBand` (bar fraction painted red), `resetOnLanding`, `landingRaidThreat` (what the raid already has when she lands), `turnGrace` |
+| `gcd`, `playerAbilities` | global cooldown and the abilities (just `taunt`): `label`, `cooldown`, `gcd` (on the GCD or not), `range`, `icon`, `tip` |
 | `actions` | boss ability definitions keyed by id (see below) |
 | `deepBreathLanes` | `{id, from:[x,y], to:[x,y]}` candidate lanes; one is picked at random per Deep Breath; width comes from `actions.deepBreath.laneWidth` |
 | `hoverHeight` | flight height in Phase 2 |
 | `eruptionCracks` | crack polygons laid on the floor in Phase 3 |
 | `phases` | the phase list (see below) |
 | `continuousMetrics` | metric definitions: `label`, `unit` (`s` or `count`), `penaltyPerSecond` or `penaltyPerUnit`, `severe` threshold, or `info: true` for display-only |
-| `grading` | `expectationWeights`, `expectationPoints`, `metricPoints`, `grades` bands |
+| `grading` | `expectationWeights`, `expectationPoints`, `metricPoints`, `cuePoints`, `cueWeights`, `grades` bands |
+| `cues` | the Taunt notes (see below) |
 | `drills` | drill definitions |
 | `tutorial` | tutorial steps |
 
@@ -267,7 +275,8 @@ names checks, metrics and cues that the code implements.
   not turn or move while casting.
 * `requires`: `grounded` or `airborne`; the action is skipped otherwise.
 * `conditional`: `behind` fires only when someone is in the tail arc (Tail
-  Sweep). Conditional actions are never announced.
+  Sweep); `onPlayer` only while she is on the tank and not held by a Taunt
+  (aggro pull). Conditional actions are never announced.
 * `warn`: show the big centre warning with lead time and run the spoken
   countdown. Deep Breath and Eruption keep `warn: false` because their lanes
   and cracks carry their own countdown once telegraphed.
@@ -276,11 +285,13 @@ names checks, metrics and cues that the code implements.
   `knockback` + `knockbackRange` (Wing Buffet), `knockback` (Tail Sweep);
   `travel` + `splash` (Fireball); `warning` + `active` + `laneWidth` + `damage`
   (Deep Breath); `perCave` + `speed` + `aggroRange` + `lifetime` (whelp
-  waves); `warning` + `active` + `damage` (Eruption).
+  waves); `warning` + `active` + `damage` (Eruption); `threatMultiplier`
+  (aggro pull: the raid's threat jumps to this times the tank's, so she turns
+  on the next tick and the tank has to Taunt her back).
 
 The action ids are fixed: `flameBreath`, `cleave`, `tailSweep`, `wingBuffet`,
-`fireball`, `deepBreath`, `whelpWave`, `bellowingRoar`, `eruption`, plus the
-transition events `landing` and `takeoff`. Each has its own resolution code in
+`fireball`, `deepBreath`, `whelpWave`, `bellowingRoar`, `eruption`,
+`aggroPull`, plus the transition events `landing` and `takeoff`. Each has its own resolution code in
 `src/core/sim.js`; adding a new kind of ability means adding a case there.
 
 ### Phases
@@ -311,45 +322,38 @@ optional `role` (`mt` or `offtank`; omit for both) and one of these types:
 | `bossAtSpot` | `spot`, `within`, `grace`, `from` | the boss must be at the named spot (position and heading within the spot's tolerances) within `within` seconds of the phase start, or of `engage` / `landing` when `from` says so |
 | `playerAtSpotBy` | `spot`, `grace` | the player must be at the spot when the phase ends (`deadline: "phaseEnd"`); arriving during `grace` is late |
 | `onEvent` | `event`, `check`, `grace` | when the action `event` lands, `check` must pass; passing during `grace` is late |
-| `afterEvent` | `event`, `check`, `within`, `grace` | after the action `event`, `check` must pass within `within` seconds (late during `grace`) |
+| `afterEvent` | `event`, `check`, `within`, `grace`, `notBefore` | after the action `event`, `check` must pass within `within` seconds (late during `grace`); with `notBefore` it is not judged for that many seconds first (the Roar recovery waits for the fear to end) |
 | `continuous` | `metric` | no instance; names the metric whose accumulated value scores the behaviour |
 
 Available checks (`src/core/expectations.js`): `nearWall`, `threatLead`,
-`hasAggro`, `outsideLane`, `fearImmune`, `whelpsPicked`. Events that
-expectations can hook are the action ids above plus `landing`.
+`hasAggro`, `facingAway` (she is on the tank and not facing the raid),
+`outsideLane`, `whelpsPicked`. Events that expectations can hook are the
+action ids above plus `landing`.
 
-### Rotation cues
+### Taunt cues
 
-`rotation` defines the press-cue lane. The `filler` note repeats on every global
-cooldown while the boss is grounded, engaged and within the ability's range;
-each entry in `cues` is a note tied to something the boss does:
+`cues` defines the note lane. Each entry in `list` is a note raised by a core
+event, naming the ability to press, when it is due and the window around it:
 
 ```json
-"rotation": {
+"cues": {
   "windows": { "perfect": 0.3 },
-  "filler": { "id": "sunder", "ability": "sunder", "late": 1.0, "missRespawn": 1.0, "label": "...", "tip": "..." },
-  "cues": [
-    { "id": "blockBreath", "ability": "shieldBlock", "on": "cast", "action": "flameBreath",
-      "offset": 0.5, "early": 1.0, "late": 2.0, "short": "BREATH", "label": "...", "tip": "..." },
-    { "id": "tauntLost", "ability": "taunt", "on": "event", "event": "threatLost", "early": 0, "late": 3, "short": "ON RAID", ... },
-    { "id": "wallLow", "ability": "defensive", "on": "hpBelow", "hp": 0.35, "late": 3, ... },
-    { "id": "tauntWhelps", "ability": "taunt", "on": "event", "event": "whelpWave", "doneBy": "whelpPickup", "offset": 3, "role": "offtank", ... }
+  "list": [
+    { "id": "tauntLost", "ability": "taunt", "on": "event", "event": "threatLost", "early": 0, "late": 3, "short": "ON RAID", "label": "...", "tip": "..." },
+    { "id": "tauntLanding", "ability": "taunt", "on": "event", "event": "landing", "offset": 1, "early": 1, "late": 4, "role": "mt", "short": "LANDED", ... },
+    { "id": "tauntWhelps", "ability": "taunt", "on": "event", "event": "whelpWave", "doneBy": "whelpPickup", "offset": 3, "early": 2, "late": 6, "role": "offtank", ... }
   ]
 }
 ```
 
-| `on` | fields | the note lands at |
-|---|---|---|
-| `cast` | `action`, `offset` | cast start + `offset`; predicted from the schedule and armed when the cast begins |
-| `event` | `event`, `offset` | the event time + `offset` (events: action ids, `landing`, `threatLost`) |
-| `hpBelow` | `hp` | immediately, while the player's health fraction is under `hp` and the buff is down |
-
-`early` / `late` are the seconds before and after the landing time that still
-count (within `windows.perfect` of it is perfect, otherwise good). `early: 0`
-draws the note as a pulsing NOW. `doneBy` names an event that satisfies the
-note without a key press. `short` is the label drawn beside the note; `label`
-and `tip` feed the scorecard. The 20 rotation points come from
-`grading.rotationPoints` and `grading.beatWeights`.
+The note lands at the event time + `offset` (events: the action ids,
+`landing`, `threatLost`, `whelpPickup`). `early` / `late` are the seconds
+before and after that still count (within `windows.perfect` of it is perfect,
+otherwise good). `early: 0` draws the note as a pulsing NOW. `doneBy` names an
+event that satisfies the note without a key press. A note is not raised when
+the ability cannot be ready inside its window. `short` is the label drawn
+beside the note; `label` and `tip` feed the scorecard. The 20 cue points come
+from `grading.cuePoints` and `grading.cueWeights`.
 
 ### Drills
 
@@ -417,18 +421,18 @@ most worth checking, with what to log in game:
 | Deep Breath warning and lane | 5 s warning, 3 s burn, 22 yd wide, every 26 s ± 3 | `actions.deepBreath`, `deepBreathLanes` | emote-to-fire delay; lane width; which hover points she uses |
 | Fireball cadence | every 3 s ± 1 | `actions.fireball` | cosmetic only |
 | Whelp waves | every 34 s ± 3, 6 per cave, speed 6 | `actions.whelpWave` | wave size and timing; whether both caves spawn together |
-| Bellowing Roar cadence / cast / fear | every 32 s ± 1, 1.5 s cast, 3 s fear | `actions.bellowingRoar`, `player.fearDuration` | cast bar length; fear duration with and without resist (the gap is kept above the 30 s immunity cooldown on purpose) |
-| Sunder Armor | 5 stacks, 30 s, one per 1.5 s global | `playerAbilities.sunder` | your rank's stack cap and duration |
-| Press-cue windows | perfect ±0.3 s; Sunder +1.0 s; Block −1/+2 s around 0.5 s into the cast; Rage −2.5/+1.2 s; Taunt on turn +3 s; Taunt on landing −1/+4 s around 1 s; Shield Wall under 35% +3 s | `rotation` | how tight your raid leader wants the reactions |
+| Bellowing Roar cadence / cast / fear | every 32 s ± 1, 1.5 s cast, 3 s fear | `actions.bellowingRoar`, `player.fearDuration` | cast bar length; how long the tank is actually feared (Fear Ward would make it zero) |
+| Aggro pulls | Phase 1 first at 45 s then every 40 s ± 6; Phase 3 first at 50 s then every 45 s ± 6; raid jumps to 115% of the tank | `phases[].actions`, `actions.aggroPull.threatMultiplier` | how often your DPS actually overtake the tank |
+| Taunt note windows | perfect ±0.3 s; Taunt on turn +3 s; Taunt on landing −1/+4 s around 1 s; whelps −2/+6 s around 3 s | `cues` | how tight your raid leader wants the reactions |
 | Eruption pulse | every 9 s ± 1, 2 s warning, 2 s burn | `actions.eruption` | crack telegraph timing |
 | Landing / takeoff | 2.5 s each; threat reset on landing; 2.5 s settle before she walks | `boss.landingDuration`, `boss.takeoffDuration`, `threat.resetOnLanding`, `boss.settleAfterLanding` | whether threat truly resets and how long she is untargetable |
 | Grace windows | raid holds DPS 6 s after the pull; facing not charged for 6 s after the pull and 5 s after a landing | `raid.holdAfterPull`, `boss.pickupGrace` | how long your raid really holds, and how fast the pickup must be |
-| Threat numbers | Sunder 340, white hits 30/s, raid 50/s, pull at 100%, regain at 110% | `threat`, `raid.threatPerSecond` | threat meter values for one Sunder in Defensive Stance; raid DPS threat after a Buffet |
+| Threat numbers | tank 80/s in melee, raid 50/s, pull at 110%, regain at 110%, Taunt sets tank to 1.6 x raid + 200, raid starts at 300 on landing | `threat`, `raid.threatPerSecond` | threat meter values for a tank's steady threat vs raid DPS; how long a Taunt lead survives a Buffet |
 | Boss movement | 9 yd/s, 180°/s turn, 11 yd melee range, 9 yd body | `boss` | how fast she turns onto the raid; where the tank stands relative to her hitbox |
-| Player | 7 yd/s, 200°/s keyboard turn, 6000 HP, 280 HP/s healing | `player` | tank HP pool and incoming healing at your gear level |
-| Damage | breath 1800, cleave 900, tail 600, melee 260 / 2 s, lane 4000, crack 1500 | `actions`, `boss.meleeDamage` | combat log; these only matter for the HP bar and death count |
-| Ability cooldowns | Taunt 10 s, Shield Block 6 s / 5 s, Shield Wall 60 s / 10 s, fear immunity 30 s / 10 s | `playerAbilities` | your class's real cooldowns (Shield Wall is shortened here on purpose; Fear Ward and Berserker Rage alternate in a real raid) |
-| Expectation windows | pull 15 s + 6, pickup 5 s + 4, drag 25 s + 10, rebuild 6 s + 4 | `phases[].expectations` | what your raid leader actually expects |
+| Player | 7 yd/s, 200°/s keyboard turn, 8000 HP, 320 HP/s healing, 1.4 yd jump over 0.8 s | `player` | tank HP pool and incoming healing at your gear level |
+| Damage | breath 1500, cleave 600, tail 600, melee 260 / 2 s, lane 4000, crack 1500 | `actions`, `boss.meleeDamage` | combat log; with no mitigation buttons these only matter for the HP bar and death count |
+| Taunt cooldown | 10 s, 16 yd, holds her 3 s | `playerAbilities.taunt`, `threat.tauntDuration` | your class's Taunt (Growl is the same) |
+| Expectation windows | pull 15 s + 6, pickup 5 s + 4, drag 25 s + 10, keep her after Buffet 6 s + 4 (judged from 1 s), Taunt back after a pull 3 s + 3, Roar recovery 8 s + 6 (judged from 3.5 s) | `phases[].expectations` | what your raid leader actually expects |
 | Positions | tank spot (0, 50), boss spot (0, 40) facing north, pickup (0, 19), landing (0, 6) | `positions` | your guild's chosen wall and the real landing point |
 
 ## Testing
@@ -440,9 +444,10 @@ npm test
 Runs the node test suite (`node --test`, no dependencies) over the core:
 geometry, threat, hazards, scheduler, scoring, and integration tests that drive
 the full simulation with a scripted tank: phase transitions, every expectation
-type, Wing Buffet at and away from the wall, Bellowing Roar with and without
-immunity, Deep Breath lanes, Eruption cracks, whelp pickup in both roles,
-drills, manual mode, phase skip, snapshot shape and determinism.
+type, Wing Buffet at and away from the wall, aggro pulls and the Taunt back,
+Bellowing Roar fear and recovery, jumping, Deep Breath lanes, Eruption cracks,
+whelp pickup in both roles, drills, manual mode, phase skip, snapshot shape and
+determinism, plus the Taunt note lane (`tests/presscues.test.js`).
 
 `tests/helpers.js` has a `perfectTank()` bot that follows the sim's own ideal
 position; it is handy for checking that a script change is still winnable.

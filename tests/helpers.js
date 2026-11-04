@@ -34,32 +34,26 @@ export function driveToward(sim, target, face = null) {
 }
 
 /**
- * A scripted tank that follows the sim's own ideal position, taunts when she
- * is not on the player, sunders on cooldown and pre-empts Bellowing Roar.
- * Returns a command function with its own memory.
+ * A scripted tank that follows the sim's own ideal position and Taunts the
+ * moment she is not on the player (or to pull). Returns a command function
+ * with its own memory.
  */
 export function perfectTank() {
-  let lastSunder = -9, lastTaunt = -99;
+  let lastTaunt = -99;
   return (sim) => {
     const s = sim.state;
     const p = s.world.player, b = s.world.boss, ideal = s.world.idealPlayer;
     const close = dist(p.x, p.y, ideal.x, ideal.y) < 2;
     const face = b.state === 'grounded' && b.engaged && close ? b : null;
     const cmd = driveToward(sim, ideal, face);
-    const inRange = b.state === 'grounded' && dist(p.x, p.y, b.x, b.y) - script.boss.radius <= 12;
-    if (inRange && (b.target !== 'player' || !b.engaged) && s.t - lastTaunt > 10 && !b.passive) { cmd.abilities.push('taunt'); lastTaunt = s.t; }
-    if (inRange && s.t - lastSunder > 1.5) { cmd.abilities.push('sunder'); lastSunder = s.t; }
-    const roar = s.upcoming.find((u) => u.id === 'bellowingRoar');
-    if (roar && roar.in < 0.25 && s.abilities.buffs.fearImmuneUntil < s.t) cmd.abilities.push('fearImmune');
-    // Shield Block as the Flame Breath cast bar appears, Shield Wall when low.
-    const cast = b.cast;
-    if (cast && cast.id === 'flameBreath' && s.t - cast.start >= 0.5 && s.abilities.buffs.shieldBlockUntil < s.t && s.abilities.readyAt.shieldBlock <= s.t) cmd.abilities.push('shieldBlock');
-    if (p.hp / p.maxHp < 0.35 && s.abilities.buffs.defensiveUntil < s.t && s.abilities.readyAt.defensive <= s.t) cmd.abilities.push('defensive');
+    const inRange = b.state === 'grounded' && dist(p.x, p.y, b.x, b.y) - script.boss.radius <= script.playerAbilities.taunt.range;
+    const ready = s.abilities.readyAt.taunt <= s.t;
+    if (inRange && ready && (b.target !== 'player' || !b.engaged) && !b.passive && p.fearedUntil <= s.t) { cmd.abilities.push('taunt'); lastTaunt = s.t; }
     return cmd;
   };
 }
 
-export const idle = () => ({ forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [] });
+export const idle = () => ({ forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [], jump: false });
 
 /** Step the sim for `seconds` using cmdFn(sim) each tick; returns all events emitted. */
 export function run(sim, seconds, cmdFn = idle) {

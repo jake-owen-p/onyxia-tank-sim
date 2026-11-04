@@ -1,4 +1,5 @@
-// Threat model. Two threat pools: the tank (player) and the ghost raid.
+// Threat model. Two threat pools: the tank (player) and the ghost raid. The
+// tank's threat builds on its own while in melee range; Taunt is the only button.
 // All functions are pure and operate on a plain { player, raid, tauntUntil } object.
 
 export function createThreat() {
@@ -12,14 +13,19 @@ export function tickThreat(threat, dt, cfg, raidActive, playerAttacking) {
   return threat;
 }
 
-export function applySunder(threat, amount) {
-  threat.player += amount;
+/** A DPS overtakes the tank: the raid pool jumps to `multiplier` x the tank's. */
+export function applyAggroPull(threat, multiplier) {
+  threat.raid = Math.max(threat.raid, threat.player * multiplier);
   return threat;
 }
 
-/** Taunt: jump to the top of the table and force the target for `duration`. */
+/**
+ * Taunt: jump to the top of the table with a lead (`tauntLead` x the raid, plus
+ * `tauntBonus`) so a following Wing Buffet cut does not flip her straight back,
+ * and force the target for `tauntDuration`.
+ */
 export function applyTaunt(threat, t, cfg) {
-  threat.player = Math.max(threat.player, threat.raid) + cfg.tauntBonus;
+  threat.player = Math.max(threat.player, threat.raid * (cfg.tauntLead || 1)) + (cfg.tauntBonus || 0);
   threat.tauntUntil = t + cfg.tauntDuration;
   return threat;
 }

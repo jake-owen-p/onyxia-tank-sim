@@ -3,7 +3,7 @@
 
 import { h, button, arrowNav } from './overlay.js';
 
-const HINTS = [['WASD', 'move'], ['Q / E', 'strafe'], ['Right-drag', 'turn'], ['1–5', 'abilities'], ['Tab', 'view'], ['Esc', 'menu']];
+const HINTS = [['WASD', 'move'], ['Q / E', 'strafe'], ['Space', 'jump'], ['Right-drag', 'turn'], ['1', 'Taunt'], ['Tab', 'view'], ['Esc', 'menu']];
 
 function hintBar(hints) {
   return h('footer', { class: 'hint-bar' },

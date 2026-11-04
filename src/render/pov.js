@@ -320,7 +320,7 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
         break;
       }
       case 'ghost': drawFigure(ctx, cam, wd.ghost.x, wd.ghost.y, wd.ghost.heading, w, h, pal.ghost, settings.ghostAlpha ?? 0.6, true, now); break;
-      case 'player': drawFigure(ctx, cam, p.x, p.y, p.heading, w, h, pal.player, 1, false, now, p.fearedUntil > t, pal.playerStroke); break;
+      case 'player': drawFigure(ctx, cam, p.x, p.y, p.heading, w, h, pal.player, 1, false, now, p.fearedUntil > t, pal.playerStroke, p.z || 0); break;
       case 'proj': {
         const pr = it.pr;
         if (t < pr.t1) {
@@ -510,18 +510,19 @@ function drawBoss(ctx, cam, view, script, pal, w, h, now) {
 }
 
 /** A small standing figure: capsule body + head + shield, drawn from projected points. */
-function drawFigure(ctx, cam, x, y, heading, w, h, color, alpha, dashed, now, feared = false, stroke = color) {
-  const base = project(cam, x, y, 0.05, w, h);
-  const top = project(cam, x, y, 1.75, w, h);
-  const head = project(cam, x, y, 2.05, w, h);
-  if (!base || !top || !head) return;
+function drawFigure(ctx, cam, x, y, heading, w, h, color, alpha, dashed, now, feared = false, stroke = color, z = 0) {
+  const base = project(cam, x, y, 0.05 + z, w, h);
+  const top = project(cam, x, y, 1.75 + z, w, h);
+  const head = project(cam, x, y, 2.05 + z, w, h);
+  const shadow = z > 0 ? project(cam, x, y, 0.05, w, h) : base;
+  if (!base || !top || !head || !shadow) return;
   const jitter = feared ? Math.sin(now * 40) * base.scale * 0.15 : 0;
   ctx.save();
   ctx.globalAlpha = alpha;
   if (dashed) ctx.setLineDash([6, 4]);
-  // ground ring
-  ctx.strokeStyle = withAlpha(color, 0.6); ctx.lineWidth = Math.max(1, base.scale * 0.1);
-  ctx.beginPath(); ctx.ellipse(base.x, base.y, Math.max(2, base.scale * 1.1), Math.max(1, base.scale * 0.45), 0, 0, Math.PI * 2); ctx.stroke();
+  // ground ring (stays on the floor while the figure is in the air)
+  ctx.strokeStyle = withAlpha(color, 0.6); ctx.lineWidth = Math.max(1, shadow.scale * 0.1);
+  ctx.beginPath(); ctx.ellipse(shadow.x, shadow.y, Math.max(2, shadow.scale * 1.1), Math.max(1, shadow.scale * 0.45), 0, 0, Math.PI * 2); ctx.stroke();
   // body capsule
   ctx.strokeStyle = stroke; ctx.lineWidth = Math.max(3, base.scale * 0.75); ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(base.x + jitter, base.y - base.scale * 0.2); ctx.lineTo(top.x + jitter, top.y); ctx.stroke();
@@ -545,7 +546,7 @@ function drawFigure(ctx, cam, x, y, heading, w, h, color, alpha, dashed, now, fe
   }
   // shield on the left arm
   const sx = x + Math.cos(heading + Math.PI / 2) * 0.7, sy = y + Math.sin(heading + Math.PI / 2) * 0.7;
-  const s0 = project(cam, sx, sy, 0.7, w, h), s1 = project(cam, sx, sy, 1.5, w, h);
+  const s0 = project(cam, sx, sy, 0.7 + z, w, h), s1 = project(cam, sx, sy, 1.5 + z, w, h);
   if (s0 && s1) { ctx.strokeStyle = withAlpha(stroke, 0.9); ctx.lineWidth = Math.max(2, base.scale * 0.35); ctx.beginPath(); ctx.moveTo(s0.x, s0.y); ctx.lineTo(s1.x, s1.y); ctx.stroke(); }
   ctx.restore();
 }

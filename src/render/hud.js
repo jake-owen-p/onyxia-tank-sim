@@ -4,8 +4,8 @@
 import { roundRect, drawIcon, drawTick, drawCross } from './shapes.js';
 import { withAlpha, actionColor } from './palette.js';
 
-const ABILITY_ORDER = ['taunt', 'sunder', 'shieldBlock', 'defensive', 'fearImmune'];
-const SHORT_LABEL = { taunt: 'Taunt', sunder: 'Sunder', shieldBlock: 'Block', defensive: 'Wall', fearImmune: 'Rage' };
+const ABILITY_ORDER = ['taunt'];
+const SHORT_LABEL = { taunt: 'Taunt' };
 
 function font(ctx, pal, px, weight = 600, display = false) {
   ctx.font = `${weight} ${Math.round(px)}px ${display ? pal.fontDisplay : pal.font}`;
@@ -55,7 +55,6 @@ export function drawHUD(ctx, view, script, settings, pal, w, h, now, abilityKeys
 
   drawEdgeFeedback(ctx, view, pal, w, h, now);
   drawPhaseBlock(ctx, view, script, pal, u, w, h, t);
-  drawDebuffs(ctx, view, script, pal, u, w, h, t);
   drawCastBar(ctx, view, pal, u, w, h, t);
   drawWarnings(ctx, view, script, settings, pal, u, w, h, t, now);
   drawFeedbackTick(ctx, view, pal, u, w, h, t);
@@ -75,10 +74,10 @@ export function drawHUD(ctx, view, script, settings, pal, w, h, now, abilityKeys
     const iconSize = u * 2.7;
     const abilityY = timelineY - u * 0.7 - iconSize;
     const lay = abilityLayout(u, w, iconSize);
-    if (settings.cueLane !== false && view.rotation) {
+    if (settings.cueLane !== false && view.cues) {
       const laneH = u * 5.5;
       const laneY = abilityY - u * 0.3 - laneH;
-      drawLane(ctx, view, script, settings, pal, u, lay, laneY, abilityY, t, now);
+      drawLane(ctx, view, script, settings, pal, u, w, lay, laneY, abilityY, t, now);
       threatY = laneY - u * 0.55 - threatH;
     } else {
       threatY = abilityY - u * 0.6 - threatH;
@@ -342,8 +341,7 @@ function abilityLayout(u, w, size) {
 function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
   const { size, gap } = lay;
   const A = view.abilities;
-  const buffs = A.buffs;
-  const hit = view.rotation && view.rotation.lastHit;
+  const hit = view.cues && view.cues.lastHit;
   for (let i = 0; i < ABILITY_ORDER.length; i++) {
     const id = ABILITY_ORDER[i];
     const x = lay.xs[i];
@@ -352,7 +350,7 @@ function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
     const readyAt = A.readyAt[id] ?? -Infinity;
     const cdLeft = Math.max(0, readyAt - t);
     const onGcd = def.gcd && A.gcdUntil > t;
-    const active = (id === 'shieldBlock' && buffs.shieldBlockUntil > t) || (id === 'defensive' && buffs.defensiveUntil > t) || (id === 'fearImmune' && buffs.fearImmuneUntil > t);
+    const active = id === 'taunt' && view.threat && view.threat.tauntUntil > t;   // she is held on you
     roundRect(ctx, x, y, size, size, u * 0.35);
     ctx.fillStyle = pal.iconBg; ctx.fill();
     const onCd = cdLeft > 0 && def.cooldown > 0;
@@ -396,9 +394,8 @@ function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
     ctx.stroke();
     if (active) {
       ctx.save(); ctx.globalAlpha = 0.5; ctx.shadowBlur = u; ctx.shadowColor = pal.iconActive; ctx.stroke(); ctx.restore();
-      const until = id === 'shieldBlock' ? buffs.shieldBlockUntil : id === 'defensive' ? buffs.defensiveUntil : buffs.fearImmuneUntil;
-      // remaining buff time as a thin bar at the bottom
-      const frac = Math.min(1, (until - t) / (def.duration || 1));
+      // remaining hold time as a thin bar at the bottom
+      const frac = Math.min(1, (view.threat.tauntUntil - t) / (script.threat.tauntDuration || 1));
       ctx.fillStyle = pal.iconActive;
       ctx.fillRect(x + u * 0.25, y + size - u * 0.3, (size - u * 0.5) * frac, u * 0.12);
     }
@@ -433,11 +430,13 @@ function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
 
 const BEAT_WORD = { perfect: 'PERFECT', good: 'GOOD', missed: 'MISS' };
 
-function drawLane(ctx, view, script, settings, pal, u, lay, laneY, abilityY, t, now) {
-  const rot = view.rotation;
+function drawLane(ctx, view, script, settings, pal, u, w, lay, laneY, abilityY, t, now) {
+  const rot = view.cues;
   const lead = settings.laneLead || 3;
   const { size, gap, xs } = lay;
-  const x0 = lay.x0 - gap, x1 = lay.x1 + gap;
+  // The lane is at least wide enough for its header even with a single key column.
+  const laneW = Math.max(lay.x1 - lay.x0 + gap * 2, Math.min(u * 15, w * 0.5));
+  const x0 = (lay.x0 + lay.x1) / 2 - laneW / 2, x1 = x0 + laneW;
   const hitY = abilityY - u * 0.15;
   const travel = hitY - laneY - u * 0.9;     // notes spawn below the header
   const yFor = (dtv) => hitY - (Math.max(0, dtv) / lead) * travel;
@@ -459,7 +458,7 @@ function drawLane(ctx, view, script, settings, pal, u, lay, laneY, abilityY, t, 
   // header and second marks
   font(ctx, pal, u * 0.42, 700);
   ctx.fillStyle = pal.textMuted;
-  text(ctx, 'PRESS WHEN THE NOTE LANDS ON ITS KEY', x0 + u * 0.4, laneY + u * 0.45, 'left');
+  text(ctx, 'TAUNT WHEN THE NOTE LANDS ON THE KEY', x0 + u * 0.4, laneY + u * 0.45, 'left');
   for (let s = 1; s <= lead; s++) {
     const y = yFor(s);
     ctx.fillStyle = withAlpha(pal.text, 0.18);
@@ -487,19 +486,18 @@ function drawLane(ctx, view, script, settings, pal, u, lay, laneY, abilityY, t, 
       const dtv = b.at - t;
       if (dtv > lead) continue;
       const y = yFor(dtv);
-      const color = b.filler ? pal.noteFiller : pal.note;
+      const color = pal.note;
       ctx.save();
-      ctx.globalAlpha = b.armed ? 1 : 0.5;
       roundRect(ctx, cx - ns / 2, y - ns / 2, ns, ns, u * 0.3);
       ctx.fillStyle = pal.iconBg; ctx.fill();
-      ctx.strokeStyle = color; ctx.lineWidth = lw(u, b.filler ? 1.2 : 2); ctx.stroke();
+      ctx.strokeStyle = color; ctx.lineWidth = lw(u, 2); ctx.stroke();
       drawIcon(ctx, def ? def.icon : b.ability, cx, y, ns * 0.6, color, pal.accent);
       if (dtv <= 0) {
         // inside the late window: a ring that shrinks as the window closes
         const frac = Math.max(0, 1 + dtv / b.late);
         ctx.strokeStyle = pal.warn; ctx.lineWidth = lw(u, 2.2);
         ctx.beginPath(); ctx.arc(cx, y, ns * 0.68, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac); ctx.stroke();
-        if (b.early === 0 && !b.filler) {
+        if (b.early === 0) {
           const pulse = 0.5 + 0.5 * Math.sin(now * 12);
           ctx.globalAlpha = 0.35 + 0.45 * pulse;
           ctx.strokeStyle = pal.bad; ctx.lineWidth = lw(u, 2);
@@ -512,8 +510,8 @@ function drawLane(ctx, view, script, settings, pal, u, lay, laneY, abilityY, t, 
       }
       if (b.short) {
         font(ctx, pal, u * 0.48, 800);
-        ctx.fillStyle = b.armed ? pal.accent : pal.textDim;
-        const rightSide = col < ABILITY_ORDER.length - 1;
+        ctx.fillStyle = pal.accent;
+        const rightSide = ABILITY_ORDER.length === 1 || col < ABILITY_ORDER.length - 1;
         text(ctx, b.short, rightSide ? cx + ns / 2 + u * 0.25 : cx - ns / 2 - u * 0.25, y, rightSide ? 'left' : 'right');
       }
       ctx.restore();
@@ -583,72 +581,6 @@ function drawLane(ctx, view, script, settings, pal, u, lay, laneY, abilityY, t, 
     }
   }
   ctx.restore();
-}
-
-// ------------------------------------------------------------------ boss debuffs
-
-function drawDebuffs(ctx, view, script, pal, u, w, h, t) {
-  const d = view.debuffs;
-  if (!d) return;
-  const boss = view.world.boss;
-  const sunder = d.sunder || { stacks: 0, until: -Infinity };
-  const taunted = view.threat && view.threat.tauntUntil > t;
-  if (!boss.engaged && sunder.stacks === 0 && !taunted) return;
-  const def = script.playerAbilities.sunder || {};
-  const x = u, y = u + u * 4.3 + u * 0.4;
-  const pw = Math.min(u * 15, w * 0.42), ph = u * 2.9;
-  panel(ctx, pal, x, y, pw, ph, u * 0.5, u);
-  font(ctx, pal, u * 0.42, 700);
-  ctx.fillStyle = pal.textMuted;
-  text(ctx, 'ON ONYXIA', x + u * 0.8, y + u * 0.5, 'left');
-  const box = u * 1.6;
-  let bx = x + u * 0.8;
-  const by = y + u * 0.95;
-  // Sunder Armor
-  const active = sunder.stacks > 0 && sunder.until > t;
-  roundRect(ctx, bx, by, box, box, u * 0.3);
-  ctx.fillStyle = pal.iconBg; ctx.fill();
-  ctx.strokeStyle = active ? pal.debuff : pal.iconEdge; ctx.lineWidth = lw(u, active ? 1.8 : 1); ctx.stroke();
-  ctx.save(); if (!active) ctx.globalAlpha = 0.35;
-  drawIcon(ctx, 'sunder', bx + box / 2, by + box / 2, box * 0.62, active ? pal.debuff : pal.text, pal.accent);
-  ctx.restore();
-  if (active) {
-    font(ctx, pal, u * 0.6, 900, true);
-    const badge = `${sunder.stacks}`;
-    roundRect(ctx, bx + box - u * 0.75, by + box - u * 0.75, u * 0.85, u * 0.75, u * 0.2);
-    ctx.fillStyle = withAlpha(pal.bg, 0.92); ctx.fill();
-    ctx.fillStyle = pal.text;
-    text(ctx, badge, bx + box - u * 0.325, by + box - u * 0.37, 'center');
-  }
-  const tx = bx + box + u * 0.5;
-  font(ctx, pal, u * 0.66, 700);
-  ctx.fillStyle = active ? pal.text : pal.textDim;
-  const max = def.maxStacks || 5;
-  text(ctx, active ? `Sunder Armor  ${sunder.stacks}/${max}` : 'No Sunder Armor', tx, by + u * 0.4, 'left');
-  if (active) {
-    const left = Math.max(0, sunder.until - t);
-    const bw = Math.min(u * 6, pw - (tx - x) - u * 0.8);
-    bar(ctx, tx, by + u * 0.95, bw, u * 0.35, left / (def.debuffDuration || 30), sunder.stacks >= max ? pal.debuff : withAlpha(pal.debuff, 0.6), pal.hpBg, u * 0.17);
-    font(ctx, pal, u * 0.5, 600);
-    ctx.fillStyle = pal.textDim;
-    text(ctx, `${Math.ceil(left)}s`, tx + bw + u * 0.3, by + u * 1.12, 'left');
-  } else {
-    font(ctx, pal, u * 0.5, 600);
-    ctx.fillStyle = pal.textMuted;
-    text(ctx, 'Sunder on every global', tx, by + u * 1.1, 'left');
-  }
-  // Taunt
-  if (taunted) {
-    bx = x + pw - u * 0.8 - box;
-    const left = view.threat.tauntUntil - t;
-    roundRect(ctx, bx, by, box, box, u * 0.3);
-    ctx.fillStyle = pal.iconBg; ctx.fill();
-    ctx.strokeStyle = pal.iconActive; ctx.lineWidth = lw(u, 1.8); ctx.stroke();
-    drawIcon(ctx, 'taunt', bx + box / 2, by + box / 2, box * 0.62, pal.iconActive, pal.accent);
-    font(ctx, pal, u * 0.42, 700);
-    ctx.fillStyle = pal.textDim;
-    text(ctx, `${left.toFixed(1)}s`, bx + box / 2, by + box + u * 0.35, 'center');
-  }
 }
 
 // ------------------------------------------------------------------ timeline

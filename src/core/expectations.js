@@ -31,9 +31,9 @@ export function outsideLane(state) {
   return !hazardAt(state.world.hazards, p.x, p.y, 'lane', ['warning', 'active']);
 }
 
-/** Is the player currently fear immune? */
-export function fearImmune(state) {
-  return state.abilities.buffs.fearImmuneUntil > state.t;
+/** Is she on the tank and not facing the raid (the state to restore after a fear)? */
+export function facingAway(state, script) {
+  return hasAggro(state) && !bossFacingRaid(state, script);
 }
 
 /** Are all live whelps aggroed onto the player (none heading for the raid)? */
@@ -71,7 +71,7 @@ export function bossFacingRaid(state, script) {
   return inCone(r.x, r.y, b.x, b.y, b.heading, rad(c.angle), c.range);
 }
 
-export const CHECKS = { nearWall, threatLead, hasAggro, outsideLane, fearImmune, whelpsPicked };
+export const CHECKS = { nearWall, threatLead, hasAggro, outsideLane, facingAway, whelpsPicked };
 
 /** Evaluate a named check. */
 export function runCheck(name, state, script) {

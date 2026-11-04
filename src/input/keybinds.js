@@ -9,16 +9,14 @@ export const ACTIONS = [
   { id: 'turnRight',   label: 'Turn right',    group: 'Movement' },
   { id: 'strafeLeft',  label: 'Strafe left',   group: 'Movement' },
   { id: 'strafeRight', label: 'Strafe right',  group: 'Movement' },
+  { id: 'jump',        label: 'Jump',          group: 'Movement' },
   { id: 'taunt',       label: 'Taunt',         group: 'Abilities' },
-  { id: 'sunder',      label: 'Sunder Armor',  group: 'Abilities' },
-  { id: 'shieldBlock', label: 'Shield Block',  group: 'Abilities' },
-  { id: 'defensive',   label: 'Shield Wall',   group: 'Abilities' },
-  { id: 'fearImmune',  label: 'Berserker Rage / Fear Ward', group: 'Abilities' },
   { id: 'toggleView',  label: 'Switch view',   group: 'Interface' },
   { id: 'pause',       label: 'Pause / menu',  group: 'Interface' },
 ];
 
-export const ABILITY_ACTIONS = ['taunt', 'sunder', 'shieldBlock', 'defensive', 'fearImmune'];
+export const ABILITY_ACTIONS = ['taunt'];
+export const MOVE_ONESHOT_ACTIONS = ['jump'];
 export const ONESHOT_ACTIONS = ['toggleView', 'pause'];
 
 export const DEFAULT_BINDS = {
@@ -28,11 +26,8 @@ export const DEFAULT_BINDS = {
   turnRight:   ['KeyD', 'ArrowRight'],
   strafeLeft:  ['KeyQ', null],
   strafeRight: ['KeyE', null],
+  jump:        ['Space', null],
   taunt:       ['Digit1', null],
-  sunder:      ['Digit2', null],
-  shieldBlock: ['Digit3', null],
-  defensive:   ['Digit4', null],
-  fearImmune:  ['Digit5', null],
   toggleView:  ['Tab', null],
   pause:       ['Escape', null],
 };

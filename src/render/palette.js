@@ -96,8 +96,6 @@ const base = {
   laneHot: 'rgba(255,190,140,0.11)',
   laneLine: 'rgba(255,179,71,0.55)',
   note: 'rgba(243,230,216,0.9)',
-  noteFiller: 'rgba(243,230,216,0.55)',
-  debuff: '#c9a2ff',
 };
 
 // Colourblind-safe variant: blue for warnings (hatched), bright orange for
@@ -133,7 +131,6 @@ const colorblind = {
   coneTail: 'rgba(77,163,255,0.12)',
   coneTailStroke: 'rgba(77,163,255,0.45)',
   iconActive: '#4da3ff',
-  debuff: '#ffffff',
 };
 
 export function getPalette(settings) {

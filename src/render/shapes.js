@@ -199,35 +199,10 @@ export function drawIcon(ctx, id, x, y, size, color, accent = color) {
       ctx.beginPath(); ctx.arc(-s * 0.3, 0, s * 0.95, -0.5, 0.5); ctx.stroke();
       break;
     }
-    case 'sunder': { // armour with a crack
-      ctx.beginPath(); ctx.moveTo(-s * 0.7, -s * 0.7); ctx.lineTo(s * 0.7, -s * 0.7); ctx.lineTo(s * 0.7, s * 0.1);
-      ctx.quadraticCurveTo(s * 0.7, s * 0.7, 0, s * 0.95); ctx.quadraticCurveTo(-s * 0.7, s * 0.7, -s * 0.7, s * 0.1); ctx.closePath(); ctx.stroke();
-      ctx.strokeStyle = accent;
-      ctx.beginPath(); ctx.moveTo(-s * 0.15, -s * 0.7); ctx.lineTo(s * 0.1, -s * 0.2); ctx.lineTo(-s * 0.15, s * 0.15); ctx.lineTo(s * 0.1, s * 0.7); ctx.stroke();
-      break;
-    }
-    case 'block': { // shield
-      ctx.beginPath(); ctx.moveTo(0, -s * 0.9); ctx.lineTo(s * 0.75, -s * 0.55); ctx.lineTo(s * 0.6, s * 0.25);
-      ctx.quadraticCurveTo(s * 0.3, s * 0.8, 0, s * 0.95); ctx.quadraticCurveTo(-s * 0.3, s * 0.8, -s * 0.6, s * 0.25);
-      ctx.lineTo(-s * 0.75, -s * 0.55); ctx.closePath(); ctx.stroke();
-      ctx.fillStyle = accent; ctx.globalAlpha *= 0.5; ctx.fill(); ctx.globalAlpha /= 0.5;
-      break;
-    }
-    case 'wall': { // bricks
-      for (let r = 0; r < 3; r++) {
-        const yy = -s * 0.65 + r * s * 0.65;
-        const off = r % 2 ? s * 0.35 : 0;
-        for (let c = -1; c <= 1; c++) {
-          const xx = c * s * 0.7 + off - s * 0.35;
-          ctx.strokeRect(xx, yy - s * 0.25, s * 0.6, s * 0.5);
-        }
-      }
-      break;
-    }
-    case 'rage': { // flame burst / horns
-      ctx.beginPath(); ctx.moveTo(-s * 0.8, s * 0.6); ctx.lineTo(-s * 0.5, -s * 0.8); ctx.lineTo(-s * 0.1, s * 0.1);
-      ctx.lineTo(s * 0.2, -s * 0.9); ctx.lineTo(s * 0.5, s * 0.1); ctx.lineTo(s * 0.8, -s * 0.5); ctx.lineTo(s * 0.7, s * 0.8); ctx.closePath();
-      ctx.fillStyle = accent; ctx.fill();
+    case 'aggro': { // exclamation: someone pulled aggro
+      ctx.lineWidth = Math.max(2, size * 0.16);
+      ctx.beginPath(); ctx.moveTo(0, -s * 0.85); ctx.lineTo(0, s * 0.25); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, s * 0.72, Math.max(1.5, size * 0.09), 0, Math.PI * 2); ctx.fill();
       break;
     }
     case 'breath': { // flame cone

@@ -12,7 +12,7 @@ export function snapshot(state) {
     hp: state.hp,
     role: state.role,
     world: {
-      player: { x: w.player.x, y: w.player.y, heading: w.player.heading, hp: w.player.hp, maxHp: w.player.maxHp, fearedUntil: w.player.fearedUntil, moving: w.player.moving, backpedal: w.player.backpedal },
+      player: { x: w.player.x, y: w.player.y, z: w.player.z, heading: w.player.heading, hp: w.player.hp, maxHp: w.player.maxHp, fearedUntil: w.player.fearedUntil, moving: w.player.moving, backpedal: w.player.backpedal },
       boss: { x: w.boss.x, y: w.boss.y, z: w.boss.z, heading: w.boss.heading, state: w.boss.state, target: w.boss.target, engaged: w.boss.engaged, cast: w.boss.cast ? { ...w.boss.cast } : null, lastHit: w.boss.lastHit },
       raid: { anchor: { ...w.raid.anchor }, dots: w.raid.dots.map((d) => ({ x: d.x, y: d.y, melee: d.melee })) },
       whelps: w.whelps.map((x) => ({ x: x.x, y: x.y, heading: x.heading, target: x.target, onRaid: x.onRaid })),
@@ -27,16 +27,14 @@ export function snapshot(state) {
     abilities: {
       gcdUntil: state.abilities.gcdUntil,
       readyAt: { ...state.abilities.readyAt },
-      buffs: { ...state.abilities.buffs },
     },
-    debuffs: { sunder: { ...state.debuffs.sunder } },
-    rotation: {
-      combo: state.rotation.combo,
-      bestCombo: state.rotation.bestCombo,
-      counts: { ...state.rotation.counts },
-      lastHit: state.rotation.lastHit ? { ...state.rotation.lastHit } : null,
-      lastEarly: state.rotation.lastEarly ? { ...state.rotation.lastEarly } : null,
-      beats: state.rotation.beats.map((b) => ({ ...b })),
+    cues: {
+      combo: state.cues.combo,
+      bestCombo: state.cues.bestCombo,
+      counts: { ...state.cues.counts },
+      lastHit: state.cues.lastHit ? { ...state.cues.lastHit } : null,
+      lastEarly: state.cues.lastEarly ? { ...state.cues.lastEarly } : null,
+      beats: state.cues.beats.map((b) => ({ ...b })),
     },
     upcoming: state.upcoming.map((u) => ({ ...u })),
     nextExpected: state.nextExpected ? { ...state.nextExpected } : null,

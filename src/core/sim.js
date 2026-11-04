@@ -5,8 +5,8 @@
 
 import { rad, dist, angleTo, inCone, angleDelta, lerp, clamp } from './geometry.js';
 import { createRng } from './rng.js';
-import { createThreat, tickThreat, applySunder, applyTaunt, applyBuffet, resetThreat, selectTarget, threatRatio } from './threat.js';
-import { createRotation, planBeats, onCastStarted, onRotationEvent, onAbilityPress, clearPending } from './rotation.js';
+import { createThreat, tickThreat, applyTaunt, applyBuffet, applyAggroPull, resetThreat, selectTarget, threatRatio } from './threat.js';
+import { createCues, planCues, onCueEvent, onCuePress, clearPendingCues } from './presscues.js';
 import { createLane, createCracks, pulseCracks, updateHazards, hazardAt } from './hazards.js';
 import { buildSchedule, dueActions, upcoming as scheduleUpcoming } from './scheduler.js';
 import { createInstance, resolve } from './scoring.js';
@@ -59,10 +59,8 @@ export function createSim(script, options = {}) {
     abilities: {
       gcdUntil: -Infinity,
       readyAt: Object.fromEntries(Object.keys(script.playerAbilities).map((k) => [k, -Infinity])),
-      buffs: { shieldBlockUntil: -Infinity, defensiveUntil: -Infinity, fearImmuneUntil: -Infinity },
     },
-    debuffs: { sunder: { stacks: 0, until: -Infinity } },   // on the boss
-    rotation: createRotation(),                              // press cues (see rotation.js)
+    cues: createCues(),                                      // press cues (see presscues.js)
     schedule: [],
     upcoming: [],
     expectations: [],      // every instance, all phases (the scoring log)
@@ -73,6 +71,8 @@ export function createSim(script, options = {}) {
     events: [],
     landedAt: null,
     engagedAt: null,
+    lastTurnAt: null,       // last time she turned from the tank onto the raid
+    lastRegainAt: null,     // last time she came back onto the tank
     duration: opts.duration,
     pendingTrigger: null,   // { id, until } action requested while the boss was mid-transition
   };
@@ -81,6 +81,7 @@ export function createSim(script, options = {}) {
     raidPerSecond: script.raid.threatPerSecond,
     autoAttackPerSecond: script.threat.autoAttackPerSecond,
     tauntBonus: script.threat.tauntBonus,
+    tauntLead: script.threat.tauntLead,
     tauntDuration: script.threat.tauntDuration,
     pullMultiplier: script.threat.pullMultiplier,
   };
@@ -103,19 +104,10 @@ export function createSim(script, options = {}) {
   const bossRangeTo = (x, y) => dist(x, y, state.world.boss.x, state.world.boss.y) - script.boss.radius;
   const playerInBossRange = (range) => bossRangeTo(state.world.player.x, state.world.player.y) <= range;
 
-  const mitigation = () => {
-    const b = state.abilities.buffs;
-    let m = 0;
-    if (b.shieldBlockUntil > state.t) m = Math.max(m, script.playerAbilities.shieldBlock.mitigation);
-    if (b.defensiveUntil > state.t) m = Math.max(m, script.playerAbilities.defensive.mitigation);
-    return m;
-  };
-
   function damagePlayer(amount, source) {
     const p = state.world.player;
-    const dealt = amount * (1 - mitigation());
-    p.hp -= dealt;
-    emit('damage', { amount: dealt, source });
+    p.hp -= amount;
+    emit('damage', { amount, source });
     if (p.hp <= 0) {
       p.hp = p.maxHp;
       addMetric('deaths', 1);
@@ -125,6 +117,20 @@ export function createSim(script, options = {}) {
   }
 
   function toast(text, kind = 'info') { state.feedback.toast = { t: state.t, text, kind }; }
+
+  /** True for `threat.turnGrace` seconds after a scripted turn onto the raid and after she comes back:
+   *  while she swings round, facing, cleaves and tail sweeps on the raid are the fight's doing, not the tank's. */
+  function turnSettling() {
+    const g = script.threat.turnGrace || 0;
+    return (state.lastTurnAt != null && state.t - state.lastTurnAt < g) || (state.lastRegainAt != null && state.t - state.lastRegainAt < g);
+  }
+  /** Facing, cleaves and tail sweeps on the raid are not charged while she is being pulled through
+   *  them, while she settles after a landing, or while she swings round on a scripted turn. */
+  function raidHitsExcused() {
+    const afterPull = state.engagedAt != null && state.landedAt == null && state.t - state.engagedAt < script.raid.holdAfterPull;
+    const afterLanding = state.landedAt != null && state.t - state.landedAt < script.boss.pickupGrace;
+    return afterPull || afterLanding || turnSettling();
+  }
 
   const activeExpectationDefs = () =>
     (state.phaseDef ? state.phaseDef.expectations : []).filter((e) => !e.role || e.role === state.role);
@@ -140,6 +146,9 @@ export function createSim(script, options = {}) {
     const def = script.phases[index];
     if (!def) { end('victory'); return; }
     const w = state.world, b = w.boss;
+    // Event windows of the old phase that straddle the transition cannot be judged fairly (she is taking off
+    // or landing): drop them unscored. Spot deadlines (playerAtSpotBy, bossAtSpot) keep running.
+    state.expectations = state.expectations.filter((i) => i.status !== 'pending' || i.phase === def.id || (i.type !== 'afterEvent' && i.type !== 'onEvent'));
     state.phaseIndex = index;
     state.phase = def.id;
     state.phaseDef = def;
@@ -198,9 +207,13 @@ export function createSim(script, options = {}) {
     state.ended = true;
     state.result = result;
     state.endedAt = state.t;
-    // Anything still pending is missed.
-    for (const i of state.expectations) if (i.status === 'pending') resolveInstance(i, 'missed');
-    clearPending(state);
+    // Anything still pending past its deadline is missed; a window the run ended inside is dropped, not scored.
+    for (const i of state.expectations) {
+      if (i.status !== 'pending') continue;
+      if (i.deadline == null || state.t > i.deadline) resolveInstance(i, 'missed');
+    }
+    state.expectations = state.expectations.filter((i) => i.status !== 'pending');
+    clearPendingCues(state);
     emit('end', { result });
   }
 
@@ -217,12 +230,13 @@ export function createSim(script, options = {}) {
     for (const e of activeExpectationDefs()) {
       if (e.event !== id) continue;
       if (e.type === 'onEvent') {
+        if (state.world.player.fearedUntil > state.t) continue;   // feared: the position is not yours to choose
         const inst = createInstance(e, state.phase, state.t, { deadline: state.t, graceEnd: state.t + (e.grace || 0), event: id });
         state.expectations.push(inst);
         if (runCheck(e.check, state, script)) resolveInstance(inst, 'ontime');
         else if (!e.grace) resolveInstance(inst, 'missed');
       } else if (e.type === 'afterEvent') {
-        state.expectations.push(createInstance(e, state.phase, state.t, { deadline: state.t + e.within, graceEnd: state.t + e.within + (e.grace || 0), event: id }));
+        state.expectations.push(createInstance(e, state.phase, state.t, { deadline: state.t + e.within, graceEnd: state.t + e.within + (e.grace || 0), event: id, notBefore: e.notBefore ? state.t + e.notBefore : null }));
       }
     }
   }
@@ -240,7 +254,9 @@ export function createSim(script, options = {}) {
           if (t < inst.deadline) continue;
           pass = playerAtSpot(state, script, def.spot); break;
         case 'onEvent':
-        case 'afterEvent': pass = runCheck(def.check, state, script); break;
+        case 'afterEvent':
+          if (inst.notBefore != null && t < inst.notBefore) continue;
+          pass = runCheck(def.check, state, script); break;
         default: continue;
       }
       // A check evaluated on the first tick at or after its deadline still counts as on time.
@@ -285,11 +301,11 @@ export function createSim(script, options = {}) {
     if (def.requires === 'airborne' && b.state !== 'airborne') return false;
     if (id === 'deepBreath' && !opts.freezeHp && state.phaseEnd - state.t < def.warning + def.active + 2) return false;
     if (def.conditional === 'behind' && !anyoneBehind()) return false;
+    if (def.conditional === 'onPlayer' && (b.target !== 'player' || state.threat.tauntUntil > state.t)) return false;
     if (def.cast > 0) {
       if (b.cast) return false;
       b.cast = { id, label: def.label, icon: def.icon, start: state.t, end: state.t + def.cast };
       emit('cast', { id, label: def.label, castTime: def.cast });
-      for (const beat of onCastStarted(state, script, id, state.t)) emitBeat(beat);
       return true;
     }
     resolveAction(id);
@@ -327,14 +343,14 @@ export function createSim(script, options = {}) {
         const hit = coneHits('cleave');
         w.coneFlash.cleave = state.t;
         if (hit.player) damagePlayer(def.damage, id);
-        if (hit.raid) addMetric('raidCleaveHits', 1);
+        if (hit.raid && !raidHitsExcused()) addMetric('raidCleaveHits', 1);
         break;
       }
       case 'tailSweep': {
         const hit = coneHits('tail', Math.PI);
         w.coneFlash.tail = state.t;
         if (hit.player) { damagePlayer(def.damage, id); knockback(p, b.x, b.y, def.knockback, state.t); emit('knockback', { source: id }); }
-        if (hit.raid) addMetric('raidTailHits', 1);
+        if (hit.raid && !raidHitsExcused()) addMetric('raidTailHits', 1);
         break;
       }
       case 'wingBuffet': {
@@ -367,14 +383,16 @@ export function createSim(script, options = {}) {
       }
       case 'whelpWave': spawnWhelps(state, script, def); break;
       case 'bellowingRoar': {
-        if (state.abilities.buffs.fearImmuneUntil > state.t) emit('fearResisted');
-        else {
-          p.fearedUntil = state.t + script.player.fearDuration;
-          p.wanderTimer = 0;
-          addMetric('fearsTaken', 1);
-          emit('feared', { duration: script.player.fearDuration });
-          toast('Feared', 'bad');
-        }
+        p.fearedUntil = state.t + script.player.fearDuration;
+        p.wanderTimer = 0;
+        emit('feared', { duration: script.player.fearDuration });
+        toast('Feared', 'bad');
+        break;
+      }
+      case 'aggroPull': {
+        // A DPS overtakes the tank on the threat table; she turns on the next threat tick.
+        applyAggroPull(state.threat, def.threatMultiplier || 1.15);
+        toast('A DPS pulled aggro', 'warn');
         break;
       }
       case 'eruption': {
@@ -386,18 +404,19 @@ export function createSim(script, options = {}) {
     }
     emit('action', { id, label: def.label });
     onActionEvent(id);
-    for (const beat of onRotationEvent(state, script, id, state.t)) emitBeat(beat);
+    spawnExpectationsFor(id, state.phase);
+    for (const beat of onCueEvent(state, script, id, state.t)) emitBeat(beat);
   }
 
   function onLanded() {
     const b = state.world.boss;
     state.landedAt = state.t;
-    if (script.threat.resetOnLanding) resetThreat(state.threat);
+    if (script.threat.resetOnLanding) { resetThreat(state.threat); state.threat.raid = script.threat.landingRaidThreat || 0; }   // healers and DPS are already on her table
     b.target = 'raid';
     b.engaged = true;
     emit('action', { id: 'landing', label: script.actions.landing.label });
     onActionEvent('landing');
-    for (const beat of onRotationEvent(state, script, 'landing', state.t)) emitBeat(beat);
+    for (const beat of onCueEvent(state, script, 'landing', state.t)) emitBeat(beat);
     spawnExpectationsFor('landing', state.phase);
   }
 
@@ -410,7 +429,7 @@ export function createSim(script, options = {}) {
     const fail = (reason, text) => {
       emit('abilityFailed', { id, reason });
       if (text) toast(text, 'warn');
-      onAbilityPress(state, script, id, state.t, reason);
+      onCuePress(state, script, id, state.t, reason);
     };
     if (p.fearedUntil > state.t) return fail('feared', 'Feared');
     if (A.readyAt[id] > state.t) return fail('cooldown');
@@ -421,43 +440,28 @@ export function createSim(script, options = {}) {
         if (b.state === 'grounded' && !b.passive && playerInBossRange(def.range)) {
           engage();
           applyTaunt(state.threat, state.t, threatCfg);
-          if (b.target !== 'player') { b.target = 'player'; emit('threatRegained', { by: 'taunt' }); }
+          if (b.target !== 'player') { b.target = 'player'; state.lastRegainAt = state.t; emit('threatRegained', { by: 'taunt' }); }
         } else if (state.role === 'offtank' && pickupWhelps(state, script, def.range) > 0) {
           onWhelpPickup();
         } else return fail('range', b.state === 'grounded' ? 'Out of range' : 'She is in the air');
         break;
       }
-      case 'sunder': {
-        if (b.state === 'grounded' && !b.passive && playerInBossRange(def.range)) {
-          engage();
-          applySunder(state.threat, script.threat.sunder);
-          const d = state.debuffs.sunder;
-          d.stacks = Math.min(def.maxStacks || 5, (d.until > state.t ? d.stacks : 0) + 1);
-          d.until = state.t + (def.debuffDuration || 30);
-        } else if (state.role === 'offtank' && pickupWhelps(state, script, def.range) > 0) {
-          onWhelpPickup();
-        } else return fail('range', b.state === 'grounded' ? 'Out of range' : 'She is in the air');
-        break;
-      }
-      case 'shieldBlock': A.buffs.shieldBlockUntil = state.t + def.duration; break;
-      case 'defensive': A.buffs.defensiveUntil = state.t + def.duration; break;
-      case 'fearImmune': A.buffs.fearImmuneUntil = state.t + def.duration; break;
       default: break;
     }
     A.readyAt[id] = state.t + def.cooldown;
     if (def.gcd) A.gcdUntil = state.t + script.gcd;
     emit('abilityUsed', { id, label: def.label });
-    const beat = onAbilityPress(state, script, id, state.t, 'ok');
+    const beat = onCuePress(state, script, id, state.t, 'ok');
     if (beat) emitBeat(beat);
   }
 
   function onWhelpPickup() {
     emit('whelpPickup');
-    for (const beat of onRotationEvent(state, script, 'whelpPickup', state.t)) emitBeat(beat);
+    for (const beat of onCueEvent(state, script, 'whelpPickup', state.t)) emitBeat(beat);
   }
 
   function emitBeat(beat) {
-    emit('beat', { ability: beat.ability, status: beat.status, delta: beat.delta, cue: beat.cue, label: beat.label, combo: state.rotation.combo, filler: beat.filler });
+    emit('beat', { ability: beat.ability, status: beat.status, delta: beat.delta, cue: beat.cue, label: beat.label, combo: state.cues.combo });
   }
 
   // ------------------------------------------------------------ derived HUD state
@@ -537,7 +541,7 @@ export function createSim(script, options = {}) {
 
     // Player.
     if (cmd.abilities) for (const id of cmd.abilities) useAbility(id);
-    updatePlayer(state, script, cmd, dt, rng);
+    if (updatePlayer(state, script, cmd, dt, rng).jumped) emit('jump');
 
     // Proximity engage: walking into melee range wakes her up.
     if (!b.engaged && !b.passive && b.state === 'grounded' && playerInBossRange(script.boss.meleeRange + 1)) engage();
@@ -562,8 +566,8 @@ export function createSim(script, options = {}) {
     if (live) {
       const prev = b.target;
       b.target = selectTarget(state.threat, b.target, state.t, threatCfg);
-      if (prev === 'player' && b.target === 'raid') { addMetric('threatLostCount', 1); emit('threatLost'); toast('She turned on the raid. Taunt!', 'bad'); for (const beat of onRotationEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
-      else if (prev === 'raid' && b.target === 'player') { emit('threatRegained', { by: 'threat' }); }
+      if (prev === 'player' && b.target === 'raid') { addMetric('threatLostCount', 1); state.lastTurnAt = state.t; emit('threatLost'); toast('She turned on the raid. Taunt!', 'bad'); for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
+      else if (prev === 'raid' && b.target === 'player') { state.lastRegainAt = state.t; emit('threatRegained', { by: 'threat' }); }
       if (b.target === 'player' && state.landedAt != null && state.metrics.pickupTime == null && state.phase === 3) {
         setMetric('pickupTime', state.t - state.landedAt);
       }
@@ -614,11 +618,9 @@ export function createSim(script, options = {}) {
     if (live) {
       // Facing is not held against the tank during the pull and the landing pickup window:
       // she is expected to be facing the wrong way until the tank has her.
-      const graceAfterPull = state.engagedAt != null && state.t - state.engagedAt < script.raid.holdAfterPull;
-      const graceAfterLanding = state.landedAt != null && state.t - state.landedAt < script.boss.pickupGrace;
       const facing = bossFacingRaid(state, script);
       state.feedback.facingWrong = facing;
-      if (facing && !graceAfterPull && !graceAfterLanding) addMetric('bossFacingRaid', dt);
+      if (facing && !raidHitsExcused()) addMetric('bossFacingRaid', dt);
       const c = script.boss.cones.tail;
       if (inCone(p.x, p.y, b.x, b.y, b.heading + Math.PI, rad(c.angle), c.range)) addMetric('playerInTail', dt);
     } else state.feedback.facingWrong = false;
@@ -631,9 +633,8 @@ export function createSim(script, options = {}) {
     buildUpcoming();
     buildNextExpected();
 
-    // Boss debuffs and press cues.
-    if (state.debuffs.sunder.until <= state.t) state.debuffs.sunder.stacks = 0;
-    for (const beat of planBeats(state, script, state.t)) emitBeat(beat);
+    // Press cues whose window closed.
+    for (const beat of planCues(state, state.t)) emitBeat(beat);
 
     if (opts.duration != null && state.t >= opts.duration) end('drillComplete');
   }
@@ -645,7 +646,7 @@ export function createSim(script, options = {}) {
     const P = script.positions, w = state.world, b = w.boss;
     w.whelps = []; w.projectiles = [];
     w.hazards = w.hazards.filter((h) => h.kind === 'crack');
-    w.player.knock = null; w.player.fearedUntil = -Infinity; w.player.hp = w.player.maxHp;
+    w.player.knock = null; w.player.fearedUntil = -Infinity; w.player.hp = w.player.maxHp; w.player.z = 0; w.player.vz = 0;
     if (preset === 'wall') {
       Object.assign(w.player, { x: P.tankSpot.x, y: P.tankSpot.y, heading: rad(270) });
       Object.assign(b, { x: P.bossSpot.x, y: P.bossSpot.y, z: 0, heading: rad(P.bossSpot.heading), state: 'grounded', engaged: true, target: 'player', cast: null, transition: null });
@@ -680,7 +681,7 @@ export function createSim(script, options = {}) {
     if (idx < 0) return;
     // Pending phase-scoped expectations of the old phase are dropped, not failed.
     state.expectations = state.expectations.filter((i) => i.status !== 'pending');
-    clearPending(state);
+    clearPendingCues(state);
     enterPhase(idx, elapsed);
     buildUpcoming();
   }
@@ -705,7 +706,6 @@ export function createSim(script, options = {}) {
   if (opts.start === 'wall') spawnExpectationsFor('engage', state.phase);
   buildUpcoming();
   buildNextExpected();
-  planBeats(state, script, state.t);
 
   return {
     state, script, options: opts,

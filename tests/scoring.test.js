@@ -44,7 +44,7 @@ test('computeScore: weights and points per phase', () => {
   assert.deepEqual(perfect.phases[0].counts, { ontime: 2, late: 0, missed: 0 });
 
   const half = computeScore(script, [finished('pull', 'ontime'), finished('wall', 'missed')], { 1: {} }, [1]);
-  assert.equal(half.overall, 75, '0.5 * 50 expectation points + 30 metric points + 20 rotation points (no beats judged)');
+  assert.equal(half.overall, 75, '0.5 * 50 expectation points + 30 metric points + 20 cue points (no notes judged)');
   assert.equal(half.grade, 'B');
 
   const late = computeScore(script, [finished('pull', 'late', 10, 3)], { 1: {} }, [1]);

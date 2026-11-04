@@ -87,7 +87,6 @@ export function createTutorial({ script, sim, settings, panel, audio = null, onE
       }
       case 'eventLanded': return landed;
       case 'expectation': return landed;
-      case 'debuffStacks': return ((sim.state.debuffs && sim.state.debuffs[d.debuff] || {}).stacks || 0) >= (d.stacks || 1);
       default: return true;
     }
   }

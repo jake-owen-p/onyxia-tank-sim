@@ -15,18 +15,30 @@ export function createPlayer(script, pos) {
     fearedUntil: -Infinity, wanderTimer: 0,
     knock: null,            // { vx, vy, until }
     moving: false, backpedal: false, speed: 0,
+    z: 0, vz: 0,            // jump height and vertical speed (yards, yards/s)
   };
 }
 
 /**
- * Apply movement commands. `cmd` = { forward, strafe, turn, mouseTurn }.
+ * Apply movement commands. `cmd` = { forward, strafe, turn, mouseTurn, jump }.
  * turn: +1 turns left (counter-clockwise, heading increases). forward: +1 = ahead.
+ * jump: true on the tick the key was pressed. Returns { jumped } for the event.
  */
 export function updatePlayer(state, script, cmd, dt, rng) {
   const p = state.world.player;
   const cfg = script.player;
   const floors = script.arena.floor;
   let dx = 0, dy = 0;
+  const flags = {};
+
+  // Jump: a fixed arc (height h over duration T): v0 = 4h/T, g = 8h/T^2. Air control is full, like WoW.
+  const J = cfg.jump || { height: 1.4, duration: 0.8 };
+  if (cmd.jump && p.z <= 0 && p.fearedUntil <= state.t) { p.vz = (4 * J.height) / J.duration; p.z = 1e-6; flags.jumped = true; }
+  if (p.z > 0) {
+    p.z += p.vz * dt;
+    p.vz -= ((8 * J.height) / (J.duration * J.duration)) * dt;
+    if (p.z <= 0) { p.z = 0; p.vz = 0; }
+  }
 
   if (p.fearedUntil > state.t) {
     // Feared: stumble around in random directions.
@@ -71,6 +83,7 @@ export function updatePlayer(state, script, cmd, dt, rng) {
   }
   p.speed = Math.hypot(dx, dy) / (dt || 1);
   p.hp = Math.min(p.maxHp, p.hp + cfg.healPerSecond * dt);
+  return flags;
 }
 
 /** Push the player directly away from (fx,fy) by `distance` yards over `duration` seconds starting at time t. */

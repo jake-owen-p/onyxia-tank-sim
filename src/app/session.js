@@ -97,7 +97,7 @@ export function createSession({ script, scenario, settings, renderer, audio, inp
     cancelAnimationFrame(raf);
     api.detach();
     input.setEnabled(false);
-    const score = computeScore(script, sim.state.expectations, sim.state.phaseMetrics, sim.state.phasesPlayed, sim.state.role, sim.state.rotation.log);
+    const score = computeScore(script, sim.state.expectations, sim.state.phaseMetrics, sim.state.phasesPlayed, sim.state.role, sim.state.cues.log);
     if (hooks.onEnd) hooks.onEnd(sim, score, api);
   }
 
@@ -151,7 +151,7 @@ export function createSession({ script, scenario, settings, renderer, audio, inp
       if (!sim.state.ended) sim.end(result);
     },
     /** Final score (valid after end). */
-    score() { return computeScore(script, sim.state.expectations, sim.state.phaseMetrics, sim.state.phasesPlayed, sim.state.role, sim.state.rotation.log); },
+    score() { return computeScore(script, sim.state.expectations, sim.state.phaseMetrics, sim.state.phasesPlayed, sim.state.role, sim.state.cues.log); },
     duration() { return sim.state.t; },
     detach() {
       window.removeEventListener('blur', onBlur);
