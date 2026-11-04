@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Ember dragon eye: dark warm disc, orange iris, slit pupil -->
+  <defs>
+    <radialGradient id="g" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="0.55" stop-color="#e2541b"/>
+      <stop offset="1" stop-color="#5a1708"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#140d0a"/>
+  <path d="M8 32 Q32 8 56 32 Q32 56 8 32 Z" fill="url(#g)" stroke="#2a130c" stroke-width="2"/>
+  <ellipse cx="32" cy="32" rx="5" ry="15" fill="#1a0b07"/>
+  <ellipse cx="29" cy="25" rx="2.2" ry="3.2" fill="#ffd9a0" opacity="0.8"/>
+</svg>

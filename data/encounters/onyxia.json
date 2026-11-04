@@ -1,0 +1,1131 @@
+{
+  "id": "onyxia",
+  "name": "Onyxia",
+  "version": "1.0.0",
+  "notes": "All timings, ranges and threat values are placeholders. See README 'Values to tune'. Headings are degrees, 0 = east, 90 = north (toward the back wall). Units are yards and seconds.",
+  "arena": {
+    "name": "Onyxia's Lair",
+    "wallHeight": 12,
+    "floor": [
+      {
+        "id": "chamber",
+        "poly": [[58, 2], [57.3, 10.1], [55.2, 18.1], [51.7, 25.6], [46.9, 32.6], [41, 38.8], [34.1, 44.1], [26.3, 48.3], [17.9, 51.5], [9.1, 53.4], [0, 54], [-9.1, 53.4], [-17.9, 51.5], [-26.3, 48.3], [-34.1, 44.1], [-41, 38.8], [-46.9, 32.6], [-51.7, 25.6], [-55.2, 18.1], [-57.3, 10.1], [-58, 2], [-57.3, -6.1], [-55.2, -14.1], [-51.7, -21.6], [-46.9, -28.6], [-41, -34.8], [-34.1, -40.1], [-26.3, -44.3], [-17.9, -47.5], [-9.1, -49.4], [0, -50], [9.1, -49.4], [17.9, -47.5], [26.3, -44.3], [34.1, -40.1], [41, -34.8], [46.9, -28.6], [51.7, -21.6], [55.2, -14.1], [57.3, -6.1]]
+      },
+      {
+        "id": "ramp",
+        "poly": [[-12, -44], [12, -44], [12, -95], [-12, -95]]
+      },
+      {
+        "id": "caveWest",
+        "poly": [[-50, -9], [-66, -12], [-80, -8], [-85, 2], [-80, 12], [-66, 16], [-50, 13]]
+      },
+      {
+        "id": "caveEast",
+        "poly": [[50, -9], [66, -12], [80, -8], [85, 2], [80, 12], [66, 16], [50, 13]]
+      }
+    ],
+    "walls": [
+      {
+        "id": "chamberNorth",
+        "points": [[56.7, 12.8], [55.2, 18.1], [53, 23.2], [50.2, 28], [46.9, 32.6], [43.1, 36.8], [38.8, 40.6], [34.1, 44.1], [29, 47], [23.6, 49.5], [17.9, 51.5], [12.1, 52.9], [6.1, 53.7], [0, 54], [-6.1, 53.7], [-12.1, 52.9], [-17.9, 51.5], [-23.6, 49.5], [-29, 47], [-34.1, 44.1], [-38.8, 40.6], [-43.1, 36.8], [-46.9, 32.6], [-50.2, 28], [-53, 23.2], [-55.2, 18.1], [-56.7, 12.8]]
+      },
+      {
+        "id": "chamberSouthWest",
+        "points": [[-56.7, -8.8], [-55.2, -14.1], [-53, -19.2], [-50.2, -24], [-46.9, -28.6], [-43.1, -32.8], [-38.8, -36.6], [-34.1, -40.1], [-29, -43], [-23.6, -45.5], [-17.9, -47.5], [-12.1, -48.9]]
+      },
+      {
+        "id": "chamberSouthEast",
+        "points": [[12.1, -48.9], [17.9, -47.5], [23.6, -45.5], [29, -43], [34.1, -40.1], [38.8, -36.6], [43.1, -32.8], [46.9, -28.6], [50.2, -24], [53, -19.2], [55.2, -14.1], [56.7, -8.8]]
+      },
+      {
+        "id": "rampWest",
+        "points": [[-12.1, -48.9], [-12, -95]]
+      },
+      {
+        "id": "rampEast",
+        "points": [[12.1, -48.9], [12, -95]]
+      },
+      {
+        "id": "rampEnd",
+        "points": [[-12, -95], [12, -95]]
+      },
+      {
+        "id": "caveWest",
+        "points": [[-56.7, 12.8], [-66, 16], [-80, 12], [-85, 2], [-80, -8], [-66, -12], [-56.7, -8.8]]
+      },
+      {
+        "id": "caveEast",
+        "points": [[56.7, 12.8], [66, 16], [80, 12], [85, 2], [80, -8], [66, -12], [56.7, -8.8]]
+      }
+    ],
+    "backWall": [[-17.9, 51.5], [-12.1, 52.9], [-6.1, 53.7], [0, 54], [6.1, 53.7], [12.1, 52.9], [17.9, 51.5]],
+    "nearWallDistance": 5,
+    "labels": [
+      {
+        "text": "Entrance",
+        "at": [0, -80]
+      },
+      {
+        "text": "West cave",
+        "at": [-70, 2]
+      },
+      {
+        "text": "East cave",
+        "at": [70, 2]
+      },
+      {
+        "text": "Back wall",
+        "at": [0, 58]
+      }
+    ]
+  },
+  "positions": {
+    "playerStart": {
+      "x": 0,
+      "y": -62,
+      "heading": 90
+    },
+    "bossStart": {
+      "x": 0,
+      "y": 4,
+      "heading": 270
+    },
+    "tankSpot": {
+      "x": 0,
+      "y": 50,
+      "tolerance": 4
+    },
+    "bossSpot": {
+      "x": 0,
+      "y": 40,
+      "heading": 90,
+      "tolerance": 7,
+      "headingTolerance": 35
+    },
+    "raidSpotP1": {
+      "x": 0,
+      "y": -6,
+      "spread": 10
+    },
+    "raidSpotP2": {
+      "x": 0,
+      "y": -28,
+      "spread": 18
+    },
+    "raidSpotP3": {
+      "x": 0,
+      "y": -20,
+      "spread": 10
+    },
+    "hoverIdle": {
+      "x": 0,
+      "y": 22,
+      "z": 24
+    },
+    "landSpot": {
+      "x": 0,
+      "y": 6,
+      "heading": 270
+    },
+    "pickupSpot": {
+      "x": 0,
+      "y": 19,
+      "tolerance": 6
+    },
+    "offtankWhelpSpot": {
+      "x": -30,
+      "y": -34
+    },
+    "ghostOfftankSpot": {
+      "x": 34,
+      "y": -30
+    },
+    "caveWest": {
+      "x": -72,
+      "y": 2
+    },
+    "caveEast": {
+      "x": 72,
+      "y": 2
+    },
+    "raidWait": {
+      "x": 0,
+      "y": -40,
+      "spread": 6
+    }
+  },
+  "player": {
+    "speed": 7,
+    "turnRate": 200,
+    "radius": 0.8,
+    "hp": 6000,
+    "healPerSecond": 280,
+    "fearDuration": 3,
+    "fearSpeed": 4
+  },
+  "ghostTank": {
+    "speed": 7.4,
+    "turnRate": 360
+  },
+  "raid": {
+    "size": 35,
+    "melee": 10,
+    "threatPerSecond": 50,
+    "meleeFlankDistance": 12,
+    "whelpContactRange": 8,
+    "holdAfterPull": 6
+  },
+  "boss": {
+    "radius": 9,
+    "speed": 9,
+    "turnRate": 180,
+    "meleeRange": 11,
+    "meleeDamage": 260,
+    "meleeInterval": 2,
+    "cones": {
+      "breath": {
+        "angle": 60,
+        "range": 60,
+        "label": "Flame Breath"
+      },
+      "cleave": {
+        "angle": 90,
+        "range": 15,
+        "label": "Cleave"
+      },
+      "tail": {
+        "angle": 120,
+        "range": 18,
+        "label": "Tail Sweep"
+      }
+    },
+    "landingDuration": 2.5,
+    "takeoffDuration": 2.5,
+    "pickupGrace": 5,
+    "settleAfterLanding": 2.5
+  },
+  "threat": {
+    "sunder": 340,
+    "autoAttackPerSecond": 30,
+    "tauntBonus": 1,
+    "tauntDuration": 3,
+    "buffetCut": 0.35,
+    "pullMultiplier": 1,
+    "dangerBand": 0.8,
+    "resetOnLanding": true
+  },
+  "gcd": 1.5,
+  "playerAbilities": {
+    "taunt": {
+      "label": "Taunt",
+      "cooldown": 10,
+      "gcd": false,
+      "range": 16,
+      "icon": "taunt"
+    },
+    "sunder": {
+      "label": "Sunder Armor",
+      "cooldown": 0,
+      "gcd": true,
+      "range": 12,
+      "icon": "sunder",
+      "maxStacks": 5,
+      "debuffDuration": 30
+    },
+    "shieldBlock": {
+      "label": "Shield Block",
+      "cooldown": 6,
+      "gcd": false,
+      "duration": 5,
+      "mitigation": 0.4,
+      "icon": "block"
+    },
+    "defensive": {
+      "label": "Shield Wall",
+      "cooldown": 60,
+      "gcd": false,
+      "duration": 10,
+      "mitigation": 0.75,
+      "icon": "wall"
+    },
+    "fearImmune": {
+      "label": "Berserker Rage",
+      "cooldown": 30,
+      "gcd": false,
+      "duration": 10,
+      "icon": "rage"
+    }
+  },
+  "actions": {
+    "flameBreath": {
+      "label": "Flame Breath",
+      "cast": 3,
+      "cone": "breath",
+      "damage": 1800,
+      "warn": true,
+      "cue": "breath",
+      "icon": "breath",
+      "requires": "grounded"
+    },
+    "cleave": {
+      "label": "Cleave",
+      "cast": 0,
+      "cone": "cleave",
+      "damage": 900,
+      "warn": false,
+      "cue": "cleave",
+      "icon": "cleave",
+      "requires": "grounded"
+    },
+    "wingBuffet": {
+      "label": "Wing Buffet",
+      "cast": 1,
+      "knockback": 22,
+      "knockbackRange": 20,
+      "warn": true,
+      "cue": "buffet",
+      "icon": "buffet",
+      "requires": "grounded"
+    },
+    "tailSweep": {
+      "label": "Tail Sweep",
+      "cast": 0,
+      "cone": "tail",
+      "knockback": 10,
+      "damage": 600,
+      "conditional": "behind",
+      "warn": false,
+      "cue": "tail",
+      "icon": "tail",
+      "requires": "grounded"
+    },
+    "fireball": {
+      "label": "Fireball",
+      "cast": 0,
+      "travel": 1.2,
+      "splash": 6,
+      "warn": false,
+      "cue": null,
+      "icon": "fireball",
+      "requires": "airborne"
+    },
+    "deepBreath": {
+      "label": "Deep Breath",
+      "cast": 0,
+      "warning": 5,
+      "active": 3,
+      "laneWidth": 22,
+      "damage": 4000,
+      "warn": false,
+      "cue": "deepBreath",
+      "icon": "deepbreath",
+      "requires": "airborne"
+    },
+    "whelpWave": {
+      "label": "Whelps",
+      "cast": 0,
+      "perCave": 6,
+      "speed": 6,
+      "aggroRange": 10,
+      "lifetime": 28,
+      "warn": true,
+      "cue": "whelps",
+      "icon": "whelps",
+      "requires": "airborne"
+    },
+    "bellowingRoar": {
+      "label": "Bellowing Roar",
+      "cast": 1.5,
+      "warn": true,
+      "cue": "roar",
+      "icon": "roar",
+      "requires": "grounded"
+    },
+    "eruption": {
+      "label": "Eruption",
+      "cast": 0,
+      "warning": 2,
+      "active": 2,
+      "damage": 1500,
+      "warn": false,
+      "cue": "eruption",
+      "icon": "eruption",
+      "requires": "grounded"
+    },
+    "landing": {
+      "label": "Landing",
+      "cast": 0,
+      "warn": true,
+      "cue": "landing",
+      "icon": "landing"
+    },
+    "takeoff": {
+      "label": "Takeoff",
+      "cast": 0,
+      "warn": true,
+      "cue": "takeoff",
+      "icon": "takeoff"
+    }
+  },
+  "deepBreathLanes": [
+    {
+      "id": "northToSouth",
+      "from": [0, 50],
+      "to": [0, -47]
+    },
+    {
+      "id": "southToNorth",
+      "from": [0, -47],
+      "to": [0, 50]
+    },
+    {
+      "id": "eastToWest",
+      "from": [55, 2],
+      "to": [-55, 2]
+    },
+    {
+      "id": "westToEast",
+      "from": [-55, 2],
+      "to": [55, 2]
+    }
+  ],
+  "hoverHeight": 24,
+  "eruptionCracks": [
+    [[8.4, 8.9], [14.7, 13.9], [22.5, 16.7], [28.8, 21.6], [29.7, 20.3], [24.3, 14.1], [16.7, 11], [11.3, 4.8]],
+    [[1.8, 12.1], [4, 19.8], [8.8, 26.6], [11.2, 34.2], [12.7, 33.7], [11.8, 25.5], [7.4, 18.6], [6.5, 10.4]],
+    [[-6.5, 10.4], [-9.7, 17.8], [-10.3, 26], [-13.4, 33.4], [-11.9, 34], [-7.3, 27.1], [-6.3, 19], [-1.8, 12.1]],
+    [[-11.3, 4.8], [-18.1, 9], [-23.4, 15.4], [-30.2, 19.7], [-29.3, 21], [-21.6, 18], [-16, 12], [-8.4, 8.9]],
+    [[-8.4, -8.9], [-14.7, -13.9], [-22.5, -16.7], [-28.8, -21.6], [-29.7, -20.3], [-24.3, -14.1], [-16.7, -11], [-11.3, -4.8]],
+    [[-1.8, -12.1], [-4, -19.8], [-8.8, -26.6], [-11.2, -34.2], [-12.7, -33.7], [-11.8, -25.5], [-7.4, -18.6], [-6.5, -10.4]],
+    [[6.5, -10.4], [9.7, -17.8], [10.3, -26], [13.4, -33.4], [11.9, -34], [7.3, -27.1], [6.3, -19], [1.8, -12.1]],
+    [[11.3, -4.8], [18.1, -9], [23.4, -15.4], [30.2, -19.7], [29.3, -21], [21.6, -18], [16, -12], [8.4, -8.9]]
+  ],
+  "phases": [
+    {
+      "id": 1,
+      "name": "Phase 1",
+      "subtitle": "Grounded",
+      "hpFrom": 1,
+      "hpTo": 0.65,
+      "duration": 110,
+      "bossState": "grounded",
+      "raidSpot": "raidSpotP1",
+      "actions": [
+        {
+          "id": "flameBreath",
+          "first": 16,
+          "every": 20,
+          "jitter": 2
+        },
+        {
+          "id": "cleave",
+          "first": 5,
+          "every": 7,
+          "jitter": 1
+        },
+        {
+          "id": "wingBuffet",
+          "first": 28,
+          "every": 25,
+          "jitter": 2
+        },
+        {
+          "id": "tailSweep",
+          "first": 3,
+          "every": 2,
+          "jitter": 0
+        }
+      ],
+      "expectations": [
+        {
+          "id": "pull",
+          "type": "bossAtSpot",
+          "spot": "bossSpot",
+          "within": 15,
+          "grace": 6,
+          "label": "Pull Onyxia to the back wall",
+          "tip": "Pull straight to the back wall. Run up the ramp, through the raid, and keep going until your back is on the wall.",
+          "from": "engage"
+        },
+        {
+          "id": "facing",
+          "type": "continuous",
+          "metric": "bossFacingRaid",
+          "label": "Keep her facing away from the raid",
+          "tip": "Stand between Onyxia and the wall so she faces the wall. If she turns, move so that you are on the far side from the raid."
+        },
+        {
+          "id": "wall",
+          "type": "onEvent",
+          "event": "wingBuffet",
+          "check": "nearWall",
+          "label": "Be against the wall for Wing Buffet",
+          "tip": "Wing Buffet knocks you back. With the wall behind you there is nowhere to go, and she stays put."
+        },
+        {
+          "id": "rebuild",
+          "type": "afterEvent",
+          "event": "wingBuffet",
+          "check": "threatLead",
+          "within": 6,
+          "grace": 4,
+          "label": "Rebuild threat after Wing Buffet",
+          "tip": "Wing Buffet cuts your threat. Sunder immediately after each Buffet, and Taunt if she starts to turn."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Phase 2",
+      "subtitle": "Airborne",
+      "hpFrom": 0.65,
+      "hpTo": 0.4,
+      "duration": 80,
+      "bossState": "airborne",
+      "raidSpot": "raidSpotP2",
+      "actions": [
+        {
+          "id": "fireball",
+          "first": 4,
+          "every": 3,
+          "jitter": 1
+        },
+        {
+          "id": "deepBreath",
+          "first": 22,
+          "every": 26,
+          "jitter": 3
+        },
+        {
+          "id": "whelpWave",
+          "first": 9,
+          "every": 34,
+          "jitter": 3
+        }
+      ],
+      "expectations": [
+        {
+          "id": "pickupSpot",
+          "type": "playerAtSpotBy",
+          "spot": "pickupSpot",
+          "deadline": "phaseEnd",
+          "grace": 5,
+          "label": "Be on the pickup spot when she lands",
+          "tip": "In Phase 2 your job is to be ready for the landing. Stand on the pickup spot north of the centre, dodge the lane, and come straight back."
+        },
+        {
+          "id": "lane",
+          "type": "onEvent",
+          "event": "deepBreath",
+          "check": "outsideLane",
+          "grace": 1.5,
+          "label": "Stay out of the Deep Breath lane",
+          "tip": "Deep Breath is a five second warning. Step sideways out of the lane, do not run along it."
+        },
+        {
+          "id": "whelps",
+          "type": "afterEvent",
+          "event": "whelpWave",
+          "check": "whelpsPicked",
+          "within": 12,
+          "grace": 6,
+          "role": "offtank",
+          "label": "Pick up the whelp wave",
+          "tip": "Whelps come from both caves. Meet them near the centre so you catch both packs, then walk them away from the raid."
+        },
+        {
+          "id": "whelpsAway",
+          "type": "continuous",
+          "metric": "whelpsOnRaid",
+          "role": "offtank",
+          "label": "Keep whelps off the raid",
+          "tip": "Hold the whelps on the south-west side, well away from the healers."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Phase 3",
+      "subtitle": "Landed",
+      "hpFrom": 0.4,
+      "hpTo": 0,
+      "duration": 130,
+      "bossState": "grounded",
+      "raidSpot": "raidSpotP3",
+      "actions": [
+        {
+          "id": "flameBreath",
+          "first": 18,
+          "every": 20,
+          "jitter": 2
+        },
+        {
+          "id": "cleave",
+          "first": 6,
+          "every": 7,
+          "jitter": 1
+        },
+        {
+          "id": "wingBuffet",
+          "first": 30,
+          "every": 25,
+          "jitter": 2
+        },
+        {
+          "id": "tailSweep",
+          "first": 3,
+          "every": 2,
+          "jitter": 0
+        },
+        {
+          "id": "bellowingRoar",
+          "first": 22,
+          "every": 32,
+          "jitter": 1
+        },
+        {
+          "id": "eruption",
+          "first": 8,
+          "every": 9,
+          "jitter": 1
+        }
+      ],
+      "expectations": [
+        {
+          "id": "pickup",
+          "type": "afterEvent",
+          "event": "landing",
+          "check": "hasAggro",
+          "within": 5,
+          "grace": 4,
+          "label": "Pick her up within 5s of landing",
+          "tip": "The moment she lands, Taunt. Then Sunder twice before you start moving."
+        },
+        {
+          "id": "drag",
+          "type": "bossAtSpot",
+          "spot": "bossSpot",
+          "within": 25,
+          "grace": 10,
+          "label": "Drag her back to the wall",
+          "tip": "Walk backwards toward the wall in a straight line so she follows without turning toward the raid.",
+          "from": "landing"
+        },
+        {
+          "id": "facing",
+          "type": "continuous",
+          "metric": "bossFacingRaid",
+          "label": "Keep her facing away from the raid",
+          "tip": "Stand between Onyxia and the wall so she faces the wall."
+        },
+        {
+          "id": "roar",
+          "type": "onEvent",
+          "event": "bellowingRoar",
+          "check": "fearImmune",
+          "grace": 2,
+          "label": "Be fear immune for Bellowing Roar",
+          "tip": "Watch the timeline. Use Berserker Rage or Fear Ward in the last three seconds before the Roar, not after it starts."
+        },
+        {
+          "id": "cracks",
+          "type": "continuous",
+          "metric": "playerInCrack",
+          "label": "Never stand on an eruption crack",
+          "tip": "Cracks pulse on a timer. Walk between them, and keep the wall spot clear of cracks."
+        },
+        {
+          "id": "wall",
+          "type": "onEvent",
+          "event": "wingBuffet",
+          "check": "nearWall",
+          "label": "Be against the wall for Wing Buffet",
+          "tip": "Back on the wall before each Buffet."
+        },
+        {
+          "id": "rebuild",
+          "type": "afterEvent",
+          "event": "wingBuffet",
+          "check": "threatLead",
+          "within": 6,
+          "grace": 4,
+          "label": "Rebuild threat after Wing Buffet",
+          "tip": "Sunder immediately after each Buffet and Taunt if she turns."
+        }
+      ]
+    }
+  ],
+  "continuousMetrics": {
+    "bossFacingRaid": {
+      "label": "Facing the raid",
+      "unit": "s",
+      "penaltyPerSecond": 3,
+      "severe": 4
+    },
+    "raidBreathHits": {
+      "label": "Flame Breaths on the raid",
+      "unit": "count",
+      "penaltyPerUnit": 12,
+      "severe": 1
+    },
+    "raidCleaveHits": {
+      "label": "Cleaves on the raid",
+      "unit": "count",
+      "penaltyPerUnit": 3,
+      "severe": 2
+    },
+    "raidTailHits": {
+      "label": "Tail Sweeps on the raid",
+      "unit": "count",
+      "penaltyPerUnit": 3,
+      "severe": 2
+    },
+    "playerInTail": {
+      "label": "You behind her",
+      "unit": "s",
+      "penaltyPerSecond": 2,
+      "severe": 3
+    },
+    "playerInLane": {
+      "label": "You in a Deep Breath",
+      "unit": "s",
+      "penaltyPerSecond": 8,
+      "severe": 0.5
+    },
+    "playerInCrack": {
+      "label": "You on a crack",
+      "unit": "s",
+      "penaltyPerSecond": 3,
+      "severe": 2
+    },
+    "whelpsOnRaid": {
+      "label": "Whelps on the raid",
+      "unit": "s",
+      "penaltyPerSecond": 1,
+      "severe": 8
+    },
+    "fearsTaken": {
+      "label": "Fears taken",
+      "unit": "count",
+      "penaltyPerUnit": 10,
+      "severe": 1
+    },
+    "buffetsOffWall": {
+      "label": "Buffets off the wall",
+      "unit": "count",
+      "penaltyPerUnit": 8,
+      "severe": 1
+    },
+    "threatLostCount": {
+      "label": "Times she turned on the raid",
+      "unit": "count",
+      "penaltyPerUnit": 8,
+      "severe": 1
+    },
+    "deaths": {
+      "label": "Deaths",
+      "unit": "count",
+      "penaltyPerUnit": 25,
+      "severe": 1
+    },
+    "pickupTime": {
+      "label": "Time to pick up after landing",
+      "unit": "s",
+      "info": true
+    }
+  },
+  "grading": {
+    "expectationWeights": {
+      "ontime": 1,
+      "late": 0.5,
+      "missed": 0
+    },
+    "expectationPoints": 50,
+    "metricPoints": 30,
+    "grades": [
+      {
+        "min": 95,
+        "grade": "S"
+      },
+      {
+        "min": 85,
+        "grade": "A"
+      },
+      {
+        "min": 72,
+        "grade": "B"
+      },
+      {
+        "min": 58,
+        "grade": "C"
+      },
+      {
+        "min": 40,
+        "grade": "D"
+      },
+      {
+        "min": 0,
+        "grade": "F"
+      }
+    ],
+    "rotationPoints": 20,
+    "beatWeights": {
+      "perfect": 1,
+      "good": 0.6,
+      "missed": 0
+    }
+  },
+  "drills": [
+    {
+      "id": "pullBuffet",
+      "name": "Pull and Wing Buffet",
+      "description": "Pull from the ramp to the wall, then hold position through three Wing Buffets and rebuild threat after each.",
+      "startPhase": 1,
+      "duration": 75,
+      "loop": true,
+      "start": "entrance",
+      "actions": [
+        {
+          "id": "cleave",
+          "first": 5,
+          "every": 7,
+          "jitter": 1
+        },
+        {
+          "id": "wingBuffet",
+          "first": 25,
+          "every": 18,
+          "jitter": 1
+        },
+        {
+          "id": "flameBreath",
+          "first": 15,
+          "every": 22,
+          "jitter": 1
+        },
+        {
+          "id": "tailSweep",
+          "first": 3,
+          "every": 2,
+          "jitter": 0
+        }
+      ]
+    },
+    {
+      "id": "rotation",
+      "name": "Rotation and cooldowns",
+      "description": "Already at the wall. Keep Sunder rolling on every global, Shield Block each Flame Breath and Berserker Rage each Roar. Chase a perfect combo.",
+      "startPhase": 1,
+      "duration": 60,
+      "loop": true,
+      "start": "wall",
+      "actions": [
+        {
+          "id": "flameBreath",
+          "first": 8,
+          "every": 14,
+          "jitter": 1
+        },
+        {
+          "id": "bellowingRoar",
+          "first": 12,
+          "every": 31,
+          "jitter": 0.5
+        },
+        {
+          "id": "cleave",
+          "first": 5,
+          "every": 7,
+          "jitter": 1
+        },
+        {
+          "id": "tailSweep",
+          "first": 3,
+          "every": 2,
+          "jitter": 0
+        }
+      ]
+    },
+    {
+      "id": "roar",
+      "name": "Bellowing Roar immunity",
+      "description": "Already at the wall in Phase 3. Pre-empt four Roars with your fear immunity and keep her facing the wall.",
+      "startPhase": 3,
+      "duration": 105,
+      "loop": true,
+      "start": "wall",
+      "actions": [
+        {
+          "id": "cleave",
+          "first": 4,
+          "every": 7,
+          "jitter": 1
+        },
+        {
+          "id": "bellowingRoar",
+          "first": 8,
+          "every": 31,
+          "jitter": 0.5
+        },
+        {
+          "id": "tailSweep",
+          "first": 3,
+          "every": 2,
+          "jitter": 0
+        }
+      ]
+    },
+    {
+      "id": "pickup",
+      "name": "Phase 3 pickup",
+      "description": "She lands in five seconds. Taunt, pick her up, and drag her to the wall between the cracks.",
+      "startPhase": 2,
+      "startOffset": -5,
+      "duration": 45,
+      "loop": true,
+      "start": "pickup",
+      "actions": [
+        {
+          "id": "cleave",
+          "first": 4,
+          "every": 7,
+          "jitter": 1
+        },
+        {
+          "id": "eruption",
+          "first": 6,
+          "every": 9,
+          "jitter": 1
+        },
+        {
+          "id": "tailSweep",
+          "first": 3,
+          "every": 2,
+          "jitter": 0
+        }
+      ]
+    }
+  ],
+  "tutorial": {
+    "steps": [
+      {
+        "id": "welcome",
+        "title": "Onyxia's Lair",
+        "text": "This is Onyxia's Lair. You came down the ramp from the south. The raid will gather in the centre. The back wall is where you will tank her.\n\nPress Tab to switch between the top-down map and the over-the-shoulder view.",
+        "setup": {
+          "bossPassive": true,
+          "phase": 1,
+          "start": "entrance"
+        },
+        "done": {
+          "type": "viewToggledOrWait",
+          "seconds": 8
+        }
+      },
+      {
+        "id": "move",
+        "title": "Move to the tank spot",
+        "text": "Move with W A S D. Q and E strafe. Hold the right mouse button to turn with the mouse.\n\nFollow the glowing path and the ghost tank to the tank spot on the back wall.",
+        "setup": {
+          "ghost": true
+        },
+        "done": {
+          "type": "playerAtSpot",
+          "spot": "tankSpot"
+        }
+      },
+      {
+        "id": "pull",
+        "title": "Pull and position",
+        "text": "Onyxia faces whoever she is attacking. Walk to her, press Taunt (1), then walk back to the wall. She will follow you and face the wall, away from the raid.\n\nDotted outlines show where she should stand and face.",
+        "setup": {
+          "bossPassive": false,
+          "ghost": true
+        },
+        "done": {
+          "type": "bossAtSpot",
+          "spot": "bossSpot",
+          "hold": 3
+        }
+      },
+      {
+        "id": "rotation",
+        "title": "Sunder Armor and the press lane",
+        "text": "Threat comes from Sunder Armor. Notes fall down the lane above your bar: press the key when a note reaches its icon. Sunder (2) comes every global; her debuff tray shows the stacks.\n\nShield Block (3) notes appear before Flame Breath, Berserker Rage (5) before Bellowing Roar, Taunt (1) when she turns. Perfect presses build a combo.\n\nBuild five Sunder stacks now.",
+        "done": {
+          "type": "debuffStacks",
+          "debuff": "sunder",
+          "stacks": 5
+        }
+      },
+      {
+        "id": "breath",
+        "title": "Flame Breath",
+        "text": "Flame Breath is a three second cast that hits a cone in front of her. You take it. The raid must not.\n\nHold your position, watch the cast bar, and press Shield Block (3) when its note reaches the icon.",
+        "trigger": "flameBreath",
+        "done": {
+          "type": "eventLanded",
+          "event": "flameBreath",
+          "metricUnchanged": "raidInBreath"
+        }
+      },
+      {
+        "id": "buffet",
+        "title": "Wing Buffet",
+        "text": "Wing Buffet knocks you back and cuts your threat. With the wall behind you the knockback goes nowhere.\n\nAfter it lands, keep hitting Sunder (2) on every note until your threat bar leaves the danger band, and Taunt if she turns.",
+        "trigger": "wingBuffet",
+        "done": {
+          "type": "expectation",
+          "id": "rebuild"
+        }
+      },
+      {
+        "id": "takeoff",
+        "title": "Phase 2: airborne",
+        "text": "At 65% she takes off. Fireballs hit random raid members. Move to the pickup spot north of the centre and wait.",
+        "setup": {
+          "phase": 2,
+          "ghost": true
+        },
+        "done": {
+          "type": "playerAtSpot",
+          "spot": "pickupSpot"
+        }
+      },
+      {
+        "id": "lane",
+        "title": "Deep Breath",
+        "text": "Deep Breath has a five second warning, then fire fills a lane across the room. Step sideways out of the lane, then return to the pickup spot.",
+        "trigger": "deepBreath",
+        "done": {
+          "type": "expectation",
+          "id": "lane"
+        }
+      },
+      {
+        "id": "landing",
+        "title": "Phase 3: the landing",
+        "text": "At 40% she lands in the centre with her threat reset. Taunt her within five seconds, Sunder twice, then walk backwards to the wall between the cracks.",
+        "setup": {
+          "phase": 3,
+          "ghost": true
+        },
+        "done": {
+          "type": "bossAtSpot",
+          "spot": "bossSpot",
+          "hold": 2
+        }
+      },
+      {
+        "id": "roar",
+        "title": "Bellowing Roar",
+        "text": "Bellowing Roar fears the whole raid. If you are feared she walks through the raid. Press Berserker Rage (5) when its note reaches the icon, before the cast finishes.",
+        "trigger": "bellowingRoar",
+        "done": {
+          "type": "expectation",
+          "id": "roar"
+        }
+      },
+      {
+        "id": "done",
+        "title": "You are ready",
+        "text": "That is the whole fight. Try a drill to repeat one mechanic, or run the full fight and look at your scorecard.",
+        "done": {
+          "type": "wait",
+          "seconds": 6
+        }
+      }
+    ]
+  },
+  "rotation": {
+    "notes": "Press cues shown in the lane above the ability bar. Windows are seconds around the ideal press time. The filler beat repeats on every global while she is grounded and in range.",
+    "windows": {
+      "perfect": 0.3
+    },
+    "filler": {
+      "id": "sunder",
+      "ability": "sunder",
+      "label": "Sunder Armor on every global",
+      "short": "",
+      "late": 1.0,
+      "missRespawn": 1.0,
+      "tip": "Threat is Sunder Armor. Hit it the moment the global cooldown ends, every time, and keep five stacks on her."
+    },
+    "cues": [
+      {
+        "id": "blockBreath",
+        "ability": "shieldBlock",
+        "on": "cast",
+        "action": "flameBreath",
+        "offset": 0.5,
+        "early": 1.0,
+        "late": 2.0,
+        "label": "Shield Block for Flame Breath",
+        "short": "BREATH",
+        "tip": "Press Shield Block as the Flame Breath cast bar appears so it is up when the breath lands."
+      },
+      {
+        "id": "rageRoar",
+        "ability": "fearImmune",
+        "on": "cast",
+        "action": "bellowingRoar",
+        "offset": 0,
+        "early": 2.5,
+        "late": 1.2,
+        "label": "Berserker Rage before Bellowing Roar",
+        "short": "ROAR",
+        "tip": "Berserker Rage must be active before the Roar cast finishes, or you are feared and she walks through the raid."
+      },
+      {
+        "id": "tauntLost",
+        "ability": "taunt",
+        "on": "event",
+        "event": "threatLost",
+        "offset": 0,
+        "early": 0,
+        "late": 3.0,
+        "label": "Taunt when she turns on the raid",
+        "short": "ON RAID",
+        "tip": "The moment she turns, Taunt. Every second she faces the raid is a Flame Breath waiting to happen."
+      },
+      {
+        "id": "tauntLanding",
+        "ability": "taunt",
+        "on": "event",
+        "event": "landing",
+        "offset": 1.0,
+        "early": 1.0,
+        "late": 4.0,
+        "role": "mt",
+        "label": "Taunt as she lands",
+        "short": "LANDED",
+        "tip": "Her threat table is empty when she lands. Taunt inside the first seconds, then Sunder."
+      },
+      {
+        "id": "wallLow",
+        "ability": "defensive",
+        "on": "hpBelow",
+        "hp": 0.35,
+        "early": 0,
+        "late": 3.0,
+        "label": "Shield Wall when your health is low",
+        "short": "LOW HP",
+        "tip": "Under a third health with a Breath coming is where tanks die. Shield Wall early rather than late."
+      },
+      {
+        "id": "tauntWhelps",
+        "ability": "taunt",
+        "on": "event",
+        "event": "whelpWave",
+        "offset": 3.0,
+        "early": 2.0,
+        "late": 6.0,
+        "role": "offtank",
+        "label": "Pick up the whelps",
+        "short": "WHELPS",
+        "tip": "Meet the whelps at the cave mouths and Taunt or Sunder them before they reach the raid.",
+        "doneBy": "whelpPickup"
+      }
+    ]
+  }
+}

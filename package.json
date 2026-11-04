@@ -1,0 +1,11 @@
+{
+  "name": "onyxia-tank-sim",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Standalone tank rehearsal simulator for the WoW Classic Onyxia encounter",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "serve": "python3 -m http.server 8080"
+  }
+}

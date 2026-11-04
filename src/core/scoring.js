@@ -1,0 +1,173 @@
+// Scoring: expectation instances (on time / late / missed) and the end-of-run
+// grade. Pure data in, pure data out.
+
+import { tallyBeats, bestComboOf } from './rotation.js';
+
+let uid = 0;
+
+/**
+ * Create a pending expectation instance from a script definition.
+ *  - `deadline`: time by which the check must pass for "on time" (null for onEvent)
+ *  - `graceEnd`: time after which it is "missed"
+ */
+export function createInstance(def, phase, t, { deadline = null, graceEnd = null, event = null } = {}) {
+  return {
+    uid: ++uid,
+    id: def.id,
+    type: def.type,
+    label: def.label,
+    tip: def.tip || '',
+    phase,
+    createdAt: t,
+    deadline,
+    graceEnd,
+    event,
+    status: 'pending',
+    resolvedAt: null,
+    lateBy: 0,
+  };
+}
+
+export function resolve(inst, status, t) {
+  inst.status = status;
+  inst.resolvedAt = t;
+  if (status === 'late') inst.lateBy = Math.max(0, t - (inst.deadline ?? inst.createdAt));
+  return inst;
+}
+
+/**
+ * Compute the score for a finished (or in-progress) run.
+ * @param {object} script  the encounter script
+ * @param {Array}  log     expectation instances (all phases)
+ * @param {object} phaseMetrics  { [phaseId]: { metricId: number } }
+ * @param {Array<number>} phasesPlayed ids of phases that ran
+ * @param {object} metricDefs script.continuousMetrics
+ * @param {string} role 'mt' | 'offtank'
+ * @param {Array}  rotationLog resolved press-cue beats (state.rotation.log)
+ */
+export function computeScore(script, log, phaseMetrics, phasesPlayed, role = 'mt', rotationLog = []) {
+  const g = script.grading;
+  const rotPts = g.rotationPoints || 0;
+  const bw = g.beatWeights || { perfect: 1, good: 0.6, missed: 0 };
+  const metricDefs = script.continuousMetrics;
+  const phases = [];
+  for (const pid of phasesPlayed) {
+    const phaseDef = script.phases.find((p) => p.id === pid);
+    const insts = log.filter((i) => i.phase === pid && i.status !== 'pending');
+    let expScore = 1;
+    if (insts.length) {
+      let sum = 0;
+      for (const i of insts) sum += g.expectationWeights[i.status] ?? 0;
+      expScore = sum / insts.length;
+    }
+    const metrics = phaseMetrics[pid] || {};
+    let penalty = 0;
+    const metricRows = [];
+    const relevant = relevantMetricIds(phaseDef, metricDefs, role);
+    for (const mid of relevant) {
+      const def = metricDefs[mid];
+      const v = metrics[mid] || 0;
+      let p = 0;
+      if (!def.info) {
+        if (def.unit === 's') p = v * (def.penaltyPerSecond || 0);
+        else p = v * (def.penaltyPerUnit || 0);
+      }
+      penalty += p;
+      metricRows.push({ id: mid, label: def.label, unit: def.unit, value: v, penalty: p, severe: !def.info && def.severe != null && v >= def.severe, info: !!def.info });
+    }
+    const expPoints = expScore * g.expectationPoints;
+    const metricPoints = Math.max(0, g.metricPoints - penalty);
+    const beats = tallyBeats(rotationLog, pid);
+    const rotScore = beats.total ? (beats.perfect * (bw.perfect ?? 1) + beats.good * (bw.good ?? 0.6) + beats.missed * (bw.missed ?? 0)) / beats.total : 1;
+    const total = Math.round(expPoints + metricPoints + rotScore * rotPts);
+    phases.push({
+      id: pid,
+      name: phaseDef ? phaseDef.name : `Phase ${pid}`,
+      subtitle: phaseDef ? phaseDef.subtitle : '',
+      total,
+      grade: gradeFor(total, g.grades),
+      expectations: insts,
+      counts: countStatuses(insts),
+      metrics: metricRows,
+      rotation: { ...beats, score: rotScore, points: Math.round(rotScore * rotPts) },
+    });
+  }
+  const overall = phases.length ? Math.round(phases.reduce((s, p) => s + p.total, 0) / phases.length) : 0;
+  return {
+    overall,
+    grade: gradeFor(overall, g.grades),
+    phases,
+    rotation: { ...tallyBeats(rotationLog), bestCombo: bestComboOf(rotationLog) },
+    fixes: topFixes(script, log, phases, rotationLog),
+  };
+}
+
+export function gradeFor(score, grades) {
+  for (const g of grades) if (score >= g.min) return g.grade;
+  return grades[grades.length - 1].grade;
+}
+
+export function countStatuses(insts) {
+  const c = { ontime: 0, late: 0, missed: 0 };
+  for (const i of insts) if (c[i.status] != null) c[i.status]++;
+  return c;
+}
+
+/** Metrics worth showing for a phase: those named by its expectations plus universal ones. */
+function relevantMetricIds(phaseDef, metricDefs, role) {
+  const ids = new Set(['deaths', 'threatLostCount']);
+  if (!phaseDef) return [...ids];
+  const grounded = phaseDef.bossState === 'grounded';
+  if (grounded) ['bossFacingRaid', 'raidBreathHits', 'raidCleaveHits', 'raidTailHits', 'playerInTail', 'buffetsOffWall'].forEach((m) => ids.add(m));
+  for (const e of phaseDef.expectations) {
+    if (e.role && e.role !== role) continue;
+    if (e.metric) ids.add(e.metric);
+  }
+  if (phaseDef.id === 2) ids.add('playerInLane');
+  if (phaseDef.id === 3) { ids.add('fearsTaken'); ids.add('playerInCrack'); ids.add('pickupTime'); }
+  if (role === 'offtank' && phaseDef.id === 2) ids.add('whelpsOnRaid');
+  return [...ids].filter((m) => metricDefs[m]);
+}
+
+/**
+ * The three most important things to fix, ranked by lost points.
+ * Expectation misses and severe metrics compete on the same scale.
+ */
+export function topFixes(script, log, phases, rotationLog = []) {
+  const items = new Map();
+  const bump = (key, item, weight) => {
+    const cur = items.get(key);
+    if (cur) { cur.weight += weight; cur.count++; }
+    else items.set(key, { ...item, weight, count: 1 });
+  };
+  for (const i of log) {
+    if (i.status === 'missed') bump(`e:${i.id}`, { title: i.label, tip: i.tip, kind: 'missed' }, 10);
+    else if (i.status === 'late') bump(`e:${i.id}`, { title: i.label, tip: i.tip, kind: 'late' }, 4 + Math.min(6, i.lateBy));
+  }
+  // Metric tips come from the expectation that names the metric, or a generic line.
+  const metricTip = {};
+  for (const p of script.phases) for (const e of p.expectations) if (e.metric) metricTip[e.metric] = { title: e.label, tip: e.tip };
+  for (const p of phases) {
+    for (const m of p.metrics) {
+      if (!m.severe || m.penalty <= 0) continue;
+      const t = metricTip[m.id] || { title: m.label, tip: '' };
+      bump(`m:${m.id}`, { title: t.title, tip: t.tip, kind: 'metric', detail: `${formatMetric(m)} in ${p.name}` }, m.penalty);
+    }
+  }
+  // Missed press cues, grouped by cue. A missed cooldown outweighs a dropped filler global.
+  const missedBeats = {};
+  for (const b of rotationLog) if (b.status === 'missed') { const m = missedBeats[b.cue] || (missedBeats[b.cue] = { beat: b, n: 0 }); m.n++; }
+  for (const { beat, n } of Object.values(missedBeats)) {
+    bump(`r:${beat.cue}`, { title: beat.label, tip: beat.tip, kind: 'rotation', detail: `${n} missed` }, n * (beat.filler ? 1.5 : 6));
+    items.get(`r:${beat.cue}`).count = n;
+  }
+  return [...items.values()]
+    .sort((a, b) => b.weight - a.weight)
+    .slice(0, 3)
+    .map((f) => ({ title: f.title, tip: f.tip, kind: f.kind, count: f.count, detail: f.detail || (f.count > 1 ? `${f.count} times` : '') }));
+}
+
+export function formatMetric(m) {
+  if (m.unit === 's') return `${m.value.toFixed(1)}s`;
+  return `${Math.round(m.value)}`;
+}
