@@ -233,7 +233,7 @@ Renders a DOM panel (title, text, step n/N, "Skip step", "Exit") and advances wi
 
 ## UI (src/ui)
 
-- `overlay.js`: `createOverlay(root)` → `{ show(screenId, props), hide(), current, el }`, screens registered by the modules below.
+- `overlay.js`: `createOverlay(root)` → `{ show(screenId, props), hide(), current, el, toast() }`, screens registered by the modules below. `show` wraps the screen's returned `.panel` in a full-window `.screen` backdrop (`data-screen=id`) that centres it and returns the panel; a screen renderer must never add `.screen` itself.
 - `menu.js`: main menu (Tutorial / Drills (list) / Full fight / Settings / History), keyboard navigable.
 - `settings.js`: all settings above + keybind rebinding with conflict warnings + per-cue volume with preview + "Reset history" + "Reset everything".
 - `scorecard.js`: end screen: grade, overall, per-phase cards (expectations list with on time / late +Xs / missed, metrics with severe flagged), top three fixes, buttons: Replay, Again, Menu. Saves the run to history.

@@ -16,6 +16,8 @@ exactly what to fix.
 * Pure simulation core with unit tests, kept free of DOM, Canvas and audio so
   it can later be ported to Lua for an in-game addon.
 
+**Play it now:** https://onyxia-tank-sim.vercel.app · Source: https://github.com/jake-owen-p/onyxia-tank-sim
+
 ## Quick start
 
 Serve the folder with any static file server and open it in a modern browser:
@@ -26,6 +28,10 @@ npm run serve          # python3 -m http.server 8080
 ```
 
 or `npx serve .`, or drop the folder on any static host.
+
+The public build is hosted on Vercel as a plain static site (no build step;
+`vercel.json` only sets response headers). Pushing to `main` on GitHub
+redeploys it, and `vercel deploy --prod` from the folder does the same by hand.
 
 Opening `index.html` straight from `file://` works in Firefox and Safari. Chrome
 blocks `fetch()` of the encounter JSON from `file://`, so Chrome users need a
