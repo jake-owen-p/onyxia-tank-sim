@@ -1,6 +1,6 @@
-// Entity updates: player, boss, ghost raid and whelps. Each function mutates
-// `state.world` for one fixed timestep and returns nothing (or a small flag
-// object the sim turns into events). No DOM, no rendering concerns.
+// Entity updates: player, boss, ghost raid, ghost tank and adds. Each function
+// mutates `state.world` for one fixed timestep and returns nothing (or a small
+// flag object the sim turns into events). No DOM, no rendering concerns.
 
 import {
   rad, dist, angleTo, turnToward, moveWithCollision, onFloor, offsetPoint, clamp, lerp, normAngle,
@@ -101,7 +101,7 @@ export function createBoss(script, pos) {
   return {
     x: pos.x, y: pos.y, z: 0, heading: rad(pos.heading ?? 270),
     state: 'grounded',            // grounded | takeoff | airborne | landing
-    target: null,                 // 'player' | 'raid' | null
+    target: null,                 // 'player' | 'raid' | 'ghost' | null
     engaged: false, passive: false,
     cast: null,                   // { id, label, start, end }
     hover: null,                  // { x, y } flight destination while airborne
@@ -113,6 +113,14 @@ export function createBoss(script, pos) {
   };
 }
 
+/** The point the boss is attacking: the player, the ghost tank or the raid anchor. */
+export function bossTargetPos(state) {
+  const w = state.world, b = w.boss;
+  if (b.target === 'raid') return w.raid.anchor;
+  if (b.target === 'ghost') return w.ghost;
+  return w.player;
+}
+
 /** Advance boss movement/flight. Returns { landed: true } the tick she touches down. */
 export function updateBoss(state, script, dt) {
   const b = state.world.boss;
@@ -122,13 +130,13 @@ export function updateBoss(state, script, dt) {
 
   if (b.state === 'grounded') {
     if (!b.engaged || b.passive || b.cast) return flags;
-    const tgt = b.target === 'raid' ? w.raid.anchor : w.player;
+    const tgt = bossTargetPos(state);
     const d = dist(b.x, b.y, tgt.x, tgt.y);
     const want = angleTo(b.x, b.y, tgt.x, tgt.y);
     b.heading = turnToward(b.heading, want, rad(cfg.turnRate) * dt);
     // She settles for a moment after landing (turns, but does not walk) so the tank has a window.
     const settling = b.landedAt != null && state.t - b.landedAt < (cfg.settleAfterLanding || 0);
-    if (d > cfg.meleeRange && !settling) {
+    if (d > cfg.meleeRange && !settling && !cfg.stationary) {
       const step = Math.min(cfg.speed * dt, d - cfg.meleeRange);
       const nx = b.x + Math.cos(want) * step, ny = b.y + Math.sin(want) * step;
       if (onFloor(nx, ny, script.arena.floor)) { b.x = nx; b.y = ny; }
@@ -257,32 +265,82 @@ export function updateRaid(state, script, dt) {
   }
 }
 
-// ---------------------------------------------------------------- whelps
+// ------------------------------------------------------------ ghost tank
 
-let whelpUid = 0;
+/**
+ * The ghost tank. In the tank roles it is a translucent guide that walks the
+ * correct route ahead of the player. In every other role it is the raid's
+ * actual tank: it holds the boss, takes her hits and has a health pool the
+ * healer keeps up.
+ */
+export function createGhost(script, pos) {
+  const hp = (script.ghostTank && script.ghostTank.hp) || script.player.hp;
+  return { x: pos.x, y: pos.y, heading: rad(pos.heading ?? 90), moving: false, backpedal: false, hp, maxHp: hp, tanking: false };
+}
 
-/** Spawn one wave from both caves. In MT role a ghost off-tank takes them. */
-export function spawnWhelps(state, script, actionDef) {
+/**
+ * Move the ghost toward `ideal` at its own pace. It faces the boss when
+ * standing or dragging, and its travel direction while walking to a spot
+ * before the pull.
+ */
+export function updateGhost(state, script, dt, ideal) {
+  const g = state.world.ghost;
+  const b = state.world.boss;
+  const cfg = script.ghostTank;
+  const d = dist(g.x, g.y, ideal.x, ideal.y);
+  let faceTarget;
+  const holding = b.state === 'grounded' && b.engaged && (b.target === 'ghost' || (b.target === 'player' && !g.tanking));
+  if (d > 0.3) {
+    const a = angleTo(g.x, g.y, ideal.x, ideal.y);
+    const step = Math.min(cfg.speed * dt, d);
+    const r = moveWithCollision(g.x, g.y, Math.cos(a) * step, Math.sin(a) * step, script.arena.floor);
+    g.x = r.x; g.y = r.y;
+    g.moving = true;
+    g.backpedal = holding;
+    faceTarget = holding ? angleTo(g.x, g.y, b.x, b.y) : a;
+  } else {
+    g.moving = false; g.backpedal = false;
+    if (b.state === 'grounded') faceTarget = angleTo(g.x, g.y, b.x, b.y);
+    else { const l = script.positions.landSpot || b; faceTarget = angleTo(g.x, g.y, l.x, l.y); }
+  }
+  g.heading = turnToward(g.heading, normAngle(faceTarget), rad(cfg.turnRate) * dt);
+  if (g.tanking) {
+    const heal = state.role === 'healer' ? (cfg.healPerSecondWithPlayerHealer ?? cfg.healPerSecond ?? 0) : (cfg.healPerSecond ?? script.player.healPerSecond);
+    g.hp = Math.min(g.maxHp, g.hp + heal * dt);
+  }
+}
+
+// ---------------------------------------------------------------- adds
+
+let addUid = 0;
+
+/**
+ * Spawn one wave of adds from the named spots. `pickup` says which role takes
+ * them: the player when their role matches, otherwise the ghost off-tank.
+ */
+export function spawnAdds(state, script, actionDef) {
   const rng = state.rng;
-  const caves = [script.positions.caveWest, script.positions.caveEast];
-  const offtank = state.role === 'offtank';
-  for (const c of caves) {
-    for (let i = 0; i < actionDef.perCave; i++) {
+  const spots = (actionDef.from || []).map((name) => script.positions[name]).filter(Boolean);
+  const playerPicks = state.role === (actionDef.pickup || 'offtank');
+  for (const c of spots) {
+    for (let i = 0; i < (actionDef.count || actionDef.perCave || 1); i++) {
       state.world.whelps.push({
-        uid: ++whelpUid,
+        uid: ++addUid,
         x: c.x + rng.range(-3, 3), y: c.y + rng.range(-3, 3),
         heading: 0,
-        target: offtank ? 'raid' : 'ghost',
-        speed: actionDef.speed,
+        target: playerPicks ? 'raid' : 'ghost',
+        speed: actionDef.speed || 6,
         spawnedAt: state.t,
-        diesAt: state.t + (offtank ? 70 : actionDef.lifetime),
+        lifetime: actionDef.lifetime || 28,
+        diesAt: state.t + (playerPicks ? (actionDef.heldLifetime || 70) : (actionDef.lifetime || 28)),
+        holdSpot: actionDef.holdSpot || 'ghostOfftankSpot',
         onRaid: false,
       });
     }
   }
 }
 
-/** Move whelps toward their targets. Returns { onRaid: boolean } for metrics. */
+/** Move adds toward their targets. Returns { onRaid: boolean } for metrics. */
 export function updateWhelps(state, script, dt) {
   const w = state.world;
   const ws = w.whelps;
@@ -292,7 +350,7 @@ export function updateWhelps(state, script, dt) {
     if (state.t >= wh.diesAt) { ws.splice(i, 1); continue; }
     let tx, ty, stop;
     if (wh.target === 'player') { tx = w.player.x; ty = w.player.y; stop = 2.5 + (wh.uid % 3) * 0.6; }
-    else if (wh.target === 'ghost') { const g = script.positions.ghostOfftankSpot; tx = g.x + (wh.uid % 5) - 2; ty = g.y + (wh.uid % 3) - 1; stop = 1; }
+    else if (wh.target === 'ghost') { const g = script.positions[wh.holdSpot] || w.ghost; tx = g.x + (wh.uid % 5) - 2; ty = g.y + (wh.uid % 3) - 1; stop = 1; }
     else {
       // head for the nearest raid dot
       let best = null, bd = Infinity;
@@ -314,14 +372,14 @@ export function updateWhelps(state, script, dt) {
   return { onRaid };
 }
 
-/** Off-tank pickup by proximity. Returns number of whelps newly picked. */
+/** Loose adds within `range` of the player switch to the player and die on their normal timer. Returns how many did. */
 export function pickupWhelps(state, script, range) {
   const p = state.world.player;
   let n = 0;
   for (const wh of state.world.whelps) {
     if (wh.target === 'raid' && dist(wh.x, wh.y, p.x, p.y) <= range) {
       wh.target = 'player';
-      wh.diesAt = Math.min(wh.diesAt, state.t + script.actions.whelpWave.lifetime);
+      wh.diesAt = Math.min(wh.diesAt, state.t + wh.lifetime);
       n++;
     }
   }

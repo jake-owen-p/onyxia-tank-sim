@@ -1,5 +1,7 @@
-// Boot: load the encounter script, build the shared services (settings,
-// keybinds, input, audio, renderer, overlay) and wire the menus to sessions.
+// Boot: load the encounter index and the chosen encounter script, build the
+// shared services (settings, keybinds, input, audio, renderer, overlay) and
+// wire the menus to sessions. Switching encounter swaps the script, the
+// renderer and the idle backdrop; everything else persists.
 
 import { createSim } from './core/sim.js';
 import { createRenderer } from './render/renderer.js';
@@ -10,44 +12,69 @@ import { loadSettings, saveSettings, loadBinds, saveBinds, loadHistory, saveRun,
 import { createOverlay, h, button } from './ui/overlay.js';
 import { menuScreen, historyScreen, pauseScreen } from './ui/menu.js';
 import { settingsScreen } from './ui/settings.js';
-import { scorecardScreen } from './ui/scorecard.js';
+import { scorecardScreen, roleLabel } from './ui/scorecard.js';
 import { replayScreen } from './ui/replay.js';
 import { createTutorialPanel } from './ui/tutorialPanel.js';
 import { buildScenario } from './app/modes.js';
 import { createSession } from './app/session.js';
 import { createTutorial } from './app/tutorial.js';
 
-const SCRIPT_URL = './data/encounters/onyxia.json';
+const INDEX_URL = './data/encounters/index.json';
+const ENCOUNTER_DIR = './data/encounters/';
 
-async function loadScript() {
-  try {
-    const res = await fetch(SCRIPT_URL);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (err) {
+async function fetchJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+async function loadIndex() {
+  try { return await fetchJson(INDEX_URL); } catch (err) {
     // Chrome blocks fetch on file://. A sibling .js module is an optional escape hatch.
     try {
-      const mod = await import('../data/encounters/onyxia.js');
+      const mod = await import('../data/encounters/index.js');
+      if (mod && (mod.default || mod.index)) return mod.default || mod.index;
+    } catch { /* fall through */ }
+    throw err;
+  }
+}
+
+async function loadScript(file) {
+  try { return await fetchJson(ENCOUNTER_DIR + file); } catch (err) {
+    try {
+      const mod = await import('../data/encounters/' + file.replace(/\.json$/, '.js'));
       if (mod && (mod.default || mod.script)) return mod.default || mod.script;
     } catch { /* fall through */ }
     throw err;
   }
 }
 
-function showLoadError(root, err) {
+function showLoadError(root, err, what) {
   root.appendChild(h('div', { class: 'screen' }, h('div', { class: 'panel' },
-    h('h2', { text: 'Could not load the encounter script' }),
-    h('p', { text: `The browser refused to read ${SCRIPT_URL} (${err.message}). Chrome blocks file:// reads; serve the folder instead:` }),
+    h('h2', { text: `Could not load ${what}` }),
+    h('p', { text: `The browser refused to read it (${err.message}). Chrome blocks file:// reads; serve the folder instead:` }),
     h('pre', { text: 'cd <this folder>\npython3 -m http.server 8080\n# or: npx serve .\nthen open http://localhost:8080' }),
     h('p', { class: 'muted', text: 'Firefox and Safari open index.html directly.' }),
   )));
 }
 
+/** Find a boss entry: the saved one, else the first ready encounter in the index. */
+function pickEncounter(index, encounterId) {
+  const [raidId, bossId] = (encounterId || '').split('/');
+  for (const r of index.raids) {
+    if (r.id !== raidId) continue;
+    const b = r.bosses.find((x) => x.id === bossId && x.status === 'ready');
+    if (b) return { raid: r, boss: b };
+  }
+  for (const r of index.raids) { const b = r.bosses.find((x) => x.status === 'ready'); if (b) return { raid: r, boss: b }; }
+  throw new Error('No ready encounter in the index');
+}
+
 async function boot() {
   const canvas = document.getElementById('stage');
   const uiRoot = document.getElementById('ui');
-  let script;
-  try { script = await loadScript(); } catch (err) { showLoadError(uiRoot, err); return; }
+  let index;
+  try { index = await loadIndex(); } catch (err) { showLoadError(uiRoot, err, 'the encounter list'); return; }
 
   // ---- shared services
   const settings = loadSettings();
@@ -55,7 +82,6 @@ async function boot() {
   keybinds.onChange((b) => saveBinds(b));
   const input = createInput(canvas, keybinds, settings);
   const audio = createAudio(settings);
-  const renderer = createRenderer(canvas, script);
   const overlay = createOverlay(uiRoot);
   const tutorialPanel = createTutorialPanel(uiRoot);
   const persist = () => saveSettings(settings);
@@ -64,14 +90,33 @@ async function boot() {
   window.addEventListener('pointerdown', unlock, { passive: true });
   window.addEventListener('keydown', unlock);
 
+  // ---- the current encounter
+  let script = null, renderer = null, current = { raid: null, boss: null };
+  let idleSim = null;
   let session = null;
   let tutorial = null;
   let lastScenarioParams = null;
   let replayEl = null;
   let idleRaf = 0;
 
+  async function loadEncounter(raidId, bossId) {
+    const pick = pickEncounter(index, raidId && bossId ? `${raidId}/${bossId}` : settings.encounter);
+    const file = pick.raid.id === 'onyxia' && pick.boss.file === 'onyxia.json' ? 'onyxia.json' : `${pick.raid.id}/${pick.boss.file}`;
+    const s = await loadScript(file);
+    s.raidInfo = s.raidInfo || { id: pick.raid.id, name: pick.raid.name, size: pick.raid.size };
+    stopIdle();
+    if (renderer) renderer.destroy();
+    script = s;
+    current = { raid: pick.raid.id, boss: pick.boss.id };
+    settings.encounter = `${pick.raid.id}/${pick.boss.id}`;
+    persist();
+    audio.setScript(script);
+    renderer = createRenderer(canvas, script);
+    renderer.resize();
+    idleSim = createSim(script, { manual: true, freezeHp: true, bossPassive: true, start: 'wall', seed: 3 });
+  }
+
   // ---- idle backdrop: a passive sim rendered behind the menus
-  const idleSim = createSim(script, { manual: true, freezeHp: true, bossPassive: true, start: 'wall', seed: 3 });
   let idleLast = performance.now();
   function idleFrame(now) {
     idleRaf = requestAnimationFrame(idleFrame);
@@ -79,9 +124,9 @@ async function boot() {
     idleLast = now;
     renderer.frame({ view: idleSim.state, settings, now: now / 1000, dtReal, abilityKeys: keybinds.abilityKeys(), overlay: { paused: false, replay: null, dim: true, idle: true } });
   }
-  function startIdle() { if (!idleRaf) { renderer.resize(); renderer.setView('topdown'); idleLast = performance.now(); idleRaf = requestAnimationFrame(idleFrame); } }
+  function startIdle() { if (!idleRaf && renderer) { renderer.resize(); renderer.setView('topdown'); idleLast = performance.now(); idleRaf = requestAnimationFrame(idleFrame); } }
   function stopIdle() { if (idleRaf) { cancelAnimationFrame(idleRaf); idleRaf = 0; } }
-  window.addEventListener('resize', () => renderer.resize());
+  window.addEventListener('resize', () => renderer && renderer.resize());
 
   // ---- screens
   function showMenu() {
@@ -89,8 +134,13 @@ async function boot() {
     tutorialPanel.hide();
     startIdle();
     overlay.show('menu', {
-      script, settings, history: loadHistory(),
+      script, index, current, settings, history: loadHistory(),
       actions: {
+        pick: async (raidId, bossId) => {
+          if (raidId === current.raid && bossId === current.boss) { showMenu(); return; }
+          try { await loadEncounter(raidId, bossId); } catch (err) { overlay.toast(`Could not load that encounter: ${err.message}`, 'bad', 3000); return; }
+          showMenu();
+        },
         tutorial: () => startRun({ mode: 'tutorial' }),
         drill: (id) => startRun({ mode: 'drill', drillId: id }),
         full: () => startRun({ mode: 'full' }),
@@ -177,6 +227,7 @@ async function boot() {
     const prevBest = history.best[scenario.modeKey];
     const run = {
       date: Date.now(), mode: scenario.mode, name: scenario.name, modeKey: scenario.modeKey, role: sim.state.role,
+      roleLabel: roleLabel(script, sim.state.role), boss: script.name, raid: script.raidInfo ? script.raidInfo.name : '',
       overall: score.overall, grade: score.grade,
       phases: score.phases.map((p) => ({ id: p.id, total: p.total, grade: p.grade })),
       fixes: score.fixes.map((f) => f.title),
@@ -222,7 +273,7 @@ async function boot() {
     if (overlay.current && overlay.current !== 'menu') { e.preventDefault(); persist(); endSession(); showMenu(); }
   });
 
-  renderer.resize();
+  try { await loadEncounter(); } catch (err) { showLoadError(uiRoot, err, 'the encounter script'); return; }
   showMenu();
 }
 

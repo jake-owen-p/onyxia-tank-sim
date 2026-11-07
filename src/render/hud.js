@@ -4,8 +4,8 @@
 import { roundRect, drawIcon, drawTick, drawCross } from './shapes.js';
 import { withAlpha, actionColor } from './palette.js';
 
-const ABILITY_ORDER = ['taunt'];
-const SHORT_LABEL = { taunt: 'Taunt' };
+const SHORT_LABEL = { taunt: 'Taunt', attack: 'Attack', heal: 'Heal', dispel: 'Dispel', interrupt: 'Kick' };
+const abilityOrder = (view) => (view.abilities && view.abilities.list && view.abilities.list.length ? view.abilities.list : ['taunt']);
 
 function font(ctx, pal, px, weight = 600, display = false) {
   ctx.font = `${weight} ${Math.round(px)}px ${display ? pal.fontDisplay : pal.font}`;
@@ -73,7 +73,7 @@ export function drawHUD(ctx, view, script, settings, pal, w, h, now, abilityKeys
     drawTimeline(ctx, view, script, settings, pal, u, w, h, timelineY, timelineH, narrow);
     const iconSize = u * 2.7;
     const abilityY = timelineY - u * 0.7 - iconSize;
-    const lay = abilityLayout(u, w, iconSize);
+    const lay = abilityLayout(u, w, iconSize, abilityOrder(view));
     if (settings.cueLane !== false && view.cues) {
       const laneH = u * 5.5;
       const laneY = abilityY - u * 0.3 - laneH;
@@ -86,6 +86,8 @@ export function drawHUD(ctx, view, script, settings, pal, w, h, now, abilityKeys
   }
   drawThreat(ctx, view, script, pal, u, w, threatY, threatH, threatRatioFn, t);
   drawPlayerHp(ctx, view, pal, u, w, threatY - u * 0.35 - u * 0.4, u * 0.4);
+  if (view.tankRole === false && view.world.ghost && view.world.ghost.tanking) drawTankHp(ctx, view, script, pal, u, w, threatY - u * 0.35 - u * 0.4 - u * 0.95, u * 0.6);
+  if (view.debuffs && view.debuffs.length) drawDebuffTray(ctx, view, pal, u, w, h, t);
 
   if (wd.player.fearedUntil > t) drawFeared(ctx, pal, u, w, h, now);
   if (overlay.replay) drawReplayHud(ctx, overlay.replay, pal, u, w, h);
@@ -287,7 +289,8 @@ function drawCorner(ctx, view, settings, pal, u, w, h, overlay) {
   const viewName = (settings.view === 'topdown') ? 'TOP-DOWN' : 'POV';
   let s = `${viewName}  ·  Tab: switch view`;
   if (settings.speed && settings.speed !== 1) s += `  ·  ${Math.round(settings.speed * 100)}% speed`;
-  if (view.role === 'offtank') s += '  ·  OFF-TANK';
+  const roleName = { tank: 'MAIN TANK', offtank: 'OFF-TANK', melee: 'MELEE DPS', ranged: 'RANGED DPS', healer: 'HEALER' }[view.role];
+  if (roleName) s += `  ·  ${roleName}`;
   text(ctx, s, w - u, u * 1.2, 'right');
 }
 
@@ -299,7 +302,9 @@ function drawThreat(ctx, view, script, pal, u, w, y, bh, threatRatioFn, t) {
   const th = view.threat;
   const ratio = threatRatioFn ? threatRatioFn(th) : (th.player > 0 ? Math.min(1, th.raid / th.player) : th.raid > 0 ? 1 : 0);
   const band = script.threat.dangerBand ?? 0.8;
-  const onRaid = view.world.boss.target === 'raid' && view.world.boss.engaged && view.world.boss.state === 'grounded';
+  const b = view.world.boss;
+  const tankIsPlayer = view.tankRole !== false;
+  const onRaid = tankIsPlayer ? b.target === 'raid' && b.engaged && b.state === 'grounded' : b.target === 'player' && b.engaged && b.state === 'grounded';
   const danger = ratio >= band || onRaid;
   roundRect(ctx, x, y, bw, bh, bh / 2);
   ctx.fillStyle = pal.hpBg; ctx.fill();
@@ -316,7 +321,9 @@ function drawThreat(ctx, view, script, pal, u, w, y, bh, threatRatioFn, t) {
   roundRect(ctx, x, y, bw, bh, bh / 2); ctx.stroke();
   font(ctx, pal, u * 0.62, 700);
   ctx.fillStyle = pal.text;
-  const label = onRaid ? "SHE'S ON THE RAID  ·  TAUNT" : th.tauntUntil > t ? 'THREAT  ·  TAUNTED' : `THREAT  ·  RAID AT ${Math.round(ratio * 100)}%`;
+  const label = tankIsPlayer
+    ? (onRaid ? "SHE'S ON THE RAID  ·  TAUNT" : th.tauntUntil > t ? 'THREAT  ·  TAUNTED' : `THREAT  ·  RAID AT ${Math.round(ratio * 100)}%`)
+    : (onRaid ? "SHE'S ON YOU  ·  STOP" : b.target === 'raid' && b.engaged && b.state === 'grounded' ? 'SHE IS LOOSE  ·  HOLD' : th.ghostTauntUntil > t ? 'TANK TAUNTED  ·  HOLD' : `YOUR THREAT  ·  ${Math.round(ratio * 100)}% OF THE TANK`);
   text(ctx, label, x + bw / 2, y + bh / 2, 'center');
 }
 
@@ -327,23 +334,62 @@ function drawPlayerHp(ctx, view, pal, u, w, y, bh) {
   bar(ctx, x, y, bw, bh, p.hp / p.maxHp, pal.playerHp, pal.hpBg, bh / 2);
 }
 
+/** The ghost tank's health, for the roles that depend on it (the healer most of all). */
+function drawTankHp(ctx, view, script, pal, u, w, y, bh) {
+  const g = view.world.ghost;
+  const bw = Math.min(u * 24, w * 0.6);
+  const x = w / 2 - bw / 2;
+  const frac = g.hp / g.maxHp;
+  const low = frac < ((script.ghostTank && script.ghostTank.lowHp) ?? 0.5);
+  bar(ctx, x, y, bw, bh, frac, low ? pal.bad : pal.ok, pal.hpBg, bh / 2);
+  font(ctx, pal, u * 0.55, 700);
+  ctx.fillStyle = pal.text;
+  text(ctx, `TANK  ${Math.round(frac * 100)}%${low ? '  ·  HEAL' : ''}`, x + bw / 2, y + bh / 2, 'center');
+}
+
+/** Outstanding debuffs on you, the tank or the raid: what a healer must dispel. */
+function drawDebuffTray(ctx, view, pal, u, w, h, t) {
+  const x = u, y = u + u * 4.3 + u * 0.4;
+  const pw = Math.min(u * 15, w * 0.42);
+  const rows = view.debuffs.slice(0, 4);
+  const ph = u * 1.1 + rows.length * u * 1.05;
+  panel(ctx, pal, x, y, pw, ph, u * 0.5, u);
+  font(ctx, pal, u * 0.42, 700);
+  ctx.fillStyle = pal.textMuted;
+  text(ctx, 'DEBUFFS', x + u * 0.8, y + u * 0.5, 'left');
+  rows.forEach((d, i) => {
+    const ry = y + u * 1.25 + i * u * 1.05;
+    const dispellable = d.dispel && d.dispel !== 'none';
+    ctx.fillStyle = dispellable ? pal.warn : pal.textDim;
+    ctx.beginPath(); ctx.arc(x + u * 1.05, ry, u * 0.22, 0, Math.PI * 2); ctx.fill();
+    font(ctx, pal, u * 0.62, 600);
+    ctx.fillStyle = pal.text;
+    const who = d.on === 'player' ? 'you' : d.on === 'ghost' ? 'tank' : 'raid';
+    text(ctx, fit(ctx, `${d.name} on ${who}`, pw - u * 4.2), x + u * 1.5, ry, 'left');
+    font(ctx, pal, u * 0.5, 600);
+    ctx.fillStyle = pal.textDim;
+    text(ctx, `${Math.max(0, Math.ceil(d.until - t))}s`, x + pw - u * 0.8, ry, 'right');
+  });
+}
+
 // ------------------------------------------------------------------ abilities
 
 /** Column positions of the ability row; the press-cue lane uses the same columns. */
-function abilityLayout(u, w, size) {
+function abilityLayout(u, w, size, order) {
   const gap = u * 0.45;
-  const n = ABILITY_ORDER.length;
+  const n = order.length;
   const total = n * size + (n - 1) * gap;
   const x0 = w / 2 - total / 2;
-  return { size, gap, xs: ABILITY_ORDER.map((_, i) => x0 + i * (size + gap)), x0, x1: x0 + total };
+  return { size, gap, order, xs: order.map((_, i) => x0 + i * (size + gap)), x0, x1: x0 + total };
 }
 
 function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
   const { size, gap } = lay;
   const A = view.abilities;
   const hit = view.cues && view.cues.lastHit;
-  for (let i = 0; i < ABILITY_ORDER.length; i++) {
-    const id = ABILITY_ORDER[i];
+  const order = lay.order;
+  for (let i = 0; i < order.length; i++) {
+    const id = order[i];
     const x = lay.xs[i];
     const def = script.playerAbilities[id];
     if (!def) continue;
@@ -351,6 +397,7 @@ function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
     const cdLeft = Math.max(0, readyAt - t);
     const onGcd = def.gcd && A.gcdUntil > t;
     const active = id === 'taunt' && view.threat && view.threat.tauntUntil > t;   // she is held on you
+    const hold = id === 'attack' && view.feedback && view.feedback.holdAttack;      // one more hit pulls her
     roundRect(ctx, x, y, size, size, u * 0.35);
     ctx.fillStyle = pal.iconBg; ctx.fill();
     const onCd = cdLeft > 0 && def.cooldown > 0;
@@ -398,6 +445,17 @@ function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
       const frac = Math.min(1, (view.threat.tauntUntil - t) / (script.threat.tauntDuration || 1));
       ctx.fillStyle = pal.iconActive;
       ctx.fillRect(x + u * 0.25, y + size - u * 0.3, (size - u * 0.5) * frac, u * 0.12);
+    }
+    if (hold) {
+      ctx.save();
+      roundRect(ctx, x, y, size, size, u * 0.35); ctx.clip();
+      ctx.fillStyle = withAlpha(pal.bad, 0.55); ctx.fillRect(x, y, size, size);
+      ctx.restore();
+      font(ctx, pal, size * 0.3, 900, true);
+      ctx.fillStyle = pal.text;
+      text(ctx, 'HOLD', x + size / 2, y + size / 2, 'center');
+      roundRect(ctx, x, y, size, size, u * 0.35);
+      ctx.strokeStyle = pal.bad; ctx.lineWidth = lw(u, 2.5); ctx.stroke();
     }
     // key label
     const key = abilityKeys[id] || '';
@@ -447,6 +505,7 @@ function drawLane(ctx, view, script, settings, pal, u, w, lay, laneY, abilityY, 
   roundRect(ctx, x0, laneY, x1 - x0, abilityY - laneY, u * 0.4); ctx.clip();
   // columns with a note on the way light up
   const hot = new Set();
+  const ABILITY_ORDER = lay.order;
   for (const b of rot.beats) if (b.status === 'pending' && b.at - t <= lead) hot.add(b.ability);
   for (let i = 0; i < ABILITY_ORDER.length; i++) {
     if (!hot.has(ABILITY_ORDER[i])) continue;
@@ -458,7 +517,7 @@ function drawLane(ctx, view, script, settings, pal, u, w, lay, laneY, abilityY, 
   // header and second marks
   font(ctx, pal, u * 0.42, 700);
   ctx.fillStyle = pal.textMuted;
-  text(ctx, 'TAUNT WHEN THE NOTE LANDS ON THE KEY', x0 + u * 0.4, laneY + u * 0.45, 'left');
+  text(ctx, 'PRESS WHEN THE NOTE LANDS ON ITS KEY', x0 + u * 0.4, laneY + u * 0.45, 'left');
   for (let s = 1; s <= lead; s++) {
     const y = yFor(s);
     ctx.fillStyle = withAlpha(pal.text, 0.18);

@@ -11,15 +11,17 @@ export function snapshot(state) {
     phaseSubtitle: state.phaseDef ? state.phaseDef.subtitle : '',
     hp: state.hp,
     role: state.role,
+    tankRole: state.tankRole,
     world: {
       player: { x: w.player.x, y: w.player.y, z: w.player.z, heading: w.player.heading, hp: w.player.hp, maxHp: w.player.maxHp, fearedUntil: w.player.fearedUntil, moving: w.player.moving, backpedal: w.player.backpedal },
       boss: { x: w.boss.x, y: w.boss.y, z: w.boss.z, heading: w.boss.heading, state: w.boss.state, target: w.boss.target, engaged: w.boss.engaged, cast: w.boss.cast ? { ...w.boss.cast } : null, lastHit: w.boss.lastHit },
       raid: { anchor: { ...w.raid.anchor }, dots: w.raid.dots.map((d) => ({ x: d.x, y: d.y, melee: d.melee })) },
       whelps: w.whelps.map((x) => ({ x: x.x, y: x.y, heading: x.heading, target: x.target, onRaid: x.onRaid })),
-      hazards: w.hazards.map((h) => ({ uid: h.uid, id: h.id, kind: h.kind, label: h.label, poly: h.poly, state: h.state, warnAt: h.warnAt, activeAt: h.activeAt, endsAt: h.endsAt })),
+      hazards: w.hazards.map((h) => ({ uid: h.uid, id: h.id, kind: h.kind, label: h.label, poly: h.poly, state: h.state, warnAt: h.warnAt, activeAt: h.activeAt, endsAt: h.endsAt, radius: h.radius || null, centroid: h.centroid ? { ...h.centroid } : null })),
       projectiles: w.projectiles.map((p) => ({ ...p })),
       ghost: { ...w.ghost },
       idealPlayer: { ...w.idealPlayer },
+      idealTank: { ...w.idealTank },
       idealBoss: w.idealBoss ? { ...w.idealBoss } : null,
       coneFlash: { ...w.coneFlash },
     },
@@ -27,7 +29,9 @@ export function snapshot(state) {
     abilities: {
       gcdUntil: state.abilities.gcdUntil,
       readyAt: { ...state.abilities.readyAt },
+      list: [...state.abilities.list],
     },
+    debuffs: state.debuffs.map((d) => ({ ...d })),
     cues: {
       combo: state.cues.combo,
       bestCombo: state.cues.bestCombo,
@@ -38,7 +42,7 @@ export function snapshot(state) {
     },
     upcoming: state.upcoming.map((u) => ({ ...u })),
     nextExpected: state.nextExpected ? { ...state.nextExpected } : null,
-    feedback: { facingWrong: state.feedback.facingWrong, inHazard: state.feedback.inHazard, lastTick: state.feedback.lastTick ? { ...state.feedback.lastTick } : null, toast: state.feedback.toast ? { ...state.feedback.toast } : null },
+    feedback: { ...state.feedback, lastTick: state.feedback.lastTick ? { ...state.feedback.lastTick } : null, toast: state.feedback.toast ? { ...state.feedback.toast } : null },
     metrics: { ...state.metrics },
   };
 }

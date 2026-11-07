@@ -1,100 +1,127 @@
-// "Where should I be?" Computes the ideal player position, the ideal boss
-// position/facing, and drives the ghost tank that walks the correct route.
-// Used by both renderers for the glowing path, dotted outlines and ghost figure.
+// "Where should I be?" Computes the ideal position for the player's role, the
+// ideal tank position (which the ghost tank follows), and the ideal boss
+// position/facing. Both renderers use these for the glowing path and outlines.
 
-import { rad, dist, angleTo, turnToward, normAngle, escapeLane } from './geometry.js';
+import { rad, dist, angleTo, escapeLane, escapeCircle, onFloor } from './geometry.js';
 import { bossAtSpot } from './expectations.js';
 
-/**
- * Ideal player position for the current state.
- * @returns {{x:number,y:number,reason:string}}
- * reason: 'approach' | 'tankSpot' | 'pickupSpot' | 'dodgeLane' | 'wait'
- */
-export function idealPlayerPos(state, script) {
+export const TANK_ROLES = ['tank', 'offtank'];
+export const isTankRole = (role) => TANK_ROLES.includes(role);
+
+/** Name of the spot a phase assigns to `key` (tank, boss, pickup, melee, ranged, healer, raid). */
+export function spotName(state, script, key, fallback = null) {
+  const def = state.phaseDef;
+  const name = (def && def.spots && def.spots[key]) || fallback;
+  return name && script.positions[name] ? name : null;
+}
+
+function spot(state, script, key, fallback) {
+  const name = spotName(state, script, key, fallback);
+  return name ? script.positions[name] : null;
+}
+
+/** Keep a point out of every telegraphed or active hazard. */
+export function dodgeHazards(x, y, state, reason) {
   const w = state.world;
-  const b = w.boss;
-  const P = script.positions;
-  const phaseDef = state.phaseDef;
-
-  if (!phaseDef) return { x: w.player.x, y: w.player.y, reason: 'wait' };
-
-  if (b.state === 'airborne' || b.state === 'takeoff' || b.state === 'landing') {
-    // Phase 2: stand on the pickup spot unless a Deep Breath lane covers it.
-    let x = P.pickupSpot.x, y = P.pickupSpot.y, reason = 'pickupSpot';
-    if (state.role === 'offtank' && b.state !== 'landing') {
-      // Off-tank: intercept loose whelps, then hold the pack on the off-tank spot.
-      let nearest = null, nd = Infinity;
-      let held = 0;
-      for (const wh of w.whelps) {
-        if (wh.target === 'raid') { const d = dist(w.player.x, w.player.y, wh.x, wh.y); if (d < nd) { nd = d; nearest = wh; } }
-        else if (wh.target === 'player') held++;
-      }
-      if (nearest) { x = nearest.x; y = nearest.y; reason = 'whelps'; }
-      else if (held) { x = P.offtankWhelpSpot.x; y = P.offtankWhelpSpot.y; reason = 'holdWhelps'; }
-    }
-    for (const h of w.hazards) {
-      if (h.kind !== 'lane' || h.state === 'idle') continue;
+  for (const h of w.hazards) {
+    if (h.state === 'idle') continue;
+    if (h.kind === 'lane') {
       const e = escapeLane(x, y, h.from, h.to, h.width, 4);
       if (e.moved) {
         // Pick the side the player is already on so the dodge is a short sidestep.
-        const alt = escapeLane(x, y, h.from, h.to, h.width, 4);
-        const mirror = { x: 2 * x - alt.x, y: 2 * y - alt.y };
-        const d1 = dist(w.player.x, w.player.y, alt.x, alt.y);
-        const d2 = dist(w.player.x, w.player.y, mirror.x, mirror.y);
-        const pick = d2 < d1 ? mirror : alt;
+        const mirror = { x: 2 * x - e.x, y: 2 * y - e.y };
+        const d1 = dist(w.player.x, w.player.y, e.x, e.y), d2 = dist(w.player.x, w.player.y, mirror.x, mirror.y);
+        const pick = d2 < d1 ? mirror : e;
         x = pick.x; y = pick.y; reason = 'dodgeLane';
       }
+    } else if (h.kind === 'zone' || h.kind === 'crack') {
+      const c = h.centroid, r = h.radius || 6;
+      const e = escapeCircle(x, y, c.x, c.y, r, 2.5);
+      if (e.moved) { x = e.x; y = e.y; reason = 'dodgeZone'; }
     }
-    return { x, y, reason };
+  }
+  return { x, y, reason };
+}
+
+/**
+ * Ideal position for the tank (the player in a tank role, the ghost tank otherwise).
+ * reason: 'approach' | 'tankSpot' | 'pickupSpot' | 'dodgeLane' | 'dodgeZone' | 'whelps' | 'holdWhelps' | 'wait'
+ */
+export function idealTankPos(state, script, who = 'player') {
+  const w = state.world;
+  const b = w.boss;
+  const me = who === 'ghost' ? w.ghost : w.player;
+  const phaseDef = state.phaseDef;
+  if (!phaseDef) return { x: me.x, y: me.y, reason: 'wait' };
+
+  if (b.state === 'airborne' || b.state === 'takeoff' || b.state === 'landing') {
+    const ps = spot(state, script, 'pickup', 'pickupSpot') || spot(state, script, 'tank', 'tankSpot');
+    let x = ps.x, y = ps.y, reason = 'pickupSpot';
+    if (who === 'player' && state.role === 'offtank' && b.state !== 'landing') {
+      // Off-tank: intercept loose adds, then hold the pack on the off-tank spot.
+      let nearest = null, nd = Infinity, held = 0;
+      for (const wh of w.whelps) {
+        if (wh.target === 'raid') { const d = dist(me.x, me.y, wh.x, wh.y); if (d < nd) { nd = d; nearest = wh; } }
+        else if (wh.target === 'player') held++;
+      }
+      const hold = script.positions.offtankWhelpSpot;
+      if (nearest) { x = nearest.x; y = nearest.y; reason = 'whelps'; }
+      else if (held && hold) { x = hold.x; y = hold.y; reason = 'holdWhelps'; }
+    }
+    return dodgeHazards(x, y, state, reason);
   }
 
-  // Grounded phases.
-  if (b.passive) return { x: P.tankSpot.x, y: P.tankSpot.y, reason: 'tankSpot' };
-  if (!b.engaged || b.target !== 'player') {
+  const ts = spot(state, script, 'tank', 'tankSpot');
+  if (b.passive) return { x: ts.x, y: ts.y, reason: 'tankSpot' };
+  const mine = who === 'player' ? 'player' : 'ghost';
+  if (!b.engaged || b.target !== mine) {
     // Go and take her: a point at taunt range on the near side of the boss.
-    const range = Math.min(script.playerAbilities.taunt.range, script.boss.meleeRange) - 1;
-    const a = angleTo(b.x, b.y, w.player.x, w.player.y);
+    const range = Math.min((script.playerAbilities.taunt || { range: 16 }).range, script.boss.meleeRange) - 1;
+    const a = angleTo(b.x, b.y, me.x, me.y);
     return { x: b.x + Math.cos(a) * range, y: b.y + Math.sin(a) * range, reason: 'approach' };
   }
-  return { x: P.tankSpot.x, y: P.tankSpot.y, reason: 'tankSpot' };
+  return dodgeHazards(ts.x, ts.y, state, 'tankSpot');
+}
+
+/** A melee position: behind or beside the boss, clear of any rear cone. */
+function meleePos(state, script) {
+  const b = state.world.boss;
+  const p = state.world.player;
+  const fixed = spot(state, script, 'melee', 'meleeSpot');
+  if (fixed) return { x: fixed.x, y: fixed.y, reason: 'meleeSpot' };
+  const cones = script.boss.cones || {};
+  const hasTail = Object.values(cones).some((c) => c.facing === 'back');
+  // Flank angle: straight behind unless she has a tail, then 110 degrees off her nose on the player's side.
+  const side = Math.sin(angleTo(b.x, b.y, p.x, p.y) - b.heading) >= 0 ? 1 : -1;
+  const off = hasTail ? rad(110) * side : Math.PI;
+  const r = script.boss.radius + 2.5;
+  let x = b.x + Math.cos(b.heading + off) * r, y = b.y + Math.sin(b.heading + off) * r;
+  if (!onFloor(x, y, script.arena.floor)) { x = b.x + Math.cos(b.heading + Math.PI / 2 * side) * r; y = b.y + Math.sin(b.heading + Math.PI / 2 * side) * r; }
+  return { x, y, reason: 'meleeSpot' };
+}
+
+/** Ideal position for the player's own role. */
+export function idealPlayerPos(state, script) {
+  const w = state.world, b = w.boss;
+  if (!state.phaseDef) return { x: w.player.x, y: w.player.y, reason: 'wait' };
+  if (isTankRole(state.role)) return idealTankPos(state, script, 'player');
+  const raid = script.positions[state.phaseDef.raidSpot];
+  if (state.role === 'melee') {
+    if (b.state === 'grounded' && b.engaged && !b.passive) return dodgeHazards(meleePos(state, script).x, meleePos(state, script).y, state, 'meleeSpot');
+    const s = spot(state, script, 'melee', 'meleeSpot') || raid;
+    return dodgeHazards(s.x, s.y, state, 'raidSpot');
+  }
+  const key = state.role === 'healer' ? 'healer' : 'ranged';
+  const s = spot(state, script, key, key + 'Spot') || raid;
+  return dodgeHazards(s.x, s.y, state, key + 'Spot');
 }
 
 /** Ideal boss position and facing, or null when it does not apply (airborne). */
 export function idealBossPos(state, script) {
   const b = state.world.boss;
   if (b.state !== 'grounded' || !state.phaseDef) return null;
-  const s = script.positions.bossSpot;
-  return { x: s.x, y: s.y, heading: rad(s.heading), satisfied: bossAtSpot(state, script, 'bossSpot') };
-}
-
-export function createGhost(script, pos) {
-  return { x: pos.x, y: pos.y, heading: rad(pos.heading ?? 90), moving: false, backpedal: false };
-}
-
-/**
- * Move the ghost tank toward the ideal spot at its own pace so it leads the
- * player. It faces the boss when standing or dragging, and its travel
- * direction while walking to a spot before the pull.
- */
-export function updateGhost(state, script, dt) {
-  const g = state.world.ghost;
-  const b = state.world.boss;
-  const cfg = script.ghostTank;
-  const ideal = state.world.idealPlayer;
-  const d = dist(g.x, g.y, ideal.x, ideal.y);
-  let faceTarget;
-  if (d > 0.3) {
-    const a = angleTo(g.x, g.y, ideal.x, ideal.y);
-    const step = Math.min(cfg.speed * dt, d);
-    g.x += Math.cos(a) * step; g.y += Math.sin(a) * step;
-    g.moving = true;
-    const dragging = b.state === 'grounded' && b.engaged && b.target === 'player';
-    g.backpedal = dragging;
-    faceTarget = dragging ? angleTo(g.x, g.y, b.x, b.y) : a;
-  } else {
-    g.moving = false; g.backpedal = false;
-    if (b.state === 'grounded') faceTarget = angleTo(g.x, g.y, b.x, b.y);
-    else { const l = script.positions.landSpot; faceTarget = angleTo(g.x, g.y, l.x, l.y); }
-  }
-  g.heading = turnToward(g.heading, normAngle(faceTarget), rad(cfg.turnRate) * dt);
+  const name = spotName(state, script, 'boss', 'bossSpot');
+  if (!name) return null;
+  const s = script.positions[name];
+  return { x: s.x, y: s.y, heading: rad(s.heading ?? 90), satisfied: bossAtSpot(state, script, name) };
 }

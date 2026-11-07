@@ -147,3 +147,19 @@ export function offsetPoint(x, y, heading, forward, right) {
   const c = Math.cos(heading), s = Math.sin(heading);
   return { x: x + c * forward + s * right, y: y + s * forward - c * right };
 }
+
+/** Polygon approximation of a circle (for hazard zones), n points. */
+export function circlePoints(x, y, r, n = 20) {
+  const pts = [];
+  for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; pts.push([x + Math.cos(a) * r, y + Math.sin(a) * r]); }
+  return pts;
+}
+
+/** Nearest point outside a circle of radius r (+margin) for a point at (px,py). */
+export function escapeCircle(px, py, cx, cy, r, margin = 3) {
+  const d = Math.hypot(px - cx, py - cy);
+  const need = r + margin;
+  if (d >= need) return { x: px, y: py, moved: false };
+  const a = d < 1e-6 ? 0 : Math.atan2(py - cy, px - cx);
+  return { x: cx + Math.cos(a) * need, y: cy + Math.sin(a) * need, moved: true };
+}

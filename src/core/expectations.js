@@ -8,6 +8,7 @@ import { hazardAt } from './hazards.js';
 /** Is the player within `nearWallDistance` of the back wall? */
 export function nearWall(state, script) {
   const p = state.world.player;
+  if (!script.arena.backWall) return true;
   return distToPolyline(p.x, p.y, script.arena.backWall) <= script.arena.nearWallDistance;
 }
 
@@ -25,10 +26,23 @@ export function hasAggro(state) {
   return b.state === 'grounded' && b.target === 'player';
 }
 
+/** Is the boss on the tank (the player in a tank role, the ghost tank otherwise)? */
+export function onTank(state) {
+  const b = state.world.boss;
+  const tankIsPlayer = state.role === 'tank' || state.role === 'offtank';
+  return b.state === 'grounded' && b.target === (tankIsPlayer ? 'player' : 'ghost');
+}
+
 /** Is the player outside every lane that is warning or active? */
 export function outsideLane(state) {
   const p = state.world.player;
   return !hazardAt(state.world.hazards, p.x, p.y, 'lane', ['warning', 'active']);
+}
+
+/** Is the player outside every telegraphed or active hazard of any kind? */
+export function outsideHazard(state) {
+  const p = state.world.player;
+  return !hazardAt(state.world.hazards, p.x, p.y, null, ['warning', 'active']);
 }
 
 /** Is she on the tank and not facing the raid (the state to restore after a fear)? */
@@ -36,11 +50,40 @@ export function facingAway(state, script) {
   return hasAggro(state) && !bossFacingRaid(state, script);
 }
 
-/** Are all live whelps aggroed onto the player (none heading for the raid)? */
+/** Are all live adds aggroed onto the player (none heading for the raid)? */
 export function whelpsPicked(state) {
   const ws = state.world.whelps;
   if (!ws.length) return false;
   return ws.every((w) => w.target === 'player');
+}
+
+/** Is the player within attack range of the boss for their role? */
+export function inRange(state, script) {
+  const p = state.world.player, b = state.world.boss;
+  const r = attackRange(state, script);
+  return dist(p.x, p.y, b.x, b.y) - script.boss.radius <= r;
+}
+
+export function attackRange(state, script) {
+  const roleDef = script.roles && script.roles[state.role];
+  if (roleDef && roleDef.attackRange != null) return roleDef.attackRange;
+  return state.role === 'melee' ? 5 : state.role === 'healer' ? 40 : 30;
+}
+
+/** Is the player clear of every frontal cone of the boss? */
+export function notInFront(state, script) {
+  const p = state.world.player, b = state.world.boss;
+  if (b.state !== 'grounded') return true;
+  for (const c of Object.values(script.boss.cones || {})) {
+    if (c.facing === 'back') continue;
+    if (inCone(p.x, p.y, b.x, b.y, b.heading, rad(c.angle), c.range)) return false;
+  }
+  return true;
+}
+
+/** No dispellable debuff is outstanding on anyone. */
+export function noDispellable(state) {
+  return !state.debuffs.some((d) => d.dispel && d.dispel !== 'none');
 }
 
 /** Is the player within a named spot's tolerance? */
@@ -63,15 +106,17 @@ export function bossAtSpot(state, script, spotName) {
   return true;
 }
 
-/** Is the raid anchor inside the boss's breath cone (i.e. is she facing the raid)? */
+/** Is the raid anchor inside the boss's main frontal cone (i.e. is she facing the raid)? */
 export function bossFacingRaid(state, script) {
   const b = state.world.boss;
   const r = state.world.raid.anchor;
-  const c = script.boss.cones.breath;
+  const cones = script.boss.cones || {};
+  const c = cones[script.boss.facingCone || 'breath'] || Object.values(cones).find((x) => x.facing !== 'back');
+  if (!c) return false;
   return inCone(r.x, r.y, b.x, b.y, b.heading, rad(c.angle), c.range);
 }
 
-export const CHECKS = { nearWall, threatLead, hasAggro, outsideLane, facingAway, whelpsPicked };
+export const CHECKS = { nearWall, threatLead, hasAggro, onTank, outsideLane, outsideHazard, facingAway, whelpsPicked, inRange, notInFront, noDispellable };
 
 /** Evaluate a named check. */
 export function runCheck(name, state, script) {

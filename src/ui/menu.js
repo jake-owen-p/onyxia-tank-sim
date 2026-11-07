@@ -1,9 +1,10 @@
-// Main menu: Full fight / Tutorial hero cards, drill list, role switch,
-// Settings / History. Also the History screen and the Pause menu.
+// Main menu: raid and boss picker, role switch, Full fight / Tutorial hero
+// cards, drill list, Settings / History. Also the History screen and the Pause menu.
 
 import { h, button, arrowNav } from './overlay.js';
+import { drillsForRole, tutorialForRole, resolveRole } from '../app/modes.js';
 
-const HINTS = [['WASD', 'move'], ['Q / E', 'strafe'], ['Space', 'jump'], ['Right-drag', 'turn'], ['1', 'Taunt'], ['Tab', 'view'], ['Esc', 'menu']];
+const HINTS = [['WASD', 'move'], ['Q / E', 'strafe'], ['Space', 'jump'], ['Right-drag', 'turn'], ['1–5', 'abilities'], ['Tab', 'view'], ['Esc', 'menu']];
 
 function hintBar(hints) {
   return h('footer', { class: 'hint-bar' },
@@ -22,22 +23,42 @@ function bestChip(history, key) {
   );
 }
 
-/** Two-option segmented control for the tank role. */
-function roleSwitch(settings, onChange) {
-  const opts = [['mt', 'Main tank'], ['offtank', 'Off-tank']];
-  const btns = opts.map(([v, l]) => button(l, () => { settings.role = v; sync(); onChange(); }, { class: 'seg-btn', title: v === 'mt' ? 'Tank Onyxia' : 'Pick up the whelps' }));
-  function sync() { btns.forEach((b, i) => { b.classList.toggle('on', opts[i][0] === settings.role); b.setAttribute('aria-pressed', opts[i][0] === settings.role); }); }
+/** Segmented control for the roles this encounter offers. */
+function roleSwitch(script, settings, onChange) {
+  const roles = Object.entries(script.roles || { tank: { label: 'Main tank', short: 'Tank' } });
+  const btns = roles.map(([id, r]) => button(r.short || r.label, () => { settings.role = id; sync(); onChange(); }, { class: 'seg-btn', title: r.description || r.label }));
+  function sync() { const cur = resolveRole(script, settings.role); btns.forEach((b, i) => { b.classList.toggle('on', roles[i][0] === cur); b.setAttribute('aria-pressed', roles[i][0] === cur); }); }
   sync();
   return h('div', { class: 'seg', role: 'group', 'aria-label': 'Role' }, ...btns);
+}
+
+/** Raid tabs and the boss chips of the chosen raid. */
+function encounterPicker(index, current, onPick) {
+  const raids = (index && index.raids) || [];
+  const curRaid = raids.find((r) => r.id === current.raid) || raids[0];
+  const tabs = raids.map((r) => {
+    const ready = r.bosses.filter((b) => b.status === 'ready').length;
+    return button(h('span', { class: 'raid-tab-inner' }, h('span', { class: 'raid-name', text: r.name }), h('span', { class: 'raid-count', text: ready ? `${ready}/${r.bosses.length}` : 'soon' })),
+      () => onPick(r.id, (r.bosses.find((b) => b.status === 'ready') || r.bosses[0] || {}).id), { class: 'raid-tab' + (curRaid && r.id === curRaid.id ? ' on' : '') + (ready ? '' : ' empty') });
+  });
+  const bosses = curRaid ? curRaid.bosses.map((b) => button(b.name, () => onPick(curRaid.id, b.id), { class: 'boss-chip' + (b.id === current.boss ? ' on' : '') + (b.status === 'ready' ? '' : ' draft'), title: b.status === 'ready' ? b.name : `${b.name}: encounter data still being researched` })) : [];
+  return h('section', { class: 'picker' },
+    h('div', { class: 'raid-tabs' }, ...tabs),
+    h('div', { class: 'boss-chips' }, ...(bosses.length ? bosses : [h('span', { class: 'muted', text: 'Encounters for this raid are being researched. Pick another raid for now.' })])),
+  );
 }
 
 const phaseTag = (d) => d.startOffset < 0 ? `P${d.startPhase}→${d.startPhase + 1}` : `P${d.startPhase}`;
 
 /**
- * @param {object} p { script, settings, history, actions:{ tutorial(), drill(id), full(), settings(), history(), settingsChanged() } }
+ * @param {object} p { script, index, current:{raid,boss}, settings, history, actions:{ pick(raid,boss), tutorial(), drill(id), full(), settings(), history(), settingsChanged() } }
  */
-export function menuScreen({ script, settings, history, actions }) {
-  const drills = (script.drills || []).map((d) =>
+export function menuScreen({ script, index, current, settings, history, actions }) {
+  const role = resolveRole(script, settings.role);
+  const key = (mode) => `${script.id}:${mode}:${role}`;
+  const roleDef = (script.roles && script.roles[role]) || {};
+  const drillList = drillsForRole(script, role);
+  const drills = drillList.map((d) =>
     h('li', {},
       button(h('span', { class: 'drill' },
         h('span', { class: 'drill-tag', text: phaseTag(d) }),
@@ -48,42 +69,47 @@ export function menuScreen({ script, settings, history, actions }) {
           ),
           h('span', { class: 'drill-desc', text: d.description }),
         ),
-        bestChip(history, `drill:${d.id}`) || h('span', { class: 'best-chip empty', text: 'Not run' }),
+        bestChip(history, key(`drill:${d.id}`)) || h('span', { class: 'best-chip empty', text: 'Not run' }),
         h('span', { class: 'chev', 'aria-hidden': true, text: '›' }),
       ), () => actions.drill(d.id), { class: 'btn-drill' }),
     ));
+  const hasTutorial = tutorialForRole(script, role);
 
   const el = h('div', { class: 'panel panel-menu' },
     h('header', { class: 'menu-top' },
       h('div', { class: 'brand' },
-        h('div', { class: 'brand-kicker', text: 'Tank rehearsal' }),
+        h('div', { class: 'brand-kicker', text: `${(script.raidInfo && script.raidInfo.name) || 'Raid rehearsal'} · ${script.raidInfo && script.raidInfo.size ? script.raidInfo.size + '-man' : ''}` }),
         h('h1', { class: 'brand-title', text: script.name }),
         h('p', { class: 'brand-sub', text: `${script.arena.name} · script v${script.version}` }),
       ),
       h('div', { class: 'menu-tools' },
-        roleSwitch(settings, () => actions.settingsChanged && actions.settingsChanged()),
         button('Settings', actions.settings, { class: 'btn-ghost' }),
         button('History', actions.history, { class: 'btn-ghost' }),
       ),
     ),
-    h('div', { class: 'hero' },
+    encounterPicker(index, current, actions.pick),
+    h('div', { class: 'role-row' },
+      h('div', {}, h('div', { class: 'section-label-inline', text: 'Play as' }), roleSwitch(script, settings, () => { actions.settingsChanged && actions.settingsChanged(); actions.pick(current.raid, current.boss); })),
+      h('p', { class: 'role-desc', text: roleDef.description || '' }),
+    ),
+    h('div', { class: 'hero' + (hasTutorial ? '' : ' single') },
       button(h('span', { class: 'card-inner' },
         h('span', { class: 'card-kicker', text: 'Play' }),
         h('span', { class: 'card-title', text: 'Full fight' }),
-        h('span', { class: 'card-sub', text: 'All three phases, start to finish' }),
-        bestChip(history, 'full') || h('span', { class: 'best-chip empty', text: 'No run yet' }),
+        h('span', { class: 'card-sub', text: `${script.phases.length === 1 ? 'The whole pull' : `All ${script.phases.length} phases`}, start to finish` }),
+        bestChip(history, key('full')) || h('span', { class: 'best-chip empty', text: 'No run yet' }),
       ), actions.full, { class: 'card card-primary', autofocus: true }),
-      button(h('span', { class: 'card-inner' },
+      hasTutorial ? button(h('span', { class: 'card-inner' },
         h('span', { class: 'card-kicker', text: 'Learn' }),
         h('span', { class: 'card-title', text: 'Tutorial' }),
-        h('span', { class: 'card-sub', text: 'Five minutes, one mechanic at a time' }),
+        h('span', { class: 'card-sub', text: 'One mechanic at a time' }),
         h('span', { class: 'best-chip empty', text: `${script.tutorial.steps.length} steps` }),
-      ), actions.tutorial, { class: 'card' }),
+      ), actions.tutorial, { class: 'card' }) : null,
     ),
     h('section', { class: 'drills' },
       h('div', { class: 'section-row' },
         h('h3', { class: 'section-label', text: 'Drills' }),
-        h('span', { class: 'section-note', text: 'Short loops of one mechanic' }),
+        h('span', { class: 'section-note', text: drillList.length ? 'Short loops of one mechanic' : 'No drills for this role yet' }),
       ),
       h('ul', { class: 'drill-list' }, ...drills),
     ),
@@ -98,13 +124,14 @@ export function historyScreen({ history, onBack, onClear }) {
   const fmtDate = (d) => new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
   const rows = runs.map((r) => h('tr', {},
     h('td', { class: 'td-when', text: fmtDate(r.date) }),
-    h('td', {}, h('div', { class: 'td-name', text: r.name }), h('div', { class: 'muted', text: r.role === 'offtank' ? 'Off-tank' : 'Main tank' })),
+    h('td', {}, h('div', { class: 'td-name', text: `${r.boss ? r.boss + ' · ' : ''}${r.name}` }), h('div', { class: 'muted', text: r.roleLabel || r.role })),
     h('td', { class: 'td-grade' }, h('span', { class: 'grade grade-' + r.grade, text: r.grade }), h('span', { class: 'td-score', text: `${r.overall}` })),
     h('td', { class: 'td-fixes' }, ...(r.fixes || []).slice(0, 2).map((f) => h('span', { class: 'fix-chip', text: f }))),
   ));
+  const bestFull = runs.filter((r) => r.mode === 'full').sort((a, b) => b.overall - a.overall)[0];
   const stats = [
     ['Runs', `${runs.length}`],
-    ['Best full fight', history.best && history.best.full != null ? `${history.best.full}` : '–'],
+    ['Best full fight', bestFull ? `${bestFull.overall}` : '–'],
     ['Last played', runs.length ? fmtDate(runs[0].date) : '–'],
   ];
   const el = h('div', { class: 'panel panel-wide panel-history' },
@@ -116,7 +143,7 @@ export function historyScreen({ history, onBack, onClear }) {
     runs.length
       ? h('div', { class: 'table-wrap' },
         h('table', { class: 'table' },
-          h('thead', {}, h('tr', {}, h('th', { text: 'When' }), h('th', { text: 'Mode' }), h('th', { text: 'Grade' }), h('th', { text: 'Top fixes' }))),
+          h('thead', {}, h('tr', {}, h('th', { text: 'When' }), h('th', { text: 'Encounter' }), h('th', { text: 'Grade' }), h('th', { text: 'Top fixes' }))),
           h('tbody', {}, ...rows),
         ))
       : h('div', { class: 'empty-state' },

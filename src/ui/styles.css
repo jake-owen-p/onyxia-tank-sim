@@ -391,3 +391,21 @@ input[type=checkbox].switch:checked::after { transform: translateX(1.1rem); back
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ---------- encounter picker and roles ---------- */
+
+.picker { margin: -0.4rem 0 1rem; }
+.raid-tabs { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
+.raid-tab { padding: 0.35rem 0.7rem; border-radius: 999px; font-size: 0.82rem; background: transparent; border-color: rgba(255, 180, 110, 0.14); color: var(--ink-dim); }
+.raid-tab.on { background: rgba(255, 150, 70, 0.18); border-color: rgba(255, 170, 90, 0.5); color: var(--ember-2); }
+.raid-tab.empty { opacity: 0.6; }
+.raid-tab-inner { display: inline-flex; align-items: baseline; gap: 0.4rem; }
+.raid-count { font-size: 0.68rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.boss-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.boss-chip { padding: 0.3rem 0.7rem; border-radius: 0.5rem; font-size: 0.84rem; background: var(--card); border-color: var(--card-edge); }
+.boss-chip.on { background: rgba(255, 150, 70, 0.2); border-color: rgba(255, 170, 90, 0.6); color: #ffe2b8; font-weight: 650; }
+.boss-chip.draft { opacity: 0.5; }
+.role-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.2rem; margin-bottom: 1rem; }
+.section-label-inline { color: var(--ink-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; margin: 0 0.2rem 0.3rem; }
+.role-desc { color: var(--ink-dim); font-size: 0.85rem; margin: 0; flex: 1 1 18rem; }
+.hero.single { grid-template-columns: 1fr; }

@@ -199,6 +199,30 @@ export function drawIcon(ctx, id, x, y, size, color, accent = color) {
       ctx.beginPath(); ctx.arc(-s * 0.3, 0, s * 0.95, -0.5, 0.5); ctx.stroke();
       break;
     }
+    case 'attack': { // sword
+      ctx.beginPath(); ctx.moveTo(-s * 0.75, s * 0.75); ctx.lineTo(s * 0.45, -s * 0.45); ctx.stroke();
+      ctx.lineWidth = Math.max(2, size * 0.14);
+      ctx.beginPath(); ctx.moveTo(s * 0.2, -s * 0.75); ctx.lineTo(s * 0.75, -s * 0.2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-s * 0.55, s * 0.3); ctx.lineTo(-s * 0.3, s * 0.55); ctx.stroke();
+      break;
+    }
+    case 'heal': { // bold cross with a glow
+      ctx.lineWidth = Math.max(2.5, size * 0.22); ctx.strokeStyle = accent;
+      ctx.beginPath(); ctx.moveTo(0, -s * 0.8); ctx.lineTo(0, s * 0.8); ctx.moveTo(-s * 0.8, 0); ctx.lineTo(s * 0.8, 0); ctx.stroke();
+      break;
+    }
+    case 'dispel': { // sparkle: four-point star and two dots
+      ctx.fillStyle = accent;
+      ctx.beginPath(); ctx.moveTo(0, -s * 0.9); ctx.lineTo(s * 0.22, -s * 0.22); ctx.lineTo(s * 0.9, 0); ctx.lineTo(s * 0.22, s * 0.22); ctx.lineTo(0, s * 0.9); ctx.lineTo(-s * 0.22, s * 0.22); ctx.lineTo(-s * 0.9, 0); ctx.lineTo(-s * 0.22, -s * 0.22); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(s * 0.65, -s * 0.65, s * 0.12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-s * 0.65, s * 0.6, s * 0.1, 0, Math.PI * 2); ctx.fill();
+      break;
+    }
+    case 'interrupt': { // lightning bolt
+      ctx.fillStyle = accent;
+      ctx.beginPath(); ctx.moveTo(s * 0.2, -s * 0.9); ctx.lineTo(-s * 0.6, s * 0.1); ctx.lineTo(0, s * 0.1); ctx.lineTo(-s * 0.2, s * 0.9); ctx.lineTo(s * 0.6, -s * 0.15); ctx.lineTo(0, -s * 0.15); ctx.closePath(); ctx.fill();
+      break;
+    }
     case 'aggro': { // exclamation: someone pulled aggro
       ctx.lineWidth = Math.max(2, size * 0.16);
       ctx.beginPath(); ctx.moveTo(0, -s * 0.85); ctx.lineTo(0, s * 0.25); ctx.stroke();

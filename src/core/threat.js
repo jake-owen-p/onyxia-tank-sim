@@ -1,15 +1,16 @@
-// Threat model. Two threat pools: the tank (player) and the ghost raid. The
-// tank's threat builds on its own while in melee range; Taunt is the only button.
-// All functions are pure and operate on a plain { player, raid, tauntUntil } object.
+// Threat model. Three threat pools: the player, the ghost raid, and the ghost
+// tank (who holds the boss when the player is not a tank). All functions are
+// pure over a plain { player, raid, ghost, tauntUntil, ghostTauntUntil } object.
 
 export function createThreat() {
-  return { player: 0, raid: 0, tauntUntil: -Infinity };
+  return { player: 0, raid: 0, ghost: 0, tauntUntil: -Infinity, ghostTauntUntil: -Infinity, ghostTauntAt: null };
 }
 
-/** Steady threat growth for one tick. `playerAttacking` is true while in melee range. */
-export function tickThreat(threat, dt, cfg, raidActive, playerAttacking) {
+/** Steady threat growth for one tick. */
+export function tickThreat(threat, dt, cfg, raidActive, playerAttacking, ghostTanking = false) {
   if (raidActive) threat.raid += cfg.raidPerSecond * dt;
   if (playerAttacking) threat.player += cfg.autoAttackPerSecond * dt;
+  if (ghostTanking) threat.ghost += (cfg.ghostTankPerSecond || cfg.autoAttackPerSecond) * dt;
   return threat;
 }
 
@@ -19,34 +20,52 @@ export function applyAggroPull(threat, multiplier) {
   return threat;
 }
 
+/** A press of an attack or heal adds `amount` to the player's pool. */
+export function applyPlayerThreat(threat, amount) {
+  threat.player += amount;
+  return threat;
+}
+
 /**
- * Taunt: jump to the top of the table with a lead (`tauntLead` x the raid, plus
- * `tauntBonus`) so a following Wing Buffet cut does not flip her straight back,
- * and force the target for `tauntDuration`.
+ * Taunt by the player: jump to the top of the table with a lead (`tauntLead` x
+ * the top pool, plus `tauntBonus`) so a following Wing Buffet cut does not flip
+ * her straight back, and force the target for `tauntDuration`.
  */
 export function applyTaunt(threat, t, cfg) {
-  threat.player = Math.max(threat.player, threat.raid * (cfg.tauntLead || 1)) + (cfg.tauntBonus || 0);
+  const top = Math.max(threat.raid, threat.ghost);
+  threat.player = Math.max(threat.player, top * (cfg.tauntLead || 1)) + (cfg.tauntBonus || 0);
   threat.tauntUntil = t + cfg.tauntDuration;
   return threat;
 }
 
-/** Wing Buffet removes a fraction of the tank's threat. */
-export function applyBuffet(threat, cut) {
-  threat.player *= 1 - cut;
+/** Taunt by the ghost tank (after the player pulled aggro). */
+export function applyGhostTaunt(threat, t, cfg) {
+  threat.ghost = Math.max(threat.ghost, threat.player * (cfg.tauntLead || 1)) + (cfg.tauntBonus || 0);
+  threat.ghostTauntUntil = t + cfg.tauntDuration;
+  threat.ghostTauntAt = null;
+  return threat;
+}
+
+/** Wing Buffet removes a fraction of the tank's threat (whoever is tanking). */
+export function applyBuffet(threat, cut, tankIsPlayer = true) {
+  if (tankIsPlayer) threat.player *= 1 - cut; else threat.ghost *= 1 - cut;
   return threat;
 }
 
 export function resetThreat(threat) {
   threat.player = 0;
   threat.raid = 0;
+  threat.ghost = 0;
   threat.tauntUntil = -Infinity;
+  threat.ghostTauntUntil = -Infinity;
+  threat.ghostTauntAt = null;
   return threat;
 }
 
 /**
- * Decide who the boss attacks. Uses hysteresis like the real game: the raid
- * pulls when it exceeds player * pullMultiplier; the tank only regains without a
- * taunt when clearly above the raid (110%).
+ * Decide who the boss attacks when the player is a tank: the raid pulls when it
+ * exceeds player * pullMultiplier; the tank only regains without a taunt when
+ * clearly above the raid (110%).
  */
 export function selectTarget(threat, current, t, cfg) {
   if (threat.tauntUntil > t) return 'player';
@@ -58,10 +77,28 @@ export function selectTarget(threat, current, t, cfg) {
 }
 
 /**
- * 0..1 fill for the threat bar: how close the raid is to pulling. 1 means the raid
- * is at or above the pull threshold. The HUD paints `dangerBand`..1 red.
+ * Decide who the boss attacks when the ghost tank holds her: the player pulls
+ * aggro by out-threating the ghost tank; the ghost taunts back after a delay.
  */
-export function threatRatio(threat, cfg) {
-  if (threat.player <= 0) return threat.raid > 0 ? 1 : 0;
-  return Math.min(1, threat.raid / (threat.player * cfg.pullMultiplier));
+export function selectTargetGhostTanked(threat, current, t, cfg) {
+  if (threat.ghostTauntUntil > t) return 'ghost';
+  if (threat.tauntUntil > t) return 'player';
+  if (current === 'ghost' || current == null) {
+    return threat.player > threat.ghost * cfg.pullMultiplier && threat.player > 0 ? 'player' : 'ghost';
+  }
+  if (current === 'player') return threat.ghost > threat.player * 1.1 ? 'ghost' : 'player';
+  return current;
+}
+
+/**
+ * 0..1 fill for the threat bar. For a tank: how close the raid is to pulling.
+ * For everyone else: how close the player is to pulling off the ghost tank.
+ */
+export function threatRatio(threat, cfg, tankIsPlayer = true) {
+  if (tankIsPlayer) {
+    if (threat.player <= 0) return threat.raid > 0 ? 1 : 0;
+    return Math.min(1, threat.raid / (threat.player * cfg.pullMultiplier));
+  }
+  if (threat.ghost <= 0) return threat.player > 0 ? 1 : 0;
+  return Math.min(1, threat.player / (threat.ghost * cfg.pullMultiplier));
 }

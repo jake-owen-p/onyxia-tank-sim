@@ -19,7 +19,9 @@ export function createCues() {
 
 const KEEP_RESOLVED = 1.5;
 
-const cueDefs = (script, role) => ((script.cues && script.cues.list) || []).filter((c) => !c.role || c.role === role);
+import { roleMatches } from './scoring.js';
+
+const cueDefs = (script, role) => ((script.cues && script.cues.list) || []).filter((c) => roleMatches(c.role, role));
 const perfectWindow = (script) => (script.cues && script.cues.windows && script.cues.windows.perfect) ?? 0.3;
 
 function makeBeat(def, at, phase, t) {

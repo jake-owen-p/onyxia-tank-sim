@@ -11,11 +11,15 @@ export const ACTIONS = [
   { id: 'strafeRight', label: 'Strafe right',  group: 'Movement' },
   { id: 'jump',        label: 'Jump',          group: 'Movement' },
   { id: 'taunt',       label: 'Taunt',         group: 'Abilities' },
+  { id: 'attack',      label: 'Attack',        group: 'Abilities' },
+  { id: 'heal',        label: 'Heal the tank', group: 'Abilities' },
+  { id: 'dispel',      label: 'Dispel',        group: 'Abilities' },
+  { id: 'interrupt',   label: 'Interrupt',     group: 'Abilities' },
   { id: 'toggleView',  label: 'Switch view',   group: 'Interface' },
   { id: 'pause',       label: 'Pause / menu',  group: 'Interface' },
 ];
 
-export const ABILITY_ACTIONS = ['taunt'];
+export const ABILITY_ACTIONS = ['taunt', 'attack', 'heal', 'dispel', 'interrupt'];
 export const MOVE_ONESHOT_ACTIONS = ['jump'];
 export const ONESHOT_ACTIONS = ['toggleView', 'pause'];
 
@@ -28,6 +32,10 @@ export const DEFAULT_BINDS = {
   strafeRight: ['KeyE', null],
   jump:        ['Space', null],
   taunt:       ['Digit1', null],
+  attack:      ['Digit2', null],
+  heal:        ['Digit3', null],
+  dispel:      ['Digit4', null],
+  interrupt:   ['Digit5', null],
   toggleView:  ['Tab', null],
   pause:       ['Escape', null],
 };

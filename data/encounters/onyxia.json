@@ -1,8 +1,8 @@
 {
  "id": "onyxia",
  "name": "Onyxia",
- "version": "1.0.0",
- "notes": "All timings, ranges and threat values are placeholders. See README 'Values to tune'. Headings are degrees, 0 = east, 90 = north (toward the back wall). Units are yards and seconds.",
+ "version": "1.1.0",
+ "notes": "Numbers follow docs/research/onyxia/onyxia.md where the sources agree. Onyxia is immune to Taunt in the real fight: the tank's one button here is a threat burst (think Sunder + Revenge + Heroic Strike dumped at once) that plays the same role as a Taunt in every other encounter, so the lesson is still when to press it. Cadences are DBM/BigWigs variance timers; Knock Away is the -25% threat knockback, Wing Buffet knocks back without a threat cut.",
  "arena": {
   "name": "Onyxia's Lair",
   "wallHeight": 12,
@@ -152,14 +152,26 @@
    "x": 0,
    "y": -40,
    "spread": 6
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": 18,
+   "tolerance": 6,
+   "label": "Healers"
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": 12,
+   "tolerance": 8,
+   "label": "Ranged"
   }
  },
  "player": {
   "speed": 7,
   "turnRate": 200,
   "radius": 0.8,
-  "hp": 8000,
-  "healPerSecond": 320,
+  "hp": 10000,
+  "healPerSecond": 420,
   "fearDuration": 3,
   "fearSpeed": 4,
   "jump": {
@@ -169,7 +181,11 @@
  },
  "ghostTank": {
   "speed": 7.4,
-  "turnRate": 360
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
  },
  "raid": {
   "size": 35,
@@ -189,24 +205,28 @@
   "cones": {
    "breath": {
     "angle": 60,
-    "range": 60,
-    "label": "Flame Breath"
+    "range": 45,
+    "label": "Flame Breath",
+    "facing": "front"
    },
    "cleave": {
     "angle": 90,
     "range": 15,
-    "label": "Cleave"
+    "label": "Cleave",
+    "facing": "front"
    },
    "tail": {
     "angle": 120,
-    "range": 18,
-    "label": "Tail Sweep"
+    "range": 30,
+    "label": "Tail Sweep",
+    "facing": "back"
    }
   },
   "landingDuration": 2.5,
   "takeoffDuration": 2.5,
   "pickupGrace": 5,
-  "settleAfterLanding": 2.5
+  "settleAfterLanding": 2.5,
+  "facingCone": "breath"
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -218,83 +238,142 @@
   "resetOnLanding": true,
   "landingRaidThreat": 300,
   "turnGrace": 2,
-  "tauntLead": 1.6
+  "tauntLead": 1.6,
+  "ghostTankPerSecond": 70,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
  },
  "gcd": 1.5,
  "playerAbilities": {
   "taunt": {
-   "label": "Taunt",
+   "kind": "taunt",
+   "label": "Threat burst",
    "cooldown": 10,
    "gcd": false,
    "range": 16,
    "icon": "taunt",
-   "tip": "Taunt pulls her onto you and holds her for a few seconds. Use it when she turns on the raid, the moment she lands, and never before you are in range."
+   "tip": "Onyxia cannot be taunted: this is your biggest threat dump (Sunder, Revenge, Heroic Strike at once). Press it the moment she turns on the raid or lands, never while she is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls her off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "Big heals on the tank. Pre-heal before Flame Breath and the landing."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "tip": "Remove a dispellable debuff from the raid."
   }
  },
  "actions": {
   "flameBreath": {
    "label": "Flame Breath",
-   "cast": 3,
+   "cast": 2,
    "cone": "breath",
-   "damage": 1500,
+   "damage": 3500,
    "warn": true,
    "cue": "breath",
    "icon": "breath",
-   "requires": "grounded"
+   "requires": "grounded",
+   "kind": "cone",
+   "hitsMelee": true,
+   "raidMetric": "raidBreathHits",
+   "raidToast": "Flame Breath hit the raid",
+   "playerMetric": "breathsTaken",
+   "tip": "2 s cast, 3063-3937 Fire in a 45 yd cone. Only the tank stands in it."
   },
   "cleave": {
    "label": "Cleave",
    "cast": 0,
    "cone": "cleave",
-   "damage": 600,
+   "damage": 750,
    "warn": false,
    "cue": "cleave",
    "icon": "cleave",
-   "requires": "grounded"
+   "requires": "grounded",
+   "kind": "cone",
+   "raidMetric": "raidCleaveHits",
+   "playerMetric": "cleavesTaken"
   },
   "wingBuffet": {
    "label": "Wing Buffet",
    "cast": 1,
-   "knockback": 22,
+   "knockback": 14,
    "knockbackRange": 20,
    "warn": true,
    "cue": "buffet",
    "icon": "buffet",
-   "requires": "grounded"
+   "requires": "grounded",
+   "kind": "knockback",
+   "threatCut": 0,
+   "wallMetric": "buffetsOffWall",
+   "damage": 750,
+   "tip": "1 s cast, 20 yd frontal cone knockback. No threat loss, but a tank off the wall ends up out of melee."
   },
   "tailSweep": {
    "label": "Tail Sweep",
    "cast": 0,
    "cone": "tail",
-   "knockback": 10,
-   "damage": 600,
+   "knockback": 12,
+   "damage": 800,
    "conditional": "behind",
    "warn": false,
    "cue": "tail",
    "icon": "tail",
-   "requires": "grounded"
+   "requires": "grounded",
+   "kind": "cone",
+   "raidMetric": "raidTailHits",
+   "playerMetric": "tailsTaken"
   },
   "fireball": {
    "label": "Fireball",
    "cast": 0,
-   "travel": 1.2,
-   "splash": 6,
+   "travel": 3,
+   "splash": 8,
    "warn": false,
    "cue": null,
    "icon": "fireball",
-   "requires": "airborne"
+   "requires": "airborne",
+   "kind": "projectile",
+   "damage": 2000,
+   "playerChance": 0.1,
+   "tip": "3 s cast on a random player, 1700-2300 Fire to everyone within 8 yd. Spread."
   },
   "deepBreath": {
    "label": "Deep Breath",
    "cast": 0,
    "warning": 5,
-   "active": 3,
-   "laneWidth": 22,
-   "damage": 4000,
+   "active": 4,
+   "laneWidth": 26,
+   "damage": 5000,
    "warn": false,
    "cue": "deepBreath",
    "icon": "deepbreath",
-   "requires": "airborne"
+   "requires": "airborne",
+   "kind": "hazard",
+   "placement": "lanes",
+   "lanes": "deepBreathLanes",
+   "tip": "\"Onyxia takes in a deep breath...\" then 5 s before a wall of fire crosses the room from her position to the opposite side. Move to the side adjacent to her."
   },
   "whelpWave": {
    "label": "Whelps",
@@ -302,11 +381,20 @@
    "perCave": 6,
    "speed": 6,
    "aggroRange": 10,
-   "lifetime": 28,
+   "lifetime": 30,
    "warn": true,
    "cue": "whelps",
    "icon": "whelps",
-   "requires": "airborne"
+   "requires": "airborne",
+   "kind": "adds",
+   "count": 8,
+   "from": [
+    "caveWest",
+    "caveEast"
+   ],
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "tip": "Whelps pour from both egg pits. The whelp groups hold them at the pit mouths."
   },
   "bellowingRoar": {
    "label": "Bellowing Roar",
@@ -314,32 +402,48 @@
    "warn": true,
    "cue": "roar",
    "icon": "roar",
-   "requires": "grounded"
+   "requires": "grounded",
+   "kind": "fear",
+   "targets": "all",
+   "duration": 3,
+   "follow": [
+    {
+     "id": "eruption",
+     "delay": 2
+    }
+   ],
+   "tip": "1.5 s cast, 3 s fear on everyone in the room. The lava cracks erupt right after it."
   },
   "eruption": {
    "label": "Eruption",
    "cast": 0,
-   "warning": 2,
-   "active": 2,
+   "warning": 1.5,
+   "active": 3,
    "damage": 1500,
    "warn": false,
    "cue": "eruption",
    "icon": "eruption",
-   "requires": "grounded"
+   "requires": "grounded",
+   "kind": "hazard",
+   "placement": "polys",
+   "polys": "eruptionCracks",
+   "tip": "After each Bellowing Roar the floor cracks erupt for a few seconds: ~1500 Fire per hit."
   },
   "landing": {
    "label": "Landing",
    "cast": 0,
    "warn": true,
    "cue": "landing",
-   "icon": "landing"
+   "icon": "landing",
+   "kind": "transition"
   },
   "takeoff": {
    "label": "Takeoff",
    "cast": 0,
    "warn": true,
    "cue": "takeoff",
-   "icon": "takeoff"
+   "icon": "takeoff",
+   "kind": "transition"
   },
   "aggroPull": {
    "label": "Aggro pull",
@@ -349,29 +453,88 @@
    "cue": null,
    "icon": "aggro",
    "requires": "grounded",
-   "conditional": "onPlayer"
+   "conditional": "onPlayer",
+   "kind": "aggroPull",
+   "tip": "Someone overtakes the tank on threat."
+  },
+  "knockAway": {
+   "label": "Knock Away",
+   "kind": "knockback",
+   "cast": 0,
+   "damage": 700,
+   "knockback": 9,
+   "knockbackRange": 15,
+   "threatCut": 0.25,
+   "wallMetric": "buffetsOffWall",
+   "warn": false,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Instant: knocks the tank back and cuts their threat by a quarter. Back to the wall or she turns."
+  },
+  "whelpTrickle": {
+   "label": "Whelps",
+   "cast": 0,
+   "perCave": 6,
+   "speed": 6,
+   "aggroRange": 10,
+   "lifetime": 30,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "airborne",
+   "kind": "adds",
+   "count": 3,
+   "from": [
+    "caveWest",
+    "caveEast"
+   ],
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "tip": "Whelps pour from both egg pits. The whelp groups hold them at the pit mouths.",
+   "hidden": true
   }
  },
  "deepBreathLanes": [
   {
-   "id": "northToSouth",
-   "from": [0, 50],
-   "to": [0, -47]
+   "id": "fromN",
+   "from": [0.0, 50.0],
+   "to": [-0.0, -47.0]
   },
   {
-   "id": "southToNorth",
-   "from": [0, -47],
-   "to": [0, 50]
+   "id": "fromNE",
+   "from": [34.3, 35.8],
+   "to": [-34.3, -32.8]
   },
   {
-   "id": "eastToWest",
-   "from": [55, 2],
-   "to": [-55, 2]
+   "id": "fromE",
+   "from": [48.5, 1.5],
+   "to": [-48.5, 1.5]
   },
   {
-   "id": "westToEast",
-   "from": [-55, 2],
-   "to": [55, 2]
+   "id": "fromSE",
+   "from": [34.3, -32.8],
+   "to": [-34.3, 35.8]
+  },
+  {
+   "id": "fromS",
+   "from": [0.0, -47.0],
+   "to": [-0.0, 50.0]
+  },
+  {
+   "id": "fromSW",
+   "from": [-34.3, -32.8],
+   "to": [34.3, 35.8]
+  },
+  {
+   "id": "fromW",
+   "from": [-48.5, 1.5],
+   "to": [48.5, 1.5]
+  },
+  {
+   "id": "fromNW",
+   "from": [-34.3, 35.8],
+   "to": [34.3, -32.8]
   }
  ],
  "hoverHeight": 24,
@@ -398,26 +561,32 @@
    "actions": [
     {
      "id": "flameBreath",
-     "first": 16,
-     "every": 20,
-     "jitter": 2
+     "first": 14,
+     "every": 16,
+     "jitter": 4
     },
     {
      "id": "cleave",
-     "first": 5,
+     "first": 4,
      "every": 7,
-     "jitter": 1
+     "jitter": 2
     },
     {
      "id": "wingBuffet",
-     "first": 28,
+     "first": 18,
      "every": 25,
-     "jitter": 2
+     "jitter": 7
+    },
+    {
+     "id": "knockAway",
+     "first": 22,
+     "every": 27,
+     "jitter": 10
     },
     {
      "id": "tailSweep",
      "first": 3,
-     "every": 2,
+     "every": 3.5,
      "jitter": 0
     },
     {
@@ -436,14 +605,16 @@
      "grace": 6,
      "label": "Pull Onyxia to the back wall",
      "tip": "Pull straight to the back wall. Run up the ramp, through the raid, and keep going until your back is on the wall.",
-     "from": "engage"
+     "from": "engage",
+     "role": "tanks"
     },
     {
      "id": "facing",
      "type": "continuous",
      "metric": "bossFacingRaid",
      "label": "Keep her facing away from the raid",
-     "tip": "Stand between Onyxia and the wall so she faces the wall. If she turns, move so that you are on the far side from the raid."
+     "tip": "Stand between Onyxia and the wall so she faces the wall. If she turns, move so that you are on the far side from the raid.",
+     "role": "tanks"
     },
     {
      "id": "wall",
@@ -451,7 +622,8 @@
      "event": "wingBuffet",
      "check": "nearWall",
      "label": "Be against the wall for Wing Buffet",
-     "tip": "Wing Buffet knocks you back. With the wall behind you there is nowhere to go, and she stays put."
+     "tip": "Wing Buffet knocks you back. With the wall behind you there is nowhere to go, and she stays put.",
+     "role": "tanks"
     },
     {
      "id": "rebuild",
@@ -462,7 +634,8 @@
      "within": 6,
      "grace": 4,
      "label": "Keep her on you after Wing Buffet",
-     "tip": "Wing Buffet cuts your threat. Stay in melee range so it rebuilds, and Taunt the moment she turns toward the raid."
+     "tip": "Wing Buffet cuts your threat. Stay in melee range so it rebuilds, and burst threat the moment she turns toward the raid.",
+     "role": "tanks"
     },
     {
      "id": "retaunt",
@@ -471,10 +644,42 @@
      "check": "hasAggro",
      "within": 3,
      "grace": 3,
-     "label": "Taunt her back when a DPS pulls aggro",
-     "tip": "Someone will pull aggro. Watch the threat bar and the warning: the moment she turns, Taunt. Every second she faces the raid is a Flame Breath waiting to happen."
+     "label": "Take her back when a DPS pulls aggro",
+     "tip": "Someone will pull aggro. Watch the threat bar and the warning: the moment she turns, burst threat. Every second she faces the raid is a Flame Breath waiting to happen.",
+     "role": "tanks"
+    },
+    {
+     "id": "front",
+     "type": "continuous",
+     "metric": "playerInFront",
+     "role": "nontank",
+     "label": "Stay out of her front",
+     "tip": "Flame Breath and Cleave hit everything in front of her. Stand at her flank or behind the raid, never between her and the tank."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Wing Buffet the tank has lost a third of their threat."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Flame Breath hits the tank for a big chunk. Have a heal landing as the cast finishes, and never let the tank sit under half."
     }
-   ]
+   ],
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   }
   },
   {
    "id": 2,
@@ -488,21 +693,25 @@
    "actions": [
     {
      "id": "fireball",
-     "first": 4,
-     "every": 3,
+     "first": 6,
+     "every": 4,
      "jitter": 1
     },
     {
      "id": "deepBreath",
-     "first": 22,
-     "every": 26,
-     "jitter": 3
+     "first": 24,
+     "every": 30,
+     "jitter": 6
     },
     {
      "id": "whelpWave",
-     "first": 9,
-     "every": 34,
-     "jitter": 3
+     "first": 4
+    },
+    {
+     "id": "whelpTrickle",
+     "first": 40,
+     "every": 45,
+     "jitter": 12
     }
    ],
    "expectations": [
@@ -513,7 +722,8 @@
      "deadline": "phaseEnd",
      "grace": 5,
      "label": "Be on the pickup spot when she lands",
-     "tip": "In Phase 2 your job is to be ready for the landing. Stand on the pickup spot north of the centre, dodge the lane, and come straight back."
+     "tip": "In Phase 2 your job is to be ready for the landing. Stand on the pickup spot north of the centre, dodge the lane, and come straight back.",
+     "role": "tanks"
     },
     {
      "id": "lane",
@@ -522,7 +732,8 @@
      "check": "outsideLane",
      "grace": 1.5,
      "label": "Stay out of the Deep Breath lane",
-     "tip": "Deep Breath is a five second warning. Step sideways out of the lane, do not run along it."
+     "tip": "Deep Breath is a five second warning. Step sideways out of the lane, do not run along it.",
+     "role": "tanks"
     },
     {
      "id": "whelps",
@@ -542,8 +753,25 @@
      "role": "offtank",
      "label": "Keep whelps off the raid",
      "tip": "Hold the whelps on the south-west side, well away from the healers."
+    },
+    {
+     "id": "laneAll",
+     "type": "onEvent",
+     "event": "deepBreath",
+     "check": "outsideLane",
+     "grace": 1.5,
+     "role": "nontank",
+     "label": "Stay out of the Deep Breath lane",
+     "tip": "Deep Breath is a five second warning. Step sideways out of the lane, do not run along it."
     }
-   ]
+   ],
+   "spots": {
+    "tank": "pickupSpot",
+    "pickup": "pickupSpot",
+    "ranged": "raidSpotP2",
+    "healer": "raidSpotP2",
+    "melee": "raidSpotP2"
+   }
   },
   {
    "id": 3,
@@ -556,40 +784,40 @@
    "raidSpot": "raidSpotP3",
    "actions": [
     {
+     "id": "bellowingRoar",
+     "first": 3,
+     "every": 25,
+     "jitter": 8
+    },
+    {
      "id": "flameBreath",
-     "first": 18,
-     "every": 20,
-     "jitter": 2
+     "first": 15,
+     "every": 16,
+     "jitter": 4
     },
     {
      "id": "cleave",
-     "first": 6,
+     "first": 4,
      "every": 7,
-     "jitter": 1
+     "jitter": 2
     },
     {
      "id": "wingBuffet",
-     "first": 30,
+     "first": 18,
      "every": 25,
-     "jitter": 2
+     "jitter": 7
+    },
+    {
+     "id": "knockAway",
+     "first": 16,
+     "every": 27,
+     "jitter": 10
     },
     {
      "id": "tailSweep",
      "first": 3,
-     "every": 2,
+     "every": 3.5,
      "jitter": 0
-    },
-    {
-     "id": "bellowingRoar",
-     "first": 22,
-     "every": 32,
-     "jitter": 1
-    },
-    {
-     "id": "eruption",
-     "first": 8,
-     "every": 9,
-     "jitter": 1
     },
     {
      "id": "aggroPull",
@@ -607,7 +835,8 @@
      "within": 5,
      "grace": 4,
      "label": "Pick her up within 5s of landing",
-     "tip": "The moment she lands, Taunt. Stay on her for a few seconds so she settles on you before you move."
+     "tip": "The moment she lands, burst threat. Stay on her for a few seconds so she settles on you before you move.",
+     "role": "tanks"
     },
     {
      "id": "drag",
@@ -617,14 +846,16 @@
      "grace": 10,
      "label": "Drag her back to the wall",
      "tip": "Walk backwards toward the wall in a straight line so she follows without turning toward the raid.",
-     "from": "landing"
+     "from": "landing",
+     "role": "tanks"
     },
     {
      "id": "facing",
      "type": "continuous",
      "metric": "bossFacingRaid",
      "label": "Keep her facing away from the raid",
-     "tip": "Stand between Onyxia and the wall so she faces the wall."
+     "tip": "Stand between Onyxia and the wall so she faces the wall.",
+     "role": "tanks"
     },
     {
      "id": "roar",
@@ -635,7 +866,8 @@
      "label": "Get her off the raid after Bellowing Roar",
      "tip": "The fear runs you off her. The moment it ends, get back between her and the raid so she is on you and facing away from them, then walk her back onto the wall.",
      "notBefore": 3.5,
-     "within": 8
+     "within": 8,
+     "role": "tanks"
     },
     {
      "id": "cracks",
@@ -650,7 +882,8 @@
      "event": "wingBuffet",
      "check": "nearWall",
      "label": "Be against the wall for Wing Buffet",
-     "tip": "Back on the wall before each Buffet."
+     "tip": "Back on the wall before each Buffet.",
+     "role": "tanks"
     },
     {
      "id": "rebuild",
@@ -661,7 +894,8 @@
      "within": 6,
      "grace": 4,
      "label": "Keep her on you after Wing Buffet",
-     "tip": "Wing Buffet cuts your threat. Stay in melee range so it rebuilds, and Taunt the moment she turns toward the raid."
+     "tip": "Wing Buffet cuts your threat. Stay in melee range so it rebuilds, and burst threat the moment she turns toward the raid.",
+     "role": "tanks"
     },
     {
      "id": "retaunt",
@@ -670,9 +904,54 @@
      "check": "hasAggro",
      "within": 3,
      "grace": 3,
-     "label": "Taunt her back when a DPS pulls aggro",
-     "tip": "Someone will pull aggro. Watch the threat bar and the warning: the moment she turns, Taunt. Every second she faces the raid is a Flame Breath waiting to happen."
+     "label": "Take her back when a DPS pulls aggro",
+     "tip": "Someone will pull aggro. Watch the threat bar and the warning: the moment she turns, burst threat. Every second she faces the raid is a Flame Breath waiting to happen.",
+     "role": "tanks"
+    },
+    {
+     "id": "front",
+     "type": "continuous",
+     "metric": "playerInFront",
+     "role": "nontank",
+     "label": "Stay out of her front",
+     "tip": "Flame Breath and Cleave hit everything in front of her. Stand at her flank or behind the raid, never between her and the tank."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Wing Buffet the tank has lost a third of their threat."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Flame Breath hits the tank for a big chunk. Have a heal landing as the cast finishes, and never let the tank sit under half."
+    },
+    {
+     "id": "landingHold",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "onTank",
+     "within": 6,
+     "grace": 4,
+     "role": "dps",
+     "label": "Let the tank pick her up before you attack",
+     "tip": "Her threat table is empty when she lands. Do nothing until she is on the tank, then build slowly."
     }
+   ],
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "persistentHazards": [
+    "eruption"
    ]
   }
  ],
@@ -681,60 +960,66 @@
    "label": "Facing the raid",
    "unit": "s",
    "penaltyPerSecond": 3,
-   "severe": 4
+   "severe": 4,
+   "roles": "tanks"
   },
   "raidBreathHits": {
    "label": "Flame Breaths on the raid",
    "unit": "count",
    "penaltyPerUnit": 12,
-   "severe": 1
+   "severe": 1,
+   "roles": "tanks"
   },
   "raidCleaveHits": {
    "label": "Cleaves on the raid",
    "unit": "count",
    "penaltyPerUnit": 3,
-   "severe": 2
+   "severe": 2,
+   "roles": "tanks"
   },
   "raidTailHits": {
    "label": "Tail Sweeps on the raid",
    "unit": "count",
    "penaltyPerUnit": 3,
-   "severe": 2
+   "severe": 2,
+   "roles": "tanks"
   },
   "playerInTail": {
    "label": "You behind her",
    "unit": "s",
    "penaltyPerSecond": 2,
-   "severe": 3
-  },
-  "playerInLane": {
-   "label": "You in a Deep Breath",
-   "unit": "s",
-   "penaltyPerSecond": 8,
-   "severe": 0.5
+   "severe": 3,
+   "roles": [
+    "tanks",
+    "melee"
+   ]
   },
   "playerInCrack": {
    "label": "You on a crack",
    "unit": "s",
    "penaltyPerSecond": 3,
-   "severe": 2
+   "severe": 2,
+   "phases": [3]
   },
   "whelpsOnRaid": {
    "label": "Whelps on the raid",
    "unit": "s",
    "penaltyPerSecond": 1,
-   "severe": 8
+   "severe": 8,
+   "roles": "offtank"
   },
   "buffetsOffWall": {
-   "label": "Buffets off the wall",
+   "label": "Knocked away from the wall",
    "unit": "count",
    "penaltyPerUnit": 8,
-   "severe": 1
+   "severe": 1,
+   "roles": "tanks"
   },
   "threatLostCount": {
    "label": "Times she turned on the raid",
    "unit": "count",
-   "info": true
+   "info": true,
+   "roles": "tanks"
   },
   "deaths": {
    "label": "Deaths",
@@ -745,7 +1030,122 @@
   "pickupTime": {
    "label": "Time to pick up after landing",
    "unit": "s",
-   "info": true
+   "info": true,
+   "roles": "tanks"
+  },
+  "playerInHazard": {
+   "label": "You in a Deep Breath",
+   "unit": "s",
+   "penaltyPerSecond": 8,
+   "severe": 0.5,
+   "phases": [2]
+  },
+  "playerInFront": {
+   "label": "Standing in her front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "nontank",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "breathsTaken": {
+   "label": "Flame Breaths taken",
+   "unit": "count",
+   "penaltyPerUnit": 10,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "cleavesTaken": {
+   "label": "Cleaves taken",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": "nontank"
+  },
+  "tailsTaken": {
+   "label": "Tail Sweeps taken",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": "nontank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull her. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had her",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled her before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or she is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "dps"
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before Flame Breath lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the breath."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 6,
+   "roles": "healer"
   }
  },
  "grading": {
@@ -793,7 +1193,7 @@
   {
    "id": "pullBuffet",
    "name": "Pull and Wing Buffet",
-   "description": "Pull from the ramp to the wall, then hold position through three Wing Buffets and Taunt her back if she turns.",
+   "description": "Pull from the ramp to the wall, then hold position through three Wing Buffets and burst threat her back if she turns.",
    "startPhase": 1,
    "duration": 75,
    "loop": true,
@@ -827,8 +1227,8 @@
   },
   {
    "id": "taunt",
-   "name": "When to Taunt",
-   "description": "Already at the wall. DPS keep pulling aggro and Wing Buffet cuts your threat. Taunt her back the instant she turns, never before.",
+   "name": "When to burst threat",
+   "description": "Already at the wall. DPS keep pulling aggro and Wing Buffet cuts your threat. burst threat her back the instant she turns, never before.",
    "startPhase": 1,
    "duration": 60,
    "loop": true,
@@ -858,7 +1258,8 @@
      "every": 2,
      "jitter": 0
     }
-   ]
+   ],
+   "roles": "tanks"
   },
   {
    "id": "roar",
@@ -887,12 +1288,13 @@
      "every": 2,
      "jitter": 0
     }
-   ]
+   ],
+   "roles": "tanks"
   },
   {
    "id": "pickup",
    "name": "Phase 3 pickup",
-   "description": "She lands in five seconds. Taunt, pick her up, and drag her to the wall between the cracks.",
+   "description": "She lands in five seconds. burst threat, pick her up, and drag her to the wall between the cracks.",
    "startPhase": 2,
    "startOffset": -5,
    "duration": 45,
@@ -909,6 +1311,77 @@
      "id": "eruption",
      "first": 6,
      "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "tailSweep",
+     "first": 3,
+     "every": 2,
+     "jitter": 0
+    }
+   ],
+   "roles": [
+    "tanks",
+    "dps",
+    "healer"
+   ]
+  },
+  {
+   "id": "threatDps",
+   "name": "Threat discipline",
+   "description": "Already on her. Attack on every global but stop when the bar goes red: Wing Buffets cut the tank's threat and a landing resets it.",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "roles": "dps",
+   "actions": [
+    {
+     "id": "wingBuffet",
+     "first": 12,
+     "every": 22,
+     "jitter": 2
+    },
+    {
+     "id": "flameBreath",
+     "first": 8,
+     "every": 20,
+     "jitter": 2
+    },
+    {
+     "id": "cleave",
+     "first": 5,
+     "every": 7,
+     "jitter": 1
+    },
+    {
+     "id": "tailSweep",
+     "first": 3,
+     "every": 2,
+     "jitter": 0
+    }
+   ]
+  },
+  {
+   "id": "healBreath",
+   "name": "Healing through Flame Breath",
+   "description": "Already on her. Keep the tank above half through a Breath every 14 seconds; wasted heals count against you.",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "roles": "healer",
+   "actions": [
+    {
+     "id": "flameBreath",
+     "first": 6,
+     "every": 14,
+     "jitter": 1
+    },
+    {
+     "id": "cleave",
+     "first": 5,
+     "every": 7,
      "jitter": 1
     },
     {
@@ -951,7 +1424,7 @@
    {
     "id": "pull",
     "title": "Pull and position",
-    "text": "Onyxia faces whoever she is attacking. Walk to her, press Taunt (1), then walk back to the wall. She will follow you and face the wall, away from the raid.\n\nStay in melee range: your threat builds on its own while you are on her. Dotted outlines show where she should stand and face.",
+    "text": "Onyxia faces whoever she is attacking. Walk to her, press your threat burst (1), then walk back to the wall. She will follow you and face the wall, away from the raid.\n\nStay in melee range: your threat builds on its own while you are on her. Dotted outlines show where she should stand and face.",
     "setup": {
      "bossPassive": false,
      "ghost": true
@@ -964,8 +1437,8 @@
    },
    {
     "id": "taunt",
-    "title": "When to Taunt",
-    "text": "The threat bar shows how close the raid is to pulling her off you. When someone does, she turns on the raid and a red Taunt note marked NOW drops into the lane above your bar.\n\nTaunt (1) the moment she turns. Pressing it early wastes the cooldown; pressing it late costs the raid a Flame Breath.",
+    "title": "When to burst threat",
+    "text": "The threat bar shows how close the raid is to pulling her off you. When someone does, she turns on the raid and a red burst threat note marked NOW drops into the lane above your bar.\n\nyour threat burst (1) the moment she turns. Pressing it early wastes the cooldown; pressing it late costs the raid a Flame Breath.",
     "done": {
      "type": "expectation",
      "id": "retaunt"
@@ -980,7 +1453,7 @@
    {
     "id": "breath",
     "title": "Flame Breath",
-    "text": "Flame Breath is a three second cast that hits a cone in front of her. You take it. The raid must not.\n\nHold your position between her and the wall and let it land on you.",
+    "text": "Flame Breath is a two second cast that hits a cone in front of her. You take it. The raid must not.\n\nHold your position between her and the wall and let it land on you.",
     "trigger": "flameBreath",
     "done": {
      "type": "eventLanded",
@@ -991,7 +1464,7 @@
    {
     "id": "buffet",
     "title": "Wing Buffet",
-    "text": "Wing Buffet knocks you back and cuts your threat. With the wall behind you the knockback goes nowhere.\n\nAfter it lands, get straight back into melee range so your threat rebuilds, and Taunt if she turns.",
+    "text": "Wing Buffet knocks you back and cuts your threat. With the wall behind you the knockback goes nowhere.\n\nAfter it lands, get straight back into melee range so your threat rebuilds, and burst threat if she turns.",
     "trigger": "wingBuffet",
     "done": {
      "type": "expectation",
@@ -1024,7 +1497,7 @@
    {
     "id": "landing",
     "title": "Phase 3: the landing",
-    "text": "At 40% she lands in the centre with her threat reset. Taunt her within five seconds, hold still for a moment so she settles on you, then walk backwards to the wall between the cracks.",
+    "text": "At 40% she lands in the centre with her threat reset. burst threat her within five seconds, hold still for a moment so she settles on you, then walk backwards to the wall between the cracks.",
     "setup": {
      "phase": 3,
      "ghost": true
@@ -1054,7 +1527,8 @@
      "seconds": 6
     }
    }
-  ]
+  ],
+  "roles": "tanks"
  },
  "cues": {
   "notes": "Taunt cues shown in the lane above the ability bar. A note lands when a Taunt is due; early/late are the seconds around it that still count.",
@@ -1070,9 +1544,10 @@
     "offset": 0,
     "early": 0,
     "late": 3.0,
-    "label": "Taunt when she turns on the raid",
+    "label": "Burst threat when she turns on the raid",
     "short": "ON RAID",
-    "tip": "The moment she turns, Taunt. Every second she faces the raid is a Flame Breath waiting to happen."
+    "tip": "The moment she turns, burst threat. Every second she faces the raid is a Flame Breath waiting to happen.",
+    "role": "tanks"
    },
    {
     "id": "tauntLanding",
@@ -1082,10 +1557,10 @@
     "offset": 1.0,
     "early": 1.0,
     "late": 4.0,
-    "role": "mt",
-    "label": "Taunt as she lands",
+    "role": "tank",
+    "label": "Burst threat as she lands",
     "short": "LANDED",
-    "tip": "Her threat table is empty when she lands. Taunt inside the first seconds, then hold still so she settles on you."
+    "tip": "Her threat table is empty when she lands. burst threat inside the first seconds, then hold still so she settles on you."
    },
    {
     "id": "tauntWhelps",
@@ -1098,9 +1573,88 @@
     "role": "offtank",
     "label": "Pick up the whelps",
     "short": "WHELPS",
-    "tip": "Meet the whelps at the cave mouths and Taunt or run into them before they reach the raid.",
+    "tip": "Meet the whelps at the cave mouths and burst threat or run into them before they reach the raid.",
     "doneBy": "whelpPickup"
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4.0,
+    "role": "healer",
+    "label": "Heal the tank when they drop low",
+    "short": "TANK LOW",
+    "tip": "Under half with a breath coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6.0,
+    "role": "healer",
+    "label": "Dispel it",
+    "short": "DISPEL",
+    "tip": "Dispel the moment it lands."
    }
   ]
- }
+ },
+ "raidInfo": {
+  "id": "onyxia",
+  "name": "Onyxia's Lair",
+  "size": 40
+ },
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull her to the wall, hold her facing away from the raid, burst threat when she turns on the raid, pick her up when she lands. She cannot be taunted, so threat is everything.",
+   "abilities": [
+    "taunt"
+   ]
+  },
+  "offtank": {
+   "label": "Whelp off-tank",
+   "short": "Off-tank",
+   "description": "Tank as the main tank does, and in Phase 2 pick up the whelp waves and hold them away from the raid.",
+   "abilities": [
+    "taunt"
+   ]
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay on her flank, clear of the breath cone and the tail, hold your threat under the tank, run for the pickup spot in Phase 2.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand with the raid out of her front, manage threat, dodge Deep Breath lanes in Phase 2.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Keep the tank up through Flame Breath and the landing, stay out of her front and the lanes.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "sources": [
+  "docs/research/onyxia/onyxia.md (Wowhead Classic spell data, DBM/BigWigs timers, cmangos/vmangos scripts, Classic wiki and guides)"
+ ]
 }

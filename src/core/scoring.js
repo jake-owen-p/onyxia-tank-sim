@@ -114,20 +114,34 @@ export function countStatuses(insts) {
   return c;
 }
 
-/** Metrics worth showing for a phase: those named by its expectations plus universal ones. */
+const TANK_ROLES = ['tank', 'offtank', 'mt'];
+
+/** Does a role filter (string or list; 'tanks', 'dps', 'nontank' groups allowed) include `role`? */
+export function roleMatches(spec, role) {
+  if (!spec) return true;
+  const r = role === 'mt' ? 'tank' : role;
+  const list = Array.isArray(spec) ? spec : [spec];
+  return list.some((x) => x === r || (x === 'mt' && r === 'tank') || (x === 'tanks' && TANK_ROLES.includes(r)) || (x === 'dps' && (r === 'melee' || r === 'ranged')) || (x === 'nontank' && !TANK_ROLES.includes(r)));
+}
+
+/**
+ * Metrics worth showing for a phase. A metric definition may limit itself with
+ * `roles` (role filter), `phases` (phase ids) and `bossStates`; the phase's
+ * expectations add the metrics they name.
+ */
 function relevantMetricIds(phaseDef, metricDefs, role) {
-  const ids = new Set(['deaths', 'threatLostCount']);
-  if (!phaseDef) return [...ids];
-  const grounded = phaseDef.bossState === 'grounded';
-  if (grounded) ['bossFacingRaid', 'raidBreathHits', 'raidCleaveHits', 'raidTailHits', 'playerInTail', 'buffetsOffWall'].forEach((m) => ids.add(m));
-  for (const e of phaseDef.expectations) {
-    if (e.role && e.role !== role) continue;
-    if (e.metric) ids.add(e.metric);
+  const ids = new Set();
+  for (const [id, def] of Object.entries(metricDefs)) {
+    if (!roleMatches(def.roles, role)) continue;
+    if (def.phases && phaseDef && !def.phases.includes(phaseDef.id)) continue;
+    if (def.bossStates && phaseDef && !def.bossStates.includes(phaseDef.bossState || 'grounded')) continue;
+    ids.add(id);
   }
-  if (phaseDef.id === 2) ids.add('playerInLane');
-  if (phaseDef.id === 3) { ids.add('playerInCrack'); ids.add('pickupTime'); }
-  if (role === 'offtank' && phaseDef.id === 2) ids.add('whelpsOnRaid');
-  return [...ids].filter((m) => metricDefs[m]);
+  if (phaseDef) for (const e of phaseDef.expectations) {
+    if (!roleMatches(e.role, role)) continue;
+    if (e.metric && metricDefs[e.metric]) ids.add(e.metric);
+  }
+  return [...ids];
 }
 
 /**
@@ -148,6 +162,7 @@ export function topFixes(script, log, phases, cueLog = []) {
   // Metric tips come from the expectation that names the metric, or a generic line.
   const metricTip = {};
   for (const p of script.phases) for (const e of p.expectations) if (e.metric) metricTip[e.metric] = { title: e.label, tip: e.tip };
+  for (const [id, def] of Object.entries(script.continuousMetrics || {})) if (def.tip && !metricTip[id]) metricTip[id] = { title: def.label, tip: def.tip };
   for (const p of phases) {
     for (const m of p.metrics) {
       if (!m.severe || m.penalty <= 0) continue;

@@ -51,7 +51,7 @@ export function scorecardScreen({ score, scenario, sim, best, isNewBest, onRepla
   const el = h('div', { class: 'panel panel-wide panel-score' },
     h('div', { class: 'score-head' },
       h('div', {},
-        h('div', { class: 'kicker', text: scenario.name + (sim.state.role === 'offtank' ? ' · Whelp off-tank' : ' · Main tank') }),
+        h('div', { class: 'kicker', text: `${scenario.name} · ${roleLabel(sim.script, sim.state.role)}` }),
         h('h2', { text: sim.state.result === 'victory' ? 'Onyxia down' : isDrill ? 'Drill complete' : 'Run ended' }),
         h('div', { class: 'muted', text: `${formatTime(sim.state.t)} · ${isNewBest ? 'New best' : best != null ? `Best ${best}` : ''}` }),
         score.cues && score.cues.total ? h('div', { class: 'muted', text: `${score.cues.perfect}/${score.cues.total} Taunts on the note · best streak ${score.cues.bestCombo}` }) : null,
@@ -70,6 +70,11 @@ export function scorecardScreen({ score, scenario, sim, best, isNewBest, onRepla
     ),
   );
   return arrowNav(el);
+}
+
+export function roleLabel(script, role) {
+  const r = script && script.roles && script.roles[role];
+  return r ? r.label : ({ tank: 'Main tank', offtank: 'Off-tank', melee: 'Melee DPS', ranged: 'Ranged DPS', healer: 'Healer' }[role] || role);
 }
 
 export function formatTime(t) {

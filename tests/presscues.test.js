@@ -155,6 +155,6 @@ test('snapshot carries the cue lane state and the jump height', () => {
   assert.ok(snap.cues.beats.some((b) => b.cue === 'tauntLost'));
   assert.ok(snap.world.player.z > 0);
   assert.equal(snap.abilities.buffs, undefined);
-  assert.equal(snap.debuffs, undefined);
+  assert.ok(Array.isArray(snap.debuffs));
   JSON.stringify(snap);
 });

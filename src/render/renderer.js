@@ -17,7 +17,8 @@ export function createRenderer(canvas, script) {
   const ctx = canvas.getContext('2d');
   const cam = createCamera();
   const threatCfg = { pullMultiplier: script.threat.pullMultiplier };
-  const ratioFn = (threat) => threatRatio(threat, threatCfg);
+  let ratioRole = true;
+  const ratioFn = (threat) => threatRatio(threat, threatCfg, ratioRole);
 
   let view = 'pov';
   let dpr = 1;
@@ -94,6 +95,7 @@ export function createRenderer(canvas, script) {
     }
     if (!fade) drawWorld(view, v, settings, pal, now, dtReal);
 
+    ratioRole = v.tankRole !== false;
     if (!overlay.idle) drawHUD(ctx, v, script, { ...settings, view }, pal, width, height, now, abilityKeys, overlay, ratioFn);
     if (overlay.dim) {
       ctx.fillStyle = pal.pause;

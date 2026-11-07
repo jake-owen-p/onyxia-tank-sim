@@ -32,9 +32,10 @@ export function settingsScreen({ settings, keybinds, input, audio, script, onBac
   const secs = (v) => `${Math.round(v)}s`;
 
   // ---- phase durations
+  const pd = settings.phaseDurations[script.id] || (settings.phaseDurations[script.id] = {});
   const durationFields = script.phases.map((p) => {
-    const inp = h('input', { type: 'number', min: 20, max: 600, step: 5, value: settings.phaseDurations[p.id], 'aria-label': p.name });
-    inp.addEventListener('change', () => { settings.phaseDurations[p.id] = Math.max(20, Math.min(600, parseInt(inp.value, 10) || p.duration)); changed(); });
+    const inp = h('input', { type: 'number', min: 20, max: 600, step: 5, value: pd[p.id] ?? p.duration, 'aria-label': p.name });
+    inp.addEventListener('change', () => { pd[p.id] = Math.max(20, Math.min(600, parseInt(inp.value, 10) || p.duration)); changed(); });
     return h('div', { class: 'field' }, h('label', { text: `${p.name} · ${p.subtitle}` }), inp, h('span', { class: 'val muted', text: `default ${p.duration}s` }));
   });
 
@@ -93,7 +94,7 @@ export function settingsScreen({ settings, keybinds, input, audio, script, onBac
       h('section', {},
         h('h3', { text: 'Fight' }),
         h('p', { class: 'section-hint', text: 'Who you are tanking as, how fast the sim runs, and how much warning you get.' }),
-        select('role', 'Role', [['mt', 'Main tank'], ['offtank', 'Whelp off-tank']]),
+        select('role', 'Role', Object.entries(script.roles || { tank: { label: 'Main tank' } }).map(([id, r]) => [id, r.label])),
         slider('speed', 'Speed', 0.25, 1, 0.05),
         slider('warningLead', 'Warning lead time', 3, 8, 0.5, secs),
         toggle('cueLane', 'Taunt note lane'),

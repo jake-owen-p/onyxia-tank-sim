@@ -7,7 +7,8 @@ const KEYS = { settings: PREFIX + 'settings', binds: PREFIX + 'binds', history: 
 export const DEFAULT_SETTINGS = {
   view: 'pov',
   speed: 1,
-  role: 'mt',
+  role: 'tank',
+  encounter: 'onyxia/onyxia',
   warningLead: 5,
   cueLane: true,
   laneLead: 3,
@@ -20,8 +21,12 @@ export const DEFAULT_SETTINGS = {
   muted: false,
   voiceCountdown: true,
   cueVolumes: {},
-  phaseDurations: { 1: 110, 2: 80, 3: 130 },
+  phaseDurations: {},               // { [scriptId]: { [phaseId]: seconds } }
 };
+
+function isLocalDev() {
+  try { const hn = typeof location !== 'undefined' ? location.hostname : ''; return hn === 'localhost' || hn === '127.0.0.1' || hn === ''; } catch { return false; }
+}
 
 function store() {
   try { return typeof localStorage !== 'undefined' ? localStorage : null; } catch { return null; }
@@ -42,8 +47,13 @@ function write(key, value) {
 export function loadSettings() {
   const stored = read(KEYS.settings, {});
   const out = { ...DEFAULT_SETTINGS, ...(stored || {}) };
+  if (out.role === 'mt') out.role = 'tank';
+  // Development is silent: on a local server the app starts muted regardless of the saved setting.
+  if (isLocalDev()) out.muted = true;
   out.cueVolumes = { ...(stored && stored.cueVolumes ? stored.cueVolumes : {}) };
-  out.phaseDurations = { ...DEFAULT_SETTINGS.phaseDurations, ...(stored && stored.phaseDurations ? stored.phaseDurations : {}) };
+  const pd = stored && stored.phaseDurations ? stored.phaseDurations : {};
+  // Older saves kept a flat { 1, 2, 3 } for Onyxia; nest it under its script id.
+  out.phaseDurations = Object.keys(pd).some((k) => /^\d+$/.test(k)) ? { onyxia: { ...pd } } : { ...pd };
   return out;
 }
 export function saveSettings(settings) { return write(KEYS.settings, settings); }

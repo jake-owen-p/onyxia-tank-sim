@@ -1,0 +1,13 @@
+{
+  "raids": [
+    { "id": "onyxia", "name": "Onyxia's Lair", "size": 40, "bosses": [
+      { "id": "onyxia", "name": "Onyxia", "file": "onyxia.json", "status": "ready" }
+    ]},
+    { "id": "molten-core", "name": "Molten Core", "size": 40, "bosses": [] },
+    { "id": "blackwing-lair", "name": "Blackwing Lair", "size": 40, "bosses": [] },
+    { "id": "zul-gurub", "name": "Zul'Gurub", "size": 20, "bosses": [] },
+    { "id": "ruins-of-ahnqiraj", "name": "Ruins of Ahn'Qiraj", "size": 20, "bosses": [] },
+    { "id": "temple-of-ahnqiraj", "name": "Temple of Ahn'Qiraj", "size": 40, "bosses": [] },
+    { "id": "naxxramas", "name": "Naxxramas", "size": 40, "bosses": [] }
+  ]
+}

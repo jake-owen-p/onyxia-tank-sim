@@ -73,23 +73,27 @@ test('pull: on time when the tank drags her to the wall, missed when the tank st
   assert.ok(Math.abs(pull2[0].t - (e2.t + def.within + def.grace)) < 0.05, 'missed exactly at the end of the grace window');
 });
 
-test('Wing Buffet: the wall stops the knockback, threat is cut, wall and rebuild expectations resolve', () => {
+test('Wing Buffet: the wall stops the knockback; Knock Away cuts threat, she turns, the rebuild waits for the Taunt', () => {
   const sim = makeSim({ start: 'wall', manual: true });
   const s = sim.state, p = s.world.player;
-  s.threat.player = 6000; s.threat.raid = 4500;   // the 35% cut drops the tank under the raid
+  s.threat.player = 6000; s.threat.raid = 5200;   // a quarter off 6000 leaves 4500, under the raid's pull threshold
   const before = { x: p.x, y: p.y };
   assert.ok(sim.triggerAction('wingBuffet'));
   assert.equal(s.world.boss.cast.id, 'wingBuffet');
-  const ev = run(sim, 2);
-  assert.equal(actions(ev, 'wingBuffet').length, 1);
-  assert.ok(ev.some((e) => e.type === 'knockback' && e.offWall === false));
-  // The tank spot sits 4 yards off the wall, so a 22-yard knockback is clipped to under 4.
+  const ev0 = run(sim, 1.5);
+  assert.equal(actions(ev0, 'wingBuffet').length, 1);
+  assert.ok(ev0.some((e) => e.type === 'knockback' && e.offWall === false));
+  // The tank spot sits 4 yards off the wall, so the knockback is clipped to under 4.
   assert.ok(dist(before.x, before.y, p.x, p.y) < 4.5, 'the wall clips the knockback');
   assert.ok(dist(p.x, p.y, 0, 54) < 0.5, 'pinned against the back wall');
-  const cut = 6000 * (1 - script.threat.buffetCut);
-  assert.ok(s.threat.player >= cut - 1 && s.threat.player < cut + 150, `threat cut to ~${cut}, got ${s.threat.player}`);
-  assert.equal(expectations(ev, 'wall')[0].status, 'ontime');
+  assert.ok(Math.abs(s.threat.player - 6000) < 200, 'Wing Buffet does not cut threat');
+  assert.equal(expectations(ev0, 'wall')[0].status, 'ontime');
   assert.equal(s.metrics.buffetsOffWall, undefined);
+  // Knock Away cuts a quarter: 6000 -> 4500 against the raid's 4500 x 1.1 pull threshold, she turns.
+  assert.ok(sim.triggerAction('knockAway'));
+  const ev = run(sim, 0.5);
+  const cut = 6000 * (1 - script.actions.knockAway.threatCut);
+  assert.ok(s.threat.player >= cut - 1 && s.threat.player < cut + 150, `threat cut to ~${cut}, got ${s.threat.player}`);
   // The cut puts the raid above the tank: she turns, and the rebuild stays pending until we Taunt her back.
   assert.ok(ev.some((e) => e.type === 'threatLost'));
   assert.equal(s.world.boss.target, 'raid');
@@ -111,17 +115,22 @@ test('Wing Buffet flush against the wall barely moves the tank', () => {
   assert.ok(p.y - 53.5 < 1);
 });
 
-test('Wing Buffet away from the wall: full knockback, wall expectation missed, rebuild missed without a Taunt', () => {
+test('Knock Away off the wall: full knockback, wall expectation missed, rebuild missed without a Taunt', () => {
   const sim = makeSim({ start: 'wall', manual: true });
   const s = sim.state, p = s.world.player, b = s.world.boss;
   b.x = 0; b.y = 20; p.x = 0; p.y = 30;
-  s.threat.player = 6000; s.threat.raid = 4500;   // the cut drops the tank under the raid and she turns
+  s.threat.player = 6000; s.threat.raid = 5200;   // the Knock Away cut drops the tank under the raid and she turns
   sim.triggerAction('wingBuffet');
   const ev = run(sim, 2);
   assert.ok(ev.some((e) => e.type === 'knockback' && e.offWall === true));
   assert.ok(p.y - 30 > 5, 'pushed well away from her');
   assert.equal(expectations(ev, 'wall')[0].status, 'missed');
   assert.equal(s.metrics.buffetsOffWall, 1);
+  // walk back in and take the Knock Away that turns her
+  p.x = 0; p.y = 30;
+  sim.triggerAction('knockAway');
+  run(sim, 0.5);
+  assert.ok(s.threat.player < 4800, 'a quarter of the threat is gone');
   const def = script.phases[0].expectations.find((e) => e.id === 'rebuild');
   const ev2 = run(sim, def.within + def.grace + 1);
   const rebuild = expectations(ev2, 'rebuild');
@@ -233,8 +242,8 @@ test('Deep Breath lane: standing in it burns, standing outside is on time', () =
   assert.ok(ev.some((e) => e.type === 'hazardActive' && e.kind === 'lane'));
   assert.ok(ev.some((e) => e.type === 'damage' && e.source === 'deepBreath'));
   assert.ok(p.hp < hpBefore);
-  assert.ok(s.metrics.playerInLane > 0);
-  const ev2 = run(sim, 3);
+  assert.ok(s.metrics.playerInHazard > 0);
+  const ev2 = run(sim, script.actions.deepBreath.active + 0.5);
   const laneExp = expectations([...ev, ...ev2], 'lane');
   assert.equal(laneExp.length, 1);
   assert.equal(laneExp[0].status, 'missed');
@@ -247,7 +256,7 @@ test('Deep Breath lane: standing in it burns, standing outside is on time', () =
   sim2.state.world.player.x = out.x; sim2.state.world.player.y = out.y;
   const evB = run(sim2, script.actions.deepBreath.warning + 1);
   assert.equal(expectations(evB, 'lane')[0].status, 'ontime');
-  assert.equal(sim2.state.metrics.playerInLane, undefined);
+  assert.equal(sim2.state.metrics.playerInHazard, undefined);
 });
 
 test('the ideal position steps out of a lane that covers the pickup spot', () => {
@@ -299,7 +308,7 @@ test('whelps: off-tank waves target the raid and are picked up by proximity; MT 
   const ot = makeSim({ role: 'offtank', startPhase: 2, start: 'pickup', manual: true });
   ot.triggerAction('whelpWave');
   const ws = ot.state.world.whelps;
-  assert.equal(ws.length, script.actions.whelpWave.perCave * 2);
+  assert.equal(ws.length, (script.actions.whelpWave.count || script.actions.whelpWave.perCave) * 2);
   assert.ok(ws.every((w) => w.target === 'raid'));
   // walk the player onto one whelp
   const w0 = ws[0];

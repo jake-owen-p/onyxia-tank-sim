@@ -7,6 +7,7 @@ import { rad, dist } from '../core/geometry.js';
 import { project, projectPoly, projectSegment, depthOf, sortByDepth, horizonY } from './projection.js';
 import { bossFootprint, localToWorld, traceScreenPoly, conePoly, circlePoly, whelpPoly } from './shapes.js';
 import { withAlpha } from './palette.js';
+import { spotTolerance } from './topdown.js';
 
 const FAR = 130;              // fade-out distance for world detail
 const GRID = 5;
@@ -170,26 +171,33 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
   }
 
   // --- cones on the floor (grounded, engaged)
-  const cones = script.boss.cones;
+  const cones = script.boss.cones || {};
   const grounded = boss.state === 'grounded';
   if (grounded && boss.engaged) {
-    const cleaveFlash = Math.max(0, 1 - (t - wd.coneFlash.cleave) / 0.4);
-    const tailFlash = Math.max(0, 1 - (t - wd.coneFlash.tail) / 0.4);
-    floorPoly(ctx, cam, conePoly(boss.x, boss.y, boss.heading, rad(cones.cleave.angle), cones.cleave.range).map(([x, y]) => [x, y, 0.03]), w, h,
-      cleaveFlash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * cleaveFlash) : withAlpha(pal.coneCleave, 0.06), pal.coneCleaveStroke, 1);
-    floorPoly(ctx, cam, conePoly(boss.x, boss.y, boss.heading + Math.PI, rad(cones.tail.angle), cones.tail.range).map(([x, y]) => [x, y, 0.03]), w, h,
-      tailFlash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * tailFlash) : withAlpha(pal.coneTail, 0.06), pal.coneTailStroke, 1);
     const cast = boss.cast;
-    const breathFlash = Math.max(0, 1 - (t - wd.coneFlash.breath) / 0.6);
-    if ((cast && cast.id === 'flameBreath') || breathFlash) {
-      const prog = cast ? Math.min(1, (t - cast.start) / (cast.end - cast.start)) : 1;
-      const a = cast ? 0.12 + 0.4 * prog : 0.5 * breathFlash;
-      floorPoly(ctx, cam, conePoly(boss.x, boss.y, boss.heading, rad(cones.breath.angle), cones.breath.range).map(([x, y]) => [x, y, 0.04]), w, h,
-        withAlpha(pal.hazardActive, a), withAlpha(pal.coneBreathStroke, 0.5 + 0.5 * prog), 2);
+    const castDef = cast && script.actions[cast.id];
+    for (const [name, c] of Object.entries(cones)) {
+      const style = c.style || (c.facing === 'back' ? 'tail' : name === 'breath' ? 'breath' : 'cleave');
+      const flash = Math.max(0, 1 - (t - (wd.coneFlash[name] ?? -Infinity)) / (style === 'breath' ? 0.6 : 0.4));
+      const heading = boss.heading + (c.facing === 'back' ? Math.PI : 0);
+      const casting = castDef && castDef.cone === name;
+      if (style === 'breath' && !casting && !flash) continue;
+      const poly = conePoly(boss.x, boss.y, heading, rad(c.angle), c.range).map(([x, y]) => [x, y, style === 'breath' ? 0.04 : 0.03]);
+      if (casting) {
+        const prog = Math.min(1, (t - cast.start) / (cast.end - cast.start));
+        floorPoly(ctx, cam, poly, w, h, withAlpha(pal.hazardActive, 0.12 + 0.4 * prog), withAlpha(pal.coneBreathStroke, 0.5 + 0.5 * prog), 2);
+      } else if (style === 'breath') {
+        floorPoly(ctx, cam, poly, w, h, withAlpha(pal.hazardActive, 0.5 * flash), withAlpha(pal.coneBreathStroke, flash), 2);
+      } else if (style === 'tail') {
+        floorPoly(ctx, cam, poly, w, h, flash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * flash) : withAlpha(pal.coneTail, 0.06), pal.coneTailStroke, 1);
+      } else {
+        floorPoly(ctx, cam, poly, w, h, flash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * flash) : withAlpha(pal.coneCleave, 0.06), pal.coneCleaveStroke, 1);
+      }
     }
-    const buffetFlash = Math.max(0, 1 - (t - wd.coneFlash.buffet) / 0.7);
-    if (buffetFlash) {
-      floorPoly(ctx, cam, circlePoly(boss.x, boss.y, R + (1 - buffetFlash) * script.actions.wingBuffet.knockbackRange, 28).map(([x, y]) => [x, y, 0.05]), w, h,
+    const kb = Object.values(script.actions).find((a) => a.kind === 'knockback');
+    const buffetFlash = Math.max(0, 1 - (t - (wd.coneFlash.knockback ?? -Infinity)) / 0.7);
+    if (buffetFlash && kb) {
+      floorPoly(ctx, cam, circlePoly(boss.x, boss.y, R + (1 - buffetFlash) * kb.knockbackRange, 28).map(([x, y]) => [x, y, 0.05]), w, h,
         null, withAlpha(pal.buffetRing, buffetFlash), 3);
     }
   }
@@ -228,7 +236,7 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
   // --- glowing path to the ideal player spot
   const ideal = wd.idealPlayer;
   if (ideal && ideal.reason !== 'wait') {
-    const tol = ideal.reason === 'tankSpot' ? (script.positions.tankSpot.tolerance ?? 4) : (ideal.reason === 'pickupSpot' || ideal.reason === 'dodgeLane') ? (script.positions.pickupSpot.tolerance ?? 6) : 3;
+    const tol = spotTolerance(script, ideal.reason);
     const pulse = 0.5 + 0.5 * Math.sin(now * 3);
     floorPoly(ctx, cam, circlePoly(ideal.x, ideal.y, tol, 24).map(([x, y]) => [x, y, 0.06]), w, h, pal.idealFill, withAlpha(pal.ideal, 0.6), 1.5);
     floorPoly(ctx, cam, circlePoly(ideal.x, ideal.y, tol * (0.35 + pulse * 0.25), 20).map(([x, y]) => [x, y, 0.07]), w, h, withAlpha(pal.ideal, 0.25 + pulse * 0.2), null);
@@ -267,7 +275,7 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
     const d = depthOf(cam, wh.x, wh.y, 0);
     if (d > 0) items.push({ depth: d, kind: 'whelp', wh });
   }
-  if ((settings.ghostAlpha ?? 0.6) > 0.01 && wd.ghost) items.push({ depth: depthOf(cam, wd.ghost.x, wd.ghost.y, 1), kind: 'ghost' });
+  if (((settings.ghostAlpha ?? 0.6) > 0.01 || wd.ghost.tanking) && wd.ghost) items.push({ depth: depthOf(cam, wd.ghost.x, wd.ghost.y, 1), kind: 'ghost' });
   items.push({ depth: depthOf(cam, p.x, p.y, 1), kind: 'player' });
   for (const pr of wd.projectiles) {
     const k = Math.max(0, Math.min(1, (t - pr.t0) / (pr.t1 - pr.t0)));
@@ -319,7 +327,7 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
         ctx.globalAlpha = 1;
         break;
       }
-      case 'ghost': drawFigure(ctx, cam, wd.ghost.x, wd.ghost.y, wd.ghost.heading, w, h, pal.ghost, settings.ghostAlpha ?? 0.6, true, now); break;
+      case 'ghost': drawFigure(ctx, cam, wd.ghost.x, wd.ghost.y, wd.ghost.heading, w, h, pal.ghost, wd.ghost.tanking ? 1 : (settings.ghostAlpha ?? 0.6), !wd.ghost.tanking, now); break;
       case 'player': drawFigure(ctx, cam, p.x, p.y, p.heading, w, h, pal.player, 1, false, now, p.fearedUntil > t, pal.playerStroke, p.z || 0); break;
       case 'proj': {
         const pr = it.pr;

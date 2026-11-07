@@ -21,7 +21,8 @@ const EVENT_CUES = {
   threatLost: 'threatLost', feared: 'feared', phase: 'phase', knockback: null, death: 'missed',
 };
 
-export function createAudio(settings) {
+export function createAudio(settings, initialScript = null) {
+  let script = initialScript;
   let ctx = null;
   let master = null;
   let unlocked = false;
@@ -145,21 +146,21 @@ export function createAudio(settings) {
       if (voiceOk) { try { speechSynthesis.getVoices(); } catch { /* ignore */ } }
     },
     play,
+    /** The encounter script whose action definitions name the cues. */
+    setScript(s) { script = s; },
     /** Map core events to cues. */
     handleEvent(evt) {
       switch (evt.type) {
         case 'expectation': play(evt.status); break;
         case 'beat': play(evt.status === 'perfect' ? 'beatPerfect' : evt.status === 'good' ? 'beatGood' : 'beatMiss'); break;
         case 'hazardActive': play(evt.kind === 'lane' ? 'deepBreath' : 'eruption'); break;
-        case 'cast': if (evt.id === 'flameBreath') play('breath'); else if (evt.id === 'bellowingRoar') play('roar'); break;
-        case 'action':
-          if (evt.id === 'cleave') play('cleave');
-          else if (evt.id === 'tailSweep') play('tail');
-          else if (evt.id === 'landing') play('landing');
-          else if (evt.id === 'takeoff') play('takeoff');
-          else if (evt.id === 'whelpWave') play('whelps');
-          else if (evt.id === 'wingBuffet') play('buffet');
+        case 'cast': { const d = script && script.actions[evt.id]; if (d && d.cue) play(d.cue); break; }
+        case 'action': {
+          const d = script && script.actions[evt.id];
+          // casts already played their cue when the cast bar appeared
+          if (d && d.cue && !(d.cast > 0)) play(d.cue);
           break;
+        }
         default: {
           const c = EVENT_CUES[evt.type];
           if (c) play(c);

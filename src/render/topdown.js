@@ -230,34 +230,42 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
     }
   }
 
-  // --- cones
+  // --- cones (every cone the boss has; the one being cast fills in as the cast bar runs)
   const grounded = boss.state === 'grounded';
-  const cones = script.boss.cones;
+  const cones = script.boss.cones || {};
   if (grounded && boss.engaged) {
-    const cleaveFlash = Math.max(0, 1 - (t - w.coneFlash.cleave) / 0.4);
-    const tailFlash = Math.max(0, 1 - (t - w.coneFlash.tail) / 0.4);
-    ctx.lineWidth = lw(1.2);
-    ctx.fillStyle = cleaveFlash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * cleaveFlash) : pal.coneCleave;
-    ctx.strokeStyle = pal.coneCleaveStroke;
-    ctx.beginPath(); tracePoly(ctx, conePoly(boss.x, boss.y, boss.heading, rad(cones.cleave.angle), cones.cleave.range)); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = tailFlash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * tailFlash) : pal.coneTail;
-    ctx.strokeStyle = pal.coneTailStroke;
-    ctx.beginPath(); tracePoly(ctx, conePoly(boss.x, boss.y, boss.heading + Math.PI, rad(cones.tail.angle), cones.tail.range)); ctx.fill(); ctx.stroke();
     const cast = boss.cast;
-    const breathFlash = Math.max(0, 1 - (t - w.coneFlash.breath) / 0.6);
-    if ((cast && cast.id === 'flameBreath') || breathFlash) {
-      const prog = cast ? Math.min(1, (t - cast.start) / (cast.end - cast.start)) : 1;
-      const a = cast ? 0.12 + 0.4 * prog : 0.5 * breathFlash;
-      ctx.fillStyle = withAlpha(pal.hazardActive, a);
-      ctx.strokeStyle = withAlpha(pal.coneBreathStroke, 0.5 + 0.5 * prog);
-      ctx.lineWidth = lw(2);
-      ctx.beginPath(); tracePoly(ctx, conePoly(boss.x, boss.y, boss.heading, rad(cones.breath.angle), cones.breath.range)); ctx.fill(); ctx.stroke();
+    const castDef = cast && script.actions[cast.id];
+    for (const [name, c] of Object.entries(cones)) {
+      const flash = Math.max(0, 1 - (t - (w.coneFlash[name] ?? -Infinity)) / (c.style === 'breath' ? 0.6 : 0.4));
+      const heading = boss.heading + (c.facing === 'back' ? Math.PI : 0);
+      const style = c.style || (c.facing === 'back' ? 'tail' : name === 'breath' ? 'breath' : 'cleave');
+      const casting = castDef && castDef.cone === name;
+      if (style === 'breath' && !casting && !flash) continue;   // big frontal breaths only show while telegraphed
+      const poly = conePoly(boss.x, boss.y, heading, rad(c.angle), c.range);
+      ctx.lineWidth = lw(style === 'breath' ? 2 : 1.2);
+      if (casting) {
+        const prog = Math.min(1, (t - cast.start) / (cast.end - cast.start));
+        ctx.fillStyle = withAlpha(pal.hazardActive, 0.12 + 0.4 * prog);
+        ctx.strokeStyle = withAlpha(pal.coneBreathStroke, 0.5 + 0.5 * prog);
+      } else if (style === 'breath') {
+        ctx.fillStyle = withAlpha(pal.hazardActive, 0.5 * flash);
+        ctx.strokeStyle = withAlpha(pal.coneBreathStroke, flash);
+      } else if (style === 'tail') {
+        ctx.fillStyle = flash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * flash) : pal.coneTail;
+        ctx.strokeStyle = pal.coneTailStroke;
+      } else {
+        ctx.fillStyle = flash ? withAlpha(pal.hazardActive, 0.12 + 0.33 * flash) : pal.coneCleave;
+        ctx.strokeStyle = pal.coneCleaveStroke;
+      }
+      ctx.beginPath(); tracePoly(ctx, poly); ctx.fill(); ctx.stroke();
     }
-    const buffetFlash = Math.max(0, 1 - (t - w.coneFlash.buffet) / 0.7);
-    if (buffetFlash) {
+    const kb = Object.values(script.actions).find((a) => a.kind === 'knockback');
+    const buffetFlash = Math.max(0, 1 - (t - (w.coneFlash.knockback ?? w.coneFlash.buffet ?? -Infinity)) / 0.7);
+    if (buffetFlash && kb) {
       ctx.strokeStyle = withAlpha(pal.buffetRing, buffetFlash);
       ctx.lineWidth = lw(3);
-      ctx.beginPath(); ctx.arc(boss.x, boss.y, R + (1 - buffetFlash) * script.actions.wingBuffet.knockbackRange, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(boss.x, boss.y, R + (1 - buffetFlash) * kb.knockbackRange, 0, Math.PI * 2); ctx.stroke();
     }
   }
 
@@ -276,14 +284,14 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   // --- boss
   const airborne = boss.state !== 'grounded';
   if (airborne) {
-    const lift = (boss.z || 0) / Math.max(1, script.hoverHeight);
+    const lift = (boss.z || 0) / Math.max(1, script.hoverHeight || 1);
     drawBossFlat(ctx, boss.x + lift * 2, boss.y - lift * 2, boss.heading, R, { fill: pal.bossShadow, alpha: 0.6 * lift + 0.2 });
     drawBossFlat(ctx, boss.x, boss.y, boss.heading, R * (1 + 0.18 * lift), { fill: withAlpha(pal.boss, 0.3), stroke: pal.bossStroke, front: pal.bossFront, dashed: true, lineWidth: lw(2) });
     if (!compact && boss.state === 'airborne') worldText(ctx, tr, 'AIRBORNE', boss.x, boss.y - R * 2.2, Math.max(10, s * 3), pal.bossStroke, pal.fontDisplay);
   } else {
     const hit = Math.max(0, 1 - (t - boss.lastHit) / 0.25);
     drawBossFlat(ctx, boss.x, boss.y, boss.heading, R, { fill: hit ? withAlpha(pal.bossStroke, 0.45) : pal.boss, stroke: pal.bossStroke, front: pal.bossFront, lineWidth: lw(2) });
-    if (boss.target === 'raid' && boss.engaged) {
+    if ((boss.target === 'raid' || (boss.target === 'player' && view.tankRole === false)) && boss.engaged) {
       const pulse = 0.5 + 0.5 * Math.sin(now * 10);
       ctx.strokeStyle = withAlpha(pal.bad, 0.4 + pulse * 0.5); ctx.lineWidth = lw(3);
       ctx.beginPath(); ctx.arc(boss.x, boss.y, R * 1.2, 0, Math.PI * 2); ctx.stroke();
@@ -304,9 +312,11 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
     }
   }
 
-  // --- ghost tank
+  // --- ghost tank: a dashed guide in the tank roles, the raid's solid tank otherwise
   const ga = settings.ghostAlpha ?? 0.6;
-  if (ga > 0.01 && w.ghost) {
+  if (w.ghost && w.ghost.tanking) {
+    drawFigureFlat(ctx, w.ghost.x, w.ghost.y, w.ghost.heading, { fill: withAlpha(pal.ghost, 0.7), stroke: pal.ghost, alpha: 1, dashed: false, lineWidth: lw(1.5), radius: compact ? 1.5 : 1.1, shield: pal.ghost });
+  } else if (ga > 0.01 && w.ghost) {
     drawFigureFlat(ctx, w.ghost.x, w.ghost.y, w.ghost.heading, { fill: withAlpha(pal.ghost, 0.25), stroke: pal.ghost, alpha: ga, dashed: true, lineWidth: lw(1.5), radius: compact ? 1.5 : 1.1, shield: pal.ghost });
   }
 
@@ -324,9 +334,12 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   ctx.restore();
 }
 
-function spotTolerance(script, reason) {
+export function spotTolerance(script, reason) {
   const P = script.positions;
-  if (reason === 'tankSpot') return P.tankSpot.tolerance ?? 4;
-  if (reason === 'pickupSpot' || reason === 'dodgeLane') return P.pickupSpot.tolerance ?? 6;
+  if (reason === 'tankSpot') return (P.tankSpot && P.tankSpot.tolerance) ?? 4;
+  if (reason === 'pickupSpot' || reason === 'dodgeLane' || reason === 'dodgeZone') return (P.pickupSpot && P.pickupSpot.tolerance) ?? 6;
+  if (P[reason] && P[reason].tolerance != null) return P[reason].tolerance;
+  if (reason === 'meleeSpot') return 3;
+  if (reason === 'rangedSpot' || reason === 'healerSpot' || reason === 'raidSpot') return 8;
   return 3;
 }

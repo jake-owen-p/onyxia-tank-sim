@@ -53,6 +53,34 @@ export function perfectTank() {
   };
 }
 
+/**
+ * Scripted bots for the other roles. They follow the sim's ideal position for
+ * their role and use their one or two buttons sensibly:
+ *  - dps: attack on every global unless the HUD says hold, she is loose, or the raid is holding after the pull
+ *  - healer: heal when the tank is under the low-health line, dispel whenever something is up
+ */
+export function roleBot(role) {
+  if (role === 'tank' || role === 'offtank' || role === 'mt') return perfectTank();
+  return (sim) => {
+    const s = sim.state;
+    const p = s.world.player, b = s.world.boss, g = s.world.ghost, ideal = s.world.idealPlayer;
+    const close = dist(p.x, p.y, ideal.x, ideal.y) < 1.5;
+    const face = b.state === 'grounded' && b.engaged && close ? b : null;
+    const cmd = driveToward(sim, ideal, face);
+    const gcdReady = s.abilities.gcdUntil <= s.t;
+    if (!gcdReady || p.fearedUntil > s.t) return cmd;
+    if (role === 'healer') {
+      if (s.debuffs.some((d) => d.dispel !== 'none') && s.abilities.list.includes('dispel')) cmd.abilities.push('dispel');
+      else if (g.hp / g.maxHp < 0.8) cmd.abilities.push('heal');
+      return cmd;
+    }
+    const live = b.state === 'grounded' && b.engaged && !b.passive;
+    const holding = s.engagedAt != null && s.landedAt == null && s.t - s.engagedAt < script.raid.holdAfterPull;
+    if (live && b.target === 'ghost' && !s.feedback.holdAttack && !holding && s.feedback.inRangeOk) cmd.abilities.push('attack');
+    return cmd;
+  };
+}
+
 export const idle = () => ({ forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [], jump: false });
 
 /** Step the sim for `seconds` using cmdFn(sim) each tick; returns all events emitted. */

@@ -26,13 +26,34 @@ export function createLane(laneDef, actionDef, t) {
   };
 }
 
+/** A circular (or polygon) zone in its warning state: a void zone, fire patch, meteor landing. */
+export function createZone(poly, actionDef, t, label = null, extra = {}) {
+  return {
+    uid: ++uid,
+    id: extra.id || `zone${uid}`,
+    kind: 'zone',
+    label: label || actionDef.label,
+    poly,
+    centroid: polyCentroid(poly),
+    radius: extra.radius || null,
+    state: 'warning',
+    warnAt: t,
+    activeAt: t + (actionDef.warning || 0),
+    endsAt: t + (actionDef.warning || 0) + (actionDef.active || 5),
+    damage: actionDef.damage || 0,
+    tick: !!actionDef.tick,          // damage every second inside instead of once
+    nextTickAt: 0,
+    hitPlayer: false,
+  };
+}
+
 /** Persistent crack polygons for phase 3, idle until an Eruption pulses them. */
-export function createCracks(crackPolys) {
+export function createCracks(crackPolys, label = 'Eruption') {
   return crackPolys.map((poly, i) => ({
     uid: ++uid,
     id: `crack${i}`,
     kind: 'crack',
-    label: 'Eruption',
+    label,
     poly,
     centroid: polyCentroid(poly),
     state: 'idle',
