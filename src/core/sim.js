@@ -945,7 +945,7 @@ export function createSim(script, options = {}) {
       Object.assign(b, { x: bs.x, y: bs.y, z: 0, heading: rad(bs.heading), state: 'grounded', engaged: true, target: tankTarget(), cast: null, transition: null });
       if (tankRole) { Object.assign(w.player, { x: ts.x, y: ts.y, heading: rad(270) }); state.threat.player = 6000; state.threat.raid = 3000; }
       else { Object.assign(g, { x: ts.x, y: ts.y, heading: rad(270) }); state.threat.ghost = 6000; state.threat.player = 0; state.threat.raid = 0; }
-      state.engagedAt = state.t;
+      state.engagedAt = state.t - script.raid.holdAfterPull;   // already tanking: the raid is not holding any more
       placeRaid(state.phaseDef ? state.phaseDef.raidSpot : 'raidSpotP1');
       if (!tankRole) {
         const s = roleSpot();
