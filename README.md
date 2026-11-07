@@ -1,16 +1,25 @@
-# Onyxia Tank Rehearsal Simulator
+# Classic Raid Rehearsal Simulator
 
-A standalone browser app for rehearsing the main-tank job on the WoW Classic
-Onyxia encounter. The simulator plays Onyxia; you play the tank. It never
-connects to the game. Practise the pull, the wall position, Wing Buffet, the
-Phase 2 Deep Breath lanes, the Phase 3 landing pickup and recovering from
-Bellowing Roar until the timings are reflex, then look at a scorecard that
-tells you exactly what to fix.
+A standalone browser app for rehearsing WoW Classic raid encounters, one boss
+at a time, as a tank, an off-tank, a melee DPS, a ranged DPS or a healer. The
+simulator plays the boss and a ghost raid; you play your role. It never
+connects to the game. Practise where to stand, when to move, when to Taunt,
+when to stop attacking, what to dispel and when to heal until the timings are
+reflex, then look at a scorecard that tells you exactly what to fix.
 
-It is about *when to Taunt* and *where to stand*, not about a class rotation.
-There is one button, Taunt; threat builds on its own while you are in melee
-range, DPS pull aggro on a timer, Wing Buffet cuts your threat, and the game is
-reacting at the right moment and moving to the right place.
+It is about *when* and *where*, not about a class rotation. Each role has one
+or two buttons (Taunt; Attack; Heal and Dispel). Threat builds on its own
+while a tank is in melee range, DPS build threat with every attack and must
+stop when the bar goes red, healers keep the raid's tank alive through the
+spikes, and the game is reacting at the right moment and moving to the right
+place.
+
+Encounters live in `data/encounters/<raid>/<boss>.json` and are listed in
+`data/encounters/index.json`; the menu has a raid tab and a boss chip for each.
+Every script is built from the research under `docs/research/<raid>/` and
+checked against it again before it is marked ready. The format is documented
+in `docs/ENCOUNTER_FORMAT.md`; `node tools/validate.mjs` lints every script
+and plays it with a bot for each role.
 
 * Vanilla JavaScript ES modules, Canvas 2D, no build step, no backend, no
   dependencies.
