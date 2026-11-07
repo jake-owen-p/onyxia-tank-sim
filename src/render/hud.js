@@ -301,9 +301,9 @@ function drawThreat(ctx, view, script, pal, u, w, y, bh, threatRatioFn, t) {
   const x = w / 2 - bw / 2;
   const th = view.threat;
   const ratio = threatRatioFn ? threatRatioFn(th) : (th.player > 0 ? Math.min(1, th.raid / th.player) : th.raid > 0 ? 1 : 0);
-  const band = script.threat.dangerBand ?? 0.8;
   const b = view.world.boss;
   const tankIsPlayer = view.tankRole !== false;
+  const band = tankIsPlayer ? (script.threat.dangerBand ?? 0.8) : (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8);
   const onRaid = tankIsPlayer ? b.target === 'raid' && b.engaged && b.state === 'grounded' : b.target === 'player' && b.engaged && b.state === 'grounded';
   const danger = ratio >= band || onRaid;
   roundRect(ctx, x, y, bw, bh, bh / 2);

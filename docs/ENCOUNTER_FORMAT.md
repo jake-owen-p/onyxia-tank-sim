@@ -23,7 +23,7 @@ plays the full fight and every drill with a scripted bot for each role.
 | `ghostTank` | the raid's tank when the player is not one: `speed`, `turnRate`, `hp`, `healPerSecond` (passive healing when nobody plays healer), `healPerSecondWithPlayerHealer` (when the player is the healer; keep it well under the boss's damage so heals matter), `lowHp` (fraction that raises the HEAL note) |
 | `raid` | `size`, `melee` (dots at the flanks), `threatPerSecond`, `holdAfterPull`, `meleeFlankDistance`, `whelpContactRange` |
 | `boss` | `radius`, `speed`, `turnRate`, `meleeRange`, `meleeDamage`, `meleeInterval`, `stationary` (never walks), `cones` (below), `facingCone` (which cone defines "facing the raid"), `enrageMultiplier`, flying-boss fields `landingDuration`, `takeoffDuration`, `settleAfterLanding`, `pickupGrace` |
-| `threat` | `autoAttackPerSecond` (tank player), `ghostTankPerSecond`, `tauntLead`, `tauntBonus`, `tauntDuration`, `buffetCut`, `pullMultiplier` (1.1), `dangerBand` (0.8), `resetOnLanding`, `landingRaidThreat`, `turnGrace`, `ghostTauntDelay` |
+| `threat` | `autoAttackPerSecond` (tank player), `ghostTankPerSecond`, `tauntLead`, `tauntBonus`, `tauntDuration`, `buffetCut`, `pullMultiplier` (1.1), `dangerBand` (0.8), `dangerBandDps` (where DPS must stop, default `dangerBand`; lower it on bosses that cut the tank's threat), `resetOnLanding`, `landingRaidThreat`, `turnGrace`, `ghostTauntDelay` |
 | `gcd` | global cooldown in seconds (1.5) |
 | `roles` | which roles this fight offers (below) |
 | `playerAbilities` | the buttons (below) |

@@ -244,7 +244,8 @@
   "tauntLead": 1.6,
   "ghostTankPerSecond": 70,
   "ghostTauntDelay": 2.5,
-  "ghostPickupDelay": 1.5
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.65
  },
  "gcd": 1.5,
  "playerAbilities": {
@@ -665,7 +666,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Knock Away the tank has lost a quarter of their threat."
+     "tip": "Keep your threat under two thirds of the tank's: when the bar goes red, stop attacking until it clears. A Knock Away takes a quarter of the tank's threat away in one hit."
     },
     {
      "id": "tankUp",
@@ -925,7 +926,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Knock Away the tank has lost a quarter of their threat."
+     "tip": "Keep your threat under two thirds of the tank's: when the bar goes red, stop attacking until it clears. A Knock Away takes a quarter of the tank's threat away in one hit."
     },
     {
      "id": "tankUp",

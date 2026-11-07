@@ -881,7 +881,7 @@ export function createSim(script, options = {}) {
         state.feedback.inFront = front && b.target !== 'player';
         if (state.feedback.inFront) addMetric('playerInFront', dt);
         const ratio = threatRatio(state.threat, threatCfg, false);
-        state.feedback.holdAttack = b.target === 'ghost' && ratio >= (script.threat.dangerBand ?? 0.8);
+        state.feedback.holdAttack = b.target === 'ghost' && ratio >= (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8);
         if (state.role === 'melee' || state.role === 'ranged') {
           const inR = playerInBossRange(attackRange(state, script));
           state.feedback.inRangeOk = inR;
@@ -939,7 +939,7 @@ export function createSim(script, options = {}) {
     w.whelps = []; w.projectiles = []; state.debuffs = [];
     w.hazards = w.hazards.filter((h) => h.kind === 'crack');
     w.player.knock = null; w.player.fearedUntil = -Infinity; w.player.hp = w.player.maxHp; w.player.z = 0; w.player.vz = 0;
-    g.hp = g.maxHp;
+    g.hp = g.maxHp; g.viaSpot = false;
     if (preset === 'wall') {
       const ts = P.tankSpot, bs = P.bossSpot;
       Object.assign(b, { x: bs.x, y: bs.y, z: 0, heading: rad(bs.heading), state: 'grounded', engaged: true, target: tankTarget(), cast: null, transition: null });

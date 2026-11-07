@@ -2,7 +2,7 @@
 // ideal tank position (which the ghost tank follows), and the ideal boss
 // position/facing. Both renderers use these for the glowing path and outlines.
 
-import { rad, dist, angleTo, escapeLane, escapeCircle, onFloor } from './geometry.js';
+import { rad, dist, angleTo, escapeLane, escapeCircle, onFloor, pointInPoly } from './geometry.js';
 import { bossAtSpot } from './expectations.js';
 
 export const TANK_ROLES = ['tank', 'offtank'];
@@ -24,7 +24,7 @@ function spot(state, script, key, fallback) {
 export function dodgeHazards(x, y, state, reason) {
   const w = state.world;
   for (const h of w.hazards) {
-    if (h.state === 'idle') continue;
+    if (h.state === 'idle' && h.kind !== 'crack') continue;   // idle cracks are still not a place to stand
     if (h.kind === 'lane') {
       const e = escapeLane(x, y, h.from, h.to, h.width, 4);
       if (e.moved) {
@@ -34,10 +34,15 @@ export function dodgeHazards(x, y, state, reason) {
         const pick = d2 < d1 ? mirror : e;
         x = pick.x; y = pick.y; reason = 'dodgeLane';
       }
-    } else if (h.kind === 'zone' || h.kind === 'crack') {
+    } else if (h.kind === 'zone') {
       const c = h.centroid, r = h.radius || 6;
       const e = escapeCircle(x, y, c.x, c.y, r, 2.5);
       if (e.moved) { x = e.x; y = e.y; reason = 'dodgeZone'; }
+    } else if (h.kind === 'crack' && pointInPoly(x, y, h.poly)) {
+      const c = h.centroid;
+      const r = Math.max(...h.poly.map(([px, py]) => dist(px, py, c.x, c.y)));
+      const e = escapeCircle(x, y, c.x, c.y, r, 1.5);
+      x = e.x; y = e.y; reason = h.state === 'idle' ? reason : 'dodgeZone';
     }
   }
   return { x, y, reason };
@@ -78,7 +83,17 @@ export function idealTankPos(state, script, who = 'player') {
     // Go and take her: a point at taunt range on the near side of the boss.
     const range = Math.min((script.playerAbilities.taunt || { range: 16 }).range, script.boss.meleeRange) - 1;
     const a = angleTo(b.x, b.y, me.x, me.y);
+    if (who === 'ghost') me.viaSpot = false;
     return { x: b.x + Math.cos(a) * range, y: b.y + Math.sin(a) * range, reason: 'approach' };
+  }
+  if (who === 'ghost') {
+    // The ghost tank drags her through the boss spot and on to the tank spot, so she parks on the
+    // spot facing the tank instead of stopping wherever she caught up with it.
+    const bs = spot(state, script, 'boss', 'bossSpot');
+    if (bs && !me.viaSpot) {
+      if (dist(me.x, me.y, bs.x, bs.y) > 2.5 && dist(b.x, b.y, bs.x, bs.y) > 4) return dodgeHazards(bs.x, bs.y, state, 'tankSpot');
+      me.viaSpot = true;
+    }
   }
   return dodgeHazards(ts.x, ts.y, state, 'tankSpot');
 }
@@ -93,7 +108,7 @@ function meleePos(state, script) {
   const hasTail = Object.values(cones).some((c) => c.facing === 'back');
   // Flank angle: straight behind unless she has a tail, then 110 degrees off her nose on the player's side.
   const side = Math.sin(angleTo(b.x, b.y, p.x, p.y) - b.heading) >= 0 ? 1 : -1;
-  const off = hasTail ? rad(110) * side : Math.PI;
+  const off = hasTail ? rad(97) * side : Math.PI;
   const r = script.boss.radius + 2.5;
   let x = b.x + Math.cos(b.heading + off) * r, y = b.y + Math.sin(b.heading + off) * r;
   if (!onFloor(x, y, script.arena.floor)) { x = b.x + Math.cos(b.heading + Math.PI / 2 * side) * r; y = b.y + Math.sin(b.heading + Math.PI / 2 * side) * r; }

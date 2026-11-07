@@ -1,0 +1,171 @@
+{
+ "id": "kurinnaxx",
+ "name": "Kurinnaxx",
+ "version": "0.1.0",
+ "raidInfo": { "id": "ruins-of-ahnqiraj", "name": "Ruins of Ahn'Qiraj", "size": 20 },
+ "notes": "Numbers follow docs/research/ruins-of-ahnqiraj/kurinnaxx.md. ESTIMATES: the Scarab Terrace is drawn as a 45 yd sandy circle with a southern approach (no map was measured); the fight is 150 s for a 100-30-0 split (research only says 2-4 min); Sand Trap cadence 10 s is the middle of the emulator 5-15 s, its warning 4.5 s is the middle of CMaNGOS 4 s and AzerothCore 5 s, its damage 2000 is the middle of 1750-2250 with an 8 yd radius; Wide Slash 1000 is the middle of the 800-1200 reported on a tank and its 14 yd cone is 10 yd past his hitbox; Thrash is the two extra swings folded into one 1300 front hit every 15 s (CMaNGOS 12-17 s); Mortal Wound every 9 s (middle of 8-10 s); melee 650 per 2 s so that his hits roughly double in Frenzy (enrageMultiplier 1.75, research says ~900 to ~2000); tank passive healing 650 per second stands for the 5-7 healers, so a tank who stands in Sand Traps or eats Thrash with no top-up still dies. ENGINE GAPS: Mortal Wound is a -10% healing per stack debuff and the tank swap at 3-4 stacks needs a second tank; neither is expressible, so Mortal Wound is modelled as a 15 s non-dispellable debuff whose 45 damage per second per application stands for the lost healing, and the swap is only described in the tips. Sand Trap's 20 s silence and -75% hit debuff on anyone caught cannot be applied by a hazard. Summon Player is not implemented (both emulators also skip it). The 'flying adds' Warcraft Tavern mentions are unconfirmed and left out. OPEN QUESTIONS carried from the research: Era HP, 30% vs 20% Frenzy threshold (30% used), whether Sand Trap targets a random player (used, plus a tank-targeted trap every 35 s for CMaNGOS' current-victim version), whether Frenzy can be Tranq-shotted.",
+ "arena": {
+  "name": "Scarab Terrace",
+  "wallHeight": 8,
+  "floor": [
+   { "id": "terrace", "poly": [[45, 0], [41.6, 17.2], [31.8, 31.8], [17.2, 41.6], [0, 45], [-17.2, 41.6], [-31.8, 31.8], [-41.6, 17.2], [-45, 0], [-41.6, -17.2], [-31.8, -31.8], [-17.2, -41.6], [0, -45], [17.2, -41.6], [31.8, -31.8], [41.6, -17.2]] },
+   { "id": "approach", "poly": [[-10, -40], [10, -40], [10, -70], [-10, -70]] }
+  ],
+  "walls": [
+   { "id": "rimEast", "points": [[10, -43.9], [17.2, -41.6], [31.8, -31.8], [41.6, -17.2], [45, 0], [41.6, 17.2], [31.8, 31.8], [17.2, 41.6], [0, 45]] },
+   { "id": "rimWest", "points": [[0, 45], [-17.2, 41.6], [-31.8, 31.8], [-41.6, 17.2], [-45, 0], [-41.6, -17.2], [-31.8, -31.8], [-17.2, -41.6], [-10, -43.9]] },
+   { "id": "approachWest", "points": [[-10, -43.9], [-10, -70]] },
+   { "id": "approachEast", "points": [[10, -43.9], [10, -70]] }
+  ],
+  "labels": [
+   { "text": "Entrance", "at": [0, -64] },
+   { "text": "Open sand: tank him here, facing north", "at": [0, 40] },
+   { "text": "Raid spreads here", "at": [0, -12] }
+  ]
+ },
+ "positions": {
+  "playerStart": { "x": 0, "y": -56, "heading": 90 },
+  "bossStart": { "x": 0, "y": 4, "heading": 270 },
+  "tankSpot": { "x": 0, "y": 36, "tolerance": 4, "label": "Tank" },
+  "bossSpot": { "x": 0, "y": 29, "heading": 90, "tolerance": 7, "headingTolerance": 40, "label": "Kurinnaxx, facing away" },
+  "raidSpotP1": { "x": 0, "y": -4, "spread": 14, "label": "Raid, spread out" },
+  "raidSpotP2": { "x": 0, "y": -4, "spread": 14, "label": "Raid, spread out" },
+  "rangedSpot": { "x": 6, "y": 2, "tolerance": 8, "label": "Ranged" },
+  "healerSpot": { "x": -8, "y": -8, "tolerance": 8, "label": "Healers" },
+  "raidWait": { "x": 0, "y": -36, "spread": 6 }
+ },
+ "player": { "speed": 7, "turnRate": 200, "radius": 0.8, "hp": 10000, "healPerSecond": 650, "fearDuration": 3, "fearSpeed": 4, "jump": { "height": 1.4, "duration": 0.8 } },
+ "ghostTank": { "speed": 7.4, "turnRate": 360, "hp": 10000, "healPerSecond": 700, "healPerSecondWithPlayerHealer": 220, "lowHp": 0.5 },
+ "raid": { "size": 20, "melee": 6, "threatPerSecond": 50, "meleeFlankDistance": 8, "whelpContactRange": 8, "holdAfterPull": 5 },
+ "boss": {
+  "radius": 5, "speed": 8, "turnRate": 180, "meleeRange": 7, "meleeDamage": 650, "meleeInterval": 2, "enrageMultiplier": 1.75,
+  "cones": {
+   "wideSlash": { "angle": 100, "range": 14, "label": "Wide Slash", "facing": "front" },
+   "thrash": { "angle": 50, "range": 9, "label": "Thrash", "facing": "front" }
+  },
+  "facingCone": "wideSlash",
+  "pickupGrace": 4,
+  "settleAfterLanding": 0
+ },
+ "threat": { "autoAttackPerSecond": 80, "ghostTankPerSecond": 70, "tauntBonus": 200, "tauntDuration": 3, "tauntLead": 1.6, "buffetCut": 0, "pullMultiplier": 1.1, "dangerBand": 0.8, "resetOnLanding": false, "landingRaidThreat": 300, "turnGrace": 2, "ghostTauntDelay": 2.5, "ghostPickupDelay": 1.5 },
+ "gcd": 1.5,
+ "roles": {
+  "tank": { "label": "Main tank", "short": "Tank", "description": "Pull him to the open sand facing away from the raid, Taunt him back whenever a DPS pulls, walk him off every Sand Trap that lands under you, and live through Frenzy at 30%.", "abilities": ["taunt"] },
+  "melee": { "label": "Melee DPS", "short": "Melee", "description": "Stack on one flank, never in his 100 degree front (Wide Slash puts Mortal Wound on you), and step out of every sand ring before it bursts.", "abilities": ["attack"], "attackRange": 5 },
+  "ranged": { "label": "Ranged DPS", "short": "Ranged", "description": "Spread so one Sand Trap catches one person, keep your threat under the tank's, step out of sand rings, burn with cooldowns at 30%.", "abilities": ["attack"], "attackRange": 30 },
+  "healer": { "label": "Healer", "short": "Healer", "description": "Spread like ranged. The tank's healing taken drops 10% per Mortal Wound stack, so pre-cast before Thrash and Wide Slash and never let him sit under half, especially after Frenzy.", "abilities": ["heal"], "attackRange": 40 }
+ },
+ "playerAbilities": {
+  "taunt": { "kind": "taunt", "label": "Taunt", "cooldown": 10, "gcd": false, "range": 16, "icon": "taunt", "tip": "Taunt the moment he turns on the raid. In the real fight this is also the swap button: the resting tank Taunts at 3-4 Mortal Wound stacks." },
+  "attack": { "kind": "attack", "label": "Attack", "cooldown": 0, "gcd": true, "icon": "attack", "threat": 140, "tip": "Every attack adds threat. Keep it at 50-70% until Frenzy, then everything." },
+  "heal": { "kind": "heal", "label": "Heal the tank", "cooldown": 0, "gcd": true, "range": 40, "icon": "heal", "amount": 2200, "threat": 25, "tip": "Big heals on the tank. He takes 4000-5000 in a few seconds when Thrash and Wide Slash line up, and double that after Frenzy." }
+ },
+ "actions": {
+  "mortalWound": { "label": "Mortal Wound", "kind": "debuff", "cast": 0, "target": "tank", "dispel": "none", "duration": 15, "tickDamage": 45, "warn": false, "cue": null, "icon": "tail", "requires": "grounded", "tip": "-10% healing taken per stack for 15 s, refreshed on every application, not dispellable. Modelled here as 45 lost healing per second per application. Tanks swap at 3-4 stacks." },
+  "sandTrap": { "label": "Sand Trap", "kind": "hazard", "cast": 0, "placement": "random", "count": 1, "radius": 8, "warning": 4.5, "active": 1.5, "damage": 2000, "warn": false, "cue": "eruption", "icon": "eruption", "requires": "grounded", "tip": "A sand ring grows under a random raider for about 4.5 s then bursts: 1750-2250 Nature in 8 yd plus a 20 s silence and -75% hit. Walk out before it bursts." },
+  "sandTrapTank": { "label": "Sand Trap", "kind": "hazard", "cast": 0, "placement": "tank", "radius": 8, "warning": 4.5, "active": 1.5, "damage": 2000, "warn": false, "cue": "eruption", "icon": "eruption", "requires": "grounded", "tip": "A sand ring under the tank. Walk him 10 yd without turning him toward the raid." },
+  "sandTrapOnYou": { "label": "Sand Trap", "kind": "hazard", "cast": 0, "placement": "player", "radius": 8, "warning": 4.5, "active": 1.5, "damage": 2000, "warn": false, "cue": "eruption", "icon": "eruption", "requires": "grounded", "hidden": true, "tip": "Drill version: the trap is always under you." },
+  "wideSlash": { "label": "Wide Slash", "kind": "cone", "cast": 0, "cone": "wideSlash", "damage": 1000, "hitsMelee": true, "raidMetric": "raidSlashHits", "raidToast": "Wide Slash hit the raid", "playerMetric": "slashesTaken", "warn": false, "cue": "cleave", "icon": "cleave", "requires": "grounded", "tip": "Weapon damage +500 to everything in a 10 yd arc in front of him, every 12-15 s. Anyone in it also picks up Mortal Wound." },
+  "thrash": { "label": "Thrash", "kind": "cone", "cast": 0, "cone": "thrash", "damage": 1300, "hitsMelee": false, "warn": false, "cue": "cleave", "icon": "breath", "requires": "grounded", "tip": "Two extra swings on the tank every 12-17 s. With Wide Slash this is the spike window: 4000-5000 in a few seconds." },
+  "frenzy": { "label": "Frenzy", "kind": "enrage", "cast": 0, "toast": "Kurinnaxx goes into a Frenzy: double tank damage", "warn": true, "cue": "roar", "icon": "roar", "requires": "grounded", "tip": "At 30%: +75% attack speed and +250 damage per hit until he dies. Tank cooldowns, healers spam, DPS burn." },
+  "aggroPull": { "label": "Aggro pull", "kind": "aggroPull", "cast": 0, "threatMultiplier": 1.15, "warn": false, "cue": null, "icon": "aggro", "requires": "grounded", "conditional": "onPlayer", "tip": "A DPS overtakes the tank on threat." }
+ },
+ "phases": [
+  {
+   "id": 1, "name": "Phase 1", "subtitle": "Sand Traps and Mortal Wound", "hpFrom": 1, "hpTo": 0.3, "duration": 105, "bossState": "grounded", "raidSpot": "raidSpotP1",
+   "spots": { "tank": "tankSpot", "boss": "bossSpot", "melee": null, "ranged": "rangedSpot", "healer": "healerSpot" },
+   "actions": [
+    { "id": "mortalWound", "first": 8, "every": 9, "jitter": 1 },
+    { "id": "sandTrap", "first": 6, "every": 10, "jitter": 4 },
+    { "id": "sandTrapTank", "first": 32, "every": 35, "jitter": 5 },
+    { "id": "wideSlash", "first": 12, "every": 13.5, "jitter": 1.5 },
+    { "id": "thrash", "first": 9, "every": 15, "jitter": 2 },
+    { "id": "aggroPull", "first": 42, "every": 50, "jitter": 8 }
+   ],
+   "expectations": [
+    { "id": "pull", "type": "bossAtSpot", "spot": "bossSpot", "within": 15, "grace": 6, "from": "engage", "role": "tanks", "label": "Pull him to the open sand, facing north", "tip": "Pull deliberately, his aggro range is huge. Walk him north past the raid and turn so his front points at open sand, never at the raid." },
+    { "id": "facing", "type": "continuous", "metric": "bossFacingRaid", "role": "tanks", "label": "Keep his front off the raid", "tip": "Wide Slash hits a 10 yd arc in front of him and anyone in it gets Mortal Wound. Face him away, and never turn him toward the raid during a swap." },
+    { "id": "retaunt", "type": "afterEvent", "event": "aggroPull", "check": "hasAggro", "within": 3, "grace": 3, "role": "tanks", "label": "Taunt him back when a DPS pulls", "tip": "Someone will pull. The moment he turns, Taunt: every second he faces the raid is a Wide Slash and a Mortal Wound on a rogue." },
+    { "id": "trapTank", "type": "continuous", "metric": "playerInHazard", "role": "tanks", "label": "Walk him off Sand Traps", "tip": "A ring under you means move him 10 yd, keeping him faced away. Do not stand in it with him." },
+    { "id": "front", "type": "continuous", "metric": "playerInFront", "role": "nontank", "label": "Stay out of his front", "tip": "Melee stack on one flank or behind. Nobody but the active tank stands in the 10 yd arc in front of him." },
+    { "id": "trap", "type": "continuous", "metric": "playerInHazard", "role": "nontank", "label": "Step out of sand rings before they burst", "tip": "The ring grows for about 4.5 s. Leave the 8 yd circle. If you are caught: 2000 damage, 20 s silence, wand or bandage." },
+    { "id": "threatDps", "type": "continuous", "metric": "aggroPulls", "role": "dps", "label": "Never pull aggro", "tip": "Red band means stop. 50-70% output until Frenzy." },
+    { "id": "tankUp", "type": "continuous", "metric": "tankDeaths", "role": "healer", "label": "Keep the tank alive", "tip": "Thrash plus Wide Slash is 4000-5000 in a few seconds, and every Mortal Wound stack cuts your heals by 10%. Pre-cast and keep him above half." }
+   ]
+  },
+  {
+   "id": 2, "name": "Phase 2", "subtitle": "Frenzy (30%)", "hpFrom": 0.3, "hpTo": 0, "duration": 45, "bossState": "grounded", "raidSpot": "raidSpotP2",
+   "spots": { "tank": "tankSpot", "boss": "bossSpot", "melee": null, "ranged": "rangedSpot", "healer": "healerSpot" },
+   "actions": [
+    { "id": "frenzy", "first": 0 },
+    { "id": "mortalWound", "first": 5, "every": 9, "jitter": 1 },
+    { "id": "sandTrap", "first": 4, "every": 10, "jitter": 4 },
+    { "id": "wideSlash", "first": 8, "every": 13.5, "jitter": 1.5 },
+    { "id": "thrash", "first": 6, "every": 15, "jitter": 2 }
+   ],
+   "expectations": [
+    { "id": "facing", "type": "continuous", "metric": "bossFacingRaid", "role": "tanks", "label": "Keep his front off the raid", "tip": "He hits twice as hard now. Hold him still, cooldowns up, front at the sand." },
+    { "id": "trapTank", "type": "continuous", "metric": "playerInHazard", "role": "tanks", "label": "Walk him off Sand Traps", "tip": "Even in Frenzy a ring under you means move him 10 yd." },
+    { "id": "front", "type": "continuous", "metric": "playerInFront", "role": "nontank", "label": "Stay out of his front", "tip": "Burn from the flank, never the front." },
+    { "id": "trap", "type": "continuous", "metric": "playerInHazard", "role": "nontank", "label": "Step out of sand rings before they burst", "tip": "A silenced healer during Frenzy kills the tank. Keep moving out of rings." },
+    { "id": "threatDps", "type": "continuous", "metric": "aggroPulls", "role": "dps", "label": "Never pull aggro", "tip": "Use every cooldown, but a pull in Frenzy is a dead rogue." },
+    { "id": "tankUp", "type": "continuous", "metric": "tankDeaths", "role": "healer", "label": "Keep the tank alive through Frenzy", "tip": "His hits roughly double. Chain big heals, everyone on the tank." }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "bossFacingRaid": { "label": "Facing the raid", "unit": "s", "penaltyPerSecond": 3, "severe": 4, "roles": "tanks" },
+  "raidSlashHits": { "label": "Wide Slashes on the raid", "unit": "count", "penaltyPerUnit": 6, "severe": 1, "roles": "tanks" },
+  "threatLostCount": { "label": "Times he turned on the raid", "unit": "count", "info": true, "roles": "tanks" },
+  "deaths": { "label": "Deaths", "unit": "count", "penaltyPerUnit": 25, "severe": 1 },
+  "playerInHazard": { "label": "Caught in a Sand Trap", "unit": "s", "penaltyPerSecond": 8, "severe": 0.5, "tip": "Leave the ring before it bursts." },
+  "playerInFront": { "label": "Standing in his front", "unit": "s", "penaltyPerSecond": 3, "severe": 3, "roles": "nontank" },
+  "slashesTaken": { "label": "Wide Slashes taken", "unit": "count", "penaltyPerUnit": 6, "severe": 1, "roles": "nontank" },
+  "aggroPulls": { "label": "Times you pulled aggro", "unit": "count", "penaltyPerUnit": 15, "severe": 1, "roles": "nontank", "tip": "Stop attacking when the threat bar turns red." },
+  "attacksInRed": { "label": "Attacks in the red band", "unit": "count", "penaltyPerUnit": 2, "severe": 3, "roles": "dps", "tip": "In the red one more hit pulls him." },
+  "earlyAttacks": { "label": "Attacks before the tank had him", "unit": "count", "penaltyPerUnit": 3, "severe": 2, "roles": "dps", "tip": "Give the tank a few seconds after the pull." },
+  "earlyPulls": { "label": "You pulled him before the tank", "unit": "count", "penaltyPerUnit": 20, "severe": 1, "roles": "nontank" },
+  "dpsIdle": { "label": "Seconds not attacking when you could", "unit": "s", "penaltyPerSecond": 0.4, "severe": 15, "roles": "dps", "tip": "Use every safe global." },
+  "outOfRange": { "label": "Seconds out of range", "unit": "s", "penaltyPerSecond": 0.5, "severe": 10, "roles": "dps" },
+  "tankDeaths": { "label": "Tank deaths", "unit": "count", "penaltyPerUnit": 30, "severe": 1, "roles": "healer" },
+  "tankLowSeconds": { "label": "Seconds with the tank under half", "unit": "s", "penaltyPerSecond": 1, "severe": 8, "roles": "healer", "tip": "Top him up before Thrash, not after." },
+  "overheals": { "label": "Wasted heals", "unit": "count", "penaltyPerUnit": 0.5, "severe": 10, "roles": "healer", "tip": "Mana you waste now is mana you need in Frenzy." }
+ },
+ "grading": {
+  "expectationWeights": { "ontime": 1, "late": 0.5, "missed": 0 },
+  "expectationPoints": 50, "metricPoints": 30, "cuePoints": 20,
+  "cueWeights": { "perfect": 1, "good": 0.6, "missed": 0 },
+  "grades": [ { "min": 95, "grade": "S" }, { "min": 85, "grade": "A" }, { "min": 72, "grade": "B" }, { "min": 58, "grade": "C" }, { "min": 40, "grade": "D" }, { "min": 0, "grade": "F" } ]
+ },
+ "cues": {
+  "notes": "Press notes in the lane above the ability bar.",
+  "windows": { "perfect": 0.3 },
+  "list": [
+   { "id": "tauntLost", "ability": "taunt", "on": "event", "event": "threatLost", "offset": 0, "early": 0, "late": 3, "role": "tanks", "short": "ON RAID", "label": "Taunt when he turns on the raid", "tip": "The moment he turns, Taunt. A Wide Slash into the raid is a Mortal Wound on a DPS." },
+   { "id": "healLow", "ability": "heal", "on": "event", "event": "tankLow", "offset": 0, "early": 0, "late": 4, "role": "healer", "short": "TANK LOW", "label": "Heal the tank when they drop low", "tip": "Under half with Thrash coming is where tanks die, and Mortal Wound makes every heal smaller. Heal now." }
+  ]
+ },
+ "drills": [
+  { "id": "pullTraps", "name": "Pull and Sand Traps", "description": "Pull him from the approach to the open sand, then walk him off three Sand Traps that land under you without turning him toward the raid.", "roles": "tanks", "startPhase": 1, "duration": 70, "loop": true, "start": "entrance",
+    "actions": [ { "id": "sandTrapTank", "first": 22, "every": 15, "jitter": 1 }, { "id": "wideSlash", "first": 12, "every": 13.5, "jitter": 1 }, { "id": "mortalWound", "first": 8, "every": 9, "jitter": 1 } ] },
+  { "id": "tauntBack", "name": "Taunt him back", "description": "Already tanking. DPS keep pulling aggro; Taunt him back the instant he turns, never before.", "roles": "tanks", "startPhase": 1, "duration": 60, "loop": true, "start": "wall",
+    "actions": [ { "id": "aggroPull", "first": 6, "every": 13, "jitter": 3 }, { "id": "wideSlash", "first": 10, "every": 13.5, "jitter": 1 }, { "id": "thrash", "first": 7, "every": 15, "jitter": 1 } ] },
+  { "id": "trapFootwork", "name": "Sand Trap footwork", "description": "Already on him. A Sand Trap grows under you every 12 s: step out of the ring every time, then get straight back to attacking from the flank.", "roles": "dps", "startPhase": 1, "duration": 60, "loop": true, "start": "wall",
+    "actions": [ { "id": "sandTrapOnYou", "first": 5, "every": 12, "jitter": 1 }, { "id": "wideSlash", "first": 10, "every": 13.5, "jitter": 1 } ] },
+  { "id": "frenzyHeal", "name": "Healing through Frenzy", "description": "He is at 30% and frenzied. Keep the tank above half through Thrash and Wide Slash with Mortal Wound shrinking your heals; wasted heals count against you.", "roles": "healer", "startPhase": 2, "duration": 60, "loop": true, "start": "wall",
+    "actions": [ { "id": "frenzy", "first": 0 }, { "id": "mortalWound", "first": 3, "every": 9, "jitter": 1 }, { "id": "thrash", "first": 6, "every": 12, "jitter": 1 }, { "id": "wideSlash", "first": 10, "every": 13.5, "jitter": 1 }, { "id": "sandTrap", "first": 8, "every": 14, "jitter": 2 } ] }
+ ],
+ "sources": [
+  "docs/research/ruins-of-ahnqiraj/kurinnaxx.md",
+  "https://warcraft.wiki.gg/wiki/Kurinnaxx",
+  "https://www.wowhead.com/classic/guide/kurinnaxx-ruins-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/ruins-of-ahnqiraj-aq20/",
+  "https://www.tentonhammer.com/guides/tentonhammers-guide-to-the-ruins-of-ahn-qiraj-section-2-1",
+  "https://wotlkdb.com/?spell=25656",
+  "https://wotlkdb.com/?spell=25646",
+  "https://wotlkdb.com/?spell=25814",
+  "https://wotlkdb.com/?spell=26527",
+  "https://github.com/azerothcore/azerothcore-wotlk/blob/master/src/server/scripts/Kalimdor/RuinsOfAhnQiraj/boss_kurinnaxx.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/kalimdor/ruins_of_ahnqiraj/boss_kurinnaxx.cpp"
+ ]
+}
