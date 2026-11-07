@@ -1,8 +1,8 @@
 {
  "id": "onyxia",
  "name": "Onyxia",
- "version": "1.1.0",
- "notes": "Numbers follow docs/research/onyxia/onyxia.md where the sources agree. Onyxia is immune to Taunt in the real fight: the tank's one button here is a threat burst (think Sunder + Revenge + Heroic Strike dumped at once) that plays the same role as a Taunt in every other encounter, so the lesson is still when to press it. Cadences are DBM/BigWigs variance timers; Knock Away is the -25% threat knockback, Wing Buffet knocks back without a threat cut.",
+ "version": "1.2.0",
+ "notes": "Numbers follow docs/research/onyxia/onyxia.md and the cross-check pass where the sources agree. Onyxia is immune to Taunt in the real fight: the tank's one button here is a threat burst (think Sunder + Revenge + Heroic Strike dumped at once) that plays the same role as a Taunt in every other encounter, so the lesson is still when to press it. Cadences are DBM/BigWigs variance timers; Knock Away is the -25% threat knockback, Wing Buffet knocks back without a threat cut. Placeholders: cone angles (60 front / 120 rear: no Blizzard data, vmangos default arc), knockback distances (derived from the emulator knock-back formula: ~39 / 25 / 47 yd, clamped here to 30 / 22 / 35), Deep Breath as an instant lane rather than a travelling wall and on a compressed cadence (real: a 30-35% roll every 15-25 s, so 0-2 per phase), whelp waves despawning after 30 s, Fireball threat wipes folded into the landing reset, melee damage ~600 per swing (one 2005 figure). Ranged and healer pockets are the NE/NW corners of the back wall per the Classic wiki and Warcraft Tavern.",
  "arena": {
   "name": "Onyxia's Lair",
   "wallHeight": 12,
@@ -133,12 +133,16 @@
    "tolerance": 6
   },
   "offtankWhelpSpot": {
-   "x": -30,
-   "y": -34
+   "x": -45,
+   "y": 2,
+   "tolerance": 6,
+   "label": "West pit mouth"
   },
   "ghostOfftankSpot": {
-   "x": 34,
-   "y": -30
+   "x": 45,
+   "y": 2,
+   "tolerance": 6,
+   "label": "East pit mouth"
   },
   "caveWest": {
    "x": -72,
@@ -154,16 +158,16 @@
    "spread": 6
   },
   "healerSpot": {
-   "x": 0,
-   "y": 18,
+   "x": -30,
+   "y": 40,
    "tolerance": 6,
-   "label": "Healers"
+   "label": "NW pocket"
   },
   "rangedSpot": {
-   "x": 0,
-   "y": 12,
-   "tolerance": 8,
-   "label": "Ranged"
+   "x": 30,
+   "y": 40,
+   "tolerance": 7,
+   "label": "NE pocket"
   }
  },
  "player": {
@@ -171,7 +175,7 @@
   "turnRate": 200,
   "radius": 0.8,
   "hp": 10000,
-  "healPerSecond": 420,
+  "healPerSecond": 600,
   "fearDuration": 3,
   "fearSpeed": 4,
   "jump": {
@@ -183,12 +187,12 @@
   "speed": 7.4,
   "turnRate": 360,
   "hp": 10000,
-  "healPerSecond": 480,
-  "healPerSecondWithPlayerHealer": 150,
+  "healPerSecond": 660,
+  "healPerSecondWithPlayerHealer": 220,
   "lowHp": 0.5
  },
  "raid": {
-  "size": 35,
+  "size": 40,
   "melee": 10,
   "threatPerSecond": 50,
   "meleeFlankDistance": 12,
@@ -200,7 +204,7 @@
   "speed": 9,
   "turnRate": 180,
   "meleeRange": 11,
-  "meleeDamage": 260,
+  "meleeDamage": 600,
   "meleeInterval": 2,
   "cones": {
    "breath": {
@@ -232,7 +236,6 @@
   "autoAttackPerSecond": 80,
   "tauntBonus": 200,
   "tauntDuration": 3,
-  "buffetCut": 0.35,
   "pullMultiplier": 1.1,
   "dangerBand": 0.8,
   "resetOnLanding": true,
@@ -306,7 +309,7 @@
    "label": "Cleave",
    "cast": 0,
    "cone": "cleave",
-   "damage": 750,
+   "damage": 680,
    "warn": false,
    "cue": "cleave",
    "icon": "cleave",
@@ -318,7 +321,7 @@
   "wingBuffet": {
    "label": "Wing Buffet",
    "cast": 1,
-   "knockback": 14,
+   "knockback": 30,
    "knockbackRange": 20,
    "warn": true,
    "cue": "buffet",
@@ -328,13 +331,13 @@
    "threatCut": 0,
    "wallMetric": "buffetsOffWall",
    "damage": 750,
-   "tip": "1 s cast, 20 yd frontal cone knockback. No threat loss, but a tank off the wall ends up out of melee."
+   "tip": "1 s cast, 20 yd frontal cone: 563-937 damage and a long knockback. No threat loss. With the wall behind you it goes nowhere."
   },
   "tailSweep": {
    "label": "Tail Sweep",
    "cast": 0,
    "cone": "tail",
-   "knockback": 12,
+   "knockback": 35,
    "damage": 800,
    "conditional": "behind",
    "warn": false,
@@ -357,7 +360,7 @@
    "kind": "projectile",
    "damage": 2000,
    "playerChance": 0.1,
-   "tip": "3 s cast on a random player, 1700-2300 Fire to everyone within 8 yd. Spread."
+   "tip": "3 s cast on a random player (often the tank), 1700-2300 Fire to everyone within 8 yd, and the target's threat is wiped. Here the wipes are folded into the landing threat reset. Spread."
   },
   "deepBreath": {
    "label": "Deep Breath",
@@ -394,7 +397,7 @@
    ],
    "pickup": "offtank",
    "holdSpot": "ghostOfftankSpot",
-   "tip": "Whelps pour from both egg pits. The whelp groups hold them at the pit mouths."
+   "tip": "Whelps pour from both egg pits. The whelp groups hold them at the pit mouths. (They do not despawn in the real fight; here each wave dies after 30 s so the sim stays readable.)"
   },
   "bellowingRoar": {
    "label": "Bellowing Roar",
@@ -461,8 +464,8 @@
    "label": "Knock Away",
    "kind": "knockback",
    "cast": 0,
-   "damage": 700,
-   "knockback": 9,
+   "damage": 650,
+   "knockback": 22,
    "knockbackRange": 15,
    "threatCut": 0.25,
    "wallMetric": "buffetsOffWall",
@@ -628,13 +631,13 @@
     {
      "id": "rebuild",
      "type": "afterEvent",
-     "event": "wingBuffet",
+     "event": "knockAway",
      "check": "hasAggro",
      "notBefore": 1,
      "within": 6,
      "grace": 4,
-     "label": "Keep her on you after Wing Buffet",
-     "tip": "Wing Buffet cuts your threat. Stay in melee range so it rebuilds, and burst threat the moment she turns toward the raid.",
+     "label": "Keep her on you after Knock Away",
+     "tip": "Knock Away throws you back and cuts a quarter of your threat. Back to the wall at once, and burst threat the moment she turns toward the raid.",
      "role": "tanks"
     },
     {
@@ -662,7 +665,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Wing Buffet the tank has lost a third of their threat."
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Knock Away the tank has lost a quarter of their threat."
     },
     {
      "id": "tankUp",
@@ -698,18 +701,18 @@
      "jitter": 1
     },
     {
-     "id": "deepBreath",
-     "first": 24,
-     "every": 30,
-     "jitter": 6
-    },
-    {
      "id": "whelpWave",
      "first": 4
     },
     {
      "id": "whelpTrickle",
      "first": 40,
+     "every": 45,
+     "jitter": 12
+    },
+    {
+     "id": "deepBreath",
+     "first": 24,
      "every": 45,
      "jitter": 12
     }
@@ -752,7 +755,7 @@
      "metric": "whelpsOnRaid",
      "role": "offtank",
      "label": "Keep whelps off the raid",
-     "tip": "Hold the whelps on the south-west side, well away from the healers."
+     "tip": "Hold the whelps at the west pit mouth, well away from the healers."
     },
     {
      "id": "laneAll",
@@ -874,7 +877,7 @@
      "type": "continuous",
      "metric": "playerInCrack",
      "label": "Never stand on an eruption crack",
-     "tip": "Cracks pulse on a timer. Walk between them, and keep the wall spot clear of cracks."
+     "tip": "The cracks erupt right after each Bellowing Roar, for a few seconds. Walk between them, and keep the wall spot clear of cracks."
     },
     {
      "id": "wall",
@@ -888,13 +891,13 @@
     {
      "id": "rebuild",
      "type": "afterEvent",
-     "event": "wingBuffet",
+     "event": "knockAway",
      "check": "hasAggro",
      "notBefore": 1,
      "within": 6,
      "grace": 4,
-     "label": "Keep her on you after Wing Buffet",
-     "tip": "Wing Buffet cuts your threat. Stay in melee range so it rebuilds, and burst threat the moment she turns toward the raid.",
+     "label": "Keep her on you after Knock Away",
+     "tip": "Knock Away throws you back and cuts a quarter of your threat. Back to the wall at once, and burst threat the moment she turns toward the raid.",
      "role": "tanks"
     },
     {
@@ -922,7 +925,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Wing Buffet the tank has lost a third of their threat."
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again. After a Knock Away the tank has lost a quarter of their threat."
     },
     {
      "id": "tankUp",
@@ -1458,14 +1461,14 @@
     "done": {
      "type": "eventLanded",
      "event": "flameBreath",
-     "metricUnchanged": "raidInBreath"
+     "metricUnchanged": "raidBreathHits"
     }
    },
    {
     "id": "buffet",
-    "title": "Wing Buffet",
-    "text": "Wing Buffet knocks you back and cuts your threat. With the wall behind you the knockback goes nowhere.\n\nAfter it lands, get straight back into melee range so your threat rebuilds, and burst threat if she turns.",
-    "trigger": "wingBuffet",
+    "title": "Wing Buffet and Knock Away",
+    "text": "Wing Buffet knocks you back a long way. With the wall behind you the knockback goes nowhere. Knock Away is the one that also cuts a quarter of your threat.\n\nAfter either lands, get straight back into melee range so your threat rebuilds, and burst threat if she turns.",
+    "trigger": "knockAway",
     "done": {
      "type": "expectation",
      "id": "rebuild"
@@ -1629,7 +1632,7 @@
   "melee": {
    "label": "Melee DPS",
    "short": "Melee",
-   "description": "Stay on her flank, clear of the breath cone and the tail, hold your threat under the tank, run for the pickup spot in Phase 2.",
+   "description": "Stay on her flank at the shoulder, clear of the breath cone and the tail, hold your threat under the tank, and spread with the raid in Phase 2.",
    "abilities": [
     "attack"
    ],
@@ -1638,7 +1641,7 @@
   "ranged": {
    "label": "Ranged DPS",
    "short": "Ranged",
-   "description": "Stand with the raid out of her front, manage threat, dodge Deep Breath lanes in Phase 2.",
+   "description": "Stand in the wall pocket at her flank out of her front and her tail, manage threat, spread 8 yd in Phase 2 and dodge the Deep Breath lanes.",
    "abilities": [
     "attack"
    ],
@@ -1647,7 +1650,7 @@
   "healer": {
    "label": "Healer",
    "short": "Healer",
-   "description": "Keep the tank up through Flame Breath and the landing, stay out of her front and the lanes.",
+   "description": "Stand in the wall pocket at her flank within range of the tank, keep the tank up through Flame Breath and the landing, stay out of the lanes.",
    "abilities": [
     "heal"
    ],
