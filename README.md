@@ -65,7 +65,11 @@ WoW defaults. Every key is rebindable in Settings, with conflict detection.
 | Jump | `Space` |
 | Mouse turn | hold right mouse button and drag |
 | Zoom (POV view) | mouse wheel |
-| Taunt | `1` |
+| Taunt (tanks) | `1` |
+| Attack (DPS) | `2` |
+| Heal the tank (healer) | `3` |
+| Dispel (healer, where the fight has dispels) | `4` |
+| Interrupt (where the fight has interrupts) | `5` |
 | Switch view | `Tab` |
 | Pause menu | `Esc` |
 | Phase skip (full fight) | `F1` `F2` `F3` |
@@ -73,6 +77,23 @@ WoW defaults. Every key is rebindable in Settings, with conflict detection.
 Backpedalling (`S`) is slower than walking forward, as in the game. Jumping is
 a fixed arc with full air control and no gameplay effect, so you can bunny-hop
 through the fight the way everyone does.
+
+## Roles
+
+Pick a role on the menu. The encounter script says which roles a fight offers.
+
+| Role | Buttons | What is scored |
+|---|---|---|
+| Main tank | Taunt | position and facing, Taunting back when she turns, pickups, hazards |
+| Off-tank | Taunt | the tank's job plus picking up adds by proximity or Taunt and holding them away from the raid |
+| Melee DPS | Attack | staying at the flank out of frontal and rear cones, attack uptime, never pulling aggro (stop when the threat bar is red), hazards |
+| Ranged DPS | Attack | standing with the raid out of her front, threat discipline, hazards, lanes |
+| Healer | Heal, Dispel | keeping the ghost tank alive through spikes (the tank's bar is on screen), dispelling what lands, wasted heals, hazards |
+
+When you are not a tank, a ghost tank holds the boss. Your threat is measured
+against the ghost tank's; attacking into the red band pulls aggro and the ghost
+tank Taunts her back a few seconds later. When you are the healer the ghost
+tank's passive healing is low, so your heals are what keeps it up.
 
 ## Modes
 
@@ -233,10 +254,10 @@ Core modules:
 | `hazards.js` | Deep Breath lanes and Eruption cracks with warning/active lifecycles |
 | `scheduler.js` | per-phase action timers with seeded jitter |
 | `expectations.js` | the named checks the script refers to |
-| `scoring.js` | expectation instances, grades, cue points, top fixes |
-| `presscues.js` | Taunt notes raised by events, grading windows, streaks |
-| `entities.js` | player, boss (ground, takeoff, flight, landing), ghost raid, whelps |
-| `ideal.js` | where the tank and boss should be; the ghost tank |
+| `scoring.js` | expectation instances, grades, cue points, top fixes, role filters |
+| `presscues.js` | press notes raised by events, grading windows, streaks |
+| `entities.js` | player, boss (ground, takeoff, flight, landing), ghost raid, ghost tank, adds |
+| `ideal.js` | where each role and the boss should be; hazard dodging |
 | `snapshot.js` | compact replay snapshots |
 | `rng.js` | seeded RNG so runs are reproducible |
 

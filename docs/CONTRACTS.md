@@ -25,14 +25,14 @@ import { createSim, FIXED_DT } from './core/sim.js';
 const sim = createSim(script, options);
 ```
 
-Options: `{ role:'mt'|'offtank', seed, startPhase, startOffset, start:'entrance'|'wall'|'pickup',
+Options: `{ role:'tank'|'offtank'|'melee'|'ranged'|'healer', seed, startPhase, startOffset, start:'entrance'|'wall'|'pickup',
 actions:[...]|null, bossPassive, manual, duration|null, phaseDurations:{1,2,3}|null, freezeHp }`.
 
 Returned object: `{ state, script, options, step(cmd, dt), drainEvents(), teleport(preset),
 setPhase(id, elapsed=0), setBossPassive(bool), triggerAction(id), end(result), threatRatio() }`.
 
 `cmd = { forward:-1..1, strafe:-1..1 (+1 = right), turn:-1..1 (+1 = turn left), mouseTurn: radians (+ = left), jump: bool (true on the tick the key went down), abilities:['taunt'] }`
-Ability ids: `taunt` only. Threat builds on its own while the tank is in melee range; there is no rotation.
+Ability ids come from `script.playerAbilities` filtered by `script.roles[role].abilities` (`taunt`, `attack`, `heal`, `dispel`, `interrupt`). Threat builds on its own while a tank is in melee range; there is no rotation. `state.tankRole` is true for tank and offtank; otherwise `world.ghost.tanking` is true and the boss targets `'ghost'`. Boss actions are driven by `script.actions[id].kind`; see docs/ENCOUNTER_FORMAT.md.
 
 Call `step` with `FIXED_DT` (1/60) at 60 Hz times the speed multiplier (the session
 scales the number of steps per real second, not dt).
@@ -50,18 +50,21 @@ world.raid     { anchor:{x,y}, dots:[{x,y,melee}] }
 world.whelps   [{ x, y, heading, target:'raid'|'player'|'ghost', onRaid }]
 world.hazards  [{ uid, id, kind:'lane'|'crack', label, poly:[[x,y]...], state:'idle'|'warning'|'active', warnAt, activeAt, endsAt }]
 world.projectiles [{ x0,y0,z0, tx,ty, t0,t1, splash }]   (fireballs; lerp x0->tx over t0..t1, splash ring after t1)
-world.ghost    { x, y, heading, moving, backpedal }        (ghost tank)
+world.ghost    { x, y, heading, moving, backpedal, hp, maxHp, tanking }   (ghost tank: a guide in tank roles, the raid's tank otherwise)
+world.idealTank { x, y, reason }                            (where the tank should be; the ghost follows it)
 world.idealPlayer { x, y, reason:'approach'|'tankSpot'|'pickupSpot'|'dodgeLane'|'whelps'|'holdWhelps'|'wait' }
 world.idealBoss   { x, y, heading, satisfied } | null
 world.coneFlash   { breath, cleave, tail, buffet }  (time of last hit; flash for ~0.5s after)
 threat         { player, raid, tauntUntil }
-abilities      { gcdUntil, readyAt:{id:t} }
+abilities      { gcdUntil, readyAt:{id:t}, list:[ids the role may press] }
+debuffs        [{ uid, name, dispel, on:'player'|'ghost'|'raid', appliedAt, until, tickDamage }]
+tankRole       bool
 cues           { combo, bestCombo, counts:{perfect,good,missed}, lastHit:{t,ability,status,delta,cue}|null, lastEarly:{t,ability}|null,
                  beats:[{ uid, cue, ability, label, short, tip, at, early, late, doneBy, phase, status:'pending'|'perfect'|'good'|'missed', resolvedAt, delta }] }
                (pending Taunt notes plus the ones resolved in the last 1.5 s; the HUD draws them as the note lane)
 upcoming       [{ id, label, icon, at, in, warn, cue, hazard?, phase? }] sorted by time, horizon 30s
 nextExpected   { label, kind:'expectation'|'fix'|'hint'|'hold', deadline?, id? } | null
-feedback       { facingWrong, inHazard, lastTick:{t,status,label,lateBy}|null, toast:{t,text,kind}|null }
+feedback       { facingWrong, inHazard, inFront, holdAttack, inRangeOk, lastTick:{t,status,label,lateBy}|null, toast:{t,text,kind}|null }
 metrics        { ...totals }
 ```
 
