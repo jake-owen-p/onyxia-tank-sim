@@ -614,7 +614,12 @@ export function createSim(script, options = {}) {
       z.source = id;
       z.applies = def.applies || null;
       z.harmful = !!def.applies && !!def.damage || !!def.harmful;
-      if (def.carried && c.onPlayer) { z.carried = true; z.raidMetric = def.raidMetric || null; z.runTo = runOutPoint(r); toast(`${def.label} on you. Run out of the raid!`, 'bad'); }
+      if (def.carried && c.onPlayer) {
+        z.carried = true; z.raidMetric = def.raidMetric || null;
+        // `stayPut`: the raid is already spread, so the right answer is to hold your spot, not to run.
+        z.runTo = def.stayPut ? null : runOutPoint(r);
+        if (!def.stayPut) toast(`${def.label} on you. Run out of the raid!`, 'bad');
+      }
       w.hazards.push(z);
     }
     emit('hazardWarn', { kind: 'zone', label: def.label, in: def.warning || 0, onPlayer: centres.some((c) => c.onPlayer) });
@@ -810,6 +815,8 @@ export function createSim(script, options = {}) {
 
   const airTarget = () => state.world.boss.state === 'airborne' && !!script.boss.attackableInAir && state.role !== 'melee';
   const shieldUp = () => state.t < state.shieldUntil && roleMatches(state.shieldRoles);
+  /** Is there nothing worth attacking? A boss-only shield still leaves any killable adds to hit. */
+  const shieldBlocksAttacks = () => shieldUp() && !(state.shieldBossOnly && state.world.whelps.some((a) => a.killable));
 
   /** What an attack would hit: whatever in range you are looking at most directly (boss or a killable add). */
   function attackTarget(range) {
@@ -887,7 +894,7 @@ export function createSim(script, options = {}) {
     if (ideal.reason === 'runOut') return set('Run out of the raid before it goes off', 'fix');
     if (ideal.reason === 'los') return set('Get behind cover', 'fix');
     if (ideal.reason === 'moveOut') return set(`Get out of range: ${b.cast ? b.cast.label : 'move'}`, 'fix');
-    if (!tankRole && shieldUp()) return set('Shield up: stop attacking', 'fix');
+    if (!tankRole && shieldBlocksAttacks()) return set('Shield up: stop attacking', 'fix');
     if (!tankRole && ideal.reason === 'whelps') return set('Pick up the adds', 'fix');
     if (!tankRole && ideal.reason === 'holdWhelps') return set('Hold the adds on your spot', 'hold');
     if ((state.role === 'melee' || state.role === 'ranged') && killTarget(state)) return set(`Kill ${killTarget(state).label} first`, 'fix');
@@ -1082,7 +1089,7 @@ export function createSim(script, options = {}) {
         state.feedback.inFront = front && b.target !== 'player';
         if (state.feedback.inFront) addMetric('playerInFront', dt);
         const ratio = threatRatio(state.threat, threatCfg, false);
-        state.feedback.holdAttack = shieldUp() || (b.target === 'ghost' && ratio >= (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8));
+        state.feedback.holdAttack = shieldBlocksAttacks() || (b.target === 'ghost' && ratio >= (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8));
         if (state.role === 'melee' || state.role === 'ranged') {
           const aim = attackTarget(attackRange(state, script));
           const inR = !!aim;

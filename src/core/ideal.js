@@ -115,7 +115,7 @@ export function idealTankPos(state, script, who = 'player') {
 /** The add the DPS should be on right now: the nearest kill-first add, or any killable add while the boss cannot be hit. */
 export function killTarget(state) {
   const w = state.world, p = w.player, b = w.boss;
-  const bossUp = b.state === 'grounded' && b.engaged && !b.passive;
+  const bossUp = b.state === 'grounded' && b.engaged && !b.passive && !(state.shieldBossOnly && state.t < state.shieldUntil);
   const pool = w.whelps.filter((a) => a.priority || (a.killable && !bossUp));
   let best = null, bd = Infinity;
   for (const a of pool) { const d = dist(p.x, p.y, a.x, a.y); if (d < bd) { bd = d; best = a; } }
@@ -143,7 +143,7 @@ function meleePos(state, script) {
 export function idealPlayerPos(state, script) {
   const w = state.world, b = w.boss;
   if (!state.phaseDef) return { x: w.player.x, y: w.player.y, reason: 'wait' };
-  const bomb = w.hazards.find((h) => h.carried && h.state === 'warning');
+  const bomb = w.hazards.find((h) => h.carried && h.state === 'warning' && h.runTo);
   if (bomb) return { x: bomb.runTo.x, y: bomb.runTo.y, reason: 'runOut' };
   const castDef = b.cast && script.actions[b.cast.id];
   // Cover: for a cast you can hide from, or when a stacking debuff has reached the point where you drop it.

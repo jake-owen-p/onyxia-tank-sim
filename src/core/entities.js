@@ -214,6 +214,17 @@ export function beginLanding(state, script) {
 
 // ------------------------------------------------------------------ raid
 
+/** The i-th cell of a hexagonal lattice spiralling out from the centre, in units of one spacing. */
+function hexCell(i) {
+  if (i === 0) return { gx: 0, gy: 0 };
+  let ring = 1, remaining = i - 1;
+  while (remaining >= ring * 6) { remaining -= ring * 6; ring++; }
+  const side = Math.floor(remaining / ring), step = remaining % ring;
+  const corners = [[1, 0], [0.5, Math.sqrt(3) / 2], [-0.5, Math.sqrt(3) / 2], [-1, 0], [-0.5, -Math.sqrt(3) / 2], [0.5, -Math.sqrt(3) / 2]];
+  const [ax, ay] = corners[side], [bx, by] = corners[(side + 1) % 6];
+  return { gx: ax * ring + ((bx - ax) * step), gy: ay * ring + ((by - ay) * step) };
+}
+
 export function createRaid(script, rng, anchorSpot) {
   const dots = [];
   for (let i = 0; i < script.raid.size; i++) {
@@ -225,6 +236,7 @@ export function createRaid(script, rng, anchorSpot) {
       ox: Math.cos(a) * r, oy: Math.sin(a) * r,
       melee, side: i % 2 ? -1 : 1, slot: (Math.floor(i / 2) - 2) * 1.6,
       tx: anchorSpot.x, ty: anchorSpot.y,
+      ...hexCell(i),
     });
   }
   return {
@@ -238,6 +250,7 @@ export function createRaid(script, rng, anchorSpot) {
 export function setRaidSpot(raid, spot) {
   raid.anchorTarget = { x: spot.x, y: spot.y };
   raid.spread = spot.spread || 10;
+  raid.spacing = spot.spacing || 0;
 }
 
 export function updateRaid(state, script, dt) {
@@ -256,6 +269,11 @@ export function updateRaid(state, script, dt) {
     if (d.melee && meleeOnBoss) {
       const p = offsetPoint(b.x, b.y, b.heading, d.slot, d.side * script.raid.meleeFlankDistance);
       d.tx = p.x; d.ty = p.y;
+    } else if (r.spacing) {
+      // A formation: every raider holds their own cell, and steps aside for the player.
+      d.tx = r.anchor.x + d.gx * r.spacing; d.ty = r.anchor.y + d.gy * r.spacing;
+      const p = state.world.player, off = dist(d.tx, d.ty, p.x, p.y);
+      if (off < r.spacing) { const a = off < 1e-3 ? d.gx : angleTo(p.x, p.y, d.tx, d.ty); d.tx = p.x + Math.cos(a) * r.spacing; d.ty = p.y + Math.sin(a) * r.spacing; }
     } else {
       const s = d.melee ? r.spread * 0.6 : r.spread;
       d.tx = r.anchor.x + d.ox * s; d.ty = r.anchor.y + d.oy * s;

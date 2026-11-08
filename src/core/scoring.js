@@ -82,6 +82,7 @@ export function computeScore(script, log, phaseMetrics, phasesPlayed, role = 'mt
     let activity = null, roleFactor = 1;
     if (TANK_ROLES.includes(role) && pm.tankWindow > 1) activity = 1 - (pm.bossLooseSeconds || 0) / pm.tankWindow;
     else if ((role === 'melee' || role === 'ranged') && pm.dpsWindow > 1) activity = 1 - ((pm.dpsIdle || 0) + (pm.outOfRange || 0)) / pm.dpsWindow;
+    if (phaseDef && phaseDef.skipActivity && roleMatches(phaseDef.skipActivity === true ? null : phaseDef.skipActivity, role, holdsBoss(script, role))) activity = null;
     if (activity != null) { activity = Math.max(0, Math.min(1, activity)); roleFactor = Math.min(1, activity / (g.fullActivity ?? 0.7)); }
     if (role === 'healer') roleFactor = Math.pow(0.5, pm.tankDeaths || 0);
     const expPoints = expScore * g.expectationPoints * roleFactor;

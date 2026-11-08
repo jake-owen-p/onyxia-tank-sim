@@ -516,3 +516,46 @@ test('speed ramps, melee-only abilities, hazards that also debuff, and hitting a
   const ev = run(air, FIXED_DT, press('attack'));
   assert.ok(ev.some((e) => e.type === 'attack'), 'can be shot in the air');
 });
+
+test('a spaced raid really keeps its spacing and clears room for the player; a stay-put bomb does not send you running', () => {
+  const s2 = structuredClone(script);
+  s2.positions.raidSpotP1.spacing = 10; s2.positions.raidSpotP1.spread = 30;
+  s2.actions.beam = { label: 'Eye Beam', kind: 'hazard', placement: 'player', carried: true, stayPut: true, radius: 8, warning: 5, active: 0.5, damage: 100, raidMetric: 'chains', cast: 0, warn: false, icon: 'roar' };
+  s2.continuousMetrics.chains = { label: 'c', unit: 'count', penaltyPerUnit: 1 };
+  const sim = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, p = s.world.player, a = s.world.raid.anchor;
+  p.x = a.x; p.y = a.y; p.heading = 0;
+  run(sim, 8);
+  const ranged = s.world.raid.dots.filter((d) => !d.melee);
+  let closest = Infinity;
+  for (let i = 0; i < ranged.length; i++) for (let j = i + 1; j < ranged.length; j++) closest = Math.min(closest, Math.hypot(ranged[i].x - ranged[j].x, ranged[i].y - ranged[j].y));
+  assert.ok(closest >= 8.9, `raiders stay apart, closest ${closest.toFixed(1)}`);
+  assert.ok(ranged.every((d) => Math.hypot(d.x - p.x, d.y - p.y) >= 8.9), 'room is made for the player');
+  sim.triggerAction('beam');
+  sim.step(idle(), FIXED_DT);
+  assert.notEqual(s.world.idealPlayer.reason, 'runOut');
+  run(sim, 5.2);
+  assert.equal(s.metrics.chains, undefined, 'held position, nobody chained');
+});
+
+test('a boss-only shield leaves adds as the job, and an exempt phase does not punish staying away', () => {
+  const s2 = structuredClone(script);
+  s2.positions.addSpot = { x: 20, y: 30 };
+  s2.actions.adds = { label: 'Eye', kind: 'adds', cast: 0, count: 1, from: ['addSpot'], speed: 0, lifetime: 30, heldLifetime: 30, killable: true, pickup: 'offtank', holdSpot: 'addSpot', warn: false, icon: 'whelps' };
+  s2.actions.shell = { label: 'Carapace', kind: 'shield', bossOnly: true, duration: 20, cast: 0, warn: false, icon: 'roar' };
+  const sim = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state;
+  sim.triggerAction('shell');
+  sim.step(idle(), FIXED_DT);
+  assert.equal(s.feedback.holdAttack, true, 'nothing to hit yet');
+  sim.triggerAction('adds');
+  sim.step(idle(), FIXED_DT);
+  assert.equal(s.feedback.holdAttack, false, 'adds are up');
+  assert.match(s.nextExpected.label, /Kill/);
+
+  const sc = (skip) => {
+    const def = structuredClone(script); if (skip) def.phases[0].skipActivity = true;
+    return computeScore(def, [], { 1: { dpsWindow: 100, outOfRange: 100 } }, [1], 'melee', []).phases[0].total;
+  };
+  assert.ok(sc(true) > sc(false) + 40);
+});
