@@ -84,6 +84,7 @@ export function roleBot(role) {
     const live = b.state === 'grounded' && b.engaged && !b.passive;
     const holding = s.engagedAt != null && s.landedAt == null && s.t - s.engagedAt < sim.script.raid.holdAfterPull;
     if (add) { if (s.feedback.inRangeOk) cmd.abilities.push('attack'); }
+    else if (b.state === 'airborne' && sim.script.boss.attackableInAir) { if (s.feedback.inRangeOk) cmd.abilities.push('attack'); }
     else if (live && b.target === 'ghost' && !s.feedback.holdAttack && !holding && s.feedback.inRangeOk) cmd.abilities.push('attack');
     return cmd;
   };

@@ -141,7 +141,7 @@ export function updateBoss(state, script, dt) {
     // She settles for a moment after landing (turns, but does not walk) so the tank has a window.
     const settling = b.landedAt != null && state.t - b.landedAt < (cfg.settleAfterLanding || 0);
     if (d > cfg.meleeRange && !settling && !cfg.stationary) {
-      const step = Math.min(cfg.speed * dt, d - cfg.meleeRange);
+      const step = Math.min(cfg.speed * (state.bossSpeedMult ?? 1) * dt, d - cfg.meleeRange);
       const nx = b.x + Math.cos(want) * step, ny = b.y + Math.sin(want) * step;
       if (onFloor(nx, ny, script.arena.floor)) { b.x = nx; b.y = ny; }
       else {

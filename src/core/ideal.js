@@ -35,7 +35,7 @@ export function dodgeHazards(x, y, state, reason) {
 function dodgeOnce(x, y, state, reason) {
   const w = state.world;
   for (const h of w.hazards) {
-    if (h.carried || h.applies) continue;                                  // you cannot step out of the bomb you are carrying
+    if (h.carried || (h.applies && !h.harmful)) continue;                                  // you cannot step out of the bomb you are carrying
     if (h.state === 'idle' && h.kind !== 'crack') continue;   // idle cracks are still not a place to stand
     if (h.kind === 'lane') {
       const e = escapeLane(x, y, h.from, h.to, h.width, 4);

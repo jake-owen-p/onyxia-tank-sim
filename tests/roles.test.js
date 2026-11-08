@@ -484,3 +484,35 @@ test('dodging keeps going until the marker is clear of every overlapping zone', 
   const { x, y } = sim.state.world.idealPlayer;
   for (const h of sim.state.world.hazards.filter((z) => z.kind === 'zone')) assert.ok(Math.hypot(x - h.centroid.x, y - h.centroid.y) >= h.radius, 'outside every zone');
 });
+
+test('speed ramps, melee-only abilities, hazards that also debuff, and hitting a boss in the air', () => {
+  const s2 = structuredClone(script);
+  Object.assign(s2.actions, {
+    gather: { label: 'Gathering Speed', kind: 'aoe', radius: 1, damage: 0, cast: 0, bossSpeedMult: 2, bossSpeedMultMax: 3, warn: false, icon: 'roar' },
+    bite: { label: 'Dismember', kind: 'aoe', radius: 500, damage: 1, cast: 0, conditional: 'tankInMelee', warn: false, icon: 'roar' },
+    silence: { label: 'Silence', kind: 'debuff', target: 'player', dispel: 'none', duration: 5, cast: 0, warn: false, icon: 'roar' },
+    trap: { label: 'Sand Trap', kind: 'hazard', placement: 'player', radius: 6, warning: 0, active: 3, damage: 100, applies: 'silence', cast: 0, warn: false, icon: 'roar' },
+  });
+  const sim = createSim(s2, { role: 'tank', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state;
+  sim.triggerAction('gather'); sim.triggerAction('gather');
+  assert.equal(s.bossSpeedMult, 3, 'capped');
+  assert.equal(sim.triggerAction('bite'), true, 'tank in melee');
+  s.pendingTrigger = null;
+  s.world.player.x = 0; s.world.player.y = -40;
+  assert.equal(sim.triggerAction('bite'), false, 'tank out of melee');
+  s.pendingTrigger = null;
+  sim.triggerAction('trap');
+  run(sim, 0.3);
+  assert.ok(s.debuffs.some((d) => d.actionId === 'silence'), 'the hazard applied its debuff');
+  assert.ok(s.metrics.playerInHazard > 0, 'and it still counts as standing in it');
+
+  const s3 = structuredClone(script); s3.boss.attackableInAir = true;
+  const air = createSim(s3, { role: 'ranged', startPhase: 2, start: 'pickup', manual: true, seed: 5 });
+  const p = air.state.world.player, b = air.state.world.boss;
+  assert.equal(b.state, 'airborne');
+  p.x = b.x; p.y = b.y - 25;
+  p.heading = Math.PI / 2;
+  const ev = run(air, FIXED_DT, press('attack'));
+  assert.ok(ev.some((e) => e.type === 'attack'), 'can be shot in the air');
+});
