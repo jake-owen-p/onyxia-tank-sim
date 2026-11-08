@@ -494,7 +494,7 @@ export function createSim(script, options = {}) {
       case 'aoe': {
         const inRadius = (!def.radius || bossRangeTo(p.x, p.y) <= def.radius) && !sheltered(def);
         if (inRadius) { damagePlayer(def.damage || 0, id); if (def.playerMetric) addMetric(def.playerMetric, 1); stunPlayer(def.stun); }
-        if (def.tankDamage || !def.radius || ghostInBossRange(def.radius)) damageGhost(def.tankDamage ?? def.damage ?? 0, id);
+        if (!def.radius || ghostInBossRange(def.radius)) damageGhost(def.tankDamage ?? def.damage ?? 0, id);
         emit('raidDamage', { id, label: def.label, amount: def.damage || 0 });
         break;
       }
@@ -806,7 +806,7 @@ export function createSim(script, options = {}) {
     if (beat) emitBeat(beat);
   }
 
-  const airTarget = () => state.world.boss.state === 'airborne' && !!script.boss.attackableInAir;
+  const airTarget = () => state.world.boss.state === 'airborne' && !!script.boss.attackableInAir && state.role !== 'melee';
   const shieldUp = () => state.t < state.shieldUntil && roleMatches(state.shieldRoles);
 
   /** What an attack would hit: whatever in range you are looking at most directly (boss or a killable add). */
@@ -1049,7 +1049,8 @@ export function createSim(script, options = {}) {
       if (!inside) continue;
       if (h.applies) {
         // A cloud you stand in on purpose: Hakkar's poison.
-        if (script.actions[h.applies] && !state.debuffs.some((d) => d.on === 'player' && d.actionId === h.applies)) applyDebuff(script.actions[h.applies], h.applies);
+        const gives = script.actions[h.applies];
+        if (gives && roleMatches(gives.roles) && !state.debuffs.some((d) => d.on === 'player' && d.actionId === h.applies)) applyDebuff(gives, h.applies);
         if (!h.harmful) continue;
       }
       if (h.kind === 'crack') {

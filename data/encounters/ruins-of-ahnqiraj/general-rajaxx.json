@@ -1,0 +1,2443 @@
+{
+ "id": "general-rajaxx",
+ "name": "General Rajaxx",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "ruins-of-ahnqiraj",
+  "name": "Ruins of Ahn'Qiraj",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/ruins-of-ahnqiraj/general-rajaxx.md. The event is modelled as eight phases: seven waves and Rajaxx. The boss entity stands for each wave's officer in turn (Qeez, Tuubid, Drenn, Xurrem, Yeggeth, Pakkon, Zerran) and a phase's `hpFrom` 1 to `hpTo` 0 is that officer's life, so the health bar resets each wave; the fixed clock means no officer can actually live through a wave or be polymorphed, and the 'next wave only after this wave dies or a 2-3 minute timer' rule (research conflict: 3 min Wowhead/CMaNGOS, 2 min AzerothCore) is not modelled: each wave gets a flat 40 s (estimate) and Rajaxx 130 s, because a 20-minute rehearsal would not hold attention. The two big unknowns stand: real time-to-kill per wave and how far the terrace really is (the rectangle is unmeasured). Boss melee (700 per 2 s) is scaled so a 10,000 HP tank lives on the raid's passive healing and dies if a player healer ignores it (`healPerSecondWithPlayerHealer` 60). The same `meleeDamage` serves every officer and Rajaxx because the engine has one boss melee number per script; Needlers and Warriors do no damage (engine gap: adds cannot hurt anyone), so their damage is folded into that number. Wave trash uses each wave's real counts as a single killable pack of 6 held by the off-tank role; there is no Needler versus Warrior kill order. Kill order is 'officer first', which is correct for the unpolymorphed case (polymorph is not modelled). Thundercrash is an `aoe` plus radial `knockback` plus `threatWipe`, 12 s then every 21 s (emulator). Its real damage is half of current health (minimum 100, 40-50% by Warcraft Tavern), which the engine cannot express; a flat 3,500 is used so a full-health 10,000 HP tank drops by about a third per crash, which reads like repeated halves when a tank is not topped off. The real hit is half of current health, so it cannot kill above about 100 HP; the sim's flat 3,500 can, which the tip states. Knockback 14 yd (unknown; spell data 100-250 value), and phase 8 tanks in the south-west corner of the terrace (tank at (-45, -29), about 3 yd from both walls; the door gap is x -9 to 9), the only spot where, with him arriving from the east, the push really is stopped: the wall absorbs it and the tank moves about 2 yd. The research's open question on radius (spell data 100 yd vs TenTonHammer about 20 yd) is resolved as the whole room. Disarm (10 s then every 22 s, 5 s): a debuff shown on the tank plus a 20% threat cut (a placeholder; the real effect is the loss of weapon threat for 5 s). 'Deaggro' is folded into Thundercrash's threat reset (the research cannot say whether it is separate). Frenzy at 30% (BigWigs option 8269; Wowhead 8269: +60% melee haste, +50 physical damage, 2 min, no dispel type) is an `enrage` at 91 s (70% of the 130 s clock), with `boss.enrageMultiplier` 1.6 for the haste and the flat damage folded in. Officer lessons, every one an approximation: Qeez' Frightening Shout is a 12 yd `fear` on random non-tanks, 4.5 s (wiki). UNVERIFIED: its fear radius and exact spell ID (the wiki gives the duration only; spell 19134 on Wowhead is the warrior Intimidating Shout and may be a different spell), and the 12 yd is unmeasured. Tuubid's Attack Order (10 s dummy aura, Wowhead 25471 and the DBM and BigWigs target bars; all adds fixate one target) is a 10 s `carried` hazard on a random raider, because adds cannot be made to fixate a target; it scores whether the marked raider took it away from the group. Drenn's Lightning Cloud (Wowhead 26550: instant, 30 yd range, a persistent 15 s cloud, 10 yd radius, 657-843 Nature on landing and every 3 s) is a `hazard` on a random player or raid dot: 1 s warning, 15 s active, `tick` 250 per second standing in for about 750 per 3 s; hazards hit only the player, so the ghost tank does not take it and there is no Andorov to pull clear. Xurrem's Shockwave (Wowhead 25425: instant, Nature 1,313 base, 20 yd radius, 2 s stun) is an instant `aoe` of radius 17 from his 3.5 yd hitbox (20 yd centre to centre), 1,300 with `stun` 2: melee and the tank cannot avoid it and heal through it, and ranged and healers stand outside 20 yd (`shockwaveHits`, spots `rangedXurrem` and `healerXurrem`). Yeggeth's Shield of Rajaxx (Wowhead 25282: 6 s, immune to every school) is a `shield` for all DPS with no reflect, so the only rule is stop attacking; the engine's `shield` also blocks attacks on the wave's adds, whereas a real raid would turn to the Needlers for those 6 seconds. Pakkon's Sweeping Slam (Wowhead 25322: 1,750 base, 15 yd radius, knockback) is a 16 yd frontal `cone` for 2,000 with knockback; he must face away from the raid. Zerran's Enlarge is a dispellable `debuff` on the tank that raises damage taken by 40%, because a buff on an enemy add cannot be dispelled in this engine. Lieutenant General Andorov and his four Kaldorei Elite are not on the board. Their real contribution (Andorov re-taking Rajaxx after a Thundercrash, Aura of Command's 200 per 3 s and haste, Kaldorei damage) is only reflected in generous passive healing; the healer has no way to heal them and no mechanic loses them. The 140 versus 150 Cenarion Circle reputation choice and the release-and-rejoin trick are out of scope. Each wave here costs a threat reset on the boss so the tank re-acquires the next officer, a stand-in for the real gaps between waves.",
+ "sources": [
+  "docs/research/ruins-of-ahnqiraj/general-rajaxx.md",
+  "https://warcraft.wiki.gg/wiki/General_Rajaxx",
+  "https://www.wowhead.com/classic/guide/general-rajaxx-ruins-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/ruins-of-ahnqiraj-aq20/",
+  "https://www.tentonhammer.com/guides/tentonhammers-guide-to-the-ruins-of-ahn-qiraj-section-2-2",
+  "https://us.millenium.gg/guide/6975.html?page=2",
+  "https://warcraft.wiki.gg/wiki/Lieutenant_General_Andorov",
+  "https://warcraft.wiki.gg/wiki/Kaldorei_Elite",
+  "https://warcraft.wiki.gg/wiki/Captain_Drenn",
+  "https://wotlkdb.com/?spell=25599",
+  "https://wotlkdb.com/?spell=6713",
+  "https://wotlkdb.com/?spell=25516",
+  "https://github.com/azerothcore/azerothcore-wotlk/blob/master/src/server/scripts/Kalimdor/RuinsOfAhnQiraj/boss_rajaxx.cpp",
+  "https://github.com/azerothcore/azerothcore-wotlk/blob/master/src/server/scripts/Kalimdor/RuinsOfAhnQiraj/instance_ruins_of_ahnqiraj.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/kalimdor/ruins_of_ahnqiraj/boss_rajaxx.cpp"
+ ],
+ "arena": {
+  "name": "The General's Terrace",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -48,
+      -32
+     ],
+     [
+      48,
+      -32
+     ],
+     [
+      48,
+      36
+     ],
+     [
+      -48,
+      36
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -54
+     ],
+     [
+      9,
+      -54
+     ],
+     [
+      9,
+      -28
+     ],
+     [
+      -9,
+      -28
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -9,
+      -32
+     ],
+     [
+      -48,
+      -32
+     ],
+     [
+      -48,
+      36
+     ],
+     [
+      48,
+      36
+     ],
+     [
+      48,
+      -32
+     ],
+     [
+      9,
+      -32
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -32
+     ],
+     [
+      -9,
+      -54
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -32
+     ],
+     [
+      9,
+      -54
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -48
+    ]
+   },
+   {
+    "text": "Back into this corner for Thundercrash",
+    "at": [
+     -36,
+     -29
+    ]
+   },
+   {
+    "text": "Waves come in from the north side",
+    "at": [
+     0,
+     28
+    ]
+   },
+   {
+    "text": "Andorov and his Kaldorei",
+    "at": [
+     22,
+     -24
+    ]
+   }
+  ],
+  "backWall": [
+   [
+    -48,
+    -32
+   ],
+   [
+    -9,
+    -32
+   ]
+  ],
+  "nearWallDistance": 11
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -46,
+   "heading": 90
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -24,
+   "spread": 6
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 30,
+   "heading": 270
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 10,
+   "tolerance": 5,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 2,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Officer"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -14,
+   "spread": 12,
+   "label": "Raid: back to the south wall"
+  },
+  "rangedSpot": {
+   "x": -7,
+   "y": -15,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerSpot": {
+   "x": 7,
+   "y": -15,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "rajaxxTank": {
+   "x": -45,
+   "y": -29,
+   "tolerance": 5,
+   "label": "Tank, in the corner"
+  },
+  "rajaxxBoss": {
+   "x": -40,
+   "y": -25,
+   "heading": 225,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Rajaxx"
+  },
+  "raidSpotP8": {
+   "x": -24,
+   "y": -25,
+   "spread": 9,
+   "label": "Raid along the south wall"
+  },
+  "rangedRajaxx": {
+   "x": -26,
+   "y": -26,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerRajaxx": {
+   "x": -22,
+   "y": -26,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "offtankRajaxx": {
+   "x": -34,
+   "y": -16,
+   "tolerance": 7,
+   "label": "Off-tank, ready for Thundercrash"
+  },
+  "rangedXurrem": {
+   "x": 6,
+   "y": -22,
+   "tolerance": 3,
+   "label": "Ranged, outside 20 yd of Xurrem"
+  },
+  "healerXurrem": {
+   "x": -4,
+   "y": -29,
+   "tolerance": 3,
+   "label": "Healers, outside 20 yd of Xurrem"
+  },
+  "rajaxxEntry": {
+   "x": 0,
+   "y": 10,
+   "label": "Rajaxx walks in"
+  },
+  "wave1": {
+   "x": 0,
+   "y": 30,
+   "label": "Captain Qeez"
+  },
+  "boss1": {
+   "x": 0,
+   "y": 2,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Captain Qeez"
+  },
+  "tank1": {
+   "x": 0,
+   "y": 10,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "hold1": {
+   "x": 9,
+   "y": 10,
+   "label": "Wave held"
+  },
+  "ot1": {
+   "x": 12,
+   "y": 10,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "wave2": {
+   "x": -28,
+   "y": 26,
+   "label": "Captain Tuubid"
+  },
+  "boss2": {
+   "x": -9.2,
+   "y": -0.9,
+   "heading": 125,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Captain Tuubid"
+  },
+  "tank2": {
+   "x": -13.8,
+   "y": 5.7,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "hold2": {
+   "x": -6.4,
+   "y": 10.9,
+   "label": "Wave held"
+  },
+  "ot2": {
+   "x": -4,
+   "y": 12.6,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "wave3": {
+   "x": 28,
+   "y": 26,
+   "label": "Captain Drenn"
+  },
+  "boss3": {
+   "x": 9.2,
+   "y": -0.9,
+   "heading": 55,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Captain Drenn"
+  },
+  "tank3": {
+   "x": 13.8,
+   "y": 5.7,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "hold3": {
+   "x": 21.2,
+   "y": 0.5,
+   "label": "Wave held"
+  },
+  "ot3": {
+   "x": 23.6,
+   "y": -1.2,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "wave4": {
+   "x": -42,
+   "y": 8,
+   "label": "Captain Xurrem"
+  },
+  "boss4": {
+   "x": -14.2,
+   "y": -6.6,
+   "heading": 152,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Captain Xurrem"
+  },
+  "tank4": {
+   "x": -21.3,
+   "y": -2.9,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "hold4": {
+   "x": -17.1,
+   "y": 5.1,
+   "label": "Wave held"
+  },
+  "ot4": {
+   "x": -15.7,
+   "y": 7.7,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "wave5": {
+   "x": 42,
+   "y": 8,
+   "label": "Major Yeggeth"
+  },
+  "boss5": {
+   "x": 14.2,
+   "y": -6.6,
+   "heading": 28,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Major Yeggeth"
+  },
+  "tank5": {
+   "x": 21.3,
+   "y": -2.9,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "hold5": {
+   "x": 25.5,
+   "y": -10.9,
+   "label": "Wave held"
+  },
+  "ot5": {
+   "x": 26.9,
+   "y": -13.5,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "wave6": {
+   "x": -43,
+   "y": -10,
+   "label": "Major Pakkon"
+  },
+  "boss6": {
+   "x": -15.9,
+   "y": -12.5,
+   "heading": 175,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Major Pakkon"
+  },
+  "tank6": {
+   "x": -24.8,
+   "y": -21.8,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "hold6": {
+   "x": -23.1,
+   "y": -2.8,
+   "label": "Wave held"
+  },
+  "ot6": {
+   "x": -22.8,
+   "y": 0.1,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "wave7": {
+   "x": 43,
+   "y": -10,
+   "label": "Colonel Zerran"
+  },
+  "boss7": {
+   "x": 15.9,
+   "y": -12.5,
+   "heading": 5,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Colonel Zerran"
+  },
+  "tank7": {
+   "x": 23.9,
+   "y": -11.8,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "hold7": {
+   "x": 24.7,
+   "y": -20.8,
+   "label": "Wave held"
+  },
+  "ot7": {
+   "x": 25,
+   "y": -23.7,
+   "tolerance": 7,
+   "label": "Off-tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 640,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 620,
+  "healPerSecondWithPlayerHealer": 60,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 3.5,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 7,
+  "meleeDamage": 700,
+  "meleeInterval": 2,
+  "enrageMultiplier": 1.6,
+  "facingCone": "sweepingSlam",
+  "cones": {
+   "sweepingSlam": {
+    "angle": 120,
+    "range": 16,
+    "label": "Sweeping Slam",
+    "facing": "front",
+    "style": "breath"
+   }
+  }
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 500,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Each wave you take the officer off his arrival path and hold him facing away from the raid. On Rajaxx tank in the south-west corner with your back to the wall, re-take him the moment Thundercrash wipes threat, and do not let him turn on the raid. At 30% he frenzies: 60% faster swings until he dies. (The Taunt button stands for regaining threat.)",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Wave off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the trash pack of every wave: Needlers and Warriors. Grab them as they come in and hold them away from the raid until they die.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the officer first, then Needlers. Step out of Lightning Cloud, take Shockwave and heal through it (it stuns you for 2 s), stand behind Pakkon, and stop attacking through Shield of Rajaxx. On Rajaxx stop for a few seconds after every Thundercrash.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Kill the officer first. Stand outside 20 yards of Xurrem on wave four. Stop attacking through Shield of Rajaxx on wave five. Dispel Enlarge off wave seven instantly. On Rajaxx stop after every Thundercrash until the tank has him back.",
+   "abilities": [
+    "attack",
+    "dispel"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Spread so one fear does not take two healers. Stand outside 20 yards of Xurrem on wave four. Dispel Enlarge. Rajaxx: Thundercrash halves everyone, so heal the tank up the moment it lands and keep the raid topped. At 30% he frenzies: 60% faster swings until he dies.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic"
+   ],
+   "tip": "Dispel Magic or Purge. Removes Enlarge."
+  }
+ },
+ "actions": {
+  "intimidatingShout": {
+   "label": "Frightening Shout",
+   "kind": "fear",
+   "cast": 0,
+   "targets": "random",
+   "playerChance": 0.32,
+   "radius": 12,
+   "roles": "nontank",
+   "duration": 4.5,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A short-range AoE fear. Melee take it; ranged and healers stay out of range; a feared raider runs into the pack."
+  },
+  "attackOrder": {
+   "label": "Attack Order",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.34,
+   "roles": "nontank",
+   "carried": true,
+   "radius": 8,
+   "warning": 10,
+   "active": 1,
+   "damage": 900,
+   "raidMetric": "attackOrdersOnRaid",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Tuubid marks a raider for 10 seconds and his whole wave fixates them. If it is you, walk away from the raid until they die."
+  },
+  "lightningCloud": {
+   "label": "Lightning Cloud",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.35,
+   "radius": 10,
+   "warning": 1,
+   "active": 15,
+   "tick": true,
+   "damage": 250,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Drenn drops a 10 yd lightning cloud for 15 s: about 750 on landing and 750 every 3 s. Step out of it."
+  },
+  "shockwave": {
+   "label": "Shockwave",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 17,
+   "damage": 1300,
+   "tankDamage": 1300,
+   "stun": 2,
+   "playerMetric": "shockwaveHits",
+   "warn": true,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Instant 20 yd Nature blast that stuns for 2 s. Ranged and healers stand outside 20 yd; melee and tank heal through it."
+  },
+  "blessingProtection": {
+   "label": "Shield of Rajaxx",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 6,
+   "reflectDamage": 0,
+   "roles": "dps",
+   "toast": "Shield of Rajaxx: he is immune to everything. Stop attacking.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He is immune to every school for 6 seconds. Stop attacking until it fades."
+  },
+  "sweepingSlam": {
+   "label": "Sweeping Slam",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "sweepingSlam",
+   "damage": 2000,
+   "knockback": 12,
+   "hitsMelee": true,
+   "playerMetric": "slamHits",
+   "raidMetric": "slamsOnRaid",
+   "warn": true,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A heavy frontal cone with knockback. Face him away from the raid, and melee stand behind him."
+  },
+  "enlarge": {
+   "label": "Enlarge",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "magic",
+   "duration": 22,
+   "damageTakenMult": 1.4,
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A magic buff on him and his allies that raises physical damage. Dispel Magic or Purge it off immediately."
+  },
+  "thundercrash": {
+   "label": "Thundercrash",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 3500,
+   "tankDamage": 3500,
+   "follow": [
+    {
+     "id": "thundercrashPush",
+     "delay": 0
+    },
+    {
+     "id": "thundercrashWipe",
+     "delay": 0.1
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Real Thundercrash halves your current HP, so it cannot kill you. The danger is the next swing. The sim uses a flat 3,500. It knocks everyone away and wipes threat, so let the tank take him back before you attack."
+  },
+  "thundercrashPush": {
+   "label": "Thundercrash knockback",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 14,
+   "knockbackRange": 80,
+   "radial": true,
+   "wallMetric": "thundercrashOffWall",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded"
+  },
+  "thundercrashWipe": {
+   "label": "Thundercrash: threat wiped",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "Thundercrash: threat wiped. Tank, get him back.",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Threat is gone. Nobody attacks until the tank has him."
+  },
+  "disarm": {
+   "label": "Disarm",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 5,
+   "roles": "tanks",
+   "follow": [
+    {
+     "id": "disarmThreat",
+     "delay": 0
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Five seconds without your weapon, about 20% of your threat for the moment. Shout and Sunder through it."
+  },
+  "frenzy": {
+   "label": "Frenzy",
+   "kind": "enrage",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Frenzy: Rajaxx hits faster until he dies",
+   "tip": "At 30% he frenzies: +60% attack speed and +50 per hit. It cannot be dispelled."
+  },
+  "disarmThreat": {
+   "label": "Disarm: threat lost",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 0,
+   "knockbackRange": 10,
+   "threatCut": 0.2,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded"
+  },
+  "waveAdds1": {
+   "label": "Captain Qeez's wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 6,
+   "from": [
+    "wave1"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 30,
+   "heldLifetime": 34,
+   "pickup": "offtank",
+   "holdSpot": "hold1",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "2 Needlers and 4 Warriors. Hold them off the raid."
+  },
+  "arrive2": {
+   "label": "Captain Tuubid arrives",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "wave2",
+   "toast": "Wave 2: Captain Tuubid comes in from the left",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Captain Tuubid walks in with 3 Needlers and 3 Warriors. Attack Order marks one target. If it is you, take the pack away from the raid."
+  },
+  "waveAdds2": {
+   "label": "Captain Tuubid's wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 6,
+   "from": [
+    "wave2"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 30,
+   "heldLifetime": 34,
+   "pickup": "offtank",
+   "holdSpot": "hold2",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "3 Needlers and 3 Warriors. Hold them off the raid."
+  },
+  "arrive3": {
+   "label": "Captain Drenn arrives",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "wave3",
+   "toast": "Wave 3: Captain Drenn comes in from the right",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Captain Drenn walks in with 5 Needlers and 1 Warrior. Lightning Cloud: a 10 yard cloud lands on a raider and stays for 15 seconds. Step out of it."
+  },
+  "waveAdds3": {
+   "label": "Captain Drenn's wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 6,
+   "from": [
+    "wave3"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 30,
+   "heldLifetime": 34,
+   "pickup": "offtank",
+   "holdSpot": "hold3",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "5 Needlers and 1 Warrior. Hold them off the raid."
+  },
+  "arrive4": {
+   "label": "Captain Xurrem arrives",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "wave4",
+   "toast": "Wave 4: Captain Xurrem comes in from the further left",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Captain Xurrem walks in with 3 Needlers and 3 Warriors. Shockwave: instant, 20 yards, and it stuns for 2 seconds. Ranged and healers stand outside 20 yards; melee and tank heal through it."
+  },
+  "waveAdds4": {
+   "label": "Captain Xurrem's wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 6,
+   "from": [
+    "wave4"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 30,
+   "heldLifetime": 34,
+   "pickup": "offtank",
+   "holdSpot": "hold4",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "3 Needlers and 3 Warriors. Hold them off the raid."
+  },
+  "arrive5": {
+   "label": "Major Yeggeth arrives",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "wave5",
+   "toast": "Wave 5: Major Yeggeth comes in from the further right",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Major Yeggeth walks in with 4 Needlers and 2 Warriors. Shield of Rajaxx: he is immune to everything for 6 seconds. Stop attacking."
+  },
+  "waveAdds5": {
+   "label": "Major Yeggeth's wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 6,
+   "from": [
+    "wave5"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 30,
+   "heldLifetime": 34,
+   "pickup": "offtank",
+   "holdSpot": "hold5",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "4 Needlers and 2 Warriors. Hold them off the raid."
+  },
+  "arrive6": {
+   "label": "Major Pakkon arrives",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "wave6",
+   "toast": "Wave 6: Major Pakkon comes in from the deep left",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Major Pakkon walks in with 2 Needlers and 4 Warriors. Sweeping Slam: he must face away from the raid. Melee behind him."
+  },
+  "waveAdds6": {
+   "label": "Major Pakkon's wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 6,
+   "from": [
+    "wave6"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 30,
+   "heldLifetime": 34,
+   "pickup": "offtank",
+   "holdSpot": "hold6",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "2 Needlers and 4 Warriors. Hold them off the raid."
+  },
+  "arrive7": {
+   "label": "Colonel Zerran arrives",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "wave7",
+   "toast": "Wave 7: Colonel Zerran comes in from the deep right",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Colonel Zerran walks in with 3 Needlers and 3 Warriors. Enlarge: dispel it off him the moment it lands."
+  },
+  "waveAdds7": {
+   "label": "Colonel Zerran's wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 6,
+   "from": [
+    "wave7"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 30,
+   "heldLifetime": 34,
+   "pickup": "offtank",
+   "holdSpot": "hold7",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "3 Needlers and 3 Warriors. Hold them off the raid."
+  },
+  "arrive8": {
+   "label": "General Rajaxx arrives",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "rajaxxEntry",
+   "toast": "General Rajaxx: \"Impudent fool! I will kill you myself!\"",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He walks in after Zerran dies. Take him to the wall."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Wave 1: Captain Qeez",
+   "subtitle": "centre, 2 Needlers and 4 Warriors",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tank1",
+    "boss": "boss1",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ot1"
+   },
+   "actions": [
+    {
+     "id": "waveAdds1",
+     "first": 1.5
+    },
+    {
+     "id": "intimidatingShout",
+     "first": 9,
+     "every": 14,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "spot1",
+     "type": "playerAtSpotBy",
+     "spot": "tank1",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold Captain Qeez clear of the raid",
+     "tip": "Stand on the far side of him so his front points away from the raid, and keep him there."
+    },
+    {
+     "id": "pack1",
+     "type": "afterEvent",
+     "event": "waveAdds1",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the 2 Needlers and 4 Warriors of wave 1",
+     "tip": "Grab the pack the moment it comes in and hold it away from the raid."
+    },
+    {
+     "id": "ottspot1",
+     "type": "playerAtSpotBy",
+     "spot": "ot1",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the pack on your spot",
+     "tip": "Keep the pack parked where the raid does not stand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Top up between officers; the next wave comes straight in."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep them above half; Rajaxx at the end hits hard."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Wave 2: Captain Tuubid",
+   "subtitle": "left, 3 Needlers and 3 Warriors",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tank2",
+    "boss": "boss2",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ot2"
+   },
+   "actions": [
+    {
+     "id": "arrive2",
+     "first": 0.05
+    },
+    {
+     "id": "waveAdds2",
+     "first": 1.5
+    },
+    {
+     "id": "attackOrder",
+     "first": 12,
+     "every": 16,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grab2",
+     "type": "afterEvent",
+     "event": "arrive2",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 7,
+     "role": "tank",
+     "label": "Take Captain Tuubid when he arrives",
+     "tip": "Pull him off the left before he reaches the raid and hold him facing away. Attack Order marks one target. If it is you, take the pack away from the raid."
+    },
+    {
+     "id": "spot2",
+     "type": "playerAtSpotBy",
+     "spot": "tank2",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold Captain Tuubid clear of the raid",
+     "tip": "Stand on the far side of him so his front points away from the raid, and keep him there."
+    },
+    {
+     "id": "pack2",
+     "type": "afterEvent",
+     "event": "waveAdds2",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the 3 Needlers and 3 Warriors of wave 2",
+     "tip": "Grab the pack the moment it comes in and hold it away from the raid."
+    },
+    {
+     "id": "ottspot2",
+     "type": "playerAtSpotBy",
+     "spot": "ot2",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the pack on your spot",
+     "tip": "Keep the pack parked where the raid does not stand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Top up between officers; the next wave comes straight in."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep them above half; Rajaxx at the end hits hard."
+    },
+    {
+     "id": "orderOut",
+     "type": "continuous",
+     "metric": "attackOrdersOnRaid",
+     "role": "nontank",
+     "label": "Take Attack Order away from the raid",
+     "tip": "If the wave is fixating you, walk them away from the group until they are dead."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Wave 3: Captain Drenn",
+   "subtitle": "right, 5 Needlers and 1 Warrior",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tank3",
+    "boss": "boss3",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ot3"
+   },
+   "actions": [
+    {
+     "id": "arrive3",
+     "first": 0.05
+    },
+    {
+     "id": "waveAdds3",
+     "first": 1.5
+    },
+    {
+     "id": "lightningCloud",
+     "first": 11,
+     "every": 16,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grab3",
+     "type": "afterEvent",
+     "event": "arrive3",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 7,
+     "role": "tank",
+     "label": "Take Captain Drenn when he arrives",
+     "tip": "Pull him off the right before he reaches the raid and hold him facing away. Lightning Cloud: a 10 yard cloud lands on a raider and stays for 15 seconds. Step out of it."
+    },
+    {
+     "id": "spot3",
+     "type": "playerAtSpotBy",
+     "spot": "tank3",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold Captain Drenn clear of the raid",
+     "tip": "Stand on the far side of him so his front points away from the raid, and keep him there."
+    },
+    {
+     "id": "pack3",
+     "type": "afterEvent",
+     "event": "waveAdds3",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the 5 Needlers and 1 Warrior of wave 3",
+     "tip": "Grab the pack the moment it comes in and hold it away from the raid."
+    },
+    {
+     "id": "ottspot3",
+     "type": "playerAtSpotBy",
+     "spot": "ot3",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the pack on your spot",
+     "tip": "Keep the pack parked where the raid does not stand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Top up between officers; the next wave comes straight in."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep them above half; Rajaxx at the end hits hard."
+    },
+    {
+     "id": "cloudOut",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "role": "nontank",
+     "label": "Walk out of the Lightning Cloud",
+     "tip": "A 10 yard cloud lands on a raider for 15 seconds. Step out of the ring and stay out until it fades."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Wave 4: Captain Xurrem",
+   "subtitle": "further left, 3 Needlers and 3 Warriors",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tank4",
+    "boss": "boss4",
+    "ranged": "rangedXurrem",
+    "healer": "healerXurrem",
+    "offtank": "ot4"
+   },
+   "actions": [
+    {
+     "id": "arrive4",
+     "first": 0.05
+    },
+    {
+     "id": "waveAdds4",
+     "first": 1.5
+    },
+    {
+     "id": "shockwave",
+     "first": 10,
+     "every": 13,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grab4",
+     "type": "afterEvent",
+     "event": "arrive4",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 7,
+     "role": "tank",
+     "label": "Take Captain Xurrem when he arrives",
+     "tip": "Pull him off the further left before he reaches the raid and hold him facing away. Shockwave: instant, 20 yards, and it stuns for 2 seconds. Ranged and healers stand outside 20 yards; melee and tank heal through it."
+    },
+    {
+     "id": "spot4",
+     "type": "playerAtSpotBy",
+     "spot": "tank4",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold Captain Xurrem clear of the raid",
+     "tip": "Stand on the far side of him so his front points away from the raid, and keep him there."
+    },
+    {
+     "id": "pack4",
+     "type": "afterEvent",
+     "event": "waveAdds4",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the 3 Needlers and 3 Warriors of wave 4",
+     "tip": "Grab the pack the moment it comes in and hold it away from the raid."
+    },
+    {
+     "id": "ottspot4",
+     "type": "playerAtSpotBy",
+     "spot": "ot4",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the pack on your spot",
+     "tip": "Keep the pack parked where the raid does not stand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Top up between officers; the next wave comes straight in."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep them above half; Rajaxx at the end hits hard."
+    },
+    {
+     "id": "shockwaveRange",
+     "type": "continuous",
+     "metric": "shockwaveHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Ranged and healers: outside 20 yards of Xurrem",
+     "tip": "Shockwave is instant, reaches 20 yards and stuns for 2 seconds. Stand outside it."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Wave 5: Major Yeggeth",
+   "subtitle": "further right, 4 Needlers and 2 Warriors",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tank5",
+    "boss": "boss5",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ot5"
+   },
+   "actions": [
+    {
+     "id": "arrive5",
+     "first": 0.05
+    },
+    {
+     "id": "waveAdds5",
+     "first": 1.5
+    },
+    {
+     "id": "blessingProtection",
+     "first": 9,
+     "every": 14,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grab5",
+     "type": "afterEvent",
+     "event": "arrive5",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 7,
+     "role": "tank",
+     "label": "Take Major Yeggeth when he arrives",
+     "tip": "Pull him off the further right before he reaches the raid and hold him facing away. Shield of Rajaxx: he is immune to everything for 6 seconds. Stop attacking."
+    },
+    {
+     "id": "spot5",
+     "type": "playerAtSpotBy",
+     "spot": "tank5",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold Major Yeggeth clear of the raid",
+     "tip": "Stand on the far side of him so his front points away from the raid, and keep him there."
+    },
+    {
+     "id": "pack5",
+     "type": "afterEvent",
+     "event": "waveAdds5",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the 4 Needlers and 2 Warriors of wave 5",
+     "tip": "Grab the pack the moment it comes in and hold it away from the raid."
+    },
+    {
+     "id": "ottspot5",
+     "type": "playerAtSpotBy",
+     "spot": "ot5",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the pack on your spot",
+     "tip": "Keep the pack parked where the raid does not stand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Top up between officers; the next wave comes straight in."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep them above half; Rajaxx at the end hits hard."
+    },
+    {
+     "id": "bopHold",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop attacking while the Shield is up",
+     "tip": "Nothing can damage him for the 6 seconds. Stop attacking and wait."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Wave 6: Major Pakkon",
+   "subtitle": "deep left, 2 Needlers and 4 Warriors",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tank6",
+    "boss": "boss6",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ot6"
+   },
+   "actions": [
+    {
+     "id": "arrive6",
+     "first": 0.05
+    },
+    {
+     "id": "waveAdds6",
+     "first": 1.5
+    },
+    {
+     "id": "sweepingSlam",
+     "first": 8,
+     "every": 11,
+     "jitter": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grab6",
+     "type": "afterEvent",
+     "event": "arrive6",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 7,
+     "role": "tank",
+     "label": "Take Major Pakkon when he arrives",
+     "tip": "Pull him off the deep left before he reaches the raid and hold him facing away. Sweeping Slam: he must face away from the raid. Melee behind him."
+    },
+    {
+     "id": "spot6",
+     "type": "playerAtSpotBy",
+     "spot": "tank6",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold Major Pakkon clear of the raid",
+     "tip": "Stand on the far side of him so his front points away from the raid, and keep him there."
+    },
+    {
+     "id": "pack6",
+     "type": "afterEvent",
+     "event": "waveAdds6",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the 2 Needlers and 4 Warriors of wave 6",
+     "tip": "Grab the pack the moment it comes in and hold it away from the raid."
+    },
+    {
+     "id": "ottspot6",
+     "type": "playerAtSpotBy",
+     "spot": "ot6",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the pack on your spot",
+     "tip": "Keep the pack parked where the raid does not stand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Top up between officers; the next wave comes straight in."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep them above half; Rajaxx at the end hits hard."
+    },
+    {
+     "id": "slamFront",
+     "type": "continuous",
+     "metric": "playerInFront",
+     "role": "melee",
+     "label": "Melee: behind Pakkon, never in front",
+     "tip": "Sweeping Slam is a frontal cone. Stand behind him."
+    },
+    {
+     "id": "slamFacing",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tank",
+     "label": "Face Pakkon away from the raid",
+     "tip": "If his front points at the raid, the Slam hits the group."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Wave 7: Colonel Zerran",
+   "subtitle": "deep right, 3 Needlers and 3 Warriors",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tank7",
+    "boss": "boss7",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ot7"
+   },
+   "actions": [
+    {
+     "id": "arrive7",
+     "first": 0.05
+    },
+    {
+     "id": "waveAdds7",
+     "first": 1.5
+    },
+    {
+     "id": "enlarge",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grab7",
+     "type": "afterEvent",
+     "event": "arrive7",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 7,
+     "role": "tank",
+     "label": "Take Colonel Zerran when he arrives",
+     "tip": "Pull him off the deep right before he reaches the raid and hold him facing away. Enlarge: dispel it off him the moment it lands."
+    },
+    {
+     "id": "spot7",
+     "type": "playerAtSpotBy",
+     "spot": "tank7",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold Colonel Zerran clear of the raid",
+     "tip": "Stand on the far side of him so his front points away from the raid, and keep him there."
+    },
+    {
+     "id": "pack7",
+     "type": "afterEvent",
+     "event": "waveAdds7",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the 3 Needlers and 3 Warriors of wave 7",
+     "tip": "Grab the pack the moment it comes in and hold it away from the raid."
+    },
+    {
+     "id": "ottspot7",
+     "type": "playerAtSpotBy",
+     "spot": "ot7",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the pack on your spot",
+     "tip": "Keep the pack parked where the raid does not stand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Top up between officers; the next wave comes straight in."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep them above half; Rajaxx at the end hits hard."
+    },
+    {
+     "id": "enlargeUp",
+     "type": "afterEvent",
+     "event": "enlarge",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 4,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Dispel Enlarge the moment it lands",
+     "tip": "Dispel Magic or Purge straight away. Every second it is up the tank takes 40% more."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "General Rajaxx",
+   "subtitle": "Thundercrash every 21 s",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 130,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP8",
+   "spots": {
+    "tank": "rajaxxTank",
+    "boss": "rajaxxBoss",
+    "ranged": "rangedRajaxx",
+    "healer": "healerRajaxx",
+    "offtank": "offtankRajaxx"
+   },
+   "actions": [
+    {
+     "id": "arrive8",
+     "first": 0.05
+    },
+    {
+     "id": "disarm",
+     "first": 10,
+     "every": 22,
+     "jitter": 1
+    },
+    {
+     "id": "thundercrash",
+     "first": 12,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "frenzy",
+     "first": 91
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grab8",
+     "type": "afterEvent",
+     "event": "arrive8",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 7,
+     "role": "tank",
+     "label": "Take Rajaxx as he walks in",
+     "tip": "He comes straight in. Pull him to your wall and hold him there."
+    },
+    {
+     "id": "wallSpot",
+     "type": "bossAtSpot",
+     "spot": "rajaxxBoss",
+     "within": 16,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Tank Rajaxx in the south-west corner",
+     "tip": "Your back to the wall means the Thundercrash knockback is short for you and the boss is not dragged across the room."
+    },
+    {
+     "id": "regain8",
+     "type": "afterEvent",
+     "event": "thundercrashWipe",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt him back after Thundercrash",
+     "tip": "Threat is gone. Taunt instantly and turn him away from the raid."
+    },
+    {
+     "id": "wallOk",
+     "type": "continuous",
+     "metric": "thundercrashOffWall",
+     "role": "tank",
+     "label": "Keep your back to the wall",
+     "tip": "Thundercrash throws you 14 yards away from him. A wall behind you makes that a step."
+    },
+    {
+     "id": "ot8",
+     "type": "playerAtSpotBy",
+     "spot": "offtankRajaxx",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay ready beside the wall",
+     "tip": "Hold the side position ready for the next Thundercrash if the tank needs help picking him up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Every Thundercrash takes about a third of the tank. Heal it back fast and keep it topped."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The moment Thundercrash lands, the tank is low. Heal there."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with Enlarge up",
+   "unit": "s",
+   "penaltyPerSecond": 0.6,
+   "severe": 10,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "phases": [
+    7
+   ],
+   "tip": "Dispel Enlarge the moment it lands."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 4,
+   "roles": "tank",
+   "phases": [
+    6
+   ]
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ],
+   "phases": [
+    6
+   ]
+  },
+  "attacksIntoShield": {
+   "label": "Attacks into Shield of Rajaxx",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "phases": [
+    5
+   ],
+   "tip": "Stop for the 6 seconds."
+  },
+  "attackOrdersOnRaid": {
+   "label": "Attack Orders carried into the raid",
+   "unit": "count",
+   "penaltyPerUnit": 10,
+   "severe": 1,
+   "roles": "nontank",
+   "phases": [
+    2
+   ],
+   "tip": "Take it away from the raid."
+  },
+  "shockwaveHits": {
+   "label": "Shockwaves taken",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "phases": [
+    4
+   ],
+   "tip": "Stand outside 20 yd."
+  },
+  "slamHits": {
+   "label": "Sweeping Slams taken",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "melee",
+   "phases": [
+    6
+   ],
+   "tip": "Stand behind him."
+  },
+  "slamsOnRaid": {
+   "label": "Sweeping Slams on the raid",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "tank",
+   "phases": [
+    6
+   ],
+   "tip": "Keep him facing away from the raid."
+  },
+  "thundercrashOffWall": {
+   "label": "Thundercrashes taken away from the wall",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 2,
+   "roles": "tank",
+   "phases": [
+    8
+   ],
+   "tip": "Tank him with your back to the south wall so the knockback is short."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt Rajaxx back after every Thundercrash; pick up each wave; dispel Enlarge.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Rajaxx turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabWave1",
+    "ability": "taunt",
+    "on": "event",
+    "event": "waveAdds1",
+    "offset": 2.5,
+    "early": 2.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "PICK UP",
+    "label": "Grab wave 1",
+    "tip": "Grab the 2 Needlers and 4 Warriors as soon as they arrive.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabWave2",
+    "ability": "taunt",
+    "on": "event",
+    "event": "waveAdds2",
+    "offset": 2.5,
+    "early": 2.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "PICK UP",
+    "label": "Grab wave 2",
+    "tip": "Grab the 3 Needlers and 3 Warriors as soon as they arrive.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabWave3",
+    "ability": "taunt",
+    "on": "event",
+    "event": "waveAdds3",
+    "offset": 2.5,
+    "early": 2.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "PICK UP",
+    "label": "Grab wave 3",
+    "tip": "Grab the 5 Needlers and 1 Warrior as soon as they arrive.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabWave4",
+    "ability": "taunt",
+    "on": "event",
+    "event": "waveAdds4",
+    "offset": 2.5,
+    "early": 2.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "PICK UP",
+    "label": "Grab wave 4",
+    "tip": "Grab the 3 Needlers and 3 Warriors as soon as they arrive.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabWave5",
+    "ability": "taunt",
+    "on": "event",
+    "event": "waveAdds5",
+    "offset": 2.5,
+    "early": 2.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "PICK UP",
+    "label": "Grab wave 5",
+    "tip": "Grab the 4 Needlers and 2 Warriors as soon as they arrive.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabWave6",
+    "ability": "taunt",
+    "on": "event",
+    "event": "waveAdds6",
+    "offset": 2.5,
+    "early": 2.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "PICK UP",
+    "label": "Grab wave 6",
+    "tip": "Grab the 2 Needlers and 4 Warriors as soon as they arrive.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabWave7",
+    "ability": "taunt",
+    "on": "event",
+    "event": "waveAdds7",
+    "offset": 2.5,
+    "early": 2.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "PICK UP",
+    "label": "Grab wave 7",
+    "tip": "Grab the 3 Needlers and 3 Warriors as soon as they arrive.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   },
+   {
+    "id": "dispelRanged",
+    "ability": "dispel",
+    "on": "event",
+    "event": "enlarge",
+    "offset": 0,
+    "early": 0,
+    "late": 3.5,
+    "role": "ranged",
+    "short": "DISPEL",
+    "label": "Dispel Enlarge",
+    "tip": "Dispel Magic or Purge the moment it lands."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "thundercrashTaunt",
+   "name": "Thundercrash recovery",
+   "description": "Thundercrash every 12 s. Taunt Rajaxx back the moment threat is wiped.",
+   "roles": "tanks",
+   "startPhase": 8,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thundercrash",
+     "first": 4,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "lessonDps",
+   "name": "Lightning Cloud and Shockwave",
+   "description": "Step out of each Lightning Cloud and get back on the target. Shockwave cannot be avoided in melee: take it and heal through the stun.",
+   "roles": "melee",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "lightningCloud",
+     "first": 4,
+     "every": 12
+    },
+    {
+     "id": "shockwave",
+     "first": 10,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "orderRanged",
+   "name": "Attack Order",
+   "description": "You may be the marked raider: walk it away from the raid.",
+   "roles": "ranged",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "attackOrder",
+     "first": 5,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "packGrab",
+   "name": "Wave pickup",
+   "description": "A pack every 18 s. Grab it and hold it off the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "waveAdds1",
+     "first": 3,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "crashHeal",
+   "name": "Healing Thundercrash",
+   "description": "Thundercrash every 12 s. Heal the tank the moment it lands.",
+   "roles": "healer",
+   "startPhase": 8,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thundercrash",
+     "first": 4,
+     "every": 12
+    },
+    {
+     "id": "enlarge",
+     "first": 8,
+     "every": 11
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,4864 @@
+{
+ "id": "buru",
+ "name": "Buru the Gorger",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "ruins-of-ahnqiraj",
+  "name": "Ruins of Ahn'Qiraj",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/ruins-of-ahnqiraj/buru.md (no Era HP: SoM 1,066,000 only). ESTIMATES: the Hatchery is a 46 yd round room around a pool; six eggs on a 30 yd ring counter-clockwise from the South egg stand in for the real ring (count not stated on any source), and six egg pops take him from 100% to 20% (real 10-12 pops, 8-12 minutes; here 8 s for the first egg, then 41.5 s per egg). UNVERIFIED: the real room layout (pool depth and distances; no map or coordinates). Gathering Speed is modelled (Wowhead 1834: +25% run speed, stacks; both emulators: +25% every 9 s, reset on an egg hit): `gatheringSpeed` adds +25% at 2 s and then every 9 s since the last egg, capped at x4, from a base 2.2 yd/s. The egg's `eggBurst` has a hidden follow-up `eggReset` that sets it back to base when the egg actually bursts (the engine applies a hazard's `bossSpeedMult` when the hazard is placed, 2.5 s before it goes off, so the reset cannot sit on the hazard itself). So he is slower than a 7 yd/s player at the start of a cycle and about 6.7 yd/s by its end, and a stationary kiter gets caught. The kite itself is a 41.5 s lap, one full lap of the pool plus one egg per cycle: five 8.3 s legs (`wpN_1..4` then `kiteN`, 84 degrees apart at radius 41, chords that clear the pool), computed so a kiter who keeps moving stays outside his melee reach all the way round, and he crosses the egg as it bursts. The real gap between eggs is 30-60 s while the egg group prepares the next one; the lap is the sim's stand-in for that wait. At the transform he gets Full Speed (+300%): `bossSpeedMult: 4` on `transform`, 8.8 yd/s, permanent. Boss melee is scaled so a 10,000 HP kiter who is caught takes real damage and a player healer who ignores the kiter loses them (`healPerSecondWithPlayerHealer` 30, `lowHp` 0.7 because a kiter who is low has no second chance). P1 structure: the `tank` role is the kiter (the fixated raider in the real fight): Buru chases you, you lead him onto each egg, the egg bursts (`hazard` at the egg's spot) and a Hatchling spawns. The real tank's P1 job is the off-tank role here (Hatchlings); in the sim's P2 the `tank` role picks him up, in the real fight a warrior would. Fixation is the `fixate` `targetSwitch` after each pop: Buru is immune to Taunt in the real fight; the sim's Taunt press stands for 'you are the new fixate, start moving'. For non-tank roles a `carried` zone (`fixateYou`) lands on a random raider who must run out of the group toward the next egg, standing in for being the fixate target, and the ghost kiter closes on him to re-take the fixate, which is the kiter's main exposure. Dismember (Wowhead 96: 5 yd melee, 1,248 every 2 s for 10 s, stacking) is a `debuff` gated by `conditional: tankInMelee` on its real 5 s cadence: it lands only while he is in melee of the kiter, 12.5 yd centre to centre for his 4.5 yd hitbox and 7 yd melee range, at 624 per stack per second (the real 1,248 per 2 s), so being caught twice is lethal. `dismemberBite` is the 800 weapon hit that lands with it at the same reach and scores the catch (`caughtByBuru`). Kite spots are 16 yd from each egg, outside that reach with him on the egg. Thorns (200 to attackers in P1) cannot be modelled with `shield`, because a shield also blocks attacks on eggs and hatchlings, so 'do not hit him in P1' is scored as `attacksOffPriority` while an egg is alive; between eggs nothing punishes it. The egg group and healers stand on the shore at radius 19 (research: the kiter must not swim in deep water and priests Levitate over it to keep line of sight; pool depth unmeasured), 11 yd from the egg and outside its 10 yd ring; healer spots move with the kiter's leg so they stay within 40 yd (about 22 yd). Eggs are stationary (`speed: 0`) `killFirst` adds, one per cycle with a lifetime matching the cycle: the DPS job in P1, standing in for the real egg group bringing it to 5% and popping it when Buru is on top. `attack.addDamage` is 0 here, so attacks are scored but only the burst pops the egg; pop timing (do not pop early, no DoTs) cannot be modelled and is not scored. The egg's damage to Buru (45,000 per wiki/Millenium, 40,000 TenTonHammer, 7% Wowhead/AzerothCore, 15% CMaNGOS) has no effect on the phase-clock HP. Eggs do not respawn here (TenTonHammer says they do; wiki silent). Hatchlings are killable adds for the off-tank role (one per egg, real), spawning at the start of the following cycle because an expectation cannot straddle a phase change; in the burn phase `hatch6` keeps spawning to stand in for the remaining eggs hatching (CMaNGOS). Egg burst damage to players (100-500 by distance, 25 yd) is a flat 400 in a 10 yd ring on the egg. P2 (transform at 20%) is a `threatWipe` with `creepingPlague` as a `maxStacks` debuff (65 per second per stack, every 6 s), 30 s to kill (research 25-30 s); the real 80-per-tick ramp and 'every third tick' stepping are not modelled.",
+ "sources": [
+  "docs/research/ruins-of-ahnqiraj/buru.md",
+  "https://warcraft.wiki.gg/wiki/Buru_the_Gorger",
+  "https://warcraft.wiki.gg/wiki/Buru_Egg",
+  "https://www.wowhead.com/classic/guide/buru-the-gorger-ruins-of-ahnqiraj-strategy",
+  "https://www.wowhead.com/classic/npc=15370/buru-the-gorger",
+  "https://www.warcrafttavern.com/wow-classic/guides/ruins-of-ahnqiraj-aq20/",
+  "https://www.tentonhammer.com/guides/tentonhammers-guide-to-the-ruins-of-ahn-qiraj-section-2-4",
+  "https://us.millenium.gg/guide/6975.html?page=3",
+  "https://wotlkdb.com/?spell=96",
+  "https://wotlkdb.com/?spell=25640",
+  "https://wotlkdb.com/?spell=20512",
+  "https://github.com/azerothcore/azerothcore-wotlk/blob/master/src/server/scripts/Kalimdor/RuinsOfAhnQiraj/boss_buru.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/kalimdor/ruins_of_ahnqiraj/boss_buru.cpp"
+ ],
+ "arena": {
+  "name": "The Hatchery",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -68
+     ],
+     [
+      -9,
+      -68
+     ]
+    ]
+   },
+   {
+    "id": "pool",
+    "poly": [
+     [
+      18,
+      0
+     ],
+     [
+      17.7,
+      3.1
+     ],
+     [
+      16.9,
+      6.2
+     ],
+     [
+      15.6,
+      9
+     ],
+     [
+      13.8,
+      11.6
+     ],
+     [
+      11.6,
+      13.8
+     ],
+     [
+      9,
+      15.6
+     ],
+     [
+      6.2,
+      16.9
+     ],
+     [
+      3.1,
+      17.7
+     ],
+     [
+      0,
+      18
+     ],
+     [
+      -3.1,
+      17.7
+     ],
+     [
+      -6.2,
+      16.9
+     ],
+     [
+      -9,
+      15.6
+     ],
+     [
+      -11.6,
+      13.8
+     ],
+     [
+      -13.8,
+      11.6
+     ],
+     [
+      -15.6,
+      9
+     ],
+     [
+      -16.9,
+      6.2
+     ],
+     [
+      -17.7,
+      3.1
+     ],
+     [
+      -18,
+      0
+     ],
+     [
+      -17.7,
+      -3.1
+     ],
+     [
+      -16.9,
+      -6.2
+     ],
+     [
+      -15.6,
+      -9
+     ],
+     [
+      -13.8,
+      -11.6
+     ],
+     [
+      -11.6,
+      -13.8
+     ],
+     [
+      -9,
+      -15.6
+     ],
+     [
+      -6.2,
+      -16.9
+     ],
+     [
+      -3.1,
+      -17.7
+     ],
+     [
+      0,
+      -18
+     ],
+     [
+      3.1,
+      -17.7
+     ],
+     [
+      6.2,
+      -16.9
+     ],
+     [
+      9,
+      -15.6
+     ],
+     [
+      11.6,
+      -13.8
+     ],
+     [
+      13.8,
+      -11.6
+     ],
+     [
+      15.6,
+      -9
+     ],
+     [
+      16.9,
+      -6.2
+     ],
+     [
+      17.7,
+      -3.1
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -68
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -68
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -62
+    ]
+   },
+   {
+    "text": "Pool: kite around it",
+    "at": [
+     0,
+     0
+    ]
+   },
+   {
+    "text": "South egg: start the loop here",
+    "at": [
+     0,
+     -34
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 7
+  },
+  "bossStart": {
+   "x": -14,
+   "y": -30,
+   "heading": 0
+  },
+  "tankSpot": {
+   "x": 9,
+   "y": -36,
+   "tolerance": 6,
+   "label": "Kiter"
+  },
+  "bossSpot": {
+   "x": -14,
+   "y": -30,
+   "heading": 0,
+   "tolerance": 8,
+   "headingTolerance": 180,
+   "label": "Buru"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": 0,
+   "spread": 14,
+   "label": "Raid around the pool"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": -19,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "burnBoss": {
+   "x": 0,
+   "y": 10,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 120,
+   "label": "Buru, transformed"
+  },
+  "burnTank": {
+   "x": 0,
+   "y": 18,
+   "tolerance": 6,
+   "label": "Tank"
+  },
+  "raidSpotBurn": {
+   "x": 0,
+   "y": -2,
+   "spread": 10,
+   "label": "Stack up on the healers"
+  },
+  "rangedBurn": {
+   "x": -6,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerBurn": {
+   "x": 6,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "otBurn": {
+   "x": 12,
+   "y": 8,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "hatchHold": {
+   "x": 16,
+   "y": 16,
+   "label": "Hatchlings held"
+  },
+  "egg1": {
+   "x": 0,
+   "y": -30,
+   "tolerance": 8,
+   "label": "Egg 1"
+  },
+  "kite1": {
+   "x": 13.4,
+   "y": -38.8,
+   "tolerance": 6,
+   "label": "Run here: Egg 1"
+  },
+  "ranged1": {
+   "x": 0,
+   "y": -19,
+   "tolerance": 8,
+   "label": "Ranged: egg group"
+  },
+  "healer1": {
+   "x": 0,
+   "y": -19,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "ot1": {
+   "x": 8.9,
+   "y": -19,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "egg2": {
+   "x": 26,
+   "y": -15,
+   "tolerance": 8,
+   "label": "Egg 2"
+  },
+  "kite2": {
+   "x": 40.3,
+   "y": -7.8,
+   "tolerance": 6,
+   "label": "Run here: Egg 2"
+  },
+  "ranged2": {
+   "x": 16.5,
+   "y": -9.5,
+   "tolerance": 8,
+   "label": "Ranged: egg group"
+  },
+  "healer2": {
+   "x": 16.5,
+   "y": -9.5,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "ot2": {
+   "x": 20.9,
+   "y": -1.8,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "egg3": {
+   "x": 26,
+   "y": 15,
+   "tolerance": 8,
+   "label": "Egg 3"
+  },
+  "kite3": {
+   "x": 26.9,
+   "y": 31,
+   "tolerance": 6,
+   "label": "Run here: Egg 3"
+  },
+  "ranged3": {
+   "x": 16.5,
+   "y": 9.5,
+   "tolerance": 8,
+   "label": "Ranged: egg group"
+  },
+  "healer3": {
+   "x": 16.5,
+   "y": 9.5,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "ot3": {
+   "x": 12.1,
+   "y": 17.2,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "egg4": {
+   "x": 0,
+   "y": 30,
+   "tolerance": 8,
+   "label": "Egg 4"
+  },
+  "kite4": {
+   "x": -13.4,
+   "y": 38.8,
+   "tolerance": 6,
+   "label": "Run here: Egg 4"
+  },
+  "ranged4": {
+   "x": 0,
+   "y": 19,
+   "tolerance": 8,
+   "label": "Ranged: egg group"
+  },
+  "healer4": {
+   "x": 0,
+   "y": 19,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "ot4": {
+   "x": -8.9,
+   "y": 19,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "egg5": {
+   "x": -26,
+   "y": 15,
+   "tolerance": 8,
+   "label": "Egg 5"
+  },
+  "kite5": {
+   "x": -40.3,
+   "y": 7.8,
+   "tolerance": 6,
+   "label": "Run here: Egg 5"
+  },
+  "ranged5": {
+   "x": -16.5,
+   "y": 9.5,
+   "tolerance": 8,
+   "label": "Ranged: egg group"
+  },
+  "healer5": {
+   "x": -16.5,
+   "y": 9.5,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "ot5": {
+   "x": -20.9,
+   "y": 1.8,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "egg6": {
+   "x": -26,
+   "y": -15,
+   "tolerance": 8,
+   "label": "Egg 6"
+  },
+  "kite6": {
+   "x": -26.9,
+   "y": -31,
+   "tolerance": 6,
+   "label": "Run here: Egg 6"
+  },
+  "ranged6": {
+   "x": -16.5,
+   "y": -9.5,
+   "tolerance": 8,
+   "label": "Ranged: egg group"
+  },
+  "healer6": {
+   "x": -16.5,
+   "y": -9.5,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "ot6": {
+   "x": -12.1,
+   "y": -17.2,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "wp2_1": {
+   "x": 39.9,
+   "y": 9.3,
+   "tolerance": 6,
+   "label": "Keep running: Egg 2 leg 1"
+  },
+  "healer2_1": {
+   "x": 18.5,
+   "y": 4.3,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp2_2": {
+   "x": -5,
+   "y": 40.7,
+   "tolerance": 6,
+   "label": "Keep running: Egg 2 leg 2"
+  },
+  "healer2_2": {
+   "x": -2.3,
+   "y": 18.9,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp2_3": {
+   "x": -41,
+   "y": -0.8,
+   "tolerance": 6,
+   "label": "Keep running: Egg 2 leg 3"
+  },
+  "healer2_3": {
+   "x": -19,
+   "y": -0.3,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp2_4": {
+   "x": -3.5,
+   "y": -40.8,
+   "tolerance": 6,
+   "label": "Keep running: Egg 2 leg 4"
+  },
+  "healer2_4": {
+   "x": -1.6,
+   "y": -18.9,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp3_1": {
+   "x": 12,
+   "y": 39.2,
+   "tolerance": 6,
+   "label": "Keep running: Egg 3 leg 1"
+  },
+  "healer3_1": {
+   "x": 5.5,
+   "y": 18.2,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp3_2": {
+   "x": -37.8,
+   "y": 16,
+   "tolerance": 6,
+   "label": "Keep running: Egg 3 leg 2"
+  },
+  "healer3_2": {
+   "x": -17.5,
+   "y": 7.4,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp3_3": {
+   "x": -19.8,
+   "y": -35.9,
+   "tolerance": 6,
+   "label": "Keep running: Egg 3 leg 3"
+  },
+  "healer3_3": {
+   "x": -9.2,
+   "y": -16.6,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp3_4": {
+   "x": 33.6,
+   "y": -23.5,
+   "tolerance": 6,
+   "label": "Keep running: Egg 3 leg 4"
+  },
+  "healer3_4": {
+   "x": 15.6,
+   "y": -10.9,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp4_1": {
+   "x": -28,
+   "y": 30,
+   "tolerance": 6,
+   "label": "Keep running: Egg 4 leg 1"
+  },
+  "healer4_1": {
+   "x": -13,
+   "y": 13.9,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp4_2": {
+   "x": -32.7,
+   "y": -24.7,
+   "tolerance": 6,
+   "label": "Keep running: Egg 4 leg 2"
+  },
+  "healer4_2": {
+   "x": -15.2,
+   "y": -11.4,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp4_3": {
+   "x": 21.1,
+   "y": -35.1,
+   "tolerance": 6,
+   "label": "Keep running: Egg 4 leg 3"
+  },
+  "healer4_3": {
+   "x": 9.8,
+   "y": -16.3,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp4_4": {
+   "x": 37.1,
+   "y": 17.4,
+   "tolerance": 6,
+   "label": "Keep running: Egg 4 leg 4"
+  },
+  "healer4_4": {
+   "x": 17.2,
+   "y": 8,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp5_1": {
+   "x": -39.9,
+   "y": -9.3,
+   "tolerance": 6,
+   "label": "Keep running: Egg 5 leg 1"
+  },
+  "healer5_1": {
+   "x": -18.5,
+   "y": -4.3,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp5_2": {
+   "x": 5,
+   "y": -40.7,
+   "tolerance": 6,
+   "label": "Keep running: Egg 5 leg 2"
+  },
+  "healer5_2": {
+   "x": 2.3,
+   "y": -18.9,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp5_3": {
+   "x": 41,
+   "y": 0.8,
+   "tolerance": 6,
+   "label": "Keep running: Egg 5 leg 3"
+  },
+  "healer5_3": {
+   "x": 19,
+   "y": 0.3,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp5_4": {
+   "x": 3.5,
+   "y": 40.8,
+   "tolerance": 6,
+   "label": "Keep running: Egg 5 leg 4"
+  },
+  "healer5_4": {
+   "x": 1.6,
+   "y": 18.9,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp6_1": {
+   "x": -12,
+   "y": -39.2,
+   "tolerance": 6,
+   "label": "Keep running: Egg 6 leg 1"
+  },
+  "healer6_1": {
+   "x": -5.5,
+   "y": -18.2,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp6_2": {
+   "x": 37.8,
+   "y": -16,
+   "tolerance": 6,
+   "label": "Keep running: Egg 6 leg 2"
+  },
+  "healer6_2": {
+   "x": 17.5,
+   "y": -7.4,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp6_3": {
+   "x": 19.8,
+   "y": 35.9,
+   "tolerance": 6,
+   "label": "Keep running: Egg 6 leg 3"
+  },
+  "healer6_3": {
+   "x": 9.2,
+   "y": 16.6,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "wp6_4": {
+   "x": -33.6,
+   "y": 23.5,
+   "tolerance": 6,
+   "label": "Keep running: Egg 6 leg 4"
+  },
+  "healer6_4": {
+   "x": -15.6,
+   "y": 10.9,
+   "tolerance": 8,
+   "label": "Healers"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 800,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 950,
+  "healPerSecondWithPlayerHealer": 30,
+  "lowHp": 0.7
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 0,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 2
+ },
+ "boss": {
+  "radius": 4.5,
+  "speed": 2.2,
+  "turnRate": 360,
+  "meleeRange": 7,
+  "meleeDamage": 600,
+  "meleeInterval": 2,
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "You are the fixated kiter (the rogue, mage or druid whose name he emoted). Run counter-clockwise from the South egg, around the pool and over each egg; he gains 25% speed every 9 s since the last egg, so keep moving. Stay ahead of him: Dismember only lands in melee, 1,248 every 2 seconds and stacking. Press Taunt only when his eye comes back to you after an egg, which stands for 'you are the new fixate, get moving': he is immune to Taunt in the real fight. In the last phase a warrior would pick him up at the transform; here you do.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Hatchling off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the hatchlings: pick each one up as it spawns from an egg and hold it off the raid while the DPS kill it.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the current egg, not Buru (99% reduced damage in the shell). Step back from its burst, and run out of the group if he fixes on you.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Kill the current egg, stay on your egg-group spot and step out of the burst. If Buru fixes on you, run out of the group toward the next egg.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "The kiter takes Dismember first: heal them through it. When he transforms, Creeping Plague ramps on everyone and you have about 25 seconds: stack up and heal the group.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 40,
+   "icon": "taunt",
+   "tip": "Stands for: you are the new fixate. In the sim it brings him back onto you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "dismember": {
+   "label": "Dismember",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 10,
+   "tickDamage": 624,
+   "maxStacks": 5,
+   "conditional": "tankInMelee",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A stacking bleed if he reaches you in melee: 1,248 every 2 seconds for 10 seconds, stacking. Be caught twice and you are dead."
+  },
+  "dismemberBite": {
+   "label": "Caught by Buru",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 8,
+   "damage": 800,
+   "playerMetric": "caughtByBuru",
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "He reached you: the weapon hit that lands with Dismember."
+  },
+  "fixate": {
+   "label": "Buru fixates",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 1,
+   "toast": "Buru sets his eyes on someone else. Run!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Each egg that hits him makes him choose a new random target. If it is you, run to the next egg."
+  },
+  "fixateYou": {
+   "label": "Fixated on you",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "carried": true,
+   "radius": 8,
+   "warning": 7,
+   "active": 1,
+   "damage": 0,
+   "raidMetric": "draggedThroughRaid",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Buru is after you. Run out of the group toward the next egg and do not stop."
+  },
+  "eggReset": {
+   "label": "Gathering Speed resets",
+   "kind": "transition",
+   "cast": 0,
+   "bossSpeedMult": 1,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The egg burst resets his Gathering Speed."
+  },
+  "transform": {
+   "label": "Buru transforms",
+   "kind": "threatWipe",
+   "cast": 0,
+   "bossSpeedMult": 4,
+   "toast": "Buru transforms: shell off, threat gone, Creeping Plague begins",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "At 20% the shell breaks. Threat is wiped, Creeping Plague ramps on the whole raid, and you have about 25 to 30 seconds. Tank: take him. Everyone else: burn."
+  },
+  "creepingPlague": {
+   "label": "Creeping Plague",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 8,
+   "tickDamage": 65,
+   "maxStacks": 6,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A ramping raid-wide Nature debuff. It cannot be dispelled."
+  },
+  "gatheringSpeed": {
+   "label": "Gathering Speed",
+   "kind": "transition",
+   "cast": 0,
+   "bossSpeedMult": 1.25,
+   "bossSpeedMultMax": 4,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "+25% run speed every 9 s since the last egg."
+  },
+  "eggAdd1": {
+   "label": "Buru Egg",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg1"
+   ],
+   "speed": 0,
+   "aggroRange": 0,
+   "lifetime": 7,
+   "heldLifetime": 7,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "egg1",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next egg. Kill it, and when the kiter has Buru on top of it, the shell cracks."
+  },
+  "hatch1": {
+   "label": "Hive'Zara Hatchling",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg1"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 14,
+   "heldLifetime": 18,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "hatchHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Hatchling pops out of the egg. Off-tank: grab it. DPS: kill it."
+  },
+  "eggBurst1": {
+   "label": "Egg burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "egg1"
+   ],
+   "radius": 10,
+   "warning": 2.5,
+   "active": 0.8,
+   "damage": 400,
+   "follow": [
+    {
+     "id": "eggReset",
+     "delay": 2.5
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A ring on the egg: about 400 up close, falling off with distance. When it bursts it resets his speed."
+  },
+  "eggAdd2": {
+   "label": "Buru Egg",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg2"
+   ],
+   "speed": 0,
+   "aggroRange": 0,
+   "lifetime": 40.5,
+   "heldLifetime": 40.5,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "egg2",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next egg. Kill it, and when the kiter has Buru on top of it, the shell cracks."
+  },
+  "hatch2": {
+   "label": "Hive'Zara Hatchling",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg2"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 14,
+   "heldLifetime": 18,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "hatchHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Hatchling pops out of the egg. Off-tank: grab it. DPS: kill it."
+  },
+  "eggBurst2": {
+   "label": "Egg burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "egg2"
+   ],
+   "radius": 10,
+   "warning": 2.5,
+   "active": 0.8,
+   "damage": 400,
+   "follow": [
+    {
+     "id": "eggReset",
+     "delay": 2.5
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A ring on the egg: about 400 up close, falling off with distance. When it bursts it resets his speed."
+  },
+  "eggAdd3": {
+   "label": "Buru Egg",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg3"
+   ],
+   "speed": 0,
+   "aggroRange": 0,
+   "lifetime": 40.5,
+   "heldLifetime": 40.5,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "egg3",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next egg. Kill it, and when the kiter has Buru on top of it, the shell cracks."
+  },
+  "hatch3": {
+   "label": "Hive'Zara Hatchling",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg3"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 14,
+   "heldLifetime": 18,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "hatchHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Hatchling pops out of the egg. Off-tank: grab it. DPS: kill it."
+  },
+  "eggBurst3": {
+   "label": "Egg burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "egg3"
+   ],
+   "radius": 10,
+   "warning": 2.5,
+   "active": 0.8,
+   "damage": 400,
+   "follow": [
+    {
+     "id": "eggReset",
+     "delay": 2.5
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A ring on the egg: about 400 up close, falling off with distance. When it bursts it resets his speed."
+  },
+  "eggAdd4": {
+   "label": "Buru Egg",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg4"
+   ],
+   "speed": 0,
+   "aggroRange": 0,
+   "lifetime": 40.5,
+   "heldLifetime": 40.5,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "egg4",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next egg. Kill it, and when the kiter has Buru on top of it, the shell cracks."
+  },
+  "hatch4": {
+   "label": "Hive'Zara Hatchling",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg4"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 14,
+   "heldLifetime": 18,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "hatchHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Hatchling pops out of the egg. Off-tank: grab it. DPS: kill it."
+  },
+  "eggBurst4": {
+   "label": "Egg burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "egg4"
+   ],
+   "radius": 10,
+   "warning": 2.5,
+   "active": 0.8,
+   "damage": 400,
+   "follow": [
+    {
+     "id": "eggReset",
+     "delay": 2.5
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A ring on the egg: about 400 up close, falling off with distance. When it bursts it resets his speed."
+  },
+  "eggAdd5": {
+   "label": "Buru Egg",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg5"
+   ],
+   "speed": 0,
+   "aggroRange": 0,
+   "lifetime": 40.5,
+   "heldLifetime": 40.5,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "egg5",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next egg. Kill it, and when the kiter has Buru on top of it, the shell cracks."
+  },
+  "hatch5": {
+   "label": "Hive'Zara Hatchling",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg5"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 14,
+   "heldLifetime": 18,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "hatchHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Hatchling pops out of the egg. Off-tank: grab it. DPS: kill it."
+  },
+  "eggBurst5": {
+   "label": "Egg burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "egg5"
+   ],
+   "radius": 10,
+   "warning": 2.5,
+   "active": 0.8,
+   "damage": 400,
+   "follow": [
+    {
+     "id": "eggReset",
+     "delay": 2.5
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A ring on the egg: about 400 up close, falling off with distance. When it bursts it resets his speed."
+  },
+  "eggAdd6": {
+   "label": "Buru Egg",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg6"
+   ],
+   "speed": 0,
+   "aggroRange": 0,
+   "lifetime": 40.5,
+   "heldLifetime": 40.5,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "egg6",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next egg. Kill it, and when the kiter has Buru on top of it, the shell cracks."
+  },
+  "hatch6": {
+   "label": "Hive'Zara Hatchling",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "egg6"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 14,
+   "heldLifetime": 18,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "hatchHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Hatchling pops out of the egg. Off-tank: grab it. DPS: kill it."
+  },
+  "eggBurst6": {
+   "label": "Egg burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "egg6"
+   ],
+   "radius": 10,
+   "warning": 2.5,
+   "active": 0.8,
+   "damage": 400,
+   "follow": [
+    {
+     "id": "eggReset",
+     "delay": 2.5
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A ring on the egg: about 400 up close, falling off with distance. When it bursts it resets his speed."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Egg 1",
+   "subtitle": "Lead him over the egg",
+   "hpFrom": 1,
+   "hpTo": 0.8667,
+   "duration": 8,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "kite1",
+    "boss": "kite1",
+    "ranged": "ranged1",
+    "healer": "healer1",
+    "offtank": "ot1"
+   },
+   "actions": [
+    {
+     "id": "eggAdd1",
+     "first": 0.3
+    },
+    {
+     "id": "fixateYou",
+     "first": 3
+    },
+    {
+     "id": "gatheringSpeed",
+     "first": 2,
+     "every": 9
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "eggBurst1",
+     "first": 5.4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "egg1Over",
+     "type": "bossAtSpot",
+     "spot": "egg1",
+     "within": 7,
+     "grace": 1,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Lead Buru onto Egg 1",
+     "tip": "Run past the egg so he has to walk over it. If he never crosses it, the pop does not count."
+    },
+    {
+     "id": "kiter1Clear1",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst11",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 1, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "eggBurstOut1",
+     "type": "afterEvent",
+     "event": "eggBurst1",
+     "check": "outsideHazard",
+     "within": 2.4,
+     "grace": 0.6,
+     "notBefore": 2.1,
+     "role": "nontank",
+     "label": "Step back from the egg as it bursts",
+     "tip": "Get out of the ring before it detonates."
+    },
+    {
+     "id": "otSpot1",
+     "type": "playerAtSpotBy",
+     "spot": "ot1",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stand with the raid, ready for the first Hatchling",
+     "tip": "The first egg is about to go. Stay near the shore so you can grab what comes out."
+    },
+    {
+     "id": "run11",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Egg 2: lap 1/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.8667,
+   "hpTo": 0.84,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp2_1",
+    "boss": "wp2_1",
+    "ranged": "ranged2",
+    "healer": "healer2_1",
+    "offtank": "ot2"
+   },
+   "actions": [
+    {
+     "id": "eggAdd2",
+     "first": 0.3
+    },
+    {
+     "id": "fixateYou",
+     "first": 3
+    },
+    {
+     "id": "fixate",
+     "first": 0.4
+    },
+    {
+     "id": "hatch1",
+     "first": 1.2
+    },
+    {
+     "id": "gatheringSpeed",
+     "first": 2
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter2Clear1",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst21",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 2, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "hatch2Pick",
+     "type": "afterEvent",
+     "event": "hatch1",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Hatchling",
+     "tip": "Grab it the moment it spawns from the last egg and hold it off the raid."
+    },
+    {
+     "id": "run21",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot21",
+     "type": "playerAtSpotBy",
+     "spot": "ot2",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Egg 2: lap 2/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.84,
+   "hpTo": 0.8133,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp2_2",
+    "boss": "wp2_2",
+    "ranged": "ranged2",
+    "healer": "healer2_2",
+    "offtank": "ot2"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 2.7
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter2Clear2",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst22",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 2, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run22",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot22",
+     "type": "playerAtSpotBy",
+     "spot": "ot2",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Egg 2: lap 3/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.8133,
+   "hpTo": 0.7867,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp2_3",
+    "boss": "wp2_3",
+    "ranged": "ranged2",
+    "healer": "healer2_3",
+    "offtank": "ot2"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 3.4
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter2Clear3",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst23",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 2, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run23",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot23",
+     "type": "playerAtSpotBy",
+     "spot": "ot2",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Egg 2: lap 4/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.7867,
+   "hpTo": 0.76,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp2_4",
+    "boss": "wp2_4",
+    "ranged": "ranged2",
+    "healer": "healer2_4",
+    "offtank": "ot2"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.1
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter2Clear4",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst24",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 2, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run24",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot24",
+     "type": "playerAtSpotBy",
+     "spot": "ot2",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Egg 2: over the egg",
+   "subtitle": "Lead him over the egg",
+   "hpFrom": 0.76,
+   "hpTo": 0.7333,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "kite2",
+    "boss": "kite2",
+    "ranged": "ranged2",
+    "healer": "healer2",
+    "offtank": "ot2"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.8
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "eggBurst2",
+     "first": 5.700000000000001
+    }
+   ],
+   "expectations": [
+    {
+     "id": "egg2Over",
+     "type": "bossAtSpot",
+     "spot": "egg2",
+     "within": 8.100000000000001,
+     "grace": 1,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Lead Buru onto Egg 2",
+     "tip": "Run past the egg so he has to walk over it. If he never crosses it, the pop does not count."
+    },
+    {
+     "id": "kiter2Clear5",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst25",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 2, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "eggBurstOut2",
+     "type": "afterEvent",
+     "event": "eggBurst2",
+     "check": "outsideHazard",
+     "within": 2.4,
+     "grace": 0.6,
+     "notBefore": 2.1,
+     "role": "nontank",
+     "label": "Step back from the egg as it bursts",
+     "tip": "Get out of the ring before it detonates."
+    },
+    {
+     "id": "run25",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot25",
+     "type": "playerAtSpotBy",
+     "spot": "ot2",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Egg 3: lap 1/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.7333,
+   "hpTo": 0.7067,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp3_1",
+    "boss": "wp3_1",
+    "ranged": "ranged3",
+    "healer": "healer3_1",
+    "offtank": "ot3"
+   },
+   "actions": [
+    {
+     "id": "eggAdd3",
+     "first": 0.3
+    },
+    {
+     "id": "fixateYou",
+     "first": 3
+    },
+    {
+     "id": "fixate",
+     "first": 0.4
+    },
+    {
+     "id": "hatch2",
+     "first": 1.2
+    },
+    {
+     "id": "gatheringSpeed",
+     "first": 2
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter3Clear1",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst31",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 3, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "hatch3Pick",
+     "type": "afterEvent",
+     "event": "hatch2",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Hatchling",
+     "tip": "Grab it the moment it spawns from the last egg and hold it off the raid."
+    },
+    {
+     "id": "run31",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot31",
+     "type": "playerAtSpotBy",
+     "spot": "ot3",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Egg 3: lap 2/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.7067,
+   "hpTo": 0.68,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp3_2",
+    "boss": "wp3_2",
+    "ranged": "ranged3",
+    "healer": "healer3_2",
+    "offtank": "ot3"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 2.7
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter3Clear2",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst32",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 3, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run32",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot32",
+     "type": "playerAtSpotBy",
+     "spot": "ot3",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Egg 3: lap 3/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.68,
+   "hpTo": 0.6533,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp3_3",
+    "boss": "wp3_3",
+    "ranged": "ranged3",
+    "healer": "healer3_3",
+    "offtank": "ot3"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 3.4
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter3Clear3",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst33",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 3, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run33",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot33",
+     "type": "playerAtSpotBy",
+     "spot": "ot3",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Egg 3: lap 4/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.6533,
+   "hpTo": 0.6267,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp3_4",
+    "boss": "wp3_4",
+    "ranged": "ranged3",
+    "healer": "healer3_4",
+    "offtank": "ot3"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.1
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter3Clear4",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst34",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 3, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run34",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot34",
+     "type": "playerAtSpotBy",
+     "spot": "ot3",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "name": "Egg 3: over the egg",
+   "subtitle": "Lead him over the egg",
+   "hpFrom": 0.6267,
+   "hpTo": 0.6,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "kite3",
+    "boss": "kite3",
+    "ranged": "ranged3",
+    "healer": "healer3",
+    "offtank": "ot3"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.8
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "eggBurst3",
+     "first": 5.700000000000001
+    }
+   ],
+   "expectations": [
+    {
+     "id": "egg3Over",
+     "type": "bossAtSpot",
+     "spot": "egg3",
+     "within": 8.100000000000001,
+     "grace": 1,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Lead Buru onto Egg 3",
+     "tip": "Run past the egg so he has to walk over it. If he never crosses it, the pop does not count."
+    },
+    {
+     "id": "kiter3Clear5",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst35",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 3, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "eggBurstOut3",
+     "type": "afterEvent",
+     "event": "eggBurst3",
+     "check": "outsideHazard",
+     "within": 2.4,
+     "grace": 0.6,
+     "notBefore": 2.1,
+     "role": "nontank",
+     "label": "Step back from the egg as it bursts",
+     "tip": "Get out of the ring before it detonates."
+    },
+    {
+     "id": "run35",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot35",
+     "type": "playerAtSpotBy",
+     "spot": "ot3",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "name": "Egg 4: lap 1/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.6,
+   "hpTo": 0.5733,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp4_1",
+    "boss": "wp4_1",
+    "ranged": "ranged4",
+    "healer": "healer4_1",
+    "offtank": "ot4"
+   },
+   "actions": [
+    {
+     "id": "eggAdd4",
+     "first": 0.3
+    },
+    {
+     "id": "fixateYou",
+     "first": 3
+    },
+    {
+     "id": "fixate",
+     "first": 0.4
+    },
+    {
+     "id": "hatch3",
+     "first": 1.2
+    },
+    {
+     "id": "gatheringSpeed",
+     "first": 2
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter4Clear1",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst41",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 4, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "hatch4Pick",
+     "type": "afterEvent",
+     "event": "hatch3",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Hatchling",
+     "tip": "Grab it the moment it spawns from the last egg and hold it off the raid."
+    },
+    {
+     "id": "run41",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot41",
+     "type": "playerAtSpotBy",
+     "spot": "ot4",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "name": "Egg 4: lap 2/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.5733,
+   "hpTo": 0.5467,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp4_2",
+    "boss": "wp4_2",
+    "ranged": "ranged4",
+    "healer": "healer4_2",
+    "offtank": "ot4"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 2.7
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter4Clear2",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst42",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 4, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run42",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot42",
+     "type": "playerAtSpotBy",
+     "spot": "ot4",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "name": "Egg 4: lap 3/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.5467,
+   "hpTo": 0.52,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp4_3",
+    "boss": "wp4_3",
+    "ranged": "ranged4",
+    "healer": "healer4_3",
+    "offtank": "ot4"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 3.4
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter4Clear3",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst43",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 4, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run43",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot43",
+     "type": "playerAtSpotBy",
+     "spot": "ot4",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "name": "Egg 4: lap 4/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.52,
+   "hpTo": 0.4933,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp4_4",
+    "boss": "wp4_4",
+    "ranged": "ranged4",
+    "healer": "healer4_4",
+    "offtank": "ot4"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.1
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter4Clear4",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst44",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 4, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run44",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot44",
+     "type": "playerAtSpotBy",
+     "spot": "ot4",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "name": "Egg 4: over the egg",
+   "subtitle": "Lead him over the egg",
+   "hpFrom": 0.4933,
+   "hpTo": 0.4667,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "kite4",
+    "boss": "kite4",
+    "ranged": "ranged4",
+    "healer": "healer4",
+    "offtank": "ot4"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.8
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "eggBurst4",
+     "first": 5.700000000000001
+    }
+   ],
+   "expectations": [
+    {
+     "id": "egg4Over",
+     "type": "bossAtSpot",
+     "spot": "egg4",
+     "within": 8.100000000000001,
+     "grace": 1,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Lead Buru onto Egg 4",
+     "tip": "Run past the egg so he has to walk over it. If he never crosses it, the pop does not count."
+    },
+    {
+     "id": "kiter4Clear5",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst45",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 4, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "eggBurstOut4",
+     "type": "afterEvent",
+     "event": "eggBurst4",
+     "check": "outsideHazard",
+     "within": 2.4,
+     "grace": 0.6,
+     "notBefore": 2.1,
+     "role": "nontank",
+     "label": "Step back from the egg as it bursts",
+     "tip": "Get out of the ring before it detonates."
+    },
+    {
+     "id": "run45",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot45",
+     "type": "playerAtSpotBy",
+     "spot": "ot4",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "name": "Egg 5: lap 1/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.4667,
+   "hpTo": 0.44,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp5_1",
+    "boss": "wp5_1",
+    "ranged": "ranged5",
+    "healer": "healer5_1",
+    "offtank": "ot5"
+   },
+   "actions": [
+    {
+     "id": "eggAdd5",
+     "first": 0.3
+    },
+    {
+     "id": "fixateYou",
+     "first": 3
+    },
+    {
+     "id": "fixate",
+     "first": 0.4
+    },
+    {
+     "id": "hatch4",
+     "first": 1.2
+    },
+    {
+     "id": "gatheringSpeed",
+     "first": 2
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter5Clear1",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst51",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 5, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "hatch5Pick",
+     "type": "afterEvent",
+     "event": "hatch4",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Hatchling",
+     "tip": "Grab it the moment it spawns from the last egg and hold it off the raid."
+    },
+    {
+     "id": "run51",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot51",
+     "type": "playerAtSpotBy",
+     "spot": "ot5",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "name": "Egg 5: lap 2/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.44,
+   "hpTo": 0.4133,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp5_2",
+    "boss": "wp5_2",
+    "ranged": "ranged5",
+    "healer": "healer5_2",
+    "offtank": "ot5"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 2.7
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter5Clear2",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst52",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 5, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run52",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot52",
+     "type": "playerAtSpotBy",
+     "spot": "ot5",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "name": "Egg 5: lap 3/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.4133,
+   "hpTo": 0.3867,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp5_3",
+    "boss": "wp5_3",
+    "ranged": "ranged5",
+    "healer": "healer5_3",
+    "offtank": "ot5"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 3.4
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter5Clear3",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst53",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 5, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run53",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot53",
+     "type": "playerAtSpotBy",
+     "spot": "ot5",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "name": "Egg 5: lap 4/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.3867,
+   "hpTo": 0.36,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp5_4",
+    "boss": "wp5_4",
+    "ranged": "ranged5",
+    "healer": "healer5_4",
+    "offtank": "ot5"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.1
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter5Clear4",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst54",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 5, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run54",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot54",
+     "type": "playerAtSpotBy",
+     "spot": "ot5",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 21,
+   "name": "Egg 5: over the egg",
+   "subtitle": "Lead him over the egg",
+   "hpFrom": 0.36,
+   "hpTo": 0.3333,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "kite5",
+    "boss": "kite5",
+    "ranged": "ranged5",
+    "healer": "healer5",
+    "offtank": "ot5"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.8
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "eggBurst5",
+     "first": 5.700000000000001
+    }
+   ],
+   "expectations": [
+    {
+     "id": "egg5Over",
+     "type": "bossAtSpot",
+     "spot": "egg5",
+     "within": 8.100000000000001,
+     "grace": 1,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Lead Buru onto Egg 5",
+     "tip": "Run past the egg so he has to walk over it. If he never crosses it, the pop does not count."
+    },
+    {
+     "id": "kiter5Clear5",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst55",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 5, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "eggBurstOut5",
+     "type": "afterEvent",
+     "event": "eggBurst5",
+     "check": "outsideHazard",
+     "within": 2.4,
+     "grace": 0.6,
+     "notBefore": 2.1,
+     "role": "nontank",
+     "label": "Step back from the egg as it bursts",
+     "tip": "Get out of the ring before it detonates."
+    },
+    {
+     "id": "run55",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot55",
+     "type": "playerAtSpotBy",
+     "spot": "ot5",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "name": "Egg 6: lap 1/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.3333,
+   "hpTo": 0.3067,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp6_1",
+    "boss": "wp6_1",
+    "ranged": "ranged6",
+    "healer": "healer6_1",
+    "offtank": "ot6"
+   },
+   "actions": [
+    {
+     "id": "eggAdd6",
+     "first": 0.3
+    },
+    {
+     "id": "fixateYou",
+     "first": 3
+    },
+    {
+     "id": "fixate",
+     "first": 0.4
+    },
+    {
+     "id": "hatch5",
+     "first": 1.2
+    },
+    {
+     "id": "gatheringSpeed",
+     "first": 2
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter6Clear1",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst61",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 6, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "hatch6Pick",
+     "type": "afterEvent",
+     "event": "hatch5",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Hatchling",
+     "tip": "Grab it the moment it spawns from the last egg and hold it off the raid."
+    },
+    {
+     "id": "run61",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot61",
+     "type": "playerAtSpotBy",
+     "spot": "ot6",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "name": "Egg 6: lap 2/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.3067,
+   "hpTo": 0.28,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp6_2",
+    "boss": "wp6_2",
+    "ranged": "ranged6",
+    "healer": "healer6_2",
+    "offtank": "ot6"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 2.7
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter6Clear2",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst62",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 6, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run62",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot62",
+     "type": "playerAtSpotBy",
+     "spot": "ot6",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "name": "Egg 6: lap 3/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.28,
+   "hpTo": 0.2533,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp6_3",
+    "boss": "wp6_3",
+    "ranged": "ranged6",
+    "healer": "healer6_3",
+    "offtank": "ot6"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 3.4
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter6Clear3",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst63",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 6, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run63",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot63",
+     "type": "playerAtSpotBy",
+     "spot": "ot6",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "name": "Egg 6: lap 4/4",
+   "subtitle": "Keep him moving around the pool",
+   "hpFrom": 0.2533,
+   "hpTo": 0.2267,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "wp6_4",
+    "boss": "wp6_4",
+    "ranged": "ranged6",
+    "healer": "healer6_4",
+    "offtank": "ot6"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.1
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kiter6Clear4",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst64",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 6, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "run64",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot64",
+     "type": "playerAtSpotBy",
+     "spot": "ot6",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "name": "Egg 6: over the egg",
+   "subtitle": "Lead him over the egg",
+   "hpFrom": 0.2267,
+   "hpTo": 0.2,
+   "duration": 8.3,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "kite6",
+    "boss": "kite6",
+    "ranged": "ranged6",
+    "healer": "healer6",
+    "offtank": "ot6"
+   },
+   "actions": [
+    {
+     "id": "gatheringSpeed",
+     "first": 4.8
+    },
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "dismemberBite",
+     "first": 2.5,
+     "every": 5,
+     "jitter": 0.6
+    },
+    {
+     "id": "eggBurst6",
+     "first": 5.700000000000001
+    }
+   ],
+   "expectations": [
+    {
+     "id": "egg6Over",
+     "type": "bossAtSpot",
+     "spot": "egg6",
+     "within": 8.100000000000001,
+     "grace": 1,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Lead Buru onto Egg 6",
+     "tip": "Run past the egg so he has to walk over it. If he never crosses it, the pop does not count."
+    },
+    {
+     "id": "kiter6Clear5",
+     "type": "continuous",
+     "metric": "caughtByBuru",
+     "role": "tank",
+     "label": "Do not let him catch you",
+     "tip": "Keep moving around the pool. Dismember is 1,248 every 2 seconds and stacks: be caught twice and you are dead."
+    },
+    {
+     "id": "eggFirst65",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Egg 6, not Buru",
+     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+    },
+    {
+     "id": "eggBurstOut6",
+     "type": "afterEvent",
+     "event": "eggBurst6",
+     "check": "outsideHazard",
+     "within": 2.4,
+     "grace": 0.6,
+     "notBefore": 2.1,
+     "role": "nontank",
+     "label": "Step back from the egg as it bursts",
+     "tip": "Get out of the ring before it detonates."
+    },
+    {
+     "id": "run65",
+     "type": "continuous",
+     "metric": "draggedThroughRaid",
+     "role": "nontank",
+     "label": "If Buru fixes on you, take him away from the group",
+     "tip": "Run out of the raid toward the next egg."
+    },
+    {
+     "id": "otSpot65",
+     "type": "playerAtSpotBy",
+     "spot": "ot6",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on your spot by the egg group",
+     "tip": "A Hatchling comes out of each egg. Stay on the shore by the egg group so you can grab it the moment it spawns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dismember ticks hard on the kiter. Heal them first."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The kiter drops fast when caught."
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "name": "Transform",
+   "subtitle": "Burn him: Creeping Plague ramps",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotBurn",
+   "spots": {
+    "tank": "burnTank",
+    "boss": "burnBoss",
+    "ranged": "rangedBurn",
+    "healer": "healerBurn",
+    "offtank": "otBurn"
+   },
+   "actions": [
+    {
+     "id": "transform",
+     "first": 0.05
+    },
+    {
+     "id": "creepingPlague",
+     "first": 2,
+     "every": 6
+    },
+    {
+     "id": "hatch6",
+     "first": 3,
+     "every": 13
+    }
+   ],
+   "expectations": [
+    {
+     "id": "burnGrab",
+     "type": "afterEvent",
+     "event": "transform",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take Buru as he transforms",
+     "tip": "Threat is gone and he is at full speed. Get to him and hold him."
+    },
+    {
+     "id": "burnHatch",
+     "type": "afterEvent",
+     "event": "hatch6",
+     "check": "whelpsPicked",
+     "within": 7,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the last Hatchlings",
+     "tip": "Do not let them reach the healers."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Plague ramps on the raid. Heal the group, and the tank when you can."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The transform is the race. Keep them up."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "caughtByBuru": {
+   "label": "Times he caught you",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": "tank",
+   "tip": "Stay ahead of him. Every catch is Dismember."
+  },
+  "draggedThroughRaid": {
+   "label": "Times you took Buru through the raid",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "If he fixes on you, run away from the group."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt back after the fixate; pick up Hatchlings; heal the kiter when low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Buru turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabHatch1",
+    "ability": "taunt",
+    "on": "event",
+    "event": "hatch1",
+    "offset": 1.5,
+    "early": 1.5,
+    "late": 6,
+    "role": "offtank",
+    "short": "HATCH",
+    "label": "Grab Hatchling 1",
+    "tip": "Pick it up and hold it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabHatch2",
+    "ability": "taunt",
+    "on": "event",
+    "event": "hatch2",
+    "offset": 1.5,
+    "early": 1.5,
+    "late": 6,
+    "role": "offtank",
+    "short": "HATCH",
+    "label": "Grab Hatchling 2",
+    "tip": "Pick it up and hold it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabHatch3",
+    "ability": "taunt",
+    "on": "event",
+    "event": "hatch3",
+    "offset": 1.5,
+    "early": 1.5,
+    "late": 6,
+    "role": "offtank",
+    "short": "HATCH",
+    "label": "Grab Hatchling 3",
+    "tip": "Pick it up and hold it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabHatch4",
+    "ability": "taunt",
+    "on": "event",
+    "event": "hatch4",
+    "offset": 1.5,
+    "early": 1.5,
+    "late": 6,
+    "role": "offtank",
+    "short": "HATCH",
+    "label": "Grab Hatchling 4",
+    "tip": "Pick it up and hold it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabHatch5",
+    "ability": "taunt",
+    "on": "event",
+    "event": "hatch5",
+    "offset": 1.5,
+    "early": 1.5,
+    "late": 6,
+    "role": "offtank",
+    "short": "HATCH",
+    "label": "Grab Hatchling 5",
+    "tip": "Pick it up and hold it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabHatch6",
+    "ability": "taunt",
+    "on": "event",
+    "event": "hatch6",
+    "offset": 1.5,
+    "early": 1.5,
+    "late": 6,
+    "role": "offtank",
+    "short": "HATCH",
+    "label": "Grab Hatchling 6",
+    "tip": "Pick it up and hold it.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "kiteDrill",
+   "name": "Egg kite",
+   "description": "Kite Buru around the pool and over the egg. Keep moving: he speeds up 25% every 9 s. Taunt only when he comes back to you.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "dismember",
+     "first": 2,
+     "every": 5
+    },
+    {
+     "id": "dismemberBite",
+     "first": 3,
+     "every": 5
+    }
+   ]
+  },
+  {
+   "id": "eggDrill",
+   "name": "Egg first",
+   "description": "Kill the egg, not Buru, step back from the burst and carry a fixate away from the group.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "eggAdd1",
+     "first": 2,
+     "every": 17
+    },
+    {
+     "id": "eggBurst1",
+     "first": 8,
+     "every": 17
+    },
+    {
+     "id": "fixateYou",
+     "first": 5,
+     "every": 13
+    }
+   ]
+  },
+  {
+   "id": "hatchDrill",
+   "name": "Hatchling pickup",
+   "description": "A Hatchling every 12 s. Pick it up and hold it.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "hatch1",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "plagueDrill",
+   "name": "Heal through the transform",
+   "description": "Plague stacks climbing every 3 s. Heal the kiter on the way down.",
+   "roles": "healer",
+   "startPhase": 27,
+   "duration": 28,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "creepingPlague",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "dismember",
+     "first": 1,
+     "every": 5
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1484 @@
+{
+ "id": "moam",
+ "name": "Moam",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "ruins-of-ahnqiraj",
+  "name": "Ruins of Ahn'Qiraj",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/ruins-of-ahnqiraj/moam.md (no Era HP: wiki 340,000 versus SoM 799,500; the boss's HP here is a clock). ESTIMATES: the Reservoir is a 44 yd round room with an entrance south; the fight is 90 s active, then a 60 s stone phase (real: up to 90 s, ending early when all three fiends die or his mana fills), then 90 s more until he dies, with HP 100-58, held at 58, then 58-0 (the 58 is a placeholder; the wiki's 'under 45% by 90 s' is a target, not a clock, and this model cannot end the stone phase early). Boss melee (600 per 2 s) with Trample (1,000 on the tank every 15 s) is scaled so a 10,000 HP tank lives on the raid's passive healing and dies if a player healer ignores it (`healPerSecondWithPlayerHealer` 110); guides call his melee low, so this is mostly placeholder. Trample uses the spell data's self-centred 10 yd radius, set as 6 yd from his 4.5 yd hitbox edge (TenTonHammer says a front arc). Mana is the fight and the engine has no mana bar. The model: for the ranged role only (the drainers), a `manaDrain` `hazard` lands on them every 14 s (real Drain Mana is 500 from six players every 2 to 6 s) and `applies` `manaSurge`, a magic `debuff` meaning 'he is filling up', cleared by the ranged role's Dispel button, relabelled Mana Burn / Viper Sting. `arcaneEruption` (3,500, room-wide, the middle of 3,063-3,937, with a radial 8 yd `knockback` standing in for the launch; knock-up fall damage is not modelled and 45 yd is simply 'the room') is `conditional: debuff:manaSurge` and only fires while it is up, so it happens if the drainer has not burned him down. The non-drainer roles never get the debuff and never see an Eruption: the raid's other drainers are assumed to be doing their job, which matches a clean kill. This misrepresents the real mana race (his mana total, 26,200, and drain arithmetic of up to 6,000 per cast are not simulated); the Eruption is a punishment for a missed press, not a mana bar reaching full. The hazard ring under the ranged player only exists to deliver the debuff. Stone phase: `bossState: submerged` for 60 s, hp held at 58%, no melee and no threat, ranged keep burning (Moam regains mana in stone in the real fight, hence the same `manaDrain` and Eruption chain with `requires: any`). Three Mana Fiends are `killFirst` adds from front/left/right of him, ~15,000 HP real, modelled by a 30 s lifetime, held by whichever tank role plays; the real banish-two-kill-one assignment has no representation, nor does breaking the stone phase by killing all three. Fiend Arcane Explosion (~1,000, 2 s telegraphed) is a random `hazard` plus a light raid-wide pulse (the pulse is not real: it keeps the healer working while Moam is stone, since adds cannot hurt the tank in this engine). Fiend Counterspell (12 s, wiki and Wowhead guide; Wowhead's NPC page lists only Arcane Explosion, which is weak evidence against it altogether) is a `debuff` with `forbidAbilities` for 12 s on a random caster role: pressing during it is scored (`castIntoCounterspell`) instead of being a lockout per school. Waking he resets threat (a one-shot `threatWipe` at phase start, TenTonHammer's 'no aggro table'). Double Attack (CMaNGOS) is folded into melee. The 2 to 3 s delay for mana users entering at the pull is represented by `holdAfterPull` and the `earlyAttacks` metric, and only the ranged role is held to it by the `manaWait` expectation; melee go in with the tank. UNVERIFIED: whether Moam is immune or merely reduced while stoned. Wowhead spell 25685 gives Mod Damage Taken -50 (all schools), while the wiki and Wowhead guide say immune; the phase clock hides the difference and Fiends first is correct either way.",
+ "sources": [
+  "docs/research/ruins-of-ahnqiraj/moam.md",
+  "https://warcraft.wiki.gg/wiki/Moam",
+  "https://www.wowhead.com/classic/guide/moam-ruins-of-ahnqiraj-strategy",
+  "https://www.wowhead.com/classic/npc=15340/moam",
+  "https://www.warcrafttavern.com/wow-classic/guides/ruins-of-ahnqiraj-aq20/",
+  "https://www.tentonhammer.com/guides/tentonhammers-guide-to-the-ruins-of-ahn-qiraj-section-2-3",
+  "https://us.millenium.gg/guide/6975.html?page=3",
+  "https://wotlkdb.com/?spell=25671",
+  "https://wotlkdb.com/?spell=25672",
+  "https://wotlkdb.com/?spell=25685",
+  "https://wotlkdb.com/?spell=15550",
+  "https://github.com/azerothcore/azerothcore-wotlk/blob/master/src/server/scripts/Kalimdor/RuinsOfAhnQiraj/boss_moam.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/kalimdor/ruins_of_ahnqiraj/boss_moam.cpp",
+  "https://warcraft.wiki.gg/wiki/Mana_Fiend"
+ ],
+ "arena": {
+  "name": "The Reservoir",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -64
+     ],
+     [
+      -9,
+      -64
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -64
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -64
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -58
+    ]
+   },
+   {
+    "text": "Moam, facing north",
+    "at": [
+     0,
+     30
+    ]
+   },
+   {
+    "text": "Raid, spread",
+    "at": [
+     0,
+     -4
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -58,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 26,
+   "heading": 90
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 7
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 34,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 26,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Moam, facing north"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -2,
+   "spread": 15,
+   "label": "Raid, spread"
+  },
+  "rangedSpot": {
+   "x": 9,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Ranged and drainers"
+  },
+  "healerSpot": {
+   "x": -9,
+   "y": 2,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "fiendF": {
+   "x": 0,
+   "y": 16,
+   "label": "Fiend, front"
+  },
+  "fiendL": {
+   "x": -13,
+   "y": 24,
+   "label": "Fiend, left"
+  },
+  "fiendR": {
+   "x": 13,
+   "y": 24,
+   "label": "Fiend, right"
+  },
+  "fiendHold": {
+   "x": 0,
+   "y": 10,
+   "label": "Fiends held"
+  },
+  "fiendOtSpot": {
+   "x": 0,
+   "y": 8,
+   "tolerance": 6,
+   "label": "Off-tank: hold the Fiends"
+  },
+  "stoneTank": {
+   "x": 0,
+   "y": 10,
+   "tolerance": 6,
+   "label": "Tank: catch the Fiends"
+  },
+  "offtankSpot": {
+   "x": 14,
+   "y": 18,
+   "tolerance": 6,
+   "label": "Off-tank, ready"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 520,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 520,
+  "healPerSecondWithPlayerHealer": 110,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4.5,
+  "speed": 6,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 600,
+  "meleeInterval": 2,
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull him facing north and hold him there. Nothing to swap. At 90 s he turns to stone: pick up the Mana Fiends with the off-tank, and be standing on him when he wakes, because his threat is empty.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Fiend off-tank",
+   "short": "Off-tank",
+   "description": "Your whole job is the Mana Fiends: grab them when he turns to stone and hold them off the raid while the DPS kill them.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Behind him. Trample hits within 10 yards, so stay healed. Kill the Mana Fiends first when he turns to stone.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "You are a drainer. Mana Burn or Viper Sting him whenever he starts to fill: leave it and Arcane Eruption hits the raid for 3,500. Kill Mana Fiends during the stone phase.",
+   "abilities": [
+    "attack",
+    "dispel"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Keep the tank up through melee and Trample. A Counterspell locks you out for a few seconds in the stone phase: time it so the tank is high when it lands.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Mana Burn / Viper Sting",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic"
+   ],
+   "tip": "Mana Burn, Viper Sting or Drain Mana on Moam. Press it whenever he starts filling."
+  }
+ },
+ "actions": {
+  "manaDrain": {
+   "label": "Drain Mana",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "player",
+   "roles": "ranged",
+   "radius": 3,
+   "warning": 0.1,
+   "active": 1.2,
+   "damage": 0,
+   "applies": "manaSurge",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He drains mana and his bar climbs. Burn him down with your Mana Burn or Viper Sting."
+  },
+  "manaSurge": {
+   "label": "Moam is filling up",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "ranged",
+   "dispel": "magic",
+   "duration": 18,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "any",
+   "tip": "Press Mana Burn or Viper Sting now, or he erupts."
+  },
+  "arcaneEruption": {
+   "label": "Arcane Eruption",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 3500,
+   "tankDamage": 3500,
+   "conditional": "debuff:manaSurge",
+   "playerMetric": "eruptionsTaken",
+   "follow": [
+    {
+     "id": "eruptionPush",
+     "delay": 0
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "any",
+   "tip": "He reached full mana. Everything within 45 yards takes about 3,500 and is launched."
+  },
+  "eruptionPush": {
+   "label": "Arcane Eruption knockback",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 8,
+   "knockbackRange": 80,
+   "radial": true,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "any"
+  },
+  "trample": {
+   "label": "Trample",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 6,
+   "damage": 700,
+   "tankDamage": 1000,
+   "warn": false,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Weapon-damage stomp within 10 yards. The tank and melee just heal through it."
+  },
+  "submerge": {
+   "label": "Energize: he turns to stone",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "At 90 s he turns to stone for up to 90 s and summons three Mana Fiends."
+  },
+  "emerge": {
+   "label": "Moam wakes",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He wakes from stone with an empty threat table."
+  },
+  "manaFiends": {
+   "label": "Mana Fiends",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "fiendF",
+    "fiendL",
+    "fiendR"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 30,
+   "heldLifetime": 36,
+   "killFirst": true,
+   "pickup": [
+    "tanks",
+    "offtank"
+   ],
+   "holdSpot": "fiendHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Three Mana Fiends spawn around him. Pick them up and kill them."
+  },
+  "fiendExplosion": {
+   "label": "Arcane Explosion",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.3,
+   "radius": 6,
+   "warning": 2,
+   "active": 1,
+   "damage": 900,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "submerged",
+   "tip": "A Fiend detonates near someone. Step out of the ring."
+  },
+  "fiendPulse": {
+   "label": "Fiend blasts",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 300,
+   "tankDamage": 900,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "submerged",
+   "tip": "The Fiends blast the raid. Heal through it."
+  },
+  "counterspell": {
+   "label": "Counterspell",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "count": 1,
+   "playerChance": 0.3,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "dispel": "none",
+   "duration": 12,
+   "forbidAbilities": true,
+   "breakMetric": "castIntoCounterspell",
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "submerged",
+   "tip": "A Fiend Counterspells you for 12 seconds. Press nothing until it ends."
+  },
+  "awakeWipe": {
+   "label": "Moam wakes",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "He is awake: threat wiped. Tank, take him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He wakes with an empty threat table. Tank first, then everyone."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Awake: drain him",
+   "subtitle": "Stone at 90 s",
+   "hpFrom": 1,
+   "hpTo": 0.58,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "manaDrain",
+     "first": 5,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "arcaneEruption",
+     "first": 12,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "trample",
+     "first": 9,
+     "every": 15,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 8,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull him facing north",
+     "tip": "Face him away from the raid so a Trample or Eruption throw hits as few as possible."
+    },
+    {
+     "id": "manaWait",
+     "type": "continuous",
+     "metric": "earlyAttacks",
+     "role": "ranged",
+     "label": "Mana users wait a few seconds on the pull",
+     "tip": "Let the tank and melee in first. He has no target to drain for the first seconds."
+    },
+    {
+     "id": "otReady",
+     "type": "playerAtSpotBy",
+     "spot": "offtankSpot",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Be ready beside him for the Fiends",
+     "tip": "When he turns to stone the Fiends spawn around him. Stand ready for the grab."
+    },
+    {
+     "id": "burnMana",
+     "type": "afterEvent",
+     "event": "manaDrain",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 6,
+     "role": "ranged",
+     "label": "Burn his mana before he erupts",
+     "tip": "Mana Burn or Viper Sting him the moment he starts to fill. Leave it up and Arcane Eruption hits the whole raid."
+    },
+    {
+     "id": "eruptions",
+     "type": "continuous",
+     "metric": "eruptionsTaken",
+     "role": "ranged",
+     "label": "Keep him from filling up",
+     "tip": "Every Eruption is 3,500 to the raid. Burn him on the note."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mostly melee and Trample: keep the tank topped."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Top up before the next Trample."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Stone",
+   "subtitle": "Kill the Fiends",
+   "hpFrom": 0.58,
+   "hpTo": 0.58,
+   "duration": 60,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "stoneTank",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "fiendOtSpot"
+   },
+   "actions": [
+    {
+     "id": "manaFiends",
+     "first": 1
+    },
+    {
+     "id": "manaDrain",
+     "first": 4,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "arcaneEruption",
+     "first": 11,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "fiendExplosion",
+     "first": 6,
+     "every": 8,
+     "jitter": 2
+    },
+    {
+     "id": "fiendPulse",
+     "first": 5,
+     "every": 7,
+     "jitter": 1
+    },
+    {
+     "id": "counterspell",
+     "first": 9,
+     "every": 16,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "fiendGrab",
+     "type": "afterEvent",
+     "event": "manaFiends",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 7,
+     "role": [
+      "tanks",
+      "offtank"
+     ],
+     "label": "Pick up the Mana Fiends",
+     "tip": "Grab them as they spawn and hold them off the raid. Kill one if they cannot be banished."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Mana Fiends first",
+     "tip": "Fiends first: he is stunned and regaining mana, and sources disagree on whether he takes damage."
+    },
+    {
+     "id": "fiendDodge",
+     "type": "afterEvent",
+     "event": "fiendExplosion",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 1,
+     "notBefore": 1.6,
+     "role": "nontank",
+     "label": "Step out of the Fiend Explosion ring",
+     "tip": "A ring means a Fiend is about to blow. Step out now."
+    },
+    {
+     "id": "counterHold",
+     "type": "continuous",
+     "metric": "castIntoCounterspell",
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Do not press under Counterspell",
+     "tip": "Wait for the 12 seconds to end. Pressing into it only wastes your Global."
+    },
+    {
+     "id": "burnMana",
+     "type": "afterEvent",
+     "event": "manaDrain",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 6,
+     "role": "ranged",
+     "label": "Burn his mana before he erupts",
+     "tip": "Mana Burn or Viper Sting him the moment he starts to fill. Leave it up and Arcane Eruption hits the whole raid."
+    },
+    {
+     "id": "eruptions",
+     "type": "continuous",
+     "metric": "eruptionsTaken",
+     "role": "ranged",
+     "label": "Keep him from filling up",
+     "tip": "Every Eruption is 3,500 to the raid. Burn him on the note."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Moam is stone but the tank still gets hit by the Fiends here."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Fiends bite. Keep them above half."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Awake again",
+   "subtitle": "Burn him: 58% to 0",
+   "hpFrom": 0.58,
+   "hpTo": 0,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "awakeWipe",
+     "first": 0.05
+    },
+    {
+     "id": "manaDrain",
+     "first": 5,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "arcaneEruption",
+     "first": 12,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "trample",
+     "first": 9,
+     "every": 15,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "wakeGrab",
+     "type": "afterEvent",
+     "event": "awakeWipe",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take him the moment he wakes",
+     "tip": "Be next to him when he wakes. Threat is empty, so he goes for whoever hits him."
+    },
+    {
+     "id": "otReady3",
+     "type": "playerAtSpotBy",
+     "spot": "offtankSpot",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay beside him for the next stone",
+     "tip": "He will turn to stone again at the next cycle. Be ready."
+    },
+    {
+     "id": "burnMana",
+     "type": "afterEvent",
+     "event": "manaDrain",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 6,
+     "role": "ranged",
+     "label": "Burn his mana before he erupts",
+     "tip": "Mana Burn or Viper Sting him the moment he starts to fill. Leave it up and Arcane Eruption hits the whole raid."
+    },
+    {
+     "id": "eruptions",
+     "type": "continuous",
+     "metric": "eruptionsTaken",
+     "role": "ranged",
+     "label": "Keep him from filling up",
+     "tip": "Every Eruption is 3,500 to the raid. Burn him on the note."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "After the stone phase his threat is empty and he wakes fast."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Top up before the next Trample."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.05,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with Moam filling up",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 14,
+   "roles": "ranged",
+   "tip": "Mana Burn him the moment the debuff lands."
+  },
+  "eruptionsTaken": {
+   "label": "Arcane Eruptions you caused",
+   "unit": "count",
+   "penaltyPerUnit": 18,
+   "severe": 1,
+   "roles": "ranged",
+   "tip": "Press Mana Burn on the note. Every Eruption is 3,500 to the whole raid."
+  },
+  "castIntoCounterspell": {
+   "label": "Pressed into Counterspell",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "tip": "Counterspell means press nothing for the 12 seconds."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Mana Burn when he starts filling; Taunt when he wakes; grab the Fiends; heal when low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Moam turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabFiendsCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "manaFiends",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "FIENDS",
+    "label": "Grab the Mana Fiends",
+    "tip": "Pick them up and hold them off the raid.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "burnCue",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "ranged",
+    "short": "BURN",
+    "label": "Mana Burn: he is filling up",
+    "tip": "Press Mana Burn or Viper Sting right now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "wakeDrill",
+   "name": "Stone and wake",
+   "description": "He turns to stone every 22 s and wakes with no threat. Taunt him the moment he wakes.",
+   "roles": "tanks",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "awakeWipe",
+     "first": 4,
+     "every": 22
+    }
+   ]
+  },
+  {
+   "id": "burnDrill",
+   "name": "Burn his mana",
+   "description": "He starts filling every 8 s. Mana Burn the moment the debuff lands. Leave it and he erupts.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "manaDrain",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "arcaneEruption",
+     "first": 8,
+     "every": 8
+    }
+   ]
+  },
+  {
+   "id": "trampleDrill",
+   "name": "Trample and Fiends",
+   "description": "Trample every 9 s and Fiend blasts near you: keep your feet out of the rings and keep swinging.",
+   "roles": "melee",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "manaFiends",
+     "first": 2,
+     "every": 28
+    },
+    {
+     "id": "fiendExplosion",
+     "first": 5,
+     "every": 7
+    }
+   ]
+  },
+  {
+   "id": "fiendGrabDrill",
+   "name": "Fiend pickup",
+   "description": "Three Fiends spawn around him every 20 s. Grab them and hold them.",
+   "roles": "offtank",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "manaFiends",
+     "first": 3,
+     "every": 20
+    }
+   ]
+  },
+  {
+   "id": "stoneHeal",
+   "name": "Heal through Fiend pulses",
+   "description": "Fiend blasts every 6 s with Counterspell mixed in. Keep the tank high.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "fiendPulse",
+     "first": 3,
+     "every": 6
+    },
+    {
+     "id": "counterspell",
+     "first": 8,
+     "every": 14
+    },
+    {
+     "id": "manaFiends",
+     "first": 2,
+     "every": 28
+    }
+   ]
+  }
+ ]
+}

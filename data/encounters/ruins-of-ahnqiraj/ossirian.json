@@ -1,0 +1,2675 @@
+{
+ "id": "ossirian",
+ "name": "Ossirian the Unscarred",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "ruins-of-ahnqiraj",
+  "name": "Ruins of Ahn'Qiraj",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/ruins-of-ahnqiraj/ossirian.md (no Era HP: wiki ~500,000 versus SoM 2,398,320; the boss's HP is a clock). ESTIMATES: the terrace is drawn 92 by 74 yd; the fight is 270 s, six chained 45 s Weakness windows (DBM and BigWigs give 45 s; for crystals 1-5 a 27 s hold then an 18 s walk to the next crystal inside the same Weakness, and the sixth window holds for 45 s), compressing the real 8-12 windows and 6-8 minutes; schools per window are placeholders. UNVERIFIED: the real terrace layout (no map or coordinates: crystal positions are estimates). THE KITE IS THE FIGHT and is the main thing simulated. Crystal k stands at a fixed spot; the raid clicks the next crystal with 10-15 s left so the next Weakness lands before the current one ends, and the tank walks him to the next crystal inside the window (Wowhead guide: he moves 15-20 s into it; wiki: never let the Weakness expire with him in melee of anyone). A lapse is the failure case, not the rhythm: `strength` (Strength of Ossirian, `enrage` for 6.5 s, +300% melee at `enrageMultiplier` 4, matching +300% physical damage in the real spell data) is out of the rotation and appears only in the `lapseDrill`. The sim cannot end a window early or fail to land a Weakness, so a late walk scores a missed `bossAtSpot` rather than a wipe, and he does not get faster 10 s into the fight (the 2.2x run speed) because `boss.speed` is one number per script. Crystal clicking (5 s cast, spotter, clicker roles) is not modelled at all: crystals are places, weaknesses are phases, and the school weakness has no effect on DPS because the engine does not split damage by school. Boss melee (700 per 2 s) is scaled so a 10,000 HP tank lives on the raid's passive healing in the windows and dies if a player healer ignores it (`healPerSecondWithPlayerHealer` 100). Real melee during Strength hits for 10,000+ (TenTonHammer); the 4x multiplier of 700 is 2,800 here, so being caught under Strength hurts but is not fatal in one swing: an honest difference. Enveloping Winds (real 20 s then 20 s on the emulators; here every 19 s on one timeline through the whole fight, first at 9 s, so a stun can land inside a walk and the tank has to take him back and still get him to the next crystal) is a 10 s stun on the tank (the Free Action Potion answer is not modelled) with a `targetSwitch` handing him to the raid anchor for those 10 s (the real target is the off-tank at number two on threat). The raid anchor stands 10 yd from him for this reason, which is unrealistically close for 'raid 20 yd back'. War Stomp (real 30 s/30 s, here once per window in the hold, in a gap where Winds has not pulled him off his crystal, because casters who stand outside its 20 yd reach of the crystal would otherwise be inside it when he walks toward the raid) is a radial 20 yd `knockback` of 12 yd for 1,800 (the 2,188-2,812 of wotlkdb, ~1,500 of guides, ~3,000 reported when buffed: middle of the first two); ranged and healers stand outside its 20 yd reach, and in melee it is unavoidable, so `stompsTaken` is informational. Curse of Tongues (DBM: first 17.8-50.2 s, then every 21-43.7 s; here once per window at 18 s plus 0-8 s into the hold; 15 s duration) is `dispel: curse` on everyone. The two Sand Vortexes are `hazard`s of radius 10 stepping between waypoints every 7 s to imitate roaming (wiki: they wander; emulators give both fixed and random paths), on a 19-20 yd ring that keeps 14 yd from every tank spot, since a vortex on the tank cannot be dodged while Winds has them stunned; damage 1,500 per second (Harsh Winds ~2,000 per second, 10 yd radius) and `applies` `harshWinds`, a 3 s `forbidAbilities` debuff on healer and ranged standing in for its Silence and scored by `castInVortex`. Its -85% run speed and aggro loss remain engine gaps (a hazard cannot slow a player or wipe a tank's threat). No DPS during the first window is `raid.holdAfterPull` 45 s (Wowhead: no DPS in the first window) with `earlyAttacks` penalties. Ossirian is immune to Taunt in the real fight: the Taunt button stands for regaining threat with Sunder and is a known approximation.",
+ "sources": [
+  "docs/research/ruins-of-ahnqiraj/ossirian.md",
+  "https://warcraft.wiki.gg/wiki/Ossirian_the_Unscarred",
+  "https://www.wowhead.com/classic/guide/ossirian-the-unscarred-ruins-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/ruins-of-ahnqiraj-aq20/",
+  "https://www.tentonhammer.com/guides/tentonhammers-guide-to-the-ruins-of-ahn-qiraj-section-2-6",
+  "https://us.millenium.gg/guide/6975.html?page=4",
+  "https://wotlkdb.com/?spell=25176",
+  "https://wotlkdb.com/?spell=25177",
+  "https://wotlkdb.com/?spell=25195",
+  "https://wotlkdb.com/?spell=25189",
+  "https://wotlkdb.com/?spell=25188",
+  "https://wotlkdb.com/?spell=25161",
+  "https://github.com/azerothcore/azerothcore-wotlk/blob/master/src/server/scripts/Kalimdor/RuinsOfAhnQiraj/boss_ossirian.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/kalimdor/ruins_of_ahnqiraj/boss_ossirian.cpp"
+ ],
+ "arena": {
+  "name": "Watchers' Terrace",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -46,
+      -32
+     ],
+     [
+      46,
+      -32
+     ],
+     [
+      46,
+      42
+     ],
+     [
+      -46,
+      42
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -54
+     ],
+     [
+      10,
+      -54
+     ],
+     [
+      10,
+      -28
+     ],
+     [
+      -10,
+      -28
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -10,
+      -32
+     ],
+     [
+      -46,
+      -32
+     ],
+     [
+      -46,
+      42
+     ],
+     [
+      46,
+      42
+     ],
+     [
+      46,
+      -32
+     ],
+     [
+      10,
+      -32
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -32
+     ],
+     [
+      -10,
+      -54
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -32
+     ],
+     [
+      10,
+      -54
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -48
+    ]
+   },
+   {
+    "text": "First crystal: tanks wait here",
+    "at": [
+     0,
+     6
+    ]
+   },
+   {
+    "text": "His platform",
+    "at": [
+     0,
+     38
+    ]
+   },
+   {
+    "text": "Raid walks with the tank, crystal to crystal",
+    "at": [
+     -30,
+     30
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -48,
+   "heading": 90
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -24,
+   "spread": 8
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 36,
+   "heading": 270
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": -8,
+   "tolerance": 5,
+   "label": "Tank, below the first crystal"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 2,
+   "heading": 270,
+   "tolerance": 8,
+   "headingTolerance": 100,
+   "label": "Ossirian, on the first crystal"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -24,
+   "spread": 9,
+   "label": "Raid, 20 yd back"
+  },
+  "rangedSpot": {
+   "x": -8,
+   "y": -26,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healerSpot": {
+   "x": 8,
+   "y": -26,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "crystal1": {
+   "x": 0,
+   "y": 2,
+   "heading": -90,
+   "tolerance": 9,
+   "headingTolerance": 90,
+   "label": "Crystal 1"
+  },
+  "tank1": {
+   "x": 0,
+   "y": -6,
+   "tolerance": 5,
+   "label": "Tank"
+  },
+  "raidK1": {
+   "x": 0,
+   "y": -24,
+   "spread": 9,
+   "label": "Raid, 20 yd back"
+  },
+  "rangedK1": {
+   "x": -8,
+   "y": -26,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healerK1": {
+   "x": 8,
+   "y": -26,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "meleeK1": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 7,
+   "label": "Melee"
+  },
+  "crystal2": {
+   "x": 0,
+   "y": 28,
+   "heading": 90,
+   "tolerance": 9,
+   "headingTolerance": 90,
+   "label": "Crystal 2"
+  },
+  "tank2": {
+   "x": 0,
+   "y": 36,
+   "tolerance": 5,
+   "label": "Tank"
+  },
+  "raidK2": {
+   "x": 0,
+   "y": 12,
+   "spread": 8,
+   "label": "Raid"
+  },
+  "rangedK2": {
+   "x": 0,
+   "y": 1,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healerK2": {
+   "x": 6,
+   "y": 0,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "meleeK2": {
+   "x": 0,
+   "y": 21,
+   "tolerance": 6,
+   "label": "Melee, behind him"
+  },
+  "crystal3": {
+   "x": 26.6,
+   "y": 8.7,
+   "heading": -36,
+   "tolerance": 9,
+   "headingTolerance": 90,
+   "label": "Crystal 3"
+  },
+  "tank3": {
+   "x": 33.1,
+   "y": 4,
+   "tolerance": 5,
+   "label": "Tank"
+  },
+  "raidK3": {
+   "x": 11.4,
+   "y": 3.7,
+   "spread": 8,
+   "label": "Raid"
+  },
+  "rangedK3": {
+   "x": 0.9,
+   "y": 0.3,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healerK3": {
+   "x": 1.9,
+   "y": -5.7,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "meleeK3": {
+   "x": 20.9,
+   "y": 12.8,
+   "tolerance": 6,
+   "label": "Melee, behind him"
+  },
+  "crystal4": {
+   "x": 16.5,
+   "y": -22.7,
+   "heading": -107.8,
+   "tolerance": 9,
+   "headingTolerance": 90,
+   "label": "Crystal 4"
+  },
+  "tank4": {
+   "x": 14.1,
+   "y": -30.3,
+   "tolerance": 5,
+   "label": "Tank"
+  },
+  "raidK4": {
+   "x": 7.1,
+   "y": -9.8,
+   "spread": 8,
+   "label": "Raid"
+  },
+  "rangedK4": {
+   "x": 0.6,
+   "y": -0.9,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healerK4": {
+   "x": -4.8,
+   "y": -3.6,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "meleeK4": {
+   "x": 18.6,
+   "y": -16,
+   "tolerance": 6,
+   "label": "Melee, behind him"
+  },
+  "crystal5": {
+   "x": -16.5,
+   "y": -22.7,
+   "heading": 180,
+   "tolerance": 9,
+   "headingTolerance": 90,
+   "label": "Crystal 5"
+  },
+  "tank5": {
+   "x": -24.5,
+   "y": -22.7,
+   "tolerance": 5,
+   "label": "Tank"
+  },
+  "raidK5": {
+   "x": -7.1,
+   "y": -9.8,
+   "spread": 8,
+   "label": "Raid"
+  },
+  "rangedK5": {
+   "x": -0.6,
+   "y": -0.9,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healerK5": {
+   "x": -4.9,
+   "y": 3.5,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "meleeK5": {
+   "x": -9.5,
+   "y": -22.7,
+   "tolerance": 6,
+   "label": "Melee, behind him"
+  },
+  "crystal6": {
+   "x": -26.6,
+   "y": 8.7,
+   "heading": 107.8,
+   "tolerance": 9,
+   "headingTolerance": 90,
+   "label": "Crystal 6"
+  },
+  "tank6": {
+   "x": -29,
+   "y": 16.3,
+   "tolerance": 5,
+   "label": "Tank"
+  },
+  "raidK6": {
+   "x": -11.4,
+   "y": 3.7,
+   "spread": 8,
+   "label": "Raid"
+  },
+  "rangedK6": {
+   "x": -0.9,
+   "y": 0.3,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healerK6": {
+   "x": 1.9,
+   "y": 5.7,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "meleeK6": {
+   "x": -24.5,
+   "y": 2,
+   "tolerance": 6,
+   "label": "Melee, behind him"
+  },
+  "vortexA0": {
+   "x": 18.7,
+   "y": 3.3,
+   "label": "Sand Vortex"
+  },
+  "vortexB0": {
+   "x": 10.9,
+   "y": 15.6,
+   "label": "Sand Vortex"
+  },
+  "vortexA1": {
+   "x": 10.9,
+   "y": 15.6,
+   "label": "Sand Vortex"
+  },
+  "vortexB1": {
+   "x": -3.3,
+   "y": 18.7,
+   "label": "Sand Vortex"
+  },
+  "vortexA2": {
+   "x": -3.3,
+   "y": 18.7,
+   "label": "Sand Vortex"
+  },
+  "vortexB2": {
+   "x": -15.6,
+   "y": 10.9,
+   "label": "Sand Vortex"
+  },
+  "vortexA3": {
+   "x": -15.6,
+   "y": 10.9,
+   "label": "Sand Vortex"
+  },
+  "vortexB3": {
+   "x": -18.7,
+   "y": -3.3,
+   "label": "Sand Vortex"
+  },
+  "vortexA4": {
+   "x": -18.7,
+   "y": -3.3,
+   "label": "Sand Vortex"
+  },
+  "vortexB4": {
+   "x": -10.9,
+   "y": -15.6,
+   "label": "Sand Vortex"
+  },
+  "vortexA5": {
+   "x": -10.9,
+   "y": -15.6,
+   "label": "Sand Vortex"
+  },
+  "vortexB5": {
+   "x": 3.6,
+   "y": -20.2,
+   "label": "Sand Vortex"
+  },
+  "vortexA6": {
+   "x": 3.6,
+   "y": -20.2,
+   "label": "Sand Vortex"
+  },
+  "vortexB6": {
+   "x": 15.6,
+   "y": -10.9,
+   "label": "Sand Vortex"
+  },
+  "vortexA7": {
+   "x": 15.6,
+   "y": -10.9,
+   "label": "Sand Vortex"
+  },
+  "vortexB7": {
+   "x": 18.7,
+   "y": 3.3,
+   "label": "Sand Vortex"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 620,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 620,
+  "healPerSecondWithPlayerHealer": 100,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 45
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 6,
+  "turnRate": 300,
+  "meleeRange": 7,
+  "meleeDamage": 700,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 4
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 400,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him on the first crystal while the raid does nothing. Then the whole fight is one rule: walk him to the next crystal while the Weakness is up. If a window ever lapses, he hits for 10,000+ under Strength. When Enveloping Winds stuns you for 10 s, he goes to the off-tank; take him back as soon as you are free. (The Taunt button stands for regaining threat. He cannot be Taunted in the real fight.)",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Melee are optional in this fight. Attack from behind him only during weakness windows, come back on him after War Stomp throws you and keep clear of the roaming tornadoes.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "No damage during the first window. After that stay 20 to 30 yards behind the tank, walk with the raid crystal to crystal, decurse Curse of Tongues when you can, and keep clear of the roaming tornadoes.",
+   "abilities": [
+    "attack",
+    "dispel"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Move with the tank each window. Decurse Curse of Tongues off healers and casters first. Heal the tank up after Enveloping Winds and through War Stomp.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "curse"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "curse"
+   ],
+   "tip": "Remove Curse or Remove Lesser Curse. Healers and casters first."
+  }
+ },
+ "actions": {
+  "vortexA0": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA0"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexA1": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA1"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexA2": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA2"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexA3": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA3"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexA4": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA4"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexA5": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA5"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexA6": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA6"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexA7": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexA7"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB0": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB0"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB1": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB1"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB2": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB2"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB3": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB3"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB4": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB4"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB5": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB5"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB6": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB6"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "vortexB7": {
+   "label": "Sand Vortex",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "vortexB7"
+   ],
+   "radius": 10,
+   "warning": 1.2,
+   "active": 7,
+   "tick": true,
+   "damage": 1500,
+   "applies": "harshWinds",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A roaming tornado: about 2,000 per second, Silence, -85% run speed and you lose your aggro. Stay clear of it."
+  },
+  "strength": {
+   "label": "Strength of Ossirian",
+   "kind": "enrage",
+   "cast": 0,
+   "duration": 6.5,
+   "toast": "You let the window lapse: Strength is back. He hits for ten thousand.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A Weakness window lapsed: +300% physical damage. Stay out of his melee until the next Weakness."
+  },
+  "envelopingWinds": {
+   "label": "Enveloping Winds",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "tanks",
+   "dispel": "none",
+   "duration": 10,
+   "stun": 10,
+   "follow": [
+    {
+     "id": "windsSwitch",
+     "delay": 0
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Ten seconds stunned on the top-threat target. He turns on the next tank until you are free."
+  },
+  "windsSwitch": {
+   "label": "Winds: he goes to the off-tank",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 10,
+   "toast": "Enveloping Winds: he is on the off-tank for 10 s",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "The off-tank holds him for 10 s while you are stunned."
+  },
+  "warStomp": {
+   "label": "War Stomp",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 12,
+   "knockbackRange": 20,
+   "radial": true,
+   "damage": 1800,
+   "playerMetric": "stompsTaken",
+   "warn": true,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "A 20 yard radial stomp for about 1,500 and a 12 yard knockback."
+  },
+  "harshWinds": {
+   "label": "Harsh Winds",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "dispel": "none",
+   "duration": 3,
+   "forbidAbilities": true,
+   "breakMetric": "castInVortex",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Caught in a Sand Vortex: Silenced for 3 s. Press nothing until it ends."
+  },
+  "curseOfTongues": {
+   "label": "Curse of Tongues",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "curse",
+   "duration": 15,
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Curse on everyone within 45 yards: +75% cast time for 15 s. Decursers: healers and casters first."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Crystal 1: hold",
+   "subtitle": "Tanks build threat. Nobody else attacks.",
+   "hpFrom": 1,
+   "hpTo": 0.9,
+   "duration": 27,
+   "bossState": "grounded",
+   "raidSpot": "raidK1",
+   "spots": {
+    "tank": "tank1",
+    "boss": "crystal1",
+    "ranged": "rangedK1",
+    "healer": "healerK1",
+    "melee": "meleeK1"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 9,
+     "jitter": 0.5
+    },
+    {
+     "id": "warStomp",
+     "first": 8,
+     "every": 30,
+     "jitter": 1
+    },
+    {
+     "id": "curseOfTongues",
+     "first": 18,
+     "every": 30,
+     "jitter": 8
+    },
+    {
+     "id": "vortexA0",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB4",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA1",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB5",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA2",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB6",
+     "first": 17.5
+    },
+    {
+     "id": "vortexA3",
+     "first": 21.5
+    },
+    {
+     "id": "vortexB7",
+     "first": 24.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 8,
+     "from": "engage",
+     "role": "tank",
+     "label": "Hold him on the first crystal",
+     "tip": "He comes down the stairs. Take him onto the first crystal and hold him there."
+    },
+    {
+     "id": "noDps",
+     "type": "continuous",
+     "metric": "earlyAttacks",
+     "role": "dps",
+     "label": "No damage during the first weakness",
+     "tip": "Let the tanks build threat. He cannot be Taunted."
+    },
+    {
+     "id": "windsBack1",
+     "type": "afterEvent",
+     "event": "windsSwitch",
+     "check": "hasAggro",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take him back after Enveloping Winds",
+     "tip": "You are stunned for 10 s. When you are free, take him straight back, Sunder and threat."
+    },
+    {
+     "id": "curseGone1",
+     "type": "afterEvent",
+     "event": "curseOfTongues",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Curse of Tongues",
+     "tip": "Remove it from healers and casters first. It adds 75% to every cast."
+    },
+    {
+     "id": "stompHeal1",
+     "type": "continuous",
+     "metric": "stompsTaken",
+     "role": "melee",
+     "label": "Melee: stay topped for War Stomp",
+     "tip": "Stomp is about 2,000 and a knockback within 20 yards every 30 seconds. In melee you cannot avoid it, so keep your health up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Melee and War Stomp are steady. The dangerous bit is the Enveloping Winds gap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay above half: Enveloping Winds takes the tank away for 10 s right when it matters."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Crystal 1: walk to 2",
+   "subtitle": "Same Weakness. Take him to the next crystal.",
+   "hpFrom": 0.9,
+   "hpTo": 0.8333,
+   "duration": 18,
+   "bossState": "grounded",
+   "raidSpot": "raidK2",
+   "spots": {
+    "tank": "tank2",
+    "boss": "crystal2",
+    "ranged": "rangedK2",
+    "healer": "healerK2",
+    "melee": "meleeK2"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 1,
+     "jitter": 0.5
+    },
+    {
+     "id": "vortexA4",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB0",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA5",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB1",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA6",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB2",
+     "first": 17.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "onCrystal2",
+     "type": "bossAtSpot",
+     "spot": "crystal2",
+     "within": 18,
+     "grace": 3,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Have him on Crystal 2 before the Weakness runs out",
+     "tip": "Walk him onto the next crystal while the Weakness is up. If the window lapses he hits for 10,000 or more under Strength."
+    },
+    {
+     "id": "walk2",
+     "type": "playerAtSpotBy",
+     "spot": "tank2",
+     "grace": 2,
+     "role": "tank",
+     "label": "Lead him to the next crystal",
+     "tip": "Walk ahead of him onto the far side of the next crystal and be there when the window ends."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up through the walk: Enveloping Winds can land in the middle of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Move with the raid but keep the tank above half."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Crystal 2: hold",
+   "subtitle": "Fire Weakness up. Burn him.",
+   "hpFrom": 0.8333,
+   "hpTo": 0.7333,
+   "duration": 27,
+   "bossState": "grounded",
+   "raidSpot": "raidK2",
+   "spots": {
+    "tank": "tank2",
+    "boss": "crystal2",
+    "ranged": "rangedK2",
+    "healer": "healerK2",
+    "melee": "meleeK2"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 2,
+     "jitter": 0.5
+    },
+    {
+     "id": "envelopingWinds",
+     "first": 21,
+     "jitter": 0.5
+    },
+    {
+     "id": "warStomp",
+     "first": 19,
+     "every": 30,
+     "jitter": 1
+    },
+    {
+     "id": "curseOfTongues",
+     "first": 18,
+     "every": 30,
+     "jitter": 8
+    },
+    {
+     "id": "vortexA7",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB3",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA0",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB4",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA1",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB5",
+     "first": 17.5
+    },
+    {
+     "id": "vortexA2",
+     "first": 21.5
+    },
+    {
+     "id": "vortexB6",
+     "first": 24.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "windsBack2",
+     "type": "afterEvent",
+     "event": "windsSwitch",
+     "check": "hasAggro",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take him back after Enveloping Winds",
+     "tip": "You are stunned for 10 s. When you are free, take him straight back, Sunder and threat."
+    },
+    {
+     "id": "curseGone2",
+     "type": "afterEvent",
+     "event": "curseOfTongues",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Curse of Tongues",
+     "tip": "Remove it from healers and casters first. It adds 75% to every cast."
+    },
+    {
+     "id": "stompHeal2",
+     "type": "continuous",
+     "metric": "stompsTaken",
+     "role": "melee",
+     "label": "Melee: stay topped for War Stomp",
+     "tip": "Stomp is about 2,000 and a knockback within 20 yards every 30 seconds. In melee you cannot avoid it, so keep your health up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Melee and War Stomp are steady. The dangerous bit is the Enveloping Winds gap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay above half: Enveloping Winds takes the tank away for 10 s right when it matters."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Crystal 2: walk to 3",
+   "subtitle": "Same Weakness. Move him now, not after it ends.",
+   "hpFrom": 0.7333,
+   "hpTo": 0.6667,
+   "duration": 18,
+   "bossState": "grounded",
+   "raidSpot": "raidK3",
+   "spots": {
+    "tank": "tank3",
+    "boss": "crystal3",
+    "ranged": "rangedK3",
+    "healer": "healerK3",
+    "melee": "meleeK3"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 13,
+     "jitter": 0.5
+    },
+    {
+     "id": "vortexA3",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB7",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA4",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB0",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA5",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB1",
+     "first": 17.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "onCrystal3",
+     "type": "bossAtSpot",
+     "spot": "crystal3",
+     "within": 18,
+     "grace": 3,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Have him on Crystal 3 before the Weakness runs out",
+     "tip": "Walk him onto the next crystal while the Weakness is up. If the window lapses he hits for 10,000 or more under Strength."
+    },
+    {
+     "id": "walk3",
+     "type": "playerAtSpotBy",
+     "spot": "tank3",
+     "grace": 2,
+     "role": "tank",
+     "label": "Lead him to the next crystal",
+     "tip": "Walk ahead of him onto the far side of the next crystal and be there when the window ends."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up through the walk: Enveloping Winds can land in the middle of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Move with the raid but keep the tank above half."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Crystal 3: hold",
+   "subtitle": "Frost Weakness up. Burn him.",
+   "hpFrom": 0.6667,
+   "hpTo": 0.5667,
+   "duration": 27,
+   "bossState": "grounded",
+   "raidSpot": "raidK3",
+   "spots": {
+    "tank": "tank3",
+    "boss": "crystal3",
+    "ranged": "rangedK3",
+    "healer": "healerK3",
+    "melee": "meleeK3"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 14,
+     "jitter": 0.5
+    },
+    {
+     "id": "warStomp",
+     "first": 13,
+     "every": 30,
+     "jitter": 1
+    },
+    {
+     "id": "curseOfTongues",
+     "first": 18,
+     "every": 30,
+     "jitter": 8
+    },
+    {
+     "id": "vortexA6",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB2",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA7",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB3",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA0",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB4",
+     "first": 17.5
+    },
+    {
+     "id": "vortexA1",
+     "first": 21.5
+    },
+    {
+     "id": "vortexB5",
+     "first": 24.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "windsBack3",
+     "type": "afterEvent",
+     "event": "windsSwitch",
+     "check": "hasAggro",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take him back after Enveloping Winds",
+     "tip": "You are stunned for 10 s. When you are free, take him straight back, Sunder and threat."
+    },
+    {
+     "id": "curseGone3",
+     "type": "afterEvent",
+     "event": "curseOfTongues",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Curse of Tongues",
+     "tip": "Remove it from healers and casters first. It adds 75% to every cast."
+    },
+    {
+     "id": "stompHeal3",
+     "type": "continuous",
+     "metric": "stompsTaken",
+     "role": "melee",
+     "label": "Melee: stay topped for War Stomp",
+     "tip": "Stomp is about 2,000 and a knockback within 20 yards every 30 seconds. In melee you cannot avoid it, so keep your health up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Melee and War Stomp are steady. The dangerous bit is the Enveloping Winds gap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay above half: Enveloping Winds takes the tank away for 10 s right when it matters."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Crystal 3: walk to 4",
+   "subtitle": "Same Weakness. Move him now, not after it ends.",
+   "hpFrom": 0.5667,
+   "hpTo": 0.5,
+   "duration": 18,
+   "bossState": "grounded",
+   "raidSpot": "raidK4",
+   "spots": {
+    "tank": "tank4",
+    "boss": "crystal4",
+    "ranged": "rangedK4",
+    "healer": "healerK4",
+    "melee": "meleeK4"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 6,
+     "jitter": 0.5
+    },
+    {
+     "id": "vortexA2",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB6",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA3",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB7",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA4",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB0",
+     "first": 17.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "onCrystal4",
+     "type": "bossAtSpot",
+     "spot": "crystal4",
+     "within": 18,
+     "grace": 3,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Have him on Crystal 4 before the Weakness runs out",
+     "tip": "Walk him onto the next crystal while the Weakness is up. If the window lapses he hits for 10,000 or more under Strength."
+    },
+    {
+     "id": "walk4",
+     "type": "playerAtSpotBy",
+     "spot": "tank4",
+     "grace": 2,
+     "role": "tank",
+     "label": "Lead him to the next crystal",
+     "tip": "Walk ahead of him onto the far side of the next crystal and be there when the window ends."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up through the walk: Enveloping Winds can land in the middle of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Move with the raid but keep the tank above half."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Crystal 4: hold",
+   "subtitle": "Nature Weakness up. Burn him.",
+   "hpFrom": 0.5,
+   "hpTo": 0.4,
+   "duration": 27,
+   "bossState": "grounded",
+   "raidSpot": "raidK4",
+   "spots": {
+    "tank": "tank4",
+    "boss": "crystal4",
+    "ranged": "rangedK4",
+    "healer": "healerK4",
+    "melee": "meleeK4"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 7,
+     "jitter": 0.5
+    },
+    {
+     "id": "envelopingWinds",
+     "first": 26,
+     "jitter": 0.5
+    },
+    {
+     "id": "warStomp",
+     "first": 24,
+     "every": 30,
+     "jitter": 1
+    },
+    {
+     "id": "curseOfTongues",
+     "first": 18,
+     "every": 30,
+     "jitter": 8
+    },
+    {
+     "id": "vortexA5",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB1",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA6",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB2",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA7",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB3",
+     "first": 17.5
+    },
+    {
+     "id": "vortexA0",
+     "first": 21.5
+    },
+    {
+     "id": "vortexB4",
+     "first": 24.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "windsBack4",
+     "type": "afterEvent",
+     "event": "windsSwitch",
+     "check": "hasAggro",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take him back after Enveloping Winds",
+     "tip": "You are stunned for 10 s. When you are free, take him straight back, Sunder and threat."
+    },
+    {
+     "id": "curseGone4",
+     "type": "afterEvent",
+     "event": "curseOfTongues",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Curse of Tongues",
+     "tip": "Remove it from healers and casters first. It adds 75% to every cast."
+    },
+    {
+     "id": "stompHeal4",
+     "type": "continuous",
+     "metric": "stompsTaken",
+     "role": "melee",
+     "label": "Melee: stay topped for War Stomp",
+     "tip": "Stomp is about 2,000 and a knockback within 20 yards every 30 seconds. In melee you cannot avoid it, so keep your health up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Melee and War Stomp are steady. The dangerous bit is the Enveloping Winds gap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay above half: Enveloping Winds takes the tank away for 10 s right when it matters."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Crystal 4: walk to 5",
+   "subtitle": "Same Weakness. Move him now, not after it ends.",
+   "hpFrom": 0.4,
+   "hpTo": 0.3333,
+   "duration": 18,
+   "bossState": "grounded",
+   "raidSpot": "raidK5",
+   "spots": {
+    "tank": "tank5",
+    "boss": "crystal5",
+    "ranged": "rangedK5",
+    "healer": "healerK5",
+    "melee": "meleeK5"
+   },
+   "actions": [
+    {
+     "id": "vortexA1",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB5",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA2",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB6",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA3",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB7",
+     "first": 17.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "onCrystal5",
+     "type": "bossAtSpot",
+     "spot": "crystal5",
+     "within": 18,
+     "grace": 3,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Have him on Crystal 5 before the Weakness runs out",
+     "tip": "Walk him onto the next crystal while the Weakness is up. If the window lapses he hits for 10,000 or more under Strength."
+    },
+    {
+     "id": "walk5",
+     "type": "playerAtSpotBy",
+     "spot": "tank5",
+     "grace": 2,
+     "role": "tank",
+     "label": "Lead him to the next crystal",
+     "tip": "Walk ahead of him onto the far side of the next crystal and be there when the window ends."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up through the walk: Enveloping Winds can land in the middle of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Move with the raid but keep the tank above half."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Crystal 5: hold",
+   "subtitle": "Shadow Weakness up. Burn him.",
+   "hpFrom": 0.3333,
+   "hpTo": 0.2333,
+   "duration": 27,
+   "bossState": "grounded",
+   "raidSpot": "raidK5",
+   "spots": {
+    "tank": "tank5",
+    "boss": "crystal5",
+    "ranged": "rangedK5",
+    "healer": "healerK5",
+    "melee": "meleeK5"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 0,
+     "jitter": 0.5
+    },
+    {
+     "id": "envelopingWinds",
+     "first": 19,
+     "jitter": 0.5
+    },
+    {
+     "id": "warStomp",
+     "first": 17,
+     "every": 30,
+     "jitter": 1
+    },
+    {
+     "id": "curseOfTongues",
+     "first": 18,
+     "every": 30,
+     "jitter": 8
+    },
+    {
+     "id": "vortexA4",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB0",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA5",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB1",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA6",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB2",
+     "first": 17.5
+    },
+    {
+     "id": "vortexA7",
+     "first": 21.5
+    },
+    {
+     "id": "vortexB3",
+     "first": 24.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "windsBack5",
+     "type": "afterEvent",
+     "event": "windsSwitch",
+     "check": "hasAggro",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take him back after Enveloping Winds",
+     "tip": "You are stunned for 10 s. When you are free, take him straight back, Sunder and threat."
+    },
+    {
+     "id": "curseGone5",
+     "type": "afterEvent",
+     "event": "curseOfTongues",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Curse of Tongues",
+     "tip": "Remove it from healers and casters first. It adds 75% to every cast."
+    },
+    {
+     "id": "stompHeal5",
+     "type": "continuous",
+     "metric": "stompsTaken",
+     "role": "melee",
+     "label": "Melee: stay topped for War Stomp",
+     "tip": "Stomp is about 2,000 and a knockback within 20 yards every 30 seconds. In melee you cannot avoid it, so keep your health up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Melee and War Stomp are steady. The dangerous bit is the Enveloping Winds gap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay above half: Enveloping Winds takes the tank away for 10 s right when it matters."
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Crystal 5: walk to 6",
+   "subtitle": "Same Weakness. Move him now, not after it ends.",
+   "hpFrom": 0.2333,
+   "hpTo": 0.1667,
+   "duration": 18,
+   "bossState": "grounded",
+   "raidSpot": "raidK6",
+   "spots": {
+    "tank": "tank6",
+    "boss": "crystal6",
+    "ranged": "rangedK6",
+    "healer": "healerK6",
+    "melee": "meleeK6"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 11,
+     "jitter": 0.5
+    },
+    {
+     "id": "vortexA0",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB4",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA1",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB5",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA2",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB6",
+     "first": 17.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "onCrystal6",
+     "type": "bossAtSpot",
+     "spot": "crystal6",
+     "within": 18,
+     "grace": 3,
+     "from": "phaseStart",
+     "role": "tank",
+     "label": "Have him on Crystal 6 before the Weakness runs out",
+     "tip": "Walk him onto the next crystal while the Weakness is up. If the window lapses he hits for 10,000 or more under Strength."
+    },
+    {
+     "id": "walk6",
+     "type": "playerAtSpotBy",
+     "spot": "tank6",
+     "grace": 2,
+     "role": "tank",
+     "label": "Lead him to the next crystal",
+     "tip": "Walk ahead of him onto the far side of the next crystal and be there when the window ends."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up through the walk: Enveloping Winds can land in the middle of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Move with the raid but keep the tank above half."
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "name": "Crystal 6: last Weakness",
+   "subtitle": "Fire Weakness up. Burn him.",
+   "hpFrom": 0.1667,
+   "hpTo": 0,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidK6",
+   "spots": {
+    "tank": "tank6",
+    "boss": "crystal6",
+    "ranged": "rangedK6",
+    "healer": "healerK6",
+    "melee": "meleeK6"
+   },
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 12,
+     "jitter": 0.5
+    },
+    {
+     "id": "envelopingWinds",
+     "first": 31,
+     "jitter": 0.5
+    },
+    {
+     "id": "warStomp",
+     "first": 29,
+     "every": 30,
+     "jitter": 1
+    },
+    {
+     "id": "curseOfTongues",
+     "first": 18,
+     "every": 30,
+     "jitter": 8
+    },
+    {
+     "id": "vortexA3",
+     "first": 0.5
+    },
+    {
+     "id": "vortexB7",
+     "first": 3.5
+    },
+    {
+     "id": "vortexA4",
+     "first": 7.5
+    },
+    {
+     "id": "vortexB0",
+     "first": 10.5
+    },
+    {
+     "id": "vortexA5",
+     "first": 14.5
+    },
+    {
+     "id": "vortexB1",
+     "first": 17.5
+    },
+    {
+     "id": "vortexA6",
+     "first": 21.5
+    },
+    {
+     "id": "vortexB2",
+     "first": 24.5
+    },
+    {
+     "id": "vortexA7",
+     "first": 28.5
+    },
+    {
+     "id": "vortexB3",
+     "first": 31.5
+    },
+    {
+     "id": "vortexA0",
+     "first": 35.5
+    },
+    {
+     "id": "vortexB4",
+     "first": 38.5
+    },
+    {
+     "id": "vortexA1",
+     "first": 42.5
+    },
+    {
+     "id": "vortexB5",
+     "first": 45.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "windsBack6",
+     "type": "afterEvent",
+     "event": "windsSwitch",
+     "check": "hasAggro",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Take him back after Enveloping Winds",
+     "tip": "You are stunned for 10 s. When you are free, take him straight back, Sunder and threat."
+    },
+    {
+     "id": "curseGone6",
+     "type": "afterEvent",
+     "event": "curseOfTongues",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Curse of Tongues",
+     "tip": "Remove it from healers and casters first. It adds 75% to every cast."
+    },
+    {
+     "id": "stompHeal6",
+     "type": "continuous",
+     "metric": "stompsTaken",
+     "role": "melee",
+     "label": "Melee: stay topped for War Stomp",
+     "tip": "Stomp is about 2,000 and a knockback within 20 yards every 30 seconds. In melee you cannot avoid it, so keep your health up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Melee and War Stomp are steady. The dangerous bit is the Enveloping Winds gap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay above half: Enveloping Winds takes the tank away for 10 s right when it matters."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the first weakness had ended",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "No damage during the first weakness: the tanks need that time."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with Curse of Tongues up",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 25,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "tip": "Decurse healers and casters first, instantly."
+  },
+  "stompsTaken": {
+   "label": "War Stomps taken",
+   "unit": "count",
+   "info": true,
+   "roles": "melee",
+   "tip": "In melee you take it. Keep your health up."
+  },
+  "castInVortex": {
+   "label": "Pressed while caught in a Sand Vortex",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "tip": "A Sand Vortex silences you. Get out and press nothing until it ends."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Taunt him back after Winds; decurse Curse of Tongues.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 13,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Ossirian turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   },
+   {
+    "id": "decurseRanged",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "ranged",
+    "short": "DECURSE",
+    "label": "Decurse Curse of Tongues",
+    "tip": "Remove the curse from healers and casters first."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "lapseDrill",
+   "name": "When a window lapses",
+   "description": "You let the window lapse: Strength is back, stay out of his melee until the next Weakness.",
+   "roles": "tanks",
+   "startPhase": 3,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "strength",
+     "first": 4,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "kiteDrill",
+   "name": "Crystal to crystal",
+   "description": "Walk him from crystal to crystal inside the Weakness. Enveloping Winds stuns you for 10 s and War Stomp throws you: take him back and have him on the next crystal before the window ends.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "envelopingWinds",
+     "first": 8,
+     "every": 16
+    },
+    {
+     "id": "warStomp",
+     "first": 12,
+     "every": 20
+    }
+   ]
+  },
+  {
+   "id": "vortexDrill",
+   "name": "Dodging the Sand Vortex",
+   "description": "Tornadoes step around the terrace. Keep clear of them while you attack.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "vortexA0",
+     "first": 2,
+     "every": 7
+    },
+    {
+     "id": "vortexA1",
+     "first": 6,
+     "every": 7
+    },
+    {
+     "id": "warStomp",
+     "first": 8,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "curseDrill",
+   "name": "Curse of Tongues",
+   "description": "Decurse every 8 s. Healers and casters first.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "curseOfTongues",
+     "first": 3,
+     "every": 8
+    }
+   ]
+  }
+ ]
+}

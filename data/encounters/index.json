@@ -224,7 +224,44 @@
       "id": "ruins-of-ahnqiraj",
       "name": "Ruins of Ahn'Qiraj",
       "size": 20,
-      "bosses": []
+      "bosses": [
+        {
+          "id": "kurinnaxx",
+          "name": "Kurinnaxx",
+          "file": "kurinnaxx.json",
+          "status": "ready"
+        },
+        {
+          "id": "general-rajaxx",
+          "name": "General Rajaxx",
+          "file": "general-rajaxx.json",
+          "status": "ready"
+        },
+        {
+          "id": "moam",
+          "name": "Moam",
+          "file": "moam.json",
+          "status": "ready"
+        },
+        {
+          "id": "buru",
+          "name": "Buru the Gorger",
+          "file": "buru.json",
+          "status": "ready"
+        },
+        {
+          "id": "ayamiss",
+          "name": "Ayamiss the Hunter",
+          "file": "ayamiss.json",
+          "status": "ready"
+        },
+        {
+          "id": "ossirian",
+          "name": "Ossirian the Unscarred",
+          "file": "ossirian.json",
+          "status": "ready"
+        }
+      ]
     },
     {
       "id": "temple-of-ahnqiraj",

@@ -1,0 +1,1497 @@
+{
+ "id": "ayamiss",
+ "name": "Ayamiss the Hunter",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "ruins-of-ahnqiraj",
+  "name": "Ruins of Ahn'Qiraj",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/ruins-of-ahnqiraj/ayamiss.md (no Era HP; SoM 1,149,195 only, ignored because the boss's HP is a clock). ESTIMATES: the Comb is a 42 yd round room with the altar on the north side; the fight is 250 s (research: 6-10 minutes in ZG/MC gear, no log; compressed so it reads as a drill), 100% to 70% in the air (100 s), 70% to 20% on the ground (110 s), then Frenzy at 20% (40 s, emulators only per the open question). She flies with the engine's `airborne` state (the format doc says Onyxia only; the engine handles it for any boss). Boss melee (700 per 2 s, placeholder) is scaled so a 10,000 HP tank lives on the raid's passive healing and dies if a player healer ignores it (`healPerSecondWithPlayerHealer` 120 in phase 1 against Poison Stinger on the raid's caster tank, 120 against her melee on the ground). Frenzy is `enrage` (+60%). Thrash is folded into melee; Lash (5-8 s after landing, then 8-15 s) is a `knockback` of 0 yd with a 2 s stun that also interrupts your swings (the real disarm is not modelled). PHASE 1. She can be shot in the air (`boss.attackableInAir`), as in the real fight, so ranged DPS her and kill larvae and swarmers first; her HP still falls on the phase clock, so your attacks do not change it. Melee stand at the altar base, 7 yd from her edge and so out of their 5 yd reach, and work the larvae and swarm (`attackableInAir` has no role filter, so a melee player standing directly under her could also hit her). Poison Stinger is two debuffs because the engine cannot retarget by threat: `poisonStingerTank` lands on the 'ghost tank' (the raid's caster tank) on a 3 s cadence, stacking to 12 (25 Nature per stack per second, the research's number) so the healer has someone to keep alive; `poisonStingerYou` lands on the ranged player (`playerChance` 0.35) on a 5 s cadence, real 25 per stack, stacks to 20 and `shelterAt` 6 walks you to the back row until the stacks fall (`safeSpots` the back-row spot). In the real fight Poison Stinger goes to the top-threat target and the answer is to stop attacking and drop off top threat (TenTonHammer: alternate 100%/50% DPS for 10 s; wiki: keep stacks under 20); walking does nothing to threat, and the walk to the back row only stands for dropping off top threat, because bosses here cannot retarget by threat for an arbitrary aura. This is the fight's main approximation. UNVERIFIED: the spell also has a 2 s cast and an 875 Nature hit (Wowhead 25748), but guides describe only the 25 per second ticking, so neither is modelled. Stinger Spray is an `aoe`, 1,000 raid-wide, 24 s cadence (guides ~30 s, emulators 15-20 s). A hit counts as Nature but Nature Resistance is not modelled. Paralyze teleports a random player to the altar in the real fight and stuns them 10 s. Here it is a `debuff` with `stun: 10` (the teleport is missing) plus one `killFirst` Larva add from a side spot (left or right, one per Paralyze: the wiki and emulators; Wowhead's NPC page says two). The race itself (Larva reaching the altar kills the player and spawns a Hornet) cannot be modelled: adds cannot kill anyone in this engine and nothing links a Larva's life to the stun. Press-cued killing of the larva and `attacksOffPriority` while it lives (in phase 2) are the only teaching here. Larva speed (walk per CMaNGOS versus 'very fast' per wiki) is a placeholder 4 yd/s, lifetime 12 s. The Hornet/Buzzer is not modelled. Swarmers are killable adds that pick targets and die to a player's Attack; their 60-per-hit damage cannot be modelled (adds deal no damage in this engine) and the real swarm count (20-28 gathering to descend together) is compressed to a wave of 6 every 30 s. She is immune to Taunt in the real fight; the Taunt button at landing stands for building threat before anyone attacks. Tank and melee have little to do in the air, which is true to the fight; a second tank for Paralyze cover is not modelled. UNVERIFIED: the real room layout (no map or coordinates: altar side and distances are estimates).",
+ "sources": [
+  "docs/research/ruins-of-ahnqiraj/ayamiss.md",
+  "https://warcraft.wiki.gg/wiki/Ayamiss_the_Hunter",
+  "https://warcraft.wiki.gg/wiki/Hive%27Zara_Larva",
+  "https://www.wowhead.com/classic/guide/ayamiss-the-hunter-ruins-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/ruins-of-ahnqiraj-aq20/",
+  "https://www.tentonhammer.com/guides/tentonhammers-guide-to-the-ruins-of-ahn-qiraj-section-2-5",
+  "https://us.millenium.gg/guide/6975.html?page=3",
+  "https://wotlkdb.com/?spell=25749",
+  "https://wotlkdb.com/?spell=25748",
+  "https://wotlkdb.com/?spell=25725",
+  "https://wotlkdb.com/?spell=25721",
+  "https://wotlkdb.com/?spell=25852",
+  "https://github.com/azerothcore/azerothcore-wotlk/blob/master/src/server/scripts/Kalimdor/RuinsOfAhnQiraj/boss_ayamiss.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/kalimdor/ruins_of_ahnqiraj/boss_ayamiss.cpp"
+ ],
+ "arena": {
+  "name": "The Comb",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      42,
+      0
+     ],
+     [
+      41.4,
+      7.3
+     ],
+     [
+      39.5,
+      14.4
+     ],
+     [
+      36.4,
+      21
+     ],
+     [
+      32.2,
+      27
+     ],
+     [
+      27,
+      32.2
+     ],
+     [
+      21,
+      36.4
+     ],
+     [
+      14.4,
+      39.5
+     ],
+     [
+      7.3,
+      41.4
+     ],
+     [
+      0,
+      42
+     ],
+     [
+      -7.3,
+      41.4
+     ],
+     [
+      -14.4,
+      39.5
+     ],
+     [
+      -21,
+      36.4
+     ],
+     [
+      -27,
+      32.2
+     ],
+     [
+      -32.2,
+      27
+     ],
+     [
+      -36.4,
+      21
+     ],
+     [
+      -39.5,
+      14.4
+     ],
+     [
+      -41.4,
+      7.3
+     ],
+     [
+      -42,
+      0
+     ],
+     [
+      -41.4,
+      -7.3
+     ],
+     [
+      -39.5,
+      -14.4
+     ],
+     [
+      -36.4,
+      -21
+     ],
+     [
+      -32.2,
+      -27
+     ],
+     [
+      -27,
+      -32.2
+     ],
+     [
+      -21,
+      -36.4
+     ],
+     [
+      -14.4,
+      -39.5
+     ],
+     [
+      -7.3,
+      -41.4
+     ],
+     [
+      0,
+      -42
+     ],
+     [
+      7.3,
+      -41.4
+     ],
+     [
+      14.4,
+      -39.5
+     ],
+     [
+      21,
+      -36.4
+     ],
+     [
+      27,
+      -32.2
+     ],
+     [
+      32.2,
+      -27
+     ],
+     [
+      36.4,
+      -21
+     ],
+     [
+      39.5,
+      -14.4
+     ],
+     [
+      41.4,
+      -7.3
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -38
+     ],
+     [
+      9,
+      -38
+     ],
+     [
+      9,
+      -62
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -41
+     ],
+     [
+      18.6,
+      -37.6
+     ],
+     [
+      27.2,
+      -32
+     ],
+     [
+      34.1,
+      -24.5
+     ],
+     [
+      39,
+      -15.6
+     ],
+     [
+      41.6,
+      -5.7
+     ],
+     [
+      41.8,
+      4.5
+     ],
+     [
+      39.4,
+      14.5
+     ],
+     [
+      34.8,
+      23.6
+     ],
+     [
+      28.1,
+      31.3
+     ],
+     [
+      19.7,
+      37.1
+     ],
+     [
+      10.1,
+      40.8
+     ],
+     [
+      0,
+      42
+     ],
+     [
+      -10.1,
+      40.8
+     ],
+     [
+      -19.7,
+      37.1
+     ],
+     [
+      -28.1,
+      31.3
+     ],
+     [
+      -34.8,
+      23.6
+     ],
+     [
+      -39.4,
+      14.5
+     ],
+     [
+      -41.8,
+      4.5
+     ],
+     [
+      -41.6,
+      -5.7
+     ],
+     [
+      -39,
+      -15.6
+     ],
+     [
+      -34.1,
+      -24.5
+     ],
+     [
+      -27.2,
+      -32
+     ],
+     [
+      -18.6,
+      -37.6
+     ],
+     [
+      -9,
+      -41
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -41
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -41
+     ],
+     [
+      9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "The altar",
+    "at": [
+     0,
+     24
+    ]
+   },
+   {
+    "text": "Back row: the sim's threat-drop spot",
+    "at": [
+     -10,
+     -24
+    ]
+   },
+   {
+    "text": "Larva spawn, left",
+    "at": [
+     -13,
+     10
+    ]
+   },
+   {
+    "text": "Larva spawn, right",
+    "at": [
+     13,
+     10
+    ]
+   },
+   {
+    "text": "Swarm comes down here",
+    "at": [
+     0,
+     -6
+    ]
+   }
+  ]
+ },
+ "hoverHeight": 14,
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -58,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 24,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 7
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 32,
+   "tolerance": 4,
+   "label": "Tank, on the altar"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 24,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 60,
+   "label": "Ayamiss, on the altar"
+  },
+  "pickupSpot": {
+   "x": 0,
+   "y": 8,
+   "tolerance": 5,
+   "label": "Tank, at the altar base"
+  },
+  "hoverIdle": {
+   "x": 0,
+   "y": 24
+  },
+  "landSpot": {
+   "x": 0,
+   "y": 24,
+   "heading": 270
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -14,
+   "spread": 12,
+   "label": "Raid, at range"
+  },
+  "raidSpotLand": {
+   "x": 0,
+   "y": -2,
+   "spread": 12,
+   "label": "Raid"
+  },
+  "rangedSpot": {
+   "x": -8,
+   "y": -9,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerSpot": {
+   "x": 8,
+   "y": -10,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "rangedLand": {
+   "x": -8,
+   "y": 2,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerLand": {
+   "x": 8,
+   "y": 4,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "altarBase": {
+   "x": 0,
+   "y": 12,
+   "tolerance": 8,
+   "label": "Melee, at the altar base"
+  },
+  "larvaL": {
+   "x": -13,
+   "y": 12,
+   "label": "Larva spawn"
+  },
+  "larvaR": {
+   "x": 13,
+   "y": 12,
+   "label": "Larva spawn"
+  },
+  "larvaAltar": {
+   "x": 0,
+   "y": 24,
+   "label": "Altar"
+  },
+  "stingerBack": {
+   "x": -10,
+   "y": -26,
+   "tolerance": 8,
+   "label": "Back row"
+  },
+  "swarmN1": {
+   "x": -8,
+   "y": 18,
+   "label": "Swarm"
+  },
+  "swarmN2": {
+   "x": 8,
+   "y": 18,
+   "label": "Swarm"
+  },
+  "swarmHold": {
+   "x": 0,
+   "y": -4,
+   "label": "Swarm held"
+  },
+  "offtankAir": {
+   "x": 14,
+   "y": -2,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "offtankLand": {
+   "x": 14,
+   "y": 4,
+   "tolerance": 7,
+   "label": "Off-tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 640,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 640,
+  "healPerSecondWithPlayerHealer": 120,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 7,
+  "meleeDamage": 700,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.6,
+  "attackableInAir": true,
+  "takeoffDuration": 2.5,
+  "landingDuration": 2.5,
+  "settleAfterLanding": 1.5,
+  "pickupGrace": 4
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 400,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": true,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Phase 1 she is in the air: wait at the altar base and pick up the swarms when they come down. At 70% she lands with threat wiped: get to her first and hold her on the altar, your back to the mountain side, before anyone else attacks. Lash stuns you for 2 s every 8 to 15 s. She cannot be Taunted in the real fight; the Taunt press stands for grabbing her with threat.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Swarm off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the swarm when it comes down: pick it up and hold it off the raid.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Phase 1: stand at the altar base and kill Larvae before they reach the altar. The Larva is always top priority. Phase 2: on her, but drop everything for a Larva.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Phase 1: shoot her in the air, Larvae and swarmers first. Watch your Poison Stinger stacks: at six stacks, stop attacking to drop off top threat. In the sim, the walk to the back row stands for that. Phase 2: wait for the tank at landing, then burn, Larva first.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Phase 1 the raid's caster tank carries Poison Stinger stacks: keep them alive through it and pre-heal Stinger Spray. Phase 2 the tank takes her melee and Lash. Save mana for Frenzy at 20%.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "poisonStingerTank": {
+   "label": "Poison Stinger",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 10,
+   "tickDamage": 25,
+   "maxStacks": 12,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "airborne",
+   "tip": "A stacking poison on her top-threat target, 25 Nature per second per stack. It cannot be removed: the raid swaps threat before it runs away."
+  },
+  "poisonStingerYou": {
+   "label": "Poison Stinger",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "count": 1,
+   "playerChance": 0.35,
+   "roles": "ranged",
+   "dispel": "none",
+   "duration": 10,
+   "tickDamage": 25,
+   "maxStacks": 20,
+   "shelterAt": 6,
+   "safeSpots": [
+    "stingerBack"
+   ],
+   "safeRadius": 9,
+   "playerMetric": "stingersTaken",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "airborne",
+   "tip": "You are the top threat. 25 Nature a second per stack. At six stacks, stop attacking to drop off top threat. In the sim, the walk to the back row stands for that."
+  },
+  "stingerSpray": {
+   "label": "Stinger Spray",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 1000,
+   "tankDamage": 1000,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "About 1,000 Nature to the whole raid."
+  },
+  "paralyze": {
+   "label": "Paralyze",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "count": 1,
+   "playerChance": 0.28,
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 10,
+   "stun": 10,
+   "follow": [
+    {
+     "id": "larva",
+     "delay": 1
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "any",
+   "tip": "A raider is flown to the altar and stunned for 10 s; a Larva spawns at the base and walks to them."
+  },
+  "larva": {
+   "label": "Hive'Zara Larva",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "larvaL"
+   ],
+   "speed": 4,
+   "aggroRange": 0,
+   "lifetime": 12,
+   "heldLifetime": 12,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "larvaAltar",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "A Larva walks to the altar. Kill it before it reaches the player there."
+  },
+  "larvaR": {
+   "label": "Hive'Zara Larva",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "larvaR"
+   ],
+   "speed": 4,
+   "aggroRange": 0,
+   "lifetime": 12,
+   "heldLifetime": 12,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "larvaAltar",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "A Larva walks to the altar. Kill it before it reaches the player there."
+  },
+  "swarm": {
+   "label": "Swarm",
+   "kind": "adds",
+   "cast": 0,
+   "count": 3,
+   "from": [
+    "swarmN1",
+    "swarmN2"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 14,
+   "heldLifetime": 18,
+   "killable": true,
+   "pickup": [
+    "tanks",
+    "offtank"
+   ],
+   "holdSpot": "swarmHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "Swarmers descend. Tanks pick them up; DPS kill them. They die fast."
+  },
+  "lash": {
+   "label": "Lash",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 0,
+   "knockbackRange": 10,
+   "stun": 2,
+   "damage": 500,
+   "warn": false,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "A 2 second stun and weapon drop on the tank every 8 to 15 seconds."
+  },
+  "frenzy": {
+   "label": "Frenzy",
+   "kind": "enrage",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Frenzy: she hits harder until she dies",
+   "tip": "At 20% she frenzies. Everything on her; healers, everything on the tank."
+  },
+  "takeoff": {
+   "label": "Rising above the altar",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "She rises into the air. Larvae and swarms begin."
+  },
+  "landing": {
+   "label": "Landing: threat wiped",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "At 70% she lands and threat is wiped. Tank first."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "In the air",
+   "subtitle": "100% to 70%",
+   "hpFrom": 1,
+   "hpTo": 0.7,
+   "duration": 100,
+   "bossState": "airborne",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "pickupSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "altarBase",
+    "offtank": "offtankAir"
+   },
+   "actions": [
+    {
+     "id": "poisonStingerTank",
+     "first": 5,
+     "every": 3
+    },
+    {
+     "id": "poisonStingerYou",
+     "first": 8,
+     "every": 5,
+     "jitter": 1
+    },
+    {
+     "id": "stingerSpray",
+     "first": 22,
+     "every": 24,
+     "jitter": 2
+    },
+    {
+     "id": "paralyze",
+     "first": 18,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "swarm",
+     "first": 12,
+     "every": 30,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "swarmPick",
+     "type": "afterEvent",
+     "event": "swarm",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 5,
+     "role": [
+      "tanks",
+      "offtank"
+     ],
+     "label": "Pick up the swarm when it descends",
+     "tip": "They hit soft but in numbers. Hold them on you so the casters can AoE."
+    },
+    {
+     "id": "tankWait",
+     "type": "playerAtSpotBy",
+     "spot": "pickupSpot",
+     "grace": 3,
+     "role": "tank",
+     "label": "Hold at the altar base until she lands",
+     "tip": "Nothing for you to hold yet. Be first when she comes down."
+    },
+    {
+     "id": "stingerStacks",
+     "type": "continuous",
+     "metric": "stingersTaken",
+     "role": "ranged",
+     "label": "Keep Poison Stinger stacks low",
+     "tip": "At six stacks, stop attacking to drop off top threat. In the sim, the walk to the back row stands for that."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Larva before it reaches the altar",
+     "tip": "The Larva is always top priority. A Larva that reaches the altar kills the player there and spawns an elite."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Her Poison Stinger stacks tick hard on the raid's tank. Keep them above water."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not let the stinger target fall behind."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "On the ground",
+   "subtitle": "70% to 20%",
+   "hpFrom": 0.7,
+   "hpTo": 0.2,
+   "duration": 110,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotLand",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedLand",
+    "healer": "healerLand",
+    "offtank": "offtankLand"
+   },
+   "actions": [
+    {
+     "id": "lash",
+     "first": 8,
+     "every": 11,
+     "jitter": 3
+    },
+    {
+     "id": "stingerSpray",
+     "first": 16,
+     "every": 24,
+     "jitter": 2
+    },
+    {
+     "id": "paralyze",
+     "first": 12,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "swarm",
+     "first": 10,
+     "every": 30,
+     "jitter": 3
+    },
+    {
+     "id": "larvaR",
+     "first": 26,
+     "every": 44,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "landGrab",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 12,
+     "grace": 8,
+     "from": "landing",
+     "role": "tank",
+     "label": "Take her on the altar, facing away",
+     "tip": "Be on her first when she lands. Threat is gone, so build yours before the DPS start."
+    },
+    {
+     "id": "landHold",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "hasAggro",
+     "within": 7,
+     "grace": 7,
+     "role": "tank",
+     "label": "Grab her the moment she lands",
+     "tip": "Threat is wiped. Get on her immediately."
+    },
+    {
+     "id": "swarmPick2",
+     "type": "afterEvent",
+     "event": "swarm",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 5,
+     "role": [
+      "tanks",
+      "offtank"
+     ],
+     "label": "Pick up the swarm",
+     "tip": "Hold them on you."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Larva first, always",
+     "tip": "Drop her for the Larva the instant it appears. Attacking her while one lives costs you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Lash and melee are steady; Stinger Spray comes on top."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep the tank above half: Lash stuns them through their cooldowns."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Frenzy",
+   "subtitle": "Burn: 20% to 0",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotLand",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedLand",
+    "healer": "healerLand",
+    "offtank": "offtankLand"
+   },
+   "actions": [
+    {
+     "id": "frenzy",
+     "first": 0.2
+    },
+    {
+     "id": "lash",
+     "first": 6,
+     "every": 11,
+     "jitter": 3
+    },
+    {
+     "id": "stingerSpray",
+     "first": 12,
+     "every": 24,
+     "jitter": 2
+    },
+    {
+     "id": "paralyze",
+     "first": 8,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "larvaR",
+     "first": 11,
+     "every": 44,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "frenzyHold",
+     "type": "afterEvent",
+     "event": "frenzy",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Hold her through Frenzy",
+     "tip": "Do not lose her now. Stay on her."
+    },
+    {
+     "id": "otFrenzy",
+     "type": "playerAtSpotBy",
+     "spot": "offtankLand",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay ready beside the altar",
+     "tip": "Hold the side position and be ready for the next swarm."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Larva first, even in Frenzy",
+     "tip": "Drop her for the Larva the instant it appears."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frenzy. Everything on the tank."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead: at 20% she hits much harder."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.06,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "stingersTaken": {
+   "label": "Poison Stingers on you",
+   "unit": "count",
+   "info": true,
+   "roles": "ranged",
+   "tip": "Walk out at the warning."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt her on landing; pick up the swarm; heal when low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "landingGrab",
+    "ability": "taunt",
+    "on": "event",
+    "event": "landing",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "tank",
+    "short": "GRAB",
+    "label": "Grab her as she lands",
+    "tip": "She lands with threat wiped. Get on her first."
+   },
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when she turns on the raid",
+    "tip": "The moment she turns, Taunt."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half is where tanks die. Heal now."
+   },
+   {
+    "id": "swarmGrab",
+    "ability": "taunt",
+    "on": "event",
+    "event": "swarm",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "SWARM",
+    "label": "Grab the swarm",
+    "tip": "Pick them up as they come down.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "landDrill",
+   "name": "Pick up on landing",
+   "description": "She lands every 20 s: get on her first, threat wiped.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "lash",
+     "first": 4,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "stingerDrill",
+   "name": "Poison Stinger stacks",
+   "description": "A Stinger every 3 s: at six stacks, stop attacking to drop off top threat. In the sim, the walk to the back row stands for that.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "poisonStingerYou",
+     "first": 3,
+     "every": 3
+    },
+    {
+     "id": "stingerSpray",
+     "first": 12,
+     "every": 20
+    }
+   ]
+  },
+  {
+   "id": "larvaDrill",
+   "name": "The larva race",
+   "description": "A Paralyze every 16 s and a Larva after it: kill the Larva first, every time.",
+   "roles": "melee",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "paralyze",
+     "first": 4,
+     "every": 16
+    },
+    {
+     "id": "larvaR",
+     "first": 12,
+     "every": 16
+    },
+    {
+     "id": "swarm",
+     "first": 8,
+     "every": 22
+    }
+   ]
+  },
+  {
+   "id": "swarmDrill",
+   "name": "Pick up the swarm",
+   "description": "A swarm comes down every 18 s. Grab them and hold them.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "swarm",
+     "first": 3,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "stingerHeal",
+   "name": "Stinger stacks and Spray",
+   "description": "Poison Stinger stacks and Stinger Spray every 12 s. Keep the raid's tank alive.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "poisonStingerTank",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "stingerSpray",
+     "first": 6,
+     "every": 12
+    }
+   ]
+  }
+ ]
+}
