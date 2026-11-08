@@ -328,7 +328,7 @@ export function spawnAdds(state, script, actionDef) {
   for (const name of names) {
     const c = script.positions[name];
     // `playerFrom` limits the player to their own spawn point: another group handles the rest.
-    const playerPicks = roleMatches(actionDef.pickup || 'offtank', state.role) && (!actionDef.playerFrom || actionDef.playerFrom.includes(name));
+    const playerPicks = roleMatches(actionDef.pickup || 'offtank', state.role, state.tankRole) && (!actionDef.playerFrom || actionDef.playerFrom.includes(name));
     for (let i = 0; i < (actionDef.count || actionDef.perCave || 1); i++) {
       state.world.whelps.push({
         uid: ++addUid,

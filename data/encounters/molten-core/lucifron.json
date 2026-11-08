@@ -1,0 +1,1260 @@
+{
+ "id": "lucifron",
+ "name": "Lucifron",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/lucifron.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 351,780 HP, two Flamewaker Protectors (90,650 HP each). Fight modelled as two phases: Protectors alive (~60 s) then Lucifron alone (~100 s); a 2-3 minute kill. Impending Doom: 2000 Shadow landing 10 s after application if not dispelled. The engine only has per-second ticks, so it is a 10 s Magic debuff ticking 200/s (2000 total) that the healer removes. Radius: DBC 45 yd vs guides 40 yd; the stack strategy puts everyone inside it, so target is the whole raid (`all`). Lucifron's Curse: +100% power cost cannot be expressed (no resources); it is a Curse debuff (no damage) that the healer must remove. In the real raid Mages and Druids decurse; here the healer's Dispel covers both Magic and Curse. Dispel always takes the oldest debuff, so the priority rules (healers first for Doom, tank first for the curse) are in the tips only. Shadow Shock: single target, 419-485 Shadow on his current target every 3-6 s (Wowhead Classic 19460, cmangos): a one-tick 450 non-dispellable debuff on the tank every 4.5 s. Dominate Mind (Protectors): 2 s cast, 15 s charm, Magic, cast off the boss so he keeps swinging. The engine has no mind control: it is a Magic debuff on 2 random raid members (one per Protector) that fears you for 6 s if you are the victim (an approximation of losing control until a priest dispels you). Interruptibility unknown: not interruptible here. Cadences follow DBM/BigWigs logs: Impending Doom every 21-27 s (every 24, jitter 3), Curse 21-25.9 s (every 23.5, jitter 2.5). `first` values include the walk to the pull. Protectors: killFirst adds, so attacking Lucifron while one lives is scored; the off-tank role holds them (`holdsBoss: false`) on their own spot while a ghost tank has Lucifron. They are present from the pull in reality; here they spawn 12 s in beside the tank spot, and the hold spot sits where ranged can reach them from the raid. Their Cleave cannot be modelled (adds have no abilities or facing). Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Aggro pulls every ~40 s stand in for the curse doubling rage costs and a geared DPS overtaking the tank. Engine gaps: no mind control, debuffs on others are only dispelled when the player is the healer (other roles see them run their course), adds without abilities, no cone on the adds, no line-of-sight pillar logic. Boss melee 350 per 2 s is scaled so a 10,000 HP tank lives on passive healing.",
+ "sources": [
+  "docs/research/molten-core/lucifron.md",
+  "https://warcraft.wiki.gg/wiki/Lucifron",
+  "https://warcraft.wiki.gg/wiki/Flamewaker_Protector",
+  "https://www.wowhead.com/tbc/npc=12118/lucifron",
+  "https://www.wowhead.com/tbc/npc=12119/flamewaker-protector",
+  "https://wotlkdb.com/?spell=19702",
+  "https://wotlkdb.com/?spell=19703",
+  "https://wotlkdb.com/?spell=19460",
+  "https://wotlkdb.com/?spell=20604",
+  "https://wotlkdb.com/?spell=20691",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_lucifron.cpp",
+  "https://www.wowhead.com/classic/guides/lucifron-molten-core-strategy",
+  "https://warcrafttavern.com/wow-classic/guides/raserisks-molten-core-boss-guide-lucifron",
+  "https://www.tentonhammer.com/guides/mc-boss-guide-boss-1-lucifron"
+ ],
+ "arena": {
+  "name": "Lucifron's hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      38,
+      0
+     ],
+     [
+      37.4,
+      6.6
+     ],
+     [
+      35.7,
+      13
+     ],
+     [
+      32.9,
+      19
+     ],
+     [
+      29.1,
+      24.4
+     ],
+     [
+      24.4,
+      29.1
+     ],
+     [
+      19,
+      32.9
+     ],
+     [
+      13,
+      35.7
+     ],
+     [
+      6.6,
+      37.4
+     ],
+     [
+      0,
+      38
+     ],
+     [
+      -6.6,
+      37.4
+     ],
+     [
+      -13,
+      35.7
+     ],
+     [
+      -19,
+      32.9
+     ],
+     [
+      -24.4,
+      29.1
+     ],
+     [
+      -29.1,
+      24.4
+     ],
+     [
+      -32.9,
+      19
+     ],
+     [
+      -35.7,
+      13
+     ],
+     [
+      -37.4,
+      6.6
+     ],
+     [
+      -38,
+      0
+     ],
+     [
+      -37.4,
+      -6.6
+     ],
+     [
+      -35.7,
+      -13
+     ],
+     [
+      -32.9,
+      -19
+     ],
+     [
+      -29.1,
+      -24.4
+     ],
+     [
+      -24.4,
+      -29.1
+     ],
+     [
+      -19,
+      -32.9
+     ],
+     [
+      -13,
+      -35.7
+     ],
+     [
+      -6.6,
+      -37.4
+     ],
+     [
+      0,
+      -38
+     ],
+     [
+      6.6,
+      -37.4
+     ],
+     [
+      13,
+      -35.7
+     ],
+     [
+      19,
+      -32.9
+     ],
+     [
+      24.4,
+      -29.1
+     ],
+     [
+      29.1,
+      -24.4
+     ],
+     [
+      32.9,
+      -19
+     ],
+     [
+      35.7,
+      -13
+     ],
+     [
+      37.4,
+      -6.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -34
+     ],
+     [
+      9,
+      -34
+     ],
+     [
+      9,
+      -60
+     ],
+     [
+      -9,
+      -60
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      9,
+      -36.9
+     ],
+     [
+      17.6,
+      -33.7
+     ],
+     [
+      25.1,
+      -28.5
+     ],
+     [
+      31.2,
+      -21.6
+     ],
+     [
+      35.5,
+      -13.5
+     ],
+     [
+      37.7,
+      -4.6
+     ],
+     [
+      37.7,
+      4.5
+     ],
+     [
+      35.5,
+      13.4
+     ],
+     [
+      31.3,
+      21.6
+     ],
+     [
+      25.2,
+      28.4
+     ],
+     [
+      17.7,
+      33.6
+     ],
+     [
+      9.1,
+      36.9
+     ],
+     [
+      0,
+      38
+     ],
+     [
+      -9.1,
+      36.9
+     ],
+     [
+      -17.7,
+      33.6
+     ],
+     [
+      -25.2,
+      28.4
+     ],
+     [
+      -31.3,
+      21.6
+     ],
+     [
+      -35.5,
+      13.4
+     ],
+     [
+      -37.7,
+      4.5
+     ],
+     [
+      -37.7,
+      -4.6
+     ],
+     [
+      -35.5,
+      -13.5
+     ],
+     [
+      -31.2,
+      -21.6
+     ],
+     [
+      -25.1,
+      -28.5
+     ],
+     [
+      -17.6,
+      -33.7
+     ],
+     [
+      -9,
+      -36.9
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -36.9
+     ],
+     [
+      -9,
+      -60
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -36.9
+     ],
+     [
+      9,
+      -60
+     ]
+    ]
+   },
+   {
+    "id": "pillar",
+    "points": [
+     [
+      -18,
+      20
+     ],
+     [
+      -14,
+      24
+     ],
+     [
+      -18,
+      28
+     ],
+     [
+      -22,
+      24
+     ],
+     [
+      -18,
+      20
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -54
+    ]
+   },
+   {
+    "text": "Pillar",
+    "at": [
+     -22,
+     24
+    ]
+   },
+   {
+    "text": "To Magmadar",
+    "at": [
+     0,
+     34
+    ]
+   },
+   {
+    "text": "Western tunnel (imps): never drag him here",
+    "at": [
+     -30,
+     -6
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -52,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 8,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -40,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 28,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 21,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Lucifron"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -8,
+   "spread": 10
+  },
+  "raidSpotP2": {
+   "x": 0,
+   "y": -8,
+   "spread": 10
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -4,
+   "tolerance": 8,
+   "label": "Ranged (inside the 40 yd stack)"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": 2,
+   "tolerance": 6,
+   "label": "Healers"
+  },
+  "protectorWest": {
+   "x": -10,
+   "y": 32,
+   "label": "Protector"
+  },
+  "protectorEast": {
+   "x": 10,
+   "y": 32,
+   "label": "Protector"
+  },
+  "protectorHoldSpot": {
+   "x": 18,
+   "y": 14,
+   "tolerance": 5,
+   "label": "Protectors held here, facing the wall"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 8.5,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 350,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Take Lucifron away from the Protectors, hold him through aggro pulls and a curse that doubles your rage costs, and keep the raid out of the imp tunnels.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Protector off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the two Flamewaker Protectors, not Lucifron. Grab them as they come in and hold them on your spot so their Cleave and Dominate Mind stay off the raid; the raid kills them on you.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the Protectors first, from behind them (their Cleave is a 180 degree frontal cone), then Lucifron. Keep your threat under the tank.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stack with the raid, kill Protectors then Lucifron, and stop when the threat bar is red. Mages decurse before they DPS.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Dispel Impending Doom inside 10 s and remove the curse (tank first), while keeping the tank alive through Shadow Shock and the Protectors.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. Here one button stands in for Dispel Magic, Cleanse, Remove Curse and Remove Lesser Curse."
+  }
+ },
+ "actions": {
+  "impendingDoom": {
+   "label": "Impending Doom",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "all",
+   "duration": 10,
+   "tickDamage": 200,
+   "warn": true,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Everyone within 40-45 yd gets a 10 s Magic debuff; when it runs out it deals 2000 Shadow (here 200 per second). Priests and Paladins dispel it in time."
+  },
+  "lucifronsCurse": {
+   "label": "Lucifron's Curse",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "curse",
+   "target": "all",
+   "duration": 300,
+   "tickDamage": 0,
+   "warn": true,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Everyone within 40-45 yd: all spells and abilities cost 100% more for 5 minutes. Mages and Druids remove it, tank first."
+  },
+  "shadowShock": {
+   "label": "Shadow Shock",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 1.5,
+   "tickDamage": 450,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "419-485 Shadow on Lucifron's current target every 3-6 s. Tank healing, nothing to dodge."
+  },
+  "dominateMind": {
+   "label": "Dominate Mind",
+   "kind": "debuff",
+   "cast": 2,
+   "offBoss": true,
+   "dispel": "magic",
+   "target": "random",
+   "count": 2,
+   "duration": 15,
+   "tickDamage": 0,
+   "fear": 6,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Each Protector mind-controls one player within 20 yd for 15 s (2 s cast). Here you lose control for 6 s if it picks you; priests and paladins dispel it."
+  },
+  "protectors": {
+   "label": "Flamewaker Protectors",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "protectorWest",
+    "protectorEast"
+   ],
+   "speed": 5,
+   "aggroRange": 13,
+   "lifetime": 46,
+   "heldLifetime": 46,
+   "pickup": "offtank",
+   "holdSpot": "protectorHoldSpot",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Both Protectors come in with Lucifron. The off-tank picks them up and faces them away from the raid; everyone else kills them before touching Lucifron."
+  },
+  "aggroPull": {
+   "label": "Aggro pull",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "conditional": "onPlayer",
+   "tip": "A cursed tank builds threat slowly and someone overtakes them."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Phase 1",
+   "subtitle": "Protectors alive",
+   "hpFrom": 1,
+   "hpTo": 0.78,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "protectorHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "protectors",
+     "first": 12
+    },
+    {
+     "id": "shadowShock",
+     "first": 12,
+     "every": 4.5,
+     "jitter": 1.5
+    },
+    {
+     "id": "impendingDoom",
+     "first": 14,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "lucifronsCurse",
+     "first": 18,
+     "every": 23.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "dominateMind",
+     "first": 20,
+     "every": 15,
+     "jitter": 2
+    },
+    {
+     "id": "aggroPull",
+     "first": 42,
+     "every": 40,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull Lucifron to the tank spot",
+     "tip": "Taunt him and walk him north to the tank spot, away from where the Protectors are pulled and away from both tunnels."
+    },
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "The curse doubles your rage costs, so your threat drops. The moment he turns, Taunt."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Protectors before Lucifron",
+     "tip": "Turn to face a Protector and kill it. Every attack on Lucifron while one lives is wasted."
+    },
+    {
+     "id": "protectors",
+     "type": "afterEvent",
+     "event": "protectors",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up both Protectors",
+     "tip": "The Protectors come in beside Lucifron. Taunt or run into them before they walk into the raid, then face them away from everyone."
+    },
+    {
+     "id": "protectorsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the Protectors off the raid",
+     "tip": "A Protector in the raid means Cleaves and mind controls on healers. Hold them on your spot."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "doomDispel",
+     "type": "afterEvent",
+     "event": "impendingDoom",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 2,
+     "role": "healer",
+     "label": "Dispel Impending Doom inside 10 s",
+     "tip": "Impending Doom is a 10 s fuse. Dispel it well before it goes off: healers first, then tanks, then the rest."
+    },
+    {
+     "id": "curseDispel",
+     "type": "afterEvent",
+     "event": "lucifronsCurse",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 6,
+     "role": "healer",
+     "label": "Remove the curse, tank first",
+     "tip": "A cursed tank pays double rage. Decurse them first, then the healers."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Shock and the Protectors chew on the tanks. Keep heals rolling and never let the tank sit under half."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Phase 2",
+   "subtitle": "Lucifron alone",
+   "hpFrom": 0.78,
+   "hpTo": 0,
+   "duration": 100,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "shadowShock",
+     "first": 3,
+     "every": 4.5,
+     "jitter": 1.5
+    },
+    {
+     "id": "impendingDoom",
+     "first": 8,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "lucifronsCurse",
+     "first": 15,
+     "every": 23.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "aggroPull",
+     "first": 30,
+     "every": 40,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "Tank and spank now, but the curse still halves your threat. Taunt the moment he turns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "doomDispel",
+     "type": "afterEvent",
+     "event": "impendingDoom",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 2,
+     "role": "healer",
+     "label": "Dispel Impending Doom inside 10 s",
+     "tip": "Still a 10 s fuse. Dispel it before it lands."
+    },
+    {
+     "id": "curseDispel",
+     "type": "afterEvent",
+     "event": "lucifronsCurse",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 6,
+     "role": "healer",
+     "label": "Remove the curse, tank first",
+     "tip": "Tank first, then healers, then DPS."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Shock keeps landing on the tank. Keep the tank above half."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.6,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands. Tanks first."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Press notes in the lane above the ability bar: Taunt when he turns, Taunt or grab the Protectors, Dispel when a debuff lands, Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Lucifron turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "tauntProtectors",
+    "ability": "taunt",
+    "on": "event",
+    "event": "protectors",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "PROTECTORS",
+    "label": "Pick up the Protectors",
+    "tip": "Taunt one or run into both as they arrive, before they reach a healer.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Impending Doom: healers first, then tanks. Curse: tank first."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "pullLucifron",
+   "name": "Pull and hold",
+   "description": "Pull Lucifron to the tank spot and hold him through the aggro pulls while Shadow Shock lands on you.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "shadowShock",
+     "first": 12,
+     "every": 4.5,
+     "jitter": 1
+    },
+    {
+     "id": "aggroPull",
+     "first": 25,
+     "every": 15,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "protectorPickup",
+   "name": "Protector pickup",
+   "description": "Grab both Protectors as they arrive and hold them on your spot, off the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "protectors",
+     "first": 3,
+     "every": 25
+    }
+   ]
+  },
+  {
+   "id": "threatDps",
+   "name": "Threat discipline",
+   "description": "Already on him. Attack on every global but stop when the bar goes red; aggro pulls keep coming.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "shadowShock",
+     "first": 3,
+     "every": 4.5,
+     "jitter": 1
+    },
+    {
+     "id": "aggroPull",
+     "first": 10,
+     "every": 15,
+     "jitter": 2
+    },
+    {
+     "id": "lucifronsCurse",
+     "first": 6,
+     "every": 20
+    }
+   ]
+  },
+  {
+   "id": "dispelRace",
+   "name": "Doom and curse dispels",
+   "description": "Already on him. Impending Doom every 12 s and the curse every 15 s: dispel everything inside the fuse while Shadow Shock lands on the tank.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "impendingDoom",
+     "first": 4,
+     "every": 12
+    },
+    {
+     "id": "lucifronsCurse",
+     "first": 9,
+     "every": 15
+    },
+    {
+     "id": "shadowShock",
+     "first": 3,
+     "every": 4.5,
+     "jitter": 1
+    }
+   ]
+  }
+ ]
+}

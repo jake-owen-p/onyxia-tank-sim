@@ -1,0 +1,1132 @@
+{
+ "id": "baron-geddon",
+ "name": "Baron Geddon",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/baron-geddon.md, corrected by docs/research/molten-core/VERIFICATION.md (DBM and BigWigs timers, which come from real combat logs). Era 40-man: 586,256 HP, no adds. Modelled as a 233 s phase to 5% and a 25 s last phase in which he casts Armageddon 12 s in, about when he reaches 2.5%; a 3-5 minute kill. Inferno is not scheduled in the last phase, so its channel cannot sit in his single cast slot when Armageddon comes due. He is `stationary` (real Geddon is pulled back to Garr's room and tanked in place; the pull and the hallway strategy are not modelled, and a stationary boss lets a tank carrying a Living Bomb actually run out, since the boss does not chase and drag the melee dots with him). Inferno: 8 s channel, Geddon rooted and pacified, pulses every 1 s in 20 yd (DBC). Cadence from DBM/BigWigs: first 11-33 s, then every 21-37 s (every 29, jitter 8). The pulse values are an open question: Ten Ton Hammer 6 pulses of 500/500/1000/1000/2000/2000 (7000 total), wiki 9 pulses, DBC scripted. Modelled as an `aoe` cast with a single 7000 pulse in 20 yd at the end of an 8 s cast: being rooted but pacified is real and walking out is the whole lesson, but a late leaver takes the full pulse rather than a smaller hit. `moveOut` walks everyone (tank included) out and back. The fire-resistance tanking variant is not modelled. Living Bomb: carried bomb, 18 yd, 3200 Fire, 8 s fuse (DBC/wiki; Ten Ton Hammer says ~10 s, an open question), cadence DBM first 11-31 s, then every 11-30 s (every 20, jitter 9). `playerChance` 0.35 instead of the fair 1/40 so a run actually gives you one. The real knock-up and fall damage are not modelled; there is no Slow Fall. Ignite Mana: DBM first 6-27 s, then every 26-44 s (every 33, jitter 8), 45 yd (DBC) vs 40 yd (Classic snippet), Magic, 5 minutes, burns 400 mana per 3 s and deals Fire equal to the mana burned. The engine has no mana: a Magic debuff ticking 133 a second that hits about a third of the time on you (random, count 8, `playerChance` 0.3), with a 12 s duration standing in for the ghost healers dispelling it. The real rule \"leave it on Warriors and Rogues\" cannot be expressed; the tip says it. Armageddon at 2%: 8 s channel, 7600-8400 Fire (8000) in 20 yd and he kills himself. 20 yd (DBC, Wowhead TBC) vs \"all players\" (wiki, wowtbc.gg), an open question; modelled at the DBC 20 yd. In the real fight the raid kills him before it lands; here the fight runs its course and the lesson is to get clear, because the engine cannot let the raid win the DPS race. Boss melee 500 per 2 s is a placeholder scaled to the 10,000 HP tank (no source gives his swing damage). Aggro pulls every ~45 s are a placeholder for DPS overtaking a tank who just lost 8 s of threat to Inferno. Engine gaps: no mana; Inferno is one pulse instead of ramping ticks; no knock-up or fall damage on bombs; no Fire Resistance; no Ice Block or Divine Shield to clear a bomb; debuffs on others only dispelled when the player is the healer.",
+ "sources": [
+  "docs/research/molten-core/baron-geddon.md",
+  "https://warcraft.wiki.gg/wiki/Baron_Geddon",
+  "https://www.wowhead.com/tbc/npc=12056/baron-geddon",
+  "https://wotlkdb.com/?spell=19695",
+  "https://wotlkdb.com/?spell=19698",
+  "https://wotlkdb.com/?spell=19659",
+  "https://wotlkdb.com/?spell=20475",
+  "https://wotlkdb.com/?spell=20476",
+  "https://wotlkdb.com/?spell=20478",
+  "https://wotlkdb.com/?spell=20479",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_baron_geddon.cpp",
+  "https://raw.githubusercontent.com/scriptdev2/scriptdev2-classic/master/scripts/eastern_kingdoms/molten_core/boss_baron_geddon.cpp",
+  "https://www.wowhead.com/classic/guides/baron-geddon-molten-core-strategy",
+  "https://www.tentonhammer.com/guides/mc-boss-guide-boss-5-baron-geddon",
+  "https://wowtbc.gg/classic/boss-guides/molten-core"
+ ],
+ "arena": {
+  "name": "Geddon's hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      50,
+      0
+     ],
+     [
+      49.2,
+      8.7
+     ],
+     [
+      47,
+      17.1
+     ],
+     [
+      43.3,
+      25
+     ],
+     [
+      38.3,
+      32.1
+     ],
+     [
+      32.1,
+      38.3
+     ],
+     [
+      25,
+      43.3
+     ],
+     [
+      17.1,
+      47
+     ],
+     [
+      8.7,
+      49.2
+     ],
+     [
+      0,
+      50
+     ],
+     [
+      -8.7,
+      49.2
+     ],
+     [
+      -17.1,
+      47
+     ],
+     [
+      -25,
+      43.3
+     ],
+     [
+      -32.1,
+      38.3
+     ],
+     [
+      -38.3,
+      32.1
+     ],
+     [
+      -43.3,
+      25
+     ],
+     [
+      -47,
+      17.1
+     ],
+     [
+      -49.2,
+      8.7
+     ],
+     [
+      -50,
+      0
+     ],
+     [
+      -49.2,
+      -8.7
+     ],
+     [
+      -47,
+      -17.1
+     ],
+     [
+      -43.3,
+      -25
+     ],
+     [
+      -38.3,
+      -32.1
+     ],
+     [
+      -32.1,
+      -38.3
+     ],
+     [
+      -25,
+      -43.3
+     ],
+     [
+      -17.1,
+      -47
+     ],
+     [
+      -8.7,
+      -49.2
+     ],
+     [
+      0,
+      -50
+     ],
+     [
+      8.7,
+      -49.2
+     ],
+     [
+      17.1,
+      -47
+     ],
+     [
+      25,
+      -43.3
+     ],
+     [
+      32.1,
+      -38.3
+     ],
+     [
+      38.3,
+      -32.1
+     ],
+     [
+      43.3,
+      -25
+     ],
+     [
+      47,
+      -17.1
+     ],
+     [
+      49.2,
+      -8.7
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -11,
+      -46
+     ],
+     [
+      11,
+      -46
+     ],
+     [
+      11,
+      -70
+     ],
+     [
+      -11,
+      -70
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      11,
+      -48.8
+     ],
+     [
+      22.4,
+      -44.7
+     ],
+     [
+      32.5,
+      -38
+     ],
+     [
+      40.7,
+      -29
+     ],
+     [
+      46.5,
+      -18.3
+     ],
+     [
+      49.6,
+      -6.6
+     ],
+     [
+      49.7,
+      5.5
+     ],
+     [
+      46.9,
+      17.3
+     ],
+     [
+      41.3,
+      28.1
+     ],
+     [
+      33.3,
+      37.3
+     ],
+     [
+      23.4,
+      44.2
+     ],
+     [
+      12,
+      48.5
+     ],
+     [
+      0,
+      50
+     ],
+     [
+      -12,
+      48.5
+     ],
+     [
+      -23.4,
+      44.2
+     ],
+     [
+      -33.3,
+      37.3
+     ],
+     [
+      -41.3,
+      28.1
+     ],
+     [
+      -46.9,
+      17.3
+     ],
+     [
+      -49.7,
+      5.5
+     ],
+     [
+      -49.6,
+      -6.6
+     ],
+     [
+      -46.5,
+      -18.3
+     ],
+     [
+      -40.7,
+      -29
+     ],
+     [
+      -32.5,
+      -38
+     ],
+     [
+      -22.4,
+      -44.7
+     ],
+     [
+      -11,
+      -48.8
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -11,
+      -48.8
+     ],
+     [
+      -11,
+      -70
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      11,
+      -48.8
+     ],
+     [
+      11,
+      -70
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -64
+    ]
+   },
+   {
+    "text": "Inferno: everyone 20 yd from him when it pulses",
+    "at": [
+     0,
+     42
+    ]
+   },
+   {
+    "text": "Run a bomb here, away from everyone",
+    "at": [
+     -40,
+     4
+    ]
+   },
+   {
+    "text": "Run a bomb here, away from everyone",
+    "at": [
+     40,
+     4
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -66,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 8,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -54,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 15,
+   "tolerance": 4,
+   "label": "Tank: come back here after each Inferno"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 8,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Baron Geddon"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -24,
+   "spread": 12
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -22,
+   "tolerance": 8,
+   "label": "Ranged: 30 yd, outside Inferno"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": -20,
+   "tolerance": 6,
+   "label": "Healers: 35 yd from the tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 500,
+  "meleeInterval": 2,
+  "stationary": true,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him in the open. Walk out of Inferno when he goes up and come straight back when it ends; if a Living Bomb lands on you, run away from the melee and healers before you return.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Hit him between Infernos. When it goes up, leave 20 yd before the pulse and come back the moment it ends. If you are the bomb, run out and away from everyone.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand 30 yd out, inside your range but outside Inferno. Spread along the line so a bomb carrier can run clear. Never use Fire spells on him.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Dispel Ignite Mana the moment it lands, healers first, then casters; leave it on Warriors and Rogues. Keep the tank up through his hits and be ready for bomb victims.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. Here one button stands in for Dispel Magic, Cleanse, Remove Curse and Remove Lesser Curse."
+  }
+ },
+ "actions": {
+  "inferno": {
+   "label": "Inferno",
+   "kind": "aoe",
+   "cast": 8,
+   "radius": 20,
+   "damage": 7000,
+   "tankDamage": 0,
+   "moveOut": true,
+   "playerMetric": "infernosTaken",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Geddon roots himself and burns everything inside 20 yd for 8 s (here one pulse of 7000 at the end). Tanks and melee walk out now and come back the moment he stops."
+  },
+  "livingBomb": {
+   "label": "Living Bomb",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "carried": true,
+   "playerChance": 0.35,
+   "radius": 18,
+   "warning": 8,
+   "active": 0.2,
+   "damage": 3200,
+   "raidMetric": "bombsInRaid",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "8 s on a random raid member, then 3200 Fire to everyone within 18 yd and a knock-up. If it is on you, run the moment you see it and go where the marker points."
+  },
+  "bombOnYou": {
+   "label": "Living Bomb",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "player",
+   "carried": true,
+   "radius": 18,
+   "warning": 8,
+   "active": 0.2,
+   "damage": 3200,
+   "raidMetric": "bombsInRaid",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Drill version: every Living Bomb lands on you."
+  },
+  "igniteMana": {
+   "label": "Ignite Mana",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "count": 8,
+   "playerChance": 0.3,
+   "duration": 12,
+   "tickDamage": 133,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Everyone within 45 yd burns 400 mana and takes Fire equal to it every 3 s for 5 minutes. Dispel healers first, then casters. Warriors and Rogues can keep it: it does nothing to them."
+  },
+  "armageddon": {
+   "label": "Armageddon",
+   "kind": "aoe",
+   "cast": 8,
+   "radius": 20,
+   "damage": 8000,
+   "tankDamage": 0,
+   "moveOut": true,
+   "playerMetric": "armageddonsTaken",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "7600-8400 Fire to everyone within 20 yd and he kills himself. Kill him before it lands, or be nowhere near him."
+  },
+  "aggroPull": {
+   "label": "Aggro pull",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "conditional": "onPlayer",
+   "tip": "Eight seconds out of Inferno costs the tank threat. Someone overtakes them."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Baron Geddon",
+   "subtitle": "Inferno, bombs, Ignite Mana",
+   "hpFrom": 1,
+   "hpTo": 0.05,
+   "duration": 233,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "igniteMana",
+     "first": 12,
+     "every": 33,
+     "jitter": 8
+    },
+    {
+     "id": "livingBomb",
+     "first": 20,
+     "every": 20,
+     "jitter": 9
+    },
+    {
+     "id": "inferno",
+     "first": 24,
+     "every": 29,
+     "jitter": 8
+    },
+    {
+     "id": "aggroPull",
+     "first": 60,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pick him up where he stands",
+     "tip": "Taunt him and step to the north side so the raid has open floor behind you. Keep him still so melee can get out."
+    },
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "Inferno costs you threat every time, so the DPS catch up after each one. The moment he turns and you are back in range, Taunt."
+    },
+    {
+     "id": "infernoOutTank",
+     "type": "continuous",
+     "metric": "infernosTaken",
+     "role": "tanks",
+     "label": "Walk out of Inferno",
+     "tip": "He is rooted and pacified for 8 s. Walk out of the 20 yd circle, then back to the spot the moment it ends so he does not start on the raid."
+    },
+    {
+     "id": "infernoOutMelee",
+     "type": "continuous",
+     "metric": "infernosTaken",
+     "role": "melee",
+     "label": "Get 20 yd out before the pulse",
+     "tip": "When Inferno starts, stop hitting and walk out. Go back as soon as it ends: you are being paid to be out of it, not late."
+    },
+    {
+     "id": "bombClear",
+     "type": "continuous",
+     "metric": "bombsInRaid",
+     "label": "Carry the Living Bomb out of the raid",
+     "tip": "A bomb on you is your problem for 8 s. Run to where the marker points and let it go off far from everyone. 18 yd is the number that matters."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "igniteDispel",
+     "type": "afterEvent",
+     "event": "igniteMana",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Ignite Mana",
+     "tip": "It burns mana and hits for the same amount. Healers first, then casters. Leave Warriors and Rogues."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank takes him through every gap in the Inferno pattern. Heal them on the way back in."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Armageddon",
+   "subtitle": "The last 5%",
+   "hpFrom": 0.05,
+   "hpTo": 0,
+   "duration": 25,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "igniteMana",
+     "first": 6,
+     "every": 33,
+     "jitter": 8
+    },
+    {
+     "id": "livingBomb",
+     "first": 4,
+     "every": 20,
+     "jitter": 9
+    },
+    {
+     "id": "armageddon",
+     "first": 12
+    }
+   ],
+   "expectations": [
+    {
+     "id": "bombClear",
+     "type": "continuous",
+     "metric": "bombsInRaid",
+     "label": "Carry the Living Bomb out of the raid",
+     "tip": "A bomb on you is your problem for 8 s. Run to where the marker points and let it go off far from everyone. 18 yd is the number that matters."
+    },
+    {
+     "id": "armageddonOut",
+     "type": "continuous",
+     "metric": "armageddonsTaken",
+     "label": "Be 20 yd away when Armageddon goes off",
+     "tip": "At 2% he stops and casts Armageddon. Kill him first if you can, but if the bar is not going to make it, walk out."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "igniteDispel",
+     "type": "afterEvent",
+     "event": "igniteMana",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Ignite Mana",
+     "tip": "It burns mana and hits for the same amount. Healers first, then casters. Leave Warriors and Rogues."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank is still taking him right up to the end. Heal them on the way back from the bomb runs."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.06,
+   "severe": 40,
+   "roles": "dps",
+   "tip": "Melee are supposed to be gone during Inferno. Everything else should be attacking."
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands. Tanks first."
+  },
+  "infernosTaken": {
+   "label": "Inferno pulses taken",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "tip": "Get out when he roots himself. 20 yd and straight back."
+  },
+  "armageddonsTaken": {
+   "label": "Armageddon taken",
+   "unit": "count",
+   "penaltyPerUnit": 12,
+   "severe": 1
+  },
+  "bombsInRaid": {
+   "label": "Bombs that went off in the raid",
+   "unit": "count",
+   "penaltyPerUnit": 7,
+   "severe": 1,
+   "tip": "Run it out. A bomb in the raid is 3200 Fire and a knock-up on everyone inside 18 yd."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.45
+ },
+ "cues": {
+  "notes": "Press notes: Taunt when he turns; Dispel Ignite Mana when it lands; Heal when the tank is low. Inferno and bombs are about your feet, not a button.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 9,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Geddon turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands: healers first, then casters. Leave Warriors and Rogues."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "infernoDance",
+   "name": "Inferno dance",
+   "description": "Already on him. Inferno every 18 s: walk out, come back, Taunt him the moment he turns after an aggro pull.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "inferno",
+     "first": 4,
+     "every": 18
+    },
+    {
+     "id": "aggroPull",
+     "first": 14,
+     "every": 18,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "bombRun",
+   "name": "Living Bomb run-out",
+   "description": "Every bomb lands on you. Run it out of the raid, let it go off, go back to your spot.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 70,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "bombOnYou",
+     "first": 4,
+     "every": 18
+    },
+    {
+     "id": "inferno",
+     "first": 12,
+     "every": 30
+    }
+   ]
+  },
+  {
+   "id": "igniteDrill",
+   "name": "Ignite Mana dispels",
+   "description": "Already on him. Ignite Mana every 8 s and Inferno every 25 s: dispel everything inside the window and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "igniteMana",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "inferno",
+     "first": 10,
+     "every": 25
+    },
+    {
+     "id": "aggroPull",
+     "first": 20,
+     "every": 25
+    }
+   ]
+  }
+ ]
+}

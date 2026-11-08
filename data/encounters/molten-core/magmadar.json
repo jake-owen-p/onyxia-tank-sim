@@ -1,0 +1,1208 @@
+{
+ "id": "magmadar",
+ "name": "Magmadar",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/magmadar.md, corrected by docs/research/molten-core/VERIFICATION.md (DBM/BigWigs timers and Wowhead Classic spell data). Era 40-man: 826,088 HP, no adds, no phases; a 3-5 minute kill modelled as one 210 s phase. Frenzy is the heart of the fight: first at about 12 s then every 16-21 s (DBM/BigWigs), +150% attack speed for 8 s (19451), and while it lasts it triggers a Lava Breath every 4 s. Modelled as an 8 s `debuff` on the tank with `damageTakenMult` 1.4 (scaled: the buff is 2.5x his swing rate, but the multiplier also touches breaths and ticks and has to leave a 10,000 HP tank alive on the 480 healing per second a tank gets here). The breaths come from two chained 4 s cast windows, so Tranquilizing Shot interrupting a window stops the breaths still to come. Tranquilizing Shot: the ranged role has an `interrupt` button for it (cooldown 15, a placeholder so one player can answer every Frenzy, where real raids rotate two hunters) and is scored on `frenziesLeftUp` for each window that finishes. The engine cannot remove a debuff with an interrupt, so the 8 s damage window runs its length even after a Tranq: the Tranq stops the breaths, not the extra swing damage. Other roles have no button: every Frenzy runs in full for them, harder than a raid with hunters on point, and the tank damage is scaled so a 10,000 HP tank survives it. Panic: 8 s fear every 37-66 s (DBM; every 44, jitter 10). `targets: all` inside `radius` 24 from his edge, which is 30 yd from his centre: the guide figure every strategy uses. Wowhead Classic 19408 lists 45 yd, an open question; if that is right the outer positions here are too generous. Fear Ward, Tremor Totem and Berserker Rage are not modelled: the tank and melee get feared and the lesson is to recover facing. Lava Bomb: a 5 yd fire patch under a random player; Conflagration 400 Fire per second for 8 s (DBC) vs 3200/8 s (legacy-wow) vs 4800/12 s (wiki): using 400 per second while standing in it, patch 30 s (non-mana target) and 60 s (mana target). Cadence 12-15 s each. The 1 s warning is the flight of the bomb. Lava Breath: 1157-1343 Fire frontal, 35 yd, 1250 here, 60 degree cone (angle not in any source; placeholder). Magma Spit: 20% melee proc, 75 Fire/3 s for 30 s, stacks to 3 (guides). Modelled as a stacking non-dispellable debuff on the tank every 10 s (`maxStacks` 3, 25 per second per stack). Melee also get it in reality: engine gap (debuffs cannot target the melee dots). Positions: ranged stand beyond the fear; attack range 35 stands for +range talents. Healers stand 32 yd from him and 34 yd from the tank spot, off to the west, so they are outside Panic and inside heal range even after stepping out of fire; the bomb patches land where the raid is, so the flanks are the clean floor. Aggro pulls every ~45 s are a placeholder for a DPS overtaking a feared tank. Tuning: the raid is spread wide (radius 20) because two streams of 30 s and 60 s patches at 5 yd radius would otherwise leave no clean floor in a tight group, which is also why real raids spread on him. Standing in Lava Bomb fire costs 0.5 a second here (4 elsewhere) because a Panic fear can walk you into a patch and the bombs persist 30-60 s. A feared tank drags him round and a breath can find the raid; facing and breath penalties are deliberately light (0.6/s and 4 per breath) so the score judges the recovery after the fear, not the fear itself. Engine gaps: fear always lands inside its radius (no Fear Ward/Tremor/Berserker Rage), an interrupt cannot remove the Frenzy debuff, Magma Spit only on the tank.",
+ "sources": [
+  "docs/research/molten-core/magmadar.md",
+  "https://warcraft.wiki.gg/wiki/Magmadar",
+  "https://www.wowhead.com/tbc/npc=11982/magmadar",
+  "https://wotlkdb.com/?spell=19451",
+  "https://wotlkdb.com/?spell=19272",
+  "https://wotlkdb.com/?spell=19408",
+  "https://wotlkdb.com/?spell=19411",
+  "https://wotlkdb.com/?spell=19428",
+  "https://wotlkdb.com/?spell=19450",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_magmadar.cpp",
+  "https://www.wowhead.com/classic/guides/magmadar-molten-core-strategy",
+  "https://www.tentonhammer.com/guides/mc-boss-guide-boss-2-magmadar",
+  "https://legacy-wow.com/molten-core-boss-guide-magmadar/"
+ ],
+ "arena": {
+  "name": "Magmadar's cavern",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -40
+     ],
+     [
+      10,
+      -40
+     ],
+     [
+      10,
+      -64
+     ],
+     [
+      -10,
+      -64
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      10,
+      -42.8
+     ],
+     [
+      20,
+      -39.2
+     ],
+     [
+      28.8,
+      -33.2
+     ],
+     [
+      36,
+      -25.3
+     ],
+     [
+      41,
+      -15.9
+     ],
+     [
+      43.6,
+      -5.6
+     ],
+     [
+      43.7,
+      5
+     ],
+     [
+      41.2,
+      15.4
+     ],
+     [
+      36.3,
+      24.8
+     ],
+     [
+      29.3,
+      32.8
+     ],
+     [
+      20.5,
+      38.9
+     ],
+     [
+      10.6,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.6,
+      42.7
+     ],
+     [
+      -20.5,
+      38.9
+     ],
+     [
+      -29.3,
+      32.8
+     ],
+     [
+      -36.3,
+      24.8
+     ],
+     [
+      -41.2,
+      15.4
+     ],
+     [
+      -43.7,
+      5
+     ],
+     [
+      -43.6,
+      -5.6
+     ],
+     [
+      -41,
+      -15.9
+     ],
+     [
+      -36,
+      -25.3
+     ],
+     [
+      -28.8,
+      -33.2
+     ],
+     [
+      -20,
+      -39.2
+     ],
+     [
+      -10,
+      -42.8
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -42.8
+     ],
+     [
+      -10,
+      -64
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -42.8
+     ],
+     [
+      10,
+      -64
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -58
+    ]
+   },
+   {
+    "text": "Lava",
+    "at": [
+     -34,
+     22
+    ]
+   },
+   {
+    "text": "Lava",
+    "at": [
+     34,
+     22
+    ]
+   },
+   {
+    "text": "Core Hound packs cleared",
+    "at": [
+     0,
+     38
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -58,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 14,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -46,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 23,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 14,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Magmadar"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -18,
+   "spread": 20
+  },
+  "rangedSpot": {
+   "x": 28,
+   "y": -10,
+   "tolerance": 6,
+   "label": "Ranged: flank, beyond Panic, in range of him"
+  },
+  "healerSpot": {
+   "x": -31,
+   "y": 8,
+   "tolerance": 5,
+   "label": "Healers: 30+ yd from him, in heal range of the tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 10,
+  "whelpContactRange": 6,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 6,
+  "speed": 9,
+  "turnRate": 200,
+  "meleeRange": 9,
+  "meleeDamage": 280,
+  "meleeInterval": 2,
+  "cones": {
+   "breath": {
+    "angle": 60,
+    "range": 35,
+    "label": "Lava Breath",
+    "facing": "front",
+    "style": "breath"
+   }
+  },
+  "facingCone": "breath"
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Tank him where he stands, facing away from everyone. Have Fear Ward or Tremor before the pull; when Panic does get you, get back between him and the raid before he breathes on them. Step out of Lava Bombs and come straight back.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Behind or on his flanks, never in the Lava Breath. Walk out of fire patches, watch your Magma Spit stacks, and hold threat under the tank.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Beyond 30 yd so Panic cannot reach you, spread so a Lava Bomb hits one person. Hunters: Tranquilizing Shot the instant Frenzy appears, and it stops his breaths.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 35
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Stand 30+ yd from him, outside the fear and inside heal range of the tank. Spike-heal the tank through every Frenzy and every Lava Breath it triggers, and heal the bomb targets.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Tranquilizing Shot",
+   "cooldown": 15,
+   "gcd": false,
+   "range": 35,
+   "icon": "interrupt",
+   "tip": "Removes Frenzy and stops the Lava Breaths it triggers. The cooldown is a placeholder so one player can answer every Frenzy; real raids rotate two hunters."
+  }
+ },
+ "actions": {
+  "panic": {
+   "label": "Panic",
+   "kind": "fear",
+   "cast": 0,
+   "targets": "all",
+   "radius": 24,
+   "duration": 8,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "An 8 s fear on everyone within 30 yd of him (45 in the spell data). Fear Ward on the tank, Tremor Totem in the tank group, Berserker Rage 5 s before it. Healers and ranged past 30 yd are untouched."
+  },
+  "lavaBomb": {
+   "label": "Lava Bomb",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "radius": 5,
+   "warning": 1,
+   "active": 30,
+   "tick": true,
+   "damage": 400,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A fire patch lands under a random non-mana player and burns for 30 s: 400 Fire per second while you stand in it. Step out at once."
+  },
+  "lavaBombCaster": {
+   "label": "Lava Bomb (caster)",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "radius": 5,
+   "warning": 1,
+   "active": 60,
+   "tick": true,
+   "damage": 400,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The mana-user variant: the patch burns for 60 s. Spread so it only lands on one of you."
+  },
+  "lavaBreath": {
+   "label": "Lava Breath",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "breath",
+   "damage": 1250,
+   "hitsMelee": true,
+   "raidMetric": "raidBreathHits",
+   "raidToast": "Lava Breath hit the raid",
+   "playerMetric": "breathsTaken",
+   "warn": false,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "1157-1343 Fire to everything in a 35 yd cone in front of him. Only while he is Frenzied, every 4 s; a Tranquilizing Shot stops it."
+  },
+  "frenzy": {
+   "label": "Frenzy",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 8,
+   "damageTakenMult": 1.4,
+   "toast": "Magmadar goes into a killing frenzy. TRANQ SHOT!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "frenzyWindow",
+     "delay": 0
+    }
+   ],
+   "tip": "+150% attack speed for 8 s and a Lava Breath every 4 s while it lasts. Tranquilizing Shot removes it; heal hard until it does."
+  },
+  "frenzyWindow": {
+   "label": "Frenzy",
+   "kind": "transition",
+   "cast": 4,
+   "offBoss": true,
+   "interruptible": true,
+   "completedMetric": "frenziesLeftUp",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "hidden": true,
+   "follow": [
+    {
+     "id": "lavaBreath",
+     "delay": 0
+    },
+    {
+     "id": "frenzyWindowLate",
+     "delay": 0
+    }
+   ],
+   "tip": "He is Frenzied: Tranquilizing Shot now, before the first breath."
+  },
+  "frenzyWindowLate": {
+   "label": "Frenzy",
+   "kind": "transition",
+   "cast": 4,
+   "offBoss": true,
+   "interruptible": true,
+   "completedMetric": "frenziesLeftUp",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "hidden": true,
+   "follow": [
+    {
+     "id": "lavaBreath",
+     "delay": 0
+    }
+   ],
+   "tip": "Still Frenzied: Tranquilizing Shot before the second breath."
+  },
+  "magmaSpit": {
+   "label": "Magma Spit",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 30,
+   "tickDamage": 25,
+   "maxStacks": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "A melee proc: 75 Fire every 3 s for 30 s, stacking to 3. Melee step out and bandage when their stacks are high."
+  },
+  "lavaBombOnYou": {
+   "label": "Lava Bomb",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "player",
+   "radius": 5,
+   "warning": 1,
+   "active": 20,
+   "tick": true,
+   "damage": 400,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Drill version: the bomb always lands on you."
+  },
+  "aggroPull": {
+   "label": "Aggro pull",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "conditional": "onPlayer",
+   "tip": "A feared tank builds no threat; someone overtakes them."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Magmadar",
+   "subtitle": "Fears, bombs and Frenzy",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 210,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "panic",
+     "first": 12,
+     "every": 44,
+     "jitter": 10
+    },
+    {
+     "id": "lavaBomb",
+     "first": 14,
+     "every": 13.5,
+     "jitter": 1.5
+    },
+    {
+     "id": "lavaBombCaster",
+     "first": 20,
+     "every": 13.5,
+     "jitter": 1.5
+    },
+    {
+     "id": "frenzy",
+     "first": 12,
+     "every": 18.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "magmaSpit",
+     "first": 16,
+     "every": 10,
+     "jitter": 2
+    },
+    {
+     "id": "aggroPull",
+     "first": 55,
+     "every": 45,
+     "jitter": 6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 12,
+     "grace": 6,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pick him up where he stands, facing north",
+     "tip": "Taunt him, then walk round to the north side so he faces away from the raid coming in from the south. He does not need to move."
+    },
+    {
+     "id": "facing",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tanks",
+     "label": "Keep him facing away from the raid",
+     "tip": "Lava Breath is a 35 yd cone that fires during Frenzy. Stay on the far side of him from the raid; if a fear turns him, fix it the moment you can move."
+    },
+    {
+     "id": "afterFear",
+     "type": "afterEvent",
+     "event": "panic",
+     "check": "facingAway",
+     "notBefore": 8.5,
+     "within": 15,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Get him facing away again after Panic",
+     "tip": "The fear runs you about for 8 s and he follows. The moment it ends, get back to the north side so his breath points at the wall, not the raid."
+    },
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "After a fear your threat is thin. The moment he turns and you can act, Taunt."
+    },
+    {
+     "id": "bomb",
+     "type": "onEvent",
+     "event": "lavaBomb",
+     "check": "outsideHazard",
+     "grace": 2.5,
+     "label": "Stay out of the Lava Bomb patch",
+     "tip": "When a bomb lands on you, step 6 yd out of the fire immediately and go back to your spot. Never fight in it."
+    },
+    {
+     "id": "bombCaster",
+     "type": "onEvent",
+     "event": "lavaBombCaster",
+     "check": "outsideHazard",
+     "grace": 2.5,
+     "label": "Stay out of the caster Lava Bomb",
+     "tip": "This patch burns for a full minute. Move once, properly, and stay out."
+    },
+    {
+     "id": "front",
+     "type": "continuous",
+     "metric": "playerInFront",
+     "role": "nontank",
+     "label": "Stay out of the Lava Breath",
+     "tip": "Behind him or on his flank, never between him and the tank."
+    },
+    {
+     "id": "tranq",
+     "type": "continuous",
+     "metric": "frenziesLeftUp",
+     "role": "ranged",
+     "label": "Tranq every Frenzy",
+     "tip": "Press Tranquilizing Shot the moment the Frenzy cast bar appears: every window that finishes is another Lava Breath."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frenzy is 8 s of +150% attack speed with a breath every 4 s. Pre-heal when the Frenzy warning shows and keep the tank above half until the Tranq lands."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.06,
+   "severe": 40,
+   "roles": "dps",
+   "tip": "Get back to your spot when the fire or a Panic has moved you off it."
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 15,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on. A Panic can drop you in it, so walk out as soon as you can move."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.6,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in his front",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 8,
+   "roles": "nontank",
+   "bossStates": [
+    "grounded"
+   ],
+   "tip": "Behind him or on his flank, never between him and the tank."
+  },
+  "raidBreathHits": {
+   "label": "Lava Breaths on the raid",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": "tanks"
+  },
+  "breathsTaken": {
+   "label": "Lava Breaths taken",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "frenziesLeftUp": {
+   "label": "Frenzy windows left up",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 3,
+   "roles": "ranged",
+   "tip": "Every window that finishes is another Lava Breath on the tank. Tranq the moment the cast bar appears."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Press notes: Taunt when he turns on the raid; Heal when the tank is low; Tranquilizing Shot when Frenzy appears.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 9,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Magmadar turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "tranqFrenzy",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:frenzyWindow",
+    "offset": 0.5,
+    "early": 0.5,
+    "late": 3.4,
+    "role": "ranged",
+    "short": "TRANQ",
+    "label": "Tranquilizing Shot",
+    "tip": "He is Frenzied. Tranq now, before the first Lava Breath at 4 s.",
+    "doneBy": "interrupted"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "fearRecovery",
+   "name": "Panic recovery",
+   "description": "Already tanking him. Every 25 s a fear runs you off; get back to the north side before his breath finds the raid, and Taunt if someone pulls.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 80,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "panic",
+     "first": 6,
+     "every": 25
+    },
+    {
+     "id": "lavaBreath",
+     "first": 10,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "aggroPull",
+     "first": 20,
+     "every": 30,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "bombFootwork",
+   "name": "Lava Bomb footwork",
+   "description": "The bomb lands on you every 10 s. Step out of the fire the instant it appears and get back to your spot.",
+   "roles": "nontank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "lavaBombOnYou",
+     "first": 5,
+     "every": 10
+    },
+    {
+     "id": "lavaBreath",
+     "first": 8,
+     "every": 9,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "frenzyHealing",
+   "name": "Healing through Frenzy",
+   "description": "Frenzy every 18 s with the Lava Breaths it triggers, and a Panic at 40 s. Keep the tank above half and do not waste heals.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 70,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frenzy",
+     "first": 5,
+     "every": 18,
+     "jitter": 1
+    },
+    {
+     "id": "magmaSpit",
+     "first": 4,
+     "every": 10
+    },
+    {
+     "id": "panic",
+     "first": 40,
+     "every": 40
+    }
+   ]
+  },
+  {
+   "id": "tranqDrill",
+   "name": "Tranquilizing Shot",
+   "description": "Frenzy every 18 s. Press Tranquilizing Shot the moment the cast bar appears, before the first breath, and keep attacking in between.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 70,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frenzy",
+     "first": 5,
+     "every": 18,
+     "jitter": 1
+    },
+    {
+     "id": "aggroPull",
+     "first": 14,
+     "every": 25,
+     "jitter": 2
+    }
+   ]
+  }
+ ]
+}

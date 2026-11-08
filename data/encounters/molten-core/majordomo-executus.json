@@ -1,0 +1,1574 @@
+{
+ "id": "majordomo-executus",
+ "name": "Majordomo Executus",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/majordomo-executus.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: Executus 666,200 HP but unkillable (Aegis of Ragnaros heals him); the encounter is won by killing 4 Flamewaker Healers (97,680 HP) and 4 Flamewaker Elites (103,600 HP). The HP bar here is progress through the adds, not his health. The adds are killFirst, so attacking Executus while one lives is scored; the small windows when none is up (before the first wave lands and just before a phase ends) leave him as the only target, and Aegis of Ragnaros itself is not modelled. Phases: Elites first (130 s, 8 alive, Healers sheeped), then the sheep break and the Healers die (130 s, CC immune after the 4th death), then the last adds (90 s, Champion). Condensed from a 7-10 minute real kill. Adds arrive as three `adds` waves (Elites, then Healers, then the last two) beside the tank spot; the off-tank role takes them (`holdsBoss: false`, a ghost tank has Executus) to a spot on the west side where ranged can reach them from the raid. Polymorph assignments are not modelled. Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Shields: Magic Reflection and Damage Shield, 10 s on all adds, 30 s cooldown each (DBC). First at 25-31 s, then every 30 s (DBM, BigWigs); the pick is random each time (cmangos), here strict alternation. Modelled with `kind: shield`, so ranged are scored for attacking into Magic Reflection and melee into Damage Shield (`attacksIntoShield`); `reflectDamage` 400 and 100 (400 a placeholder). The engine only checks shields on attacks at the boss: while killFirst adds are up, attacks on them bypass the shield, so the penalty bites only on Executus and in the drills, and the Attack key still shows HOLD. Teleport: every 26-31 s (DBM, BigWigs) on the current tank (and a random attacker: not modelled) with a threat reset. Modelled as a `threatWipe` with `teleportTankTo` into the burning coals and a persistent hazard over the coals (300 a second, a placeholder: no source numbers the coal damage). Only the player can stand in a hazard, so the ghost tank takes no coal damage: on this boss the healer role has nothing to heal from the coals themselves. Blast Wave: Executus and Elites, 10 yd, 694-806 Fire (750), every 10 s, `aoe` (slow 8 s vs 6 s, open question; no snare in the engine). Shadow Shock: Healers, 20 yd, 740-860 Shadow (800; wiki 1098, open question), cadence \"frequent\" in guides with no number, using 8 s, in phase 2. Shadow Bolt (1350-1650 Shadow, 1500; wiki 2058, open question) as a `projectile`, every 7 s, playerChance 0.25, in phase 2. Dark Mending: 2 s (DBM 19775), 27,750-32,250 (open question vs Greater Heal 11,250-13,750), cast off the boss by a Healer, interruptible with a Kick cue for melee, every 14 s in phase 2; cadence estimated because no source times it. Encouragement (+8% damage per add death) and Champion (+50% haste on the last add): one permanent `enrage` step applied in phase 3 at 1.5x. Fire Blast and Fireball on Elite tanks are not modelled (no add abilities). Boss melee 420 per 2 s is a placeholder scaled to the 10,000 HP tank, standing in for Executus and the add tanks together. Engine gaps: no CC or Polymorph, no Aegis, no add casts, shields only check attacks at the boss. A human can do better than the bot on Kick and worse on threat; no script-side tuning changes that.",
+ "sources": [
+  "docs/research/molten-core/majordomo-executus.md",
+  "https://warcraft.wiki.gg/wiki/Majordomo_Executus",
+  "https://warcraft.wiki.gg/wiki/Flamewaker_Healer",
+  "https://warcraft.wiki.gg/wiki/Flamewaker_Elite",
+  "https://www.wowhead.com/tbc/npc=12018/majordomo-executus",
+  "https://wotlkdb.com/?spell=20619",
+  "https://wotlkdb.com/?spell=21075",
+  "https://wotlkdb.com/?spell=20620",
+  "https://wotlkdb.com/?spell=20618",
+  "https://wotlkdb.com/?spell=20534",
+  "https://wotlkdb.com/?spell=20229",
+  "https://wotlkdb.com/?spell=20603",
+  "https://wotlkdb.com/?spell=21077",
+  "https://wotlkdb.com/?spell=19775",
+  "https://wotlkdb.com/?spell=21086",
+  "https://wotlkdb.com/?spell=21090",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_majordomo_executus.cpp",
+  "https://www.wowhead.com/classic/guides/majordomo-executus-molten-core-strategy",
+  "https://wowtbc.gg/classic/boss-guides/molten-core"
+ ],
+ "arena": {
+  "name": "The Molten Span",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      48,
+      0
+     ],
+     [
+      47.3,
+      8.3
+     ],
+     [
+      45.1,
+      16.4
+     ],
+     [
+      41.6,
+      24
+     ],
+     [
+      36.8,
+      30.9
+     ],
+     [
+      30.9,
+      36.8
+     ],
+     [
+      24,
+      41.6
+     ],
+     [
+      16.4,
+      45.1
+     ],
+     [
+      8.3,
+      47.3
+     ],
+     [
+      0,
+      48
+     ],
+     [
+      -8.3,
+      47.3
+     ],
+     [
+      -16.4,
+      45.1
+     ],
+     [
+      -24,
+      41.6
+     ],
+     [
+      -30.9,
+      36.8
+     ],
+     [
+      -36.8,
+      30.9
+     ],
+     [
+      -41.6,
+      24
+     ],
+     [
+      -45.1,
+      16.4
+     ],
+     [
+      -47.3,
+      8.3
+     ],
+     [
+      -48,
+      0
+     ],
+     [
+      -47.3,
+      -8.3
+     ],
+     [
+      -45.1,
+      -16.4
+     ],
+     [
+      -41.6,
+      -24
+     ],
+     [
+      -36.8,
+      -30.9
+     ],
+     [
+      -30.9,
+      -36.8
+     ],
+     [
+      -24,
+      -41.6
+     ],
+     [
+      -16.4,
+      -45.1
+     ],
+     [
+      -8.3,
+      -47.3
+     ],
+     [
+      0,
+      -48
+     ],
+     [
+      8.3,
+      -47.3
+     ],
+     [
+      16.4,
+      -45.1
+     ],
+     [
+      24,
+      -41.6
+     ],
+     [
+      30.9,
+      -36.8
+     ],
+     [
+      36.8,
+      -30.9
+     ],
+     [
+      41.6,
+      -24
+     ],
+     [
+      45.1,
+      -16.4
+     ],
+     [
+      47.3,
+      -8.3
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -11,
+      -44
+     ],
+     [
+      11,
+      -44
+     ],
+     [
+      11,
+      -68
+     ],
+     [
+      -11,
+      -68
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      11,
+      -46.7
+     ],
+     [
+      21.9,
+      -42.7
+     ],
+     [
+      31.5,
+      -36.2
+     ],
+     [
+      39.3,
+      -27.6
+     ],
+     [
+      44.8,
+      -17.3
+     ],
+     [
+      47.6,
+      -6.1
+     ],
+     [
+      47.7,
+      5.5
+     ],
+     [
+      45,
+      16.8
+     ],
+     [
+      39.6,
+      27.1
+     ],
+     [
+      31.9,
+      35.8
+     ],
+     [
+      22.4,
+      42.5
+     ],
+     [
+      11.5,
+      46.6
+     ],
+     [
+      0,
+      48
+     ],
+     [
+      -11.5,
+      46.6
+     ],
+     [
+      -22.4,
+      42.5
+     ],
+     [
+      -31.9,
+      35.8
+     ],
+     [
+      -39.6,
+      27.1
+     ],
+     [
+      -45,
+      16.8
+     ],
+     [
+      -47.7,
+      5.5
+     ],
+     [
+      -47.6,
+      -6.1
+     ],
+     [
+      -44.8,
+      -17.3
+     ],
+     [
+      -39.3,
+      -27.6
+     ],
+     [
+      -31.5,
+      -36.2
+     ],
+     [
+      -21.9,
+      -42.7
+     ],
+     [
+      -11,
+      -46.7
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -11,
+      -46.7
+     ],
+     [
+      -11,
+      -68
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      11,
+      -46.7
+     ],
+     [
+      11,
+      -68
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -62
+    ]
+   },
+   {
+    "text": "Burning coals: never stand here",
+    "at": [
+     0,
+     4
+    ]
+   },
+   {
+    "text": "Tank Executus across the pit from the raid",
+    "at": [
+     0,
+     42
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -64,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 16,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -52,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 30,
+   "tolerance": 4,
+   "label": "Tank: across the pit from the raid"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 22,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Executus"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -8,
+   "spread": 13
+  },
+  "rangedSpot": {
+   "x": -10,
+   "y": -4,
+   "tolerance": 8,
+   "label": "Ranged: in reach of the adds and of Executus, outside Shadow Shock"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": -4,
+   "tolerance": 6,
+   "label": "Healers"
+  },
+  "eliteWest": {
+   "x": -11,
+   "y": 34,
+   "label": "Flamewaker Elite"
+  },
+  "eliteEast": {
+   "x": 11,
+   "y": 34,
+   "label": "Flamewaker Elite"
+  },
+  "eliteNorthWest": {
+   "x": -6,
+   "y": 39,
+   "label": "Flamewaker Elite"
+  },
+  "eliteNorthEast": {
+   "x": 6,
+   "y": 39,
+   "label": "Flamewaker Elite"
+  },
+  "healerAddWest": {
+   "x": -12,
+   "y": 34,
+   "label": "Flamewaker Healer"
+  },
+  "healerAddEast": {
+   "x": 12,
+   "y": 34,
+   "label": "Flamewaker Healer"
+  },
+  "healerAddNorthWest": {
+   "x": -7,
+   "y": 40,
+   "label": "Flamewaker Healer"
+  },
+  "healerAddNorthEast": {
+   "x": 7,
+   "y": 40,
+   "label": "Flamewaker Healer"
+  },
+  "addHoldSpot": {
+   "x": -26,
+   "y": 14,
+   "tolerance": 5,
+   "label": "Adds held here, away from the raid and off Executus"
+  },
+  "coalsSpot": {
+   "x": 0,
+   "y": 4,
+   "label": "Burning coals"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 8,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 420,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Tank Executus across the coal pit from the raid. Every 27 s he teleports you into the coals and zeroes your threat: walk out at once and Taunt before he reaches the raid. Never let the DPS touch him.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Elite and Healer off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the adds, not Executus. Pick up each wave as it arrives and hold it on your spot, away from the raid and the sheep. One Elite per tank; two when you are geared.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay on the called add, stop the moment Damage Shield goes up (it is the purple one) and stay off the coals. Kick every Dark Mending from a Flamewaker Healer. Never hit Executus.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stop casting the moment Magic Reflection goes up (the white one). Stay 10 yd from the Elites and outside Shadow Shock range of the Healers. Mages: one sheep each, never while a reflect is up.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Heal the teleported tank through the coals, and the Elite tanks as add deaths stack Encouragement. Shadow Shock clusters and Blast Wave are the raid damage. Nothing to dispel: conserve mana, it is a long fight.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Kick",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 8,
+   "icon": "interrupt",
+   "tip": "Interrupts an interruptible cast if you are in melee range. Kick, Pummel, Shield Bash."
+  }
+ },
+ "actions": {
+  "elites": {
+   "label": "Flamewaker Elites",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "eliteWest",
+    "eliteEast",
+    "eliteNorthWest",
+    "eliteNorthEast"
+   ],
+   "speed": 5,
+   "aggroRange": 18,
+   "lifetime": 118,
+   "heldLifetime": 118,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "addHoldSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Elites cannot be sheeped. A tank each, away from the sheep and the raid."
+  },
+  "healerAdds": {
+   "label": "Flamewaker Healers",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "healerAddWest",
+    "healerAddEast",
+    "healerAddNorthWest",
+    "healerAddNorthEast"
+   ],
+   "speed": 5,
+   "aggroRange": 18,
+   "lifetime": 126,
+   "heldLifetime": 126,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "addHoldSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The sheep break one at a time. After the fourth add is dead, nothing can be Polymorphed any more: every remaining Healer has to be tanked."
+  },
+  "lastAdds": {
+   "label": "Last adds",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "eliteWest",
+    "eliteEast"
+   ],
+   "speed": 5,
+   "aggroRange": 18,
+   "lifetime": 86,
+   "heldLifetime": 86,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "addHoldSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Last adds. The final one gets Champion: heals to full and swings 50% faster."
+  },
+  "magicReflection": {
+   "label": "Magic Reflection",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 10,
+   "reflectDamage": 400,
+   "roles": "ranged",
+   "toast": "Magic Reflection: casters stop",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "All his minions reflect 50% of harmful spells for 10 s. The white shield. Casters stop until it drops; never Polymorph into it or you sheep yourself."
+  },
+  "damageShield": {
+   "label": "Damage Shield",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 10,
+   "reflectDamage": 100,
+   "roles": "melee",
+   "toast": "Damage Shield: melee stop",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "All his minions hit anyone who swings at them for 100 for 10 s. The purple shield. Melee step back until it drops; tanks keep tanking."
+  },
+  "teleport": {
+   "label": "Teleport",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportTankTo": "coalsSpot",
+   "toast": "He teleported you into the coals and wiped your threat. Taunt him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "coalZone",
+     "delay": 0
+    }
+   ],
+   "tip": "He drops his target into the burning coals and zeroes their threat, then wanders at the raid. Walk out and Taunt him."
+  },
+  "coalZone": {
+   "label": "Burning coals",
+   "kind": "hazard",
+   "placement": "spots",
+   "spots": [
+    "coalsSpot"
+   ],
+   "radius": 8,
+   "warning": 0,
+   "active": 6,
+   "tick": true,
+   "damage": 300,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "The coals burn until you walk out. Healers land a heal as the tank comes out."
+  },
+  "blastWave": {
+   "label": "Blast Wave",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 10,
+   "damage": 750,
+   "tankDamage": 750,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "694-806 Fire and a 50% slow within 10 yd of an Elite or Executus. Keep your distance from Elites unless they are your target."
+  },
+  "shadowShock": {
+   "label": "Shadow Shock",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 20,
+   "damage": 800,
+   "tankDamage": 800,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "740-860 Shadow within 20 yd of a Healer. Stay out unless the Healer is your target; ranged and healers stay well clear."
+  },
+  "shadowBolt": {
+   "label": "Shadow Bolt",
+   "kind": "projectile",
+   "cast": 0,
+   "travel": 0.6,
+   "splash": 2,
+   "damage": 1500,
+   "playerChance": 0.25,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "1350-1650 Shadow from a Healer on a random raid member. Interruptible in the real fight (0.5 s cast)."
+  },
+  "darkMending": {
+   "label": "Dark Mending",
+   "kind": "transition",
+   "cast": 2,
+   "offBoss": true,
+   "interruptible": true,
+   "completedMetric": "mendingsLanded",
+   "warn": true,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A 2 s heal for 27,750-32,250 on a hurt add. Kick it every time."
+  },
+  "champion": {
+   "label": "Champion",
+   "kind": "enrage",
+   "cast": 0,
+   "toast": "The last add is the Champion: full health and 50% faster.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The last add is healed to full and swings 50% faster. Every add death before it stacks +8% damage on the rest. Healers save mana for this."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Elites",
+   "subtitle": "Healers sheeped, Elites first",
+   "hpFrom": 1,
+   "hpTo": 0.6,
+   "duration": 130,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "addHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "elites",
+     "first": 10
+    },
+    {
+     "id": "teleport",
+     "first": 15,
+     "every": 27.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "magicReflection",
+     "first": 32,
+     "every": 60
+    },
+    {
+     "id": "damageShield",
+     "first": 62,
+     "every": 60
+    },
+    {
+     "id": "blastWave",
+     "first": 12,
+     "every": 10,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Tank him across the pit from the raid",
+     "tip": "Taunt him and walk him north across the coals, so when he teleports you into them you are between him and the raid."
+    },
+    {
+     "id": "teleportTaunt",
+     "type": "afterEvent",
+     "event": "teleport",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tank",
+     "label": "Walk out of the coals and Taunt him",
+     "tip": "He teleports you into the burning coals and zeroes your threat. Walk straight out and Taunt before he reaches the raid."
+    },
+    {
+     "id": "coalsOut",
+     "type": "afterEvent",
+     "event": "teleport",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 2,
+     "role": "tank",
+     "label": "Walk out of the coals",
+     "tip": "The coals burn every second you stand in them. Walk straight out, then get back to him."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the adds, never Executus",
+     "tip": "Turn to face the add and kill it. Executus cannot die until his minions are dead."
+    },
+    {
+     "id": "elitesPicked",
+     "type": "afterEvent",
+     "event": "elites",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Elites",
+     "tip": "A tank each if you can; run into them or Taunt the moment they arrive."
+    },
+    {
+     "id": "addsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the adds off the raid",
+     "tip": "An add in the raid is a Blast Wave on your healers. Hold them across the pit."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank gets teleported into the coals every 27 s. Have a heal landing as they come out."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Healers",
+   "subtitle": "Sheep break, kick the heals",
+   "hpFrom": 0.6,
+   "hpTo": 0.2,
+   "duration": 130,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "addHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "healerAdds",
+     "first": 2
+    },
+    {
+     "id": "teleport",
+     "first": 8,
+     "every": 27.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "magicReflection",
+     "first": 20,
+     "every": 60
+    },
+    {
+     "id": "damageShield",
+     "first": 50,
+     "every": 60
+    },
+    {
+     "id": "blastWave",
+     "first": 4,
+     "every": 10,
+     "jitter": 1
+    },
+    {
+     "id": "shadowShock",
+     "first": 6,
+     "every": 8,
+     "jitter": 1
+    },
+    {
+     "id": "shadowBolt",
+     "first": 9,
+     "every": 7,
+     "jitter": 1
+    },
+    {
+     "id": "darkMending",
+     "first": 10,
+     "every": 14,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "teleportTaunt",
+     "type": "afterEvent",
+     "event": "teleport",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tank",
+     "label": "Walk out of the coals and Taunt him",
+     "tip": "He teleports you into the burning coals and zeroes your threat. Walk straight out and Taunt before he reaches the raid."
+    },
+    {
+     "id": "coalsOut",
+     "type": "afterEvent",
+     "event": "teleport",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 2,
+     "role": "tank",
+     "label": "Walk out of the coals",
+     "tip": "The coals burn every second you stand in them. Walk straight out, then get back to him."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the adds, never Executus",
+     "tip": "Turn to face the add and kill it. Executus cannot die until his minions are dead."
+    },
+    {
+     "id": "healersPicked",
+     "type": "afterEvent",
+     "event": "healerAdds",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Healers",
+     "tip": "When a sheep breaks that Healer needs a tank right now. After the fourth add dies, no more Polymorph."
+    },
+    {
+     "id": "addsAway2",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the adds off the raid",
+     "tip": "Hold them across the pit, away from the sheep and the ranged."
+    },
+    {
+     "id": "kickMending",
+     "type": "continuous",
+     "metric": "mendingsLanded",
+     "role": "melee",
+     "label": "Kick every Dark Mending",
+     "tip": "A 2 s heal for about 30,000 on the add you just burned. Kick it inside the cast."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Shock and Shadow Bolts join the Teleport damage. Top the tank up between every Teleport."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Last adds",
+   "subtitle": "Champion",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "addHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "lastAdds",
+     "first": 2
+    },
+    {
+     "id": "champion",
+     "first": 5
+    },
+    {
+     "id": "teleport",
+     "first": 10,
+     "every": 27.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "magicReflection",
+     "first": 15,
+     "every": 60
+    },
+    {
+     "id": "damageShield",
+     "first": 45,
+     "every": 60
+    },
+    {
+     "id": "blastWave",
+     "first": 4,
+     "every": 10,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "teleportTaunt",
+     "type": "afterEvent",
+     "event": "teleport",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tank",
+     "label": "Walk out of the coals and Taunt him",
+     "tip": "He teleports you into the burning coals and zeroes your threat. Walk straight out and Taunt before he reaches the raid."
+    },
+    {
+     "id": "coalsOut",
+     "type": "afterEvent",
+     "event": "teleport",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 2,
+     "role": "tank",
+     "label": "Walk out of the coals",
+     "tip": "The coals burn every second you stand in them. Walk straight out, then get back to him."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the adds, never Executus",
+     "tip": "Turn to face the add and kill it. Executus cannot die until his minions are dead."
+    },
+    {
+     "id": "lastPicked",
+     "type": "afterEvent",
+     "event": "lastAdds",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the last adds",
+     "tip": "The Champion swings 50% faster at full health. Do not let it near the raid."
+    },
+    {
+     "id": "addsAway3",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the adds off the raid",
+     "tip": "Last one is the Champion. Hold it across the pit."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Encouragement and Champion have stacked; this is the hardest phase on the tanks."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 1.5,
+   "severe": 3,
+   "tip": "He drops you in the coals every time: about a second to walk out is the cost of the fight. Past that, every second is your own."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "attacksIntoShield": {
+   "label": "Attacks into a shield",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "Stop the moment your shield goes up: Magic Reflection for casters, Damage Shield for melee."
+  },
+  "mendingsLanded": {
+   "label": "Dark Mendings that landed",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 3,
+   "roles": "melee",
+   "phases": [
+    2
+   ],
+   "tip": "Kick every 2 s Dark Mending inside the cast."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Press notes: Taunt when he teleports you or wipes threat; Kick Dark Mending in the Healer phase; Taunt or walk into each add wave; Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Executus turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "kickMending",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:darkMending",
+    "offset": 0.5,
+    "early": 0.5,
+    "late": 1.4,
+    "role": "melee",
+    "short": "KICK",
+    "label": "Kick Dark Mending",
+    "tip": "A Healer has started Dark Mending. Press Kick inside 2 s.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "tauntElites",
+    "ability": "taunt",
+    "on": "event",
+    "event": "elites",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "ELITES",
+    "label": "Pick up the Elites",
+    "tip": "Taunt one or run into them.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "tauntHealers",
+    "ability": "taunt",
+    "on": "event",
+    "event": "healerAdds",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "HEALERS",
+    "label": "Pick up the Healers",
+    "tip": "Taunt one or run into them.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "tauntLast",
+    "ability": "taunt",
+    "on": "event",
+    "event": "lastAdds",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "ADDS",
+    "label": "Pick up the last adds",
+    "tip": "Taunt one or run into them.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "addPickup",
+   "name": "Pick up the adds",
+   "description": "Each wave lands on you. Pick them up and hold them on your spot, away from the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "elites",
+     "first": 3,
+     "every": 30
+    }
+   ]
+  },
+  {
+   "id": "teleportDrill",
+   "name": "Teleport recovery",
+   "description": "Already on him. He teleports you into the coals and zeroes your threat every 14 s: walk out and Taunt him before he reaches the raid, while Blast Wave keeps ticking.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "teleport",
+     "first": 5,
+     "every": 14,
+     "jitter": 1
+    },
+    {
+     "id": "blastWave",
+     "first": 3,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "kickHeals",
+   "name": "Kick the Healers",
+   "description": "Healer phase. Dark Mending every 12 s: Kick each one, keep your threat under the tank, and stop attacking when Damage Shield goes up.",
+   "roles": "melee",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "darkMending",
+     "first": 4,
+     "every": 12
+    },
+    {
+     "id": "magicReflection",
+     "first": 8,
+     "every": 25
+    },
+    {
+     "id": "damageShield",
+     "first": 20,
+     "every": 25
+    },
+    {
+     "id": "shadowBolt",
+     "first": 6,
+     "every": 8
+    }
+   ]
+  },
+  {
+   "id": "reflectionDrill",
+   "name": "Stop for Magic Reflection",
+   "description": "Magic Reflection every 20 s: stop attacking while it is up and go again the moment it drops. Keep your threat under the tank.",
+   "roles": "ranged",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "magicReflection",
+     "first": 6,
+     "every": 20
+    },
+    {
+     "id": "shadowBolt",
+     "first": 4,
+     "every": 8
+    },
+    {
+     "id": "blastWave",
+     "first": 8,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "coalHealing",
+   "name": "Healing the Teleports",
+   "description": "Teleports every 12 s and Shadow Shock every 8 s: land a heal on the tank as they come out of the coals and keep them above half.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "teleport",
+     "first": 5,
+     "every": 12
+    },
+    {
+     "id": "shadowShock",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "blastWave",
+     "first": 7,
+     "every": 10
+    }
+   ]
+  }
+ ]
+}

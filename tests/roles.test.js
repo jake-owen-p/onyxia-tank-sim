@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FIXED_DT, createSim } from '../src/core/sim.js';
-import { computeScore } from '../src/core/scoring.js';
+import { computeScore, roleMatches, holdsBoss } from '../src/core/scoring.js';
 import { angleTo } from '../src/core/geometry.js';
 import { script, makeSim, run, idle, roleBot } from './helpers.js';
 
@@ -264,9 +264,49 @@ test('killable adds: you hit what you face, attacks shorten their life, hitting 
   assert.ok(hp - add.hp >= 0.05);
   assert.equal(s.metrics.attacksOnAdds, 1);
   assert.equal(s.metrics.attacksOffPriority, 1, 'not counted when you are on the add');
-  const ev = run(sim, 31);
+  // The killing blow removes it (this used to throw).
+  run(sim, 1.6);
+  p.heading = angleTo(p.x, p.y, add.x, add.y);
+  add.hp = 0.01;
+  const killed = run(sim, FIXED_DT, press('attack'));
+  assert.ok(killed.some((e) => e.type === 'addKilled'));
+  assert.equal(s.world.whelps.length, 0);
+  // Left alone, the raid finishes an add by itself.
+  sim.triggerAction('priests');
+  run(sim, 31);
   assert.equal(s.world.whelps.length, 0, 'the raid finishes it without you');
-  assert.ok(Array.isArray(ev));
+});
+
+test('role filters agree everywhere about an off-tank who does not hold the boss', () => {
+  assert.equal(roleMatches('tanks', 'offtank', false), false);
+  assert.equal(roleMatches('nontank', 'offtank', false), true);
+  assert.equal(roleMatches('offtank', 'offtank', false), true);
+  assert.equal(roleMatches('tanks', 'offtank'), true, 'by default an off-tank holds the boss');
+  const s2 = structuredClone(script);
+  s2.roles.offtank.holdsBoss = false;
+  assert.equal(holdsBoss(s2, 'offtank'), false);
+  assert.equal(holdsBoss(script, 'offtank'), true);
+});
+
+test('a shield protects adds too, and stunned time is not counted as idle', () => {
+  const s2 = withAdds();
+  s2.actions.reflect = { label: 'Reflect', kind: 'shield', duration: 5, cast: 0, warn: false, icon: 'roar' };
+  s2.actions.stomp = { label: 'Stomp', kind: 'aoe', cast: 0, radius: 200, damage: 0, stun: 3, warn: false, icon: 'roar' };
+  const sim = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, p = s.world.player;
+  sim.triggerAction('priests');
+  const add = s.world.whelps[0];
+  p.heading = angleTo(p.x, p.y, add.x, add.y);
+  sim.triggerAction('reflect');
+  const hp = add.hp;
+  run(sim, FIXED_DT, press('attack'));
+  assert.equal(s.metrics.attacksIntoShield, 1);
+  assert.ok(hp - add.hp < 0.01, 'the attack did nothing');
+  run(sim, 5.2);
+  const idleBefore = s.metrics.dpsIdle || 0;
+  sim.triggerAction('stomp');
+  run(sim, 2.5);
+  assert.equal(s.metrics.dpsIdle || 0, idleBefore, 'cannot be idle while stunned');
 });
 
 test('an off-tank who does not hold the boss leaves it on the ghost tank and goes for the adds', () => {

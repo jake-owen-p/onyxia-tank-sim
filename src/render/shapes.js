@@ -19,9 +19,20 @@ const footprintCache = new Map();
  * Boss footprint polygons for a body radius R. Local coords: +x forward, +y left.
  * Each part carries a nominal height band used by the POV renderer.
  */
-export function bossFootprint(R) {
-  if (footprintCache.has(R)) return footprintCache.get(R);
-  const parts = {
+export function bossFootprint(R, shape = 'standing') {
+  const key = `${shape}:${R}`;
+  if (footprintCache.has(key)) return footprintCache.get(key);
+  // Anything that is not a dragon: a broad body, shoulders, a head and a clear front.
+  const standing = {
+    body: { poly: ellipse(0, 0, R * 0.8, R * 0.8), z0: 0, z1: R },
+    neck: { poly: [[R * 0.55, R * 0.25], [R * 0.85, R * 0.18], [R * 0.85, -R * 0.18], [R * 0.55, -R * 0.25]], z0: R, z1: R },
+    head: { poly: ellipse(R * 0.95, 0, R * 0.32, R * 0.32), z0: R, z1: R },
+    wingL: { poly: [[R * 0.3, R * 0.7], [R * 0.05, R * 1.25], [-R * 0.4, R * 1.2], [-R * 0.35, R * 0.7]], z0: R * 0.6, z1: R },
+    wingR: { poly: [[R * 0.3, -R * 0.7], [R * 0.05, -R * 1.25], [-R * 0.4, -R * 1.2], [-R * 0.35, -R * 0.7]], z0: R * 0.6, z1: R },
+    tail: { poly: [[-R * 0.75, R * 0.2], [-R * 1.05, 0], [-R * 0.75, -R * 0.2]], z0: 0, z1: 0.1 },
+    marker: { poly: [[R * 1.3, R * 0.2], [R * 1.65, 0], [R * 1.3, -R * 0.2], [R * 1.42, 0]], z0: R, z1: R },
+  };
+  const parts = shape !== 'dragon' ? standing : {
     body: { poly: ellipse(0, 0, R * 0.95, R * 0.62), z0: 0, z1: R * 0.6 },
     neck: { poly: [[R * 0.7, R * 0.22], [R * 1.35, R * 0.12], [R * 1.35, -R * 0.12], [R * 0.7, -R * 0.22]], z0: R * 0.35, z1: R * 0.7 },
     head: { poly: [[R * 1.3, R * 0.22], [R * 1.72, R * 0.1], [R * 1.85, 0], [R * 1.72, -R * 0.1], [R * 1.3, -R * 0.22]], z0: R * 0.5, z1: R * 0.75 },
@@ -32,7 +43,7 @@ export function bossFootprint(R) {
     // Kept small: it sits above the tank's head in POV, so anything bigger fills the frame.
     marker: { poly: [[R * 1.78, R * 0.11], [R * 1.98, 0], [R * 1.78, -R * 0.11], [R * 1.84, 0]], z0: R * 0.55, z1: R * 0.55 },
   };
-  footprintCache.set(R, parts);
+  footprintCache.set(key, parts);
   return parts;
 }
 
@@ -63,7 +74,7 @@ export function traceScreenPoly(ctx, pts) {
  * be in world space (yards). `opts`: fill, stroke, front, lineWidth, dashed, alpha.
  */
 export function drawBossFlat(ctx, x, y, heading, R, opts) {
-  const parts = bossFootprint(R);
+  const parts = bossFootprint(R, opts.shape);
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(heading);

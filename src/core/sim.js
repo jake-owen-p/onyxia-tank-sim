@@ -20,7 +20,7 @@ import {
 import { createCues, planCues, onCueEvent, onCuePress, clearPendingCues } from './presscues.js';
 import { createLane, createZone, createCracks, pulseCracks, updateHazards, hazardAt } from './hazards.js';
 import { buildSchedule, dueActions, scheduleOnce, upcoming as scheduleUpcoming } from './scheduler.js';
-import { createInstance, resolve } from './scoring.js';
+import { createInstance, resolve, roleMatches as roleFilter } from './scoring.js';
 import { runCheck, playerAtSpot, bossAtSpot, bossFacingRaid, nearWall, attackRange } from './expectations.js';
 import {
   createPlayer, updatePlayer, knockback, createBoss, updateBoss, beginTakeoff, beginLanding, bossTargetPos,
@@ -196,11 +196,7 @@ export function createSim(script, options = {}) {
   const activeExpectationDefs = () =>
     (state.phaseDef ? state.phaseDef.expectations : []).filter((e) => roleMatches(e.role));
 
-  function roleMatches(roleSpec) {
-    if (!roleSpec) return true;
-    const list = Array.isArray(roleSpec) ? roleSpec : [roleSpec];
-    return list.map((r) => LEGACY_ROLE[r] || r).some((r) => r === state.role || (r === 'tanks' && tankRole) || (r === 'dps' && (state.role === 'melee' || state.role === 'ranged')) || (r === 'nontank' && !tankRole));
-  }
+  const roleMatches = (roleSpec) => roleFilter(roleSpec, state.role, tankRole);
 
   // ------------------------------------------------------------ phases
 
@@ -373,7 +369,7 @@ export function createSim(script, options = {}) {
       toast('The raid pulled without you. Taunt!', 'bad');
       for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat);
     }
-    if (!tankRole && by === 'player') { addMetric('earlyPulls', 1); toast('You pulled her before the tank', 'bad'); state.threat.ghostTauntAt = state.t + ghostTauntDelay; }
+    if (!tankRole && by === 'player') { addMetric('earlyPulls', 1); toast('You pulled before the tank', 'bad'); state.threat.ghostTauntAt = state.t + ghostTauntDelay; }
   }
 
   function anyoneBehind() {
@@ -513,7 +509,7 @@ export function createSim(script, options = {}) {
           b.target = 'raid';
           if (tankRole) { state.threat.raid = Math.max(state.threat.raid, state.threat.player * 1.2); addMetric('threatLostCount', 1); state.lastTurnAt = state.t; emit('threatLost', { by: id }); for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
           else { state.threat.ghostTauntAt = state.t + (def.duration || 3); emit('threatLost', { by: id }); }
-          toast(def.toast || `${def.label}: she switched targets`, 'bad');
+          toast(def.toast || `${def.label}: the boss switched targets`, 'bad');
         }
         break;
       }
@@ -630,6 +626,7 @@ export function createSim(script, options = {}) {
     else if (tgt === 'player') on = 'player';
     else if (tgt === 'all') on = 'player';
     else on = pickRandomVictim(def) ? 'player' : 'raid';
+    if (on === 'player' && !roleMatches(def.roles)) on = 'raid';   // e.g. a melee-only stun cannot reach the healers
     if (def.maxStacks) {
       const cur = state.debuffs.find((x) => x.actionId === id && x.on === on);
       if (cur) {
@@ -687,7 +684,7 @@ export function createSim(script, options = {}) {
   function useAbility(id) {
     const def = script.playerAbilities[id];
     if (!def) return;
-    const A = state.abilities, p = state.world.player, b = state.world.boss, g = state.world.ghost;
+    const A = state.abilities, w = state.world, p = w.player, b = w.boss, g = w.ghost;
     const fail = (reason, text) => {
       emit('abilityFailed', { id, reason });
       if (text) toast(text, 'warn');
@@ -721,8 +718,10 @@ export function createSim(script, options = {}) {
         const tgt = attackTarget(range);
         if (!tgt) return fail('range', bossLive() ? 'Out of range' : 'Nothing to hit right now');
         addMetric('attacks', 1);
+        const shielded = shieldUp();
+        if (shielded) { addMetric('attacksIntoShield', 1); if (state.shieldDamage) damagePlayer(state.shieldDamage, 'shield'); toast('Shield is up. Stop attacking', 'bad'); }
         if (tgt.add) {
-          tgt.add.hp -= def.addDamage ?? 0.06;
+          if (!shielded) tgt.add.hp -= def.addDamage ?? 0.06;
           addMetric('attacksOnAdds', 1);
           if (tgt.add.hp <= 0) { w.whelps.splice(w.whelps.indexOf(tgt.add), 1); emit('addKilled', { label: tgt.add.label }); }
           emit('attack', { id, on: 'add' });
@@ -730,7 +729,7 @@ export function createSim(script, options = {}) {
         }
         applyPlayerThreat(state.threat, def.threat || 0);
         if (killTarget(state)) { addMetric('attacksOffPriority', 1); toast('Kill the add first', 'warn'); }
-        if (shieldUp()) { addMetric('attacksIntoShield', 1); if (state.shieldDamage) damagePlayer(state.shieldDamage, 'shield'); toast('Shield is up. Stop attacking', 'bad'); }
+        if (shielded) { /* already scored above */ }
         else if (state.feedback.holdAttack) { addMetric('attacksInRed', 1); toast('Hold! You are about to pull aggro', 'bad'); }
         else if (holdAfterPull()) { addMetric('earlyAttacks', 1); toast('Wait for the tank to build threat', 'warn'); }
         emit('attack', { id });
@@ -862,16 +861,16 @@ export function createSim(script, options = {}) {
     if (ideal.reason === 'dodgeLane') return set('Step out of the lane', 'fix');
     if (ideal.reason === 'dodgeZone' || fb.inHazard) return set(fb.inHazard ? 'Get out of it' : 'Move away from the hazard', 'fix');
     if (tankRole) {
-      if (fb.facingWrong) return set('Turn her away from the raid', 'fix');
-      if (bossLive() && b.target !== 'player') return set('Taunt. She is on the raid', 'fix');
+      if (fb.facingWrong) return set('Turn the boss away from the raid', 'fix');
+      if (bossLive() && b.target !== 'player') return set('Taunt. The boss is on the raid', 'fix');
       if (ideal.reason === 'whelps') return set('Pick up the adds', 'fix');
       if (soon) { state.nextExpected = expectation; return; }
-      if (ideal.reason === 'approach') return set('Taunt her and pull to the wall', 'hint');
-      if (state.world.idealBoss && !state.world.idealBoss.satisfied && b.engaged) return set('Move her onto the boss spot, facing away', 'fix');
+      if (ideal.reason === 'approach') return set('Taunt the boss and pull it into position', 'hint');
+      if (state.world.idealBoss && !state.world.idealBoss.satisfied && b.engaged) return set('Move the boss onto its spot, facing away', 'fix');
       if (ideal.reason === 'holdWhelps') return set('Hold the adds away from the raid', 'hold');
     } else {
-      if (bossLive() && b.target === 'player') return set('She is on you. Stop and let the tank take her', 'fix');
-      if (fb.inFront) return set('Get out of her front', 'fix');
+      if (bossLive() && b.target === 'player') return set('The boss is on you. Stop and let the tank take it', 'fix');
+      if (fb.inFront) return set('Get out of the front of the boss', 'fix');
       const dsp = state.role === 'healer' && state.debuffs.find((d) => d.dispel !== 'none');
       if (dsp) return set(`Dispel ${dsp.name}`, 'fix');
       if (state.role === 'healer' && state.world.ghost.hp / state.world.ghost.maxHp < (script.ghostTank.lowHp ?? 0.5)) return set('Heal the tank', 'fix');
@@ -942,12 +941,13 @@ export function createSim(script, options = {}) {
     const ghostTanking = live && !tankRole && ghostInBossRange(script.boss.meleeRange + 1);
     // The raid holds its damage for a few seconds after the pull (not after a landing).
     const raidHolding = holdAfterPull();
+    const inControl = p.fearedUntil <= state.t && p.stunnedUntil <= state.t;
     tickThreat(state.threat, dt, threatCfg, live && tankRole && !raidHolding, attacking, ghostTanking);
     if (live) {
       const prev = b.target;
       if (tankRole) {
         b.target = selectTarget(state.threat, b.target, state.t, threatCfg);
-        if (prev === 'player' && b.target === 'raid') { addMetric('threatLostCount', 1); state.lastTurnAt = state.t; emit('threatLost'); toast('She turned on the raid. Taunt!', 'bad'); for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
+        if (prev === 'player' && b.target === 'raid') { addMetric('threatLostCount', 1); state.lastTurnAt = state.t; emit('threatLost'); toast('The boss turned on the raid. Taunt!', 'bad'); for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
         else if (prev === 'raid' && b.target === 'player') { state.lastRegainAt = state.t; emit('threatRegained', { by: 'threat' }); }
       } else {
         // The ghost tank taunts back after a delay whenever she is off it.
@@ -1028,7 +1028,7 @@ export function createSim(script, options = {}) {
     // Continuous metrics.
     if (live) {
       if (tankRole) { addMetric('tankWindow', dt); if (b.target !== 'player' && !raidHitsExcused()) addMetric('bossLooseSeconds', dt); }
-      else if ((state.role === 'melee' || state.role === 'ranged') && !raidHolding && p.fearedUntil <= state.t) addMetric('dpsWindow', dt);
+      else if ((state.role === 'melee' || state.role === 'ranged') && !raidHolding && inControl) addMetric('dpsWindow', dt);
       const facing = bossFacingRaid(state, script);
       state.feedback.facingWrong = tankRole && facing;
       if (tankRole && facing && !raidHitsExcused()) addMetric('bossFacingRaid', dt);
@@ -1045,14 +1045,14 @@ export function createSim(script, options = {}) {
           const inR = !!aim;
           state.feedback.inRangeOk = inR;
           state.feedback.target = aim ? (aim.add ? { add: aim.add.uid } : { boss: true }) : null;
-          if (!inR && p.fearedUntil <= state.t) addMetric('outOfRange', dt);
+          if (!inR && inControl) addMetric('outOfRange', dt);
           const attackReady = (state.abilities.readyAt.attack ?? -Infinity) <= state.t && state.abilities.gcdUntil <= state.t;
-          if (inR && attackReady && !state.feedback.holdAttack && !raidHolding && b.target === 'ghost' && p.fearedUntil <= state.t) addMetric('dpsIdle', dt);
+          if (inR && attackReady && !state.feedback.holdAttack && !raidHolding && b.target === 'ghost' && inControl) addMetric('dpsIdle', dt);
         }
       }
     } else {
       state.feedback.facingWrong = false; state.feedback.inFront = false; state.feedback.holdAttack = false;
-      if ((state.role === 'melee' || state.role === 'ranged') && p.fearedUntil <= state.t && w.whelps.some((a) => a.killable)) {
+      if ((state.role === 'melee' || state.role === 'ranged') && inControl && w.whelps.some((a) => a.killable)) {
         // The boss is gone but there are adds to kill: the DPS still have a job.
         addMetric('dpsWindow', dt);
         const aim = attackTarget(attackRange(state, script));

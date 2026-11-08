@@ -21,7 +21,7 @@ const KEEP_RESOLVED = 1.5;
 
 import { roleMatches } from './scoring.js';
 
-const cueDefs = (script, role) => ((script.cues && script.cues.list) || []).filter((c) => roleMatches(c.role, role));
+const cueDefs = (script, state) => ((script.cues && script.cues.list) || []).filter((c) => roleMatches(c.role, state.role, state.tankRole));
 const perfectWindow = (script) => (script.cues && script.cues.windows && script.cues.windows.perfect) ?? 0.3;
 
 function makeBeat(def, at, phase, t) {
@@ -94,7 +94,7 @@ export function onCueEvent(state, script, eventType, t) {
     const delta = t - b.at;
     resolved.push(resolveBeat(cues, b, delta <= perfect ? 'perfect' : 'good', t, delta));
   }
-  for (const c of cueDefs(script, state.role)) {
+  for (const c of cueDefs(script, state)) {
     if (c.on !== 'event' || c.event !== eventType) continue;
     if (pendingFor(cues, c.id)) continue;
     const at = t + (c.offset || 0);

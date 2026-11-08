@@ -367,7 +367,7 @@ test('losing threat turns her on the raid and Taunt brings her back', () => {
   assert.ok(ev.some((e) => e.type === 'threatLost'));
   assert.equal(b.target, 'raid');
   assert.equal(s.metrics.threatLostCount, 1);
-  assert.equal(s.nextExpected.label, 'Taunt. She is on the raid');
+  assert.equal(s.nextExpected.label, 'Taunt. The boss is on the raid');
   // she walks toward the raid
   const yBefore = b.y;
   run(sim, 1);

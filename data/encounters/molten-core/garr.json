@@ -1,0 +1,1233 @@
+{
+ "id": "garr",
+ "name": "Garr",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/garr.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 659,538 HP, 8 Firesworn (61,040 HP each). Modelled as two phases: Firesworn alive (130 s, to 70%) then Garr frenzied (160 s), a 4-5 minute kill. Firesworn: an `adds` wave of 4 beside the tank spot 10 s in; the real fight has 8, with 3-5 banished by Warlocks and killed after Garr. The off-tank role holds them on their own spot (`holdsBoss: false`) while a ghost tank has Garr. They are not killable here: raids differ on the order (the tanked ones first, or Garr first with the rest banished), and Frenzy and Eruption cannot be tied to a kill, so they die on a timer after 120 s. Separation Anxiety is a 100 yd aura (Wowhead Classic 23487, cmangos), so it cannot trigger in this room; the 15 yd in the guides is probably Eruption. Eruption: the research has it on each Firesworn death, 15 yd around the add, 1850-2150 Fire (middle 2000) with a knockback (200-225). The engine has no trigger on an add death, so it is an `aoe` of radius 15 around Garr on a cadence (every 24 s through phase 1, four explosions in the time he is at 100-70%). It has a 4 s call-out telegraph (the raid watches add health) with `moveOut` walking melee out, and it is cast off the boss so he keeps swinging. There is no knockback on an `aoe`, so the knockback lives in the tip; melee are scored for being inside (`eruptionsTaken`). Magma Shackles: -60% movement for 15 s, Magic, 45 yd, every 11-16 s (DBM; every 13.7, jitter 2.5). The engine has no snare: it is a Magic debuff the healer removes, on `all` because the real spell hits the whole 45 yd room. Antimagic Pulse removes one Magic BUFF from everyone every 16-21 s (DBM; every 18.5, jitter 2.5). The engine has no buffs and there is nothing to dispel afterwards, so it is a non-dispellable notice on the timeline. Immolate: Garr and Firesworn use 15732 (DBM, Wowhead Classic); level-scaled to 337 + 168 every 3 s for 21 s (wiki), Magic, on the add tanks. The engine cannot target the off-tank here, so it is a Magic debuff on the tank ticking 56 per second, every 18 s through phase 1, which gives the healer the priority dispel the real fight has. The 337 direct hit is not modelled. Frenzy: +9% attack speed per Firesworn death, 30 min, stacking to 8. The engine has one permanent `enrage`, applied when phase 2 starts at 1.45x (about five dead adds; the real value depends on how many were killed before Garr). Massive Eruption (6 min, cmangos only) is not reached in this script and is not modelled. Boss melee 420 per 2 s is a placeholder scaled to the 10,000 HP tank. Engine gaps: adds have no abilities and no banish; no Eruption knockback or add-death location; no snare; no buff system; Frenzy is one step instead of stacking; debuffs on others are only dispelled when the player is the healer.",
+ "sources": [
+  "docs/research/molten-core/garr.md",
+  "https://warcraft.wiki.gg/wiki/Garr",
+  "https://warcraft.wiki.gg/wiki/Firesworn",
+  "https://www.wowhead.com/tbc/npc=12057/garr",
+  "https://www.wowhead.com/tbc/npc=12099/firesworn",
+  "https://wotlkdb.com/?spell=19492",
+  "https://wotlkdb.com/?spell=19496",
+  "https://wotlkdb.com/?spell=19516",
+  "https://wotlkdb.com/?spell=19497",
+  "https://wotlkdb.com/?spell=20483",
+  "https://wotlkdb.com/?spell=20294",
+  "https://wotlkdb.com/?spell=23492",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_garr.cpp",
+  "https://www.wowhead.com/classic/guides/garr-molten-core-strategy",
+  "https://www.tentonhammer.com/guides/mc-boss-guide-boss-4-garr",
+  "https://legacy-wow.com/molten-core-boss-guide-garr/",
+  "https://wowtbc.gg/classic/boss-guides/molten-core"
+ ],
+ "arena": {
+  "name": "Garr's chamber",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      42,
+      0
+     ],
+     [
+      41.4,
+      7.3
+     ],
+     [
+      39.5,
+      14.4
+     ],
+     [
+      36.4,
+      21
+     ],
+     [
+      32.2,
+      27
+     ],
+     [
+      27,
+      32.2
+     ],
+     [
+      21,
+      36.4
+     ],
+     [
+      14.4,
+      39.5
+     ],
+     [
+      7.3,
+      41.4
+     ],
+     [
+      0,
+      42
+     ],
+     [
+      -7.3,
+      41.4
+     ],
+     [
+      -14.4,
+      39.5
+     ],
+     [
+      -21,
+      36.4
+     ],
+     [
+      -27,
+      32.2
+     ],
+     [
+      -32.2,
+      27
+     ],
+     [
+      -36.4,
+      21
+     ],
+     [
+      -39.5,
+      14.4
+     ],
+     [
+      -41.4,
+      7.3
+     ],
+     [
+      -42,
+      0
+     ],
+     [
+      -41.4,
+      -7.3
+     ],
+     [
+      -39.5,
+      -14.4
+     ],
+     [
+      -36.4,
+      -21
+     ],
+     [
+      -32.2,
+      -27
+     ],
+     [
+      -27,
+      -32.2
+     ],
+     [
+      -21,
+      -36.4
+     ],
+     [
+      -14.4,
+      -39.5
+     ],
+     [
+      -7.3,
+      -41.4
+     ],
+     [
+      0,
+      -42
+     ],
+     [
+      7.3,
+      -41.4
+     ],
+     [
+      14.4,
+      -39.5
+     ],
+     [
+      21,
+      -36.4
+     ],
+     [
+      27,
+      -32.2
+     ],
+     [
+      32.2,
+      -27
+     ],
+     [
+      36.4,
+      -21
+     ],
+     [
+      39.5,
+      -14.4
+     ],
+     [
+      41.4,
+      -7.3
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -38
+     ],
+     [
+      9,
+      -38
+     ],
+     [
+      9,
+      -62
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      9,
+      -41
+     ],
+     [
+      18.6,
+      -37.6
+     ],
+     [
+      27.2,
+      -32
+     ],
+     [
+      34.1,
+      -24.5
+     ],
+     [
+      39,
+      -15.6
+     ],
+     [
+      41.6,
+      -5.7
+     ],
+     [
+      41.8,
+      4.5
+     ],
+     [
+      39.4,
+      14.5
+     ],
+     [
+      34.8,
+      23.6
+     ],
+     [
+      28.1,
+      31.3
+     ],
+     [
+      19.7,
+      37.1
+     ],
+     [
+      10.1,
+      40.8
+     ],
+     [
+      0,
+      42
+     ],
+     [
+      -10.1,
+      40.8
+     ],
+     [
+      -19.7,
+      37.1
+     ],
+     [
+      -28.1,
+      31.3
+     ],
+     [
+      -34.8,
+      23.6
+     ],
+     [
+      -39.4,
+      14.5
+     ],
+     [
+      -41.8,
+      4.5
+     ],
+     [
+      -41.6,
+      -5.7
+     ],
+     [
+      -39,
+      -15.6
+     ],
+     [
+      -34.1,
+      -24.5
+     ],
+     [
+      -27.2,
+      -32
+     ],
+     [
+      -18.6,
+      -37.6
+     ],
+     [
+      -9,
+      -41
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -41
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -41
+     ],
+     [
+      9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Keep him here: 15 yd off the raid, adds beside him",
+    "at": [
+     0,
+     36
+    ]
+   },
+   {
+    "text": "Lava: watch the knockback",
+    "at": [
+     -32,
+     16
+    ]
+   },
+   {
+    "text": "Lava: watch the knockback",
+    "at": [
+     32,
+     16
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -58,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 14,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -46,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 26,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 18,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Garr"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -8,
+   "spread": 11
+  },
+  "raidSpotP2": {
+   "x": 0,
+   "y": -8,
+   "spread": 11
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -6,
+   "tolerance": 8,
+   "label": "Ranged: outside the 15 yd Eruption"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 6,
+   "label": "Healers"
+  },
+  "fireswornWest": {
+   "x": -12,
+   "y": 30,
+   "label": "Firesworn"
+  },
+  "fireswornEast": {
+   "x": 12,
+   "y": 30,
+   "label": "Firesworn"
+  },
+  "fireswornNorthWest": {
+   "x": -6,
+   "y": 36,
+   "label": "Firesworn"
+  },
+  "fireswornNorthEast": {
+   "x": 6,
+   "y": 36,
+   "label": "Firesworn"
+  },
+  "fireswornHoldSpot": {
+   "x": 0,
+   "y": 34,
+   "label": "Firesworn held here, close to Garr"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 8.5,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 420,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.45
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull Garr about 15 yd off the raid with his back to the room, hold him through Firesworn deaths and every Frenzy stack, and make sure a knockback cannot put you in the lava.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Firesworn off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the Firesworn, not Garr. Pick them up as they come in and hold them on your spot. Keep them off the raid. They only gain Separation Anxiety (+300% damage, Banish immune) if dragged out of Garr's 100 yd aura, which will not happen in this room.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the assigned Firesworn one at a time, step out when one is about to die (it explodes for 2000 and knocks you back 15 yd round it), then go back to work. Garr speeds up with every death, so keep your threat under the tank.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stay at max range and finish the Firesworn from there; a dying add explodes in a 15 yd circle. Warlocks: Banish on cooldown on your target, that is the priority. Do not rebuff after Antimagic Pulse.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Cleanse Immolate off the tanks first, then Magma Shackles. Shift heals to the main tank as adds die and Garr gets faster.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. Here one button stands in for Dispel Magic, Cleanse, Remove Curse and Remove Lesser Curse."
+  }
+ },
+ "actions": {
+  "firesworn": {
+   "label": "Firesworn",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "fireswornWest",
+    "fireswornEast",
+    "fireswornNorthWest",
+    "fireswornNorthEast"
+   ],
+   "speed": 5,
+   "aggroRange": 18,
+   "lifetime": 120,
+   "heldLifetime": 120,
+   "pickup": "offtank",
+   "holdSpot": "fireswornHoldSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Eight Firesworn dance round Garr. Warlocks Banish three to five; off-tanks pick up the rest and hold them close to him. Banished ones die after Garr."
+  },
+  "eruption": {
+   "label": "Eruption",
+   "kind": "aoe",
+   "cast": 4,
+   "offBoss": true,
+   "radius": 15,
+   "damage": 2000,
+   "tankDamage": 2000,
+   "playerMetric": "eruptionsTaken",
+   "moveOut": "melee",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A Firesworn dies and explodes: 1850-2150 Fire and a knockback within 15 yd of it. Melee step out when it is nearly dead. Stand so the knockback cannot throw you into lava or uncleared Molten Giants."
+  },
+  "magmaShackles": {
+   "label": "Magma Shackles",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "all",
+   "duration": 15,
+   "tickDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Everyone within 45 yd moves 60% slower for 15 s. Magic: dispel it, and Free Action Potions break it. Slowed melee cannot get out of an Eruption."
+  },
+  "antimagicPulse": {
+   "label": "Antimagic Pulse",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "all",
+   "duration": 8,
+   "tickDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Strips one Magic buff from everyone within 45 yd every 16-21 s. Stack a junk buff before the pull. Nothing to dispel afterwards: shown so the timeline is real."
+  },
+  "immolate": {
+   "label": "Immolate",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "tank",
+   "duration": 21,
+   "tickDamage": 56,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "337 Fire and 168 every 3 s for 21 s. Magic. Cleanse it off the tanks first."
+  },
+  "frenzy": {
+   "label": "Frenzy",
+   "kind": "enrage",
+   "cast": 0,
+   "toast": "Garr is Frenzied: every dead Firesworn makes him faster.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "+9% attack speed for each Firesworn that has died, up to eight stacks. Here it arrives as one step when the adds are gone. Move more healers onto the main tank."
+  },
+  "aggroPull": {
+   "label": "Aggro pull",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "conditional": "onPlayer",
+   "tip": "Someone overtakes the tank on threat."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Firesworn",
+   "subtitle": "Adds alive",
+   "hpFrom": 1,
+   "hpTo": 0.7,
+   "duration": 130,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "fireswornHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "firesworn",
+     "first": 10
+    },
+    {
+     "id": "magmaShackles",
+     "first": 7.5,
+     "every": 13.7,
+     "jitter": 2.5
+    },
+    {
+     "id": "antimagicPulse",
+     "first": 12.5,
+     "every": 18.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "immolate",
+     "first": 18,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "eruption",
+     "first": 32,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "aggroPull",
+     "first": 40,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull Garr 15 yd off the raid",
+     "tip": "Taunt him and walk him north, about 15 yd from the raid, with room behind you so a knockback cannot put you in the lava."
+    },
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "He gets faster with every dead add, so threat matters more as the fight goes on. Taunt the moment he turns."
+    },
+    {
+     "id": "adds",
+     "type": "afterEvent",
+     "event": "firesworn",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Firesworn",
+     "tip": "Keep them off the raid. They only gain Separation Anxiety (+300% damage, Banish immune) if dragged out of Garr's 100 yd aura, which will not happen in this room."
+    },
+    {
+     "id": "addsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the Firesworn off the raid",
+     "tip": "A Firesworn in the raid means an Eruption in the raid. Hold them on your spot."
+    },
+    {
+     "id": "eruptionOut",
+     "type": "continuous",
+     "metric": "eruptionsTaken",
+     "role": "melee",
+     "label": "Step out before a Firesworn dies",
+     "tip": "When the call comes that an add is nearly dead, walk 15 yd out, let it go off, and walk back in. Do not stay for the last hit."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "shacklesDispel",
+     "type": "afterEvent",
+     "event": "magmaShackles",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 6,
+     "role": "healer",
+     "label": "Dispel Magma Shackles",
+     "tip": "Dispel Shackles on tanks and melee when you have a free global; Immolate comes first."
+    },
+    {
+     "id": "immolateDispel",
+     "type": "afterEvent",
+     "event": "immolate",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 3,
+     "role": "healer",
+     "label": "Cleanse Immolate off the tanks",
+     "tip": "Immolate is the one that kills tanks: 56 a second on top of everything else. Cleanse it first, always."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank is taking Garr, Immolate and every Eruption near them. Keep heals rolling and do not let them sit under half."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Garr",
+   "subtitle": "Frenzied, no adds",
+   "hpFrom": 0.7,
+   "hpTo": 0,
+   "duration": 160,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "fireswornHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "frenzy",
+     "first": 1
+    },
+    {
+     "id": "magmaShackles",
+     "first": 7.5,
+     "every": 13.7,
+     "jitter": 2.5
+    },
+    {
+     "id": "antimagicPulse",
+     "first": 12.5,
+     "every": 18.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "aggroPull",
+     "first": 30,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "He is at his fastest now. Taunt the moment he turns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "shacklesDispel",
+     "type": "afterEvent",
+     "event": "magmaShackles",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 6,
+     "role": "healer",
+     "label": "Dispel Magma Shackles",
+     "tip": "Dispel Shackles on tanks and melee when you have a free global."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Every Frenzy stack is another 9% attack speed. Keep two healers on the main tank and pre-heal."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands. Tanks first."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "eruptionsTaken": {
+   "label": "Eruptions you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 2,
+   "roles": "melee",
+   "tip": "Step out when a Firesworn is nearly dead. 15 yd is enough."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Press notes: Taunt when he turns; Taunt or walk into the Firesworn; Dispel when something lands; Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Garr turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "tauntFiresworn",
+    "ability": "taunt",
+    "on": "event",
+    "event": "firesworn",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "FIRESWORN",
+    "label": "Pick up the Firesworn",
+    "tip": "Taunt one or run into them as they arrive, before they reach anyone.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "pullGarr",
+   "name": "Pull and hold",
+   "description": "Pull Garr to the north and hold him through the aggro pulls.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "aggroPull",
+     "first": 20,
+     "every": 16,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "addPickup",
+   "name": "Firesworn pickup",
+   "description": "Take the Firesworn as they arrive and hold them on your spot, off the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "firesworn",
+     "first": 3,
+     "every": 40
+    }
+   ]
+  },
+  {
+   "id": "eruptionFootwork",
+   "name": "Eruption footwork",
+   "description": "Already on him. Eruption every 10 s: walk 15 yd out of Garr before it goes off and straight back, and hold your threat.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "eruption",
+     "first": 5,
+     "every": 10
+    },
+    {
+     "id": "aggroPull",
+     "first": 8,
+     "every": 18,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "cleanseOrder",
+   "name": "Cleanse priority",
+   "description": "Already on him. Immolate and Shackles keep coming: clear Immolate off the tank first, then Shackles, and keep them above half.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "immolate",
+     "first": 3,
+     "every": 12
+    },
+    {
+     "id": "magmaShackles",
+     "first": 5,
+     "every": 8
+    },
+    {
+     "id": "eruption",
+     "first": 7,
+     "every": 14
+    }
+   ]
+  }
+ ]
+}

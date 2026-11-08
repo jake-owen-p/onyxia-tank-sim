@@ -1,16 +1,16 @@
 // Scenario builder: turns a mode choice into createSim options plus metadata
 // the session and scorecard use. No DOM.
 
-import { roleMatches } from '../core/scoring.js';
+import { roleMatches, holdsBoss } from '../core/scoring.js';
 
 /** Drills available to a role. */
 export function drillsForRole(script, role) {
-  return (script.drills || []).filter((d) => roleMatches(d.roles, role));
+  return (script.drills || []).filter((d) => roleMatches(d.roles, role, holdsBoss(script, role)));
 }
 
 /** Does the script's tutorial apply to this role? */
 export function tutorialForRole(script, role) {
-  return !!(script.tutorial && script.tutorial.steps && script.tutorial.steps.length && roleMatches(script.tutorial.roles, role));
+  return !!(script.tutorial && script.tutorial.steps && script.tutorial.steps.length && roleMatches(script.tutorial.roles, role, holdsBoss(script, role)));
 }
 
 /** The role to play a script with: the chosen one when the script offers it, else its first role. */

@@ -120,7 +120,7 @@ export function createTutorial({ script, sim, settings, panel, audio = null, onE
       if (d.type === 'eventLanded' && evt.type === 'action' && evt.id === d.event) {
         const m = d.metricUnchanged ? (sim.state.metrics[d.metricUnchanged] || 0) : 0;
         if (m <= metricAtStart) landed = true;
-        else { panel.setStatus('The raid was hit. Hold her facing the wall and try again.'); retryAt = t() + RETRY_DELAY; metricAtStart = m; }
+        else { panel.setStatus('The raid was hit. Hold the boss facing away and try again.'); retryAt = t() + RETRY_DELAY; metricAtStart = m; }
       }
       if (d.type === 'expectation' && evt.type === 'expectation' && evt.id === d.id) {
         if (evt.status === 'ontime' || evt.status === 'late') landed = true;

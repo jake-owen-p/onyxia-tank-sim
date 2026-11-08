@@ -1,0 +1,1346 @@
+{
+ "id": "sulfuron-harbinger",
+ "name": "Sulfuron Harbinger",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/sulfuron-harbinger.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 439,692 HP, 4 Flamewaker Priests (67,980 HP each). Two phases: priests alive (130 s, Sulfuron untouched) then Sulfuron (120 s). The real priest phase is about 4 minutes; shortened so a rehearsal stays under 5 minutes. Flamewaker Priests: a killFirst `adds` wave of 4 beside the tank spot 10 s in, so attacking Sulfuron while one lives is scored. The off-tank role holds them (`holdsBoss: false`) on a spot on the west side while a ghost tank has Sulfuron. Real raids tank each priest in its own corner 45 yd from Sulfuron and each other (so Inspire has no target and Dark Mending cannot reach the kill target); this room has one hold spot, as far from him as ranged can still reach from the raid. Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Dark Mending: 2 s cast (DBM 19775), heals 27,750-32,250 (DBC, wiki Sulfuron page) vs 1,069 (wiki priest page, an open question), interruptible, cast off the boss by a priest so he keeps swinging, every 12 s through phase 1 (cmangos: every 15-20 s per priest; a raid-wide middle). The cast bar raises the Kick note; a cast that finishes is scored for melee as `mendingsLanded`. Hand of Ragnaros: `knockback`, radial, 10 yd, 300-400 Fire (350), knockback pushing the player 8 yd (DBC 75-100 units; estimate), 2 s `stun` (19780), cadence 13.5 s (cmangos 12-15). Free Action Potion is not modelled. Melee on the priests are out of its reach, as in the real fight. Immolate: 20294, 760-840 + 380-420 every 3 s for 21 s, Magic. On a random player (cmangos); here random with `playerChance` 0.25, ticking 133 a second. Shadow Word: Pain: 19776, 120 Shadow every 3 s for 18 s (Wowhead Classic, tracked by DBM): 40 per second, Magic. Both every 18-20 s per priest in reality; here a single stream of each (Immolate every 18, SW:Pain every 20) standing for the four priests combined, because each priest firing its own would flood the healer far past what one player can dispel. Dark Strike on priest tanks: weapon damage +570-630 (DBC) vs +436 (wiki): as a spike on the tank (600) every 16 s, as a one-tick non-dispellable debuff. Demoralizing Shout: -300 AP, 45 yd, 30 s, no dispel: a do-nothing debuff so the timeline shows it. Inspire (+25% physical, +100% attack speed on a priest for 10 s) is not modelled because the engine has no add buffs. Flame Spear: 850-1150 (1000) with 10 yd splash, every 12-16 s, as a `projectile` with `playerChance` 0.3; the splash is why the raid spreads. Boss melee 520 per 2 s is a placeholder scaled to the 10,000 HP tank. The engine applies a `knockback` action's damage to the player only, so the ghost tank never takes Hand of Ragnaros; the placeholder melee covers that. Engine gaps: Kick is on a single cast bar rather than on a specific priest; Inspire not modelled; adds have no abilities of their own; debuffs on others only dispelled when the player is the healer.",
+ "sources": [
+  "docs/research/molten-core/sulfuron-harbinger.md",
+  "https://warcraft.wiki.gg/wiki/Sulfuron_Harbinger",
+  "https://warcraft.wiki.gg/wiki/Flamewaker_Priest",
+  "https://www.wowhead.com/tbc/npc=12098/sulfuron-harbinger",
+  "https://www.wowhead.com/tbc/npc=11662/flamewaker-priest",
+  "https://wotlkdb.com/?spell=19778",
+  "https://wotlkdb.com/?spell=19779",
+  "https://wotlkdb.com/?spell=19780",
+  "https://wotlkdb.com/?spell=19781",
+  "https://wotlkdb.com/?spell=19775",
+  "https://wotlkdb.com/?spell=19777",
+  "https://wotlkdb.com/?spell=19776",
+  "https://wotlkdb.com/?spell=23952",
+  "https://wotlkdb.com/?spell=20294",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_sulfuron_harbinger.cpp",
+  "https://www.wowhead.com/classic/guides/sulfuron-harbinger-molten-core-strategy",
+  "https://wowtbc.gg/classic/boss-guides/molten-core"
+ ],
+ "arena": {
+  "name": "Sulfuron's chamber",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -40
+     ],
+     [
+      10,
+      -40
+     ],
+     [
+      10,
+      -66
+     ],
+     [
+      -10,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      10,
+      -42.8
+     ],
+     [
+      20,
+      -39.2
+     ],
+     [
+      28.8,
+      -33.2
+     ],
+     [
+      36,
+      -25.3
+     ],
+     [
+      41,
+      -15.9
+     ],
+     [
+      43.6,
+      -5.6
+     ],
+     [
+      43.7,
+      5
+     ],
+     [
+      41.2,
+      15.4
+     ],
+     [
+      36.3,
+      24.8
+     ],
+     [
+      29.3,
+      32.8
+     ],
+     [
+      20.5,
+      38.9
+     ],
+     [
+      10.6,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.6,
+      42.7
+     ],
+     [
+      -20.5,
+      38.9
+     ],
+     [
+      -29.3,
+      32.8
+     ],
+     [
+      -36.3,
+      24.8
+     ],
+     [
+      -41.2,
+      15.4
+     ],
+     [
+      -43.7,
+      5
+     ],
+     [
+      -43.6,
+      -5.6
+     ],
+     [
+      -41,
+      -15.9
+     ],
+     [
+      -36,
+      -25.3
+     ],
+     [
+      -28.8,
+      -33.2
+     ],
+     [
+      -20,
+      -39.2
+     ],
+     [
+      -10,
+      -42.8
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -42.8
+     ],
+     [
+      -10,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -42.8
+     ],
+     [
+      10,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "Back of the room: Sulfuron goes here",
+    "at": [
+     0,
+     40
+    ]
+   },
+   {
+    "text": "Priests held here, as far from Sulfuron as the room allows",
+    "at": [
+     -32,
+     16
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 16,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -48,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 30,
+   "tolerance": 4,
+   "label": "Tank: back of the room"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 22,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Sulfuron"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -6,
+   "spread": 12
+  },
+  "raidSpotP2": {
+   "x": 0,
+   "y": -6,
+   "spread": 12
+  },
+  "rangedSpot": {
+   "x": -12,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Ranged: spread 10 yd apart, in reach of the priests and Sulfuron"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 6,
+   "label": "Healers"
+  },
+  "priestWest": {
+   "x": -11,
+   "y": 33,
+   "label": "Flamewaker Priest"
+  },
+  "priestEast": {
+   "x": 11,
+   "y": 33,
+   "label": "Flamewaker Priest"
+  },
+  "priestNorthWest": {
+   "x": -5,
+   "y": 39,
+   "label": "Flamewaker Priest"
+  },
+  "priestNorthEast": {
+   "x": 5,
+   "y": 39,
+   "label": "Flamewaker Priest"
+  },
+  "priestHoldSpot": {
+   "x": -30,
+   "y": 8,
+   "tolerance": 5,
+   "label": "Priests held here, away from Sulfuron"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 8.5,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 520,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Take Sulfuron to the back of the room and hold him through Hand of Ragnaros every 13 s: it hits you for 350, throws you back and stuns you for 2 s in the real fight, so get back on him the moment you land.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Priest off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the Flamewaker Priests, not Sulfuron. Pick them up as they come in and hold them on your spot, away from him so Inspire cannot reach them; the raid kills them on you.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the priests first: the called one, then the next. Kick every Dark Mending: one landing heals for about 30,000. Stay out of 10 yd of Sulfuron until the priests are dead.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Spread 10 yd apart so Flame Spear only hits one of you. Kill the called priest, then Sulfuron. Casters with interrupts help with Dark Mending.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Cleanse Immolate and Shadow Word: Pain off the raid as fast as they land, and keep the tank up through Dark Strike and Hand of Ragnaros.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. Here one button stands in for Dispel Magic, Cleanse, Remove Curse and Remove Lesser Curse."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Kick",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 8,
+   "icon": "interrupt",
+   "tip": "Interrupts an interruptible cast if you are in melee range. Kick, Pummel, Shield Bash."
+  }
+ },
+ "actions": {
+  "priests": {
+   "label": "Flamewaker Priests",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "priestWest",
+    "priestEast",
+    "priestNorthWest",
+    "priestNorthEast"
+   ],
+   "speed": 5,
+   "aggroRange": 18,
+   "lifetime": 118,
+   "heldLifetime": 118,
+   "pickup": "offtank",
+   "holdSpot": "priestHoldSpot",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Four priests come with him. A tank each, 45 yd from Sulfuron in the real fight. Killed one at a time before you touch him."
+  },
+  "handOfRagnaros": {
+   "label": "Hand of Ragnaros",
+   "kind": "knockback",
+   "cast": 0,
+   "radial": true,
+   "knockbackRange": 10,
+   "knockback": 8,
+   "damage": 350,
+   "stun": 2,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "300-400 Fire, a knockback and a 2 s stun to everyone within 10 yd of Sulfuron, every 12-15 s. Free Action Potion breaks the stun. Land back on him as fast as you can."
+  },
+  "darkMending": {
+   "label": "Dark Mending",
+   "kind": "transition",
+   "cast": 2,
+   "offBoss": true,
+   "interruptible": true,
+   "completedMetric": "mendingsLanded",
+   "warn": true,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A 2 s heal for about 30,000 on the lowest-health priest or Sulfuron. Kick it every time."
+  },
+  "flameSpear": {
+   "label": "Flame Spear",
+   "kind": "projectile",
+   "cast": 0,
+   "travel": 0.7,
+   "splash": 10,
+   "damage": 1000,
+   "playerChance": 0.3,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "Thrown at a random player, with 850-1150 Fire to everyone within 10 yd of them. The reason the raid spreads 10 yd apart."
+  },
+  "immolate": {
+   "label": "Immolate",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "count": 4,
+   "playerChance": 0.25,
+   "duration": 21,
+   "tickDamage": 133,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "A priest burns a random player: 760-840 Fire and 380-420 every 3 s for 21 s. Magic. Cleanse it."
+  },
+  "swPain": {
+   "label": "Shadow Word: Pain",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "count": 4,
+   "playerChance": 0.25,
+   "duration": 18,
+   "tickDamage": 40,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "120 Shadow every 3 s for 18 s. Magic. Cleanse it."
+  },
+  "darkStrike": {
+   "label": "Dark Strike",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 1.5,
+   "tickDamage": 600,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "A priest smashes its tank for weapon damage plus 570-630 Shadow. Shadow Protection in the tank group."
+  },
+  "demoralizingShout": {
+   "label": "Demoralizing Shout",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "all",
+   "duration": 30,
+   "tickDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "-300 attack power to everyone within 45 yd for 30 s. Nothing to do about it; shown so the timeline is real."
+  },
+  "aggroPull": {
+   "label": "Aggro pull",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "conditional": "onPlayer",
+   "tip": "Every stun costs the tank threat. Someone overtakes them."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Flamewaker Priests",
+   "subtitle": "Kill the priests, kick everything",
+   "hpFrom": 1,
+   "hpTo": 0.97,
+   "duration": 130,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "priestHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "priests",
+     "first": 10
+    },
+    {
+     "id": "flameSpear",
+     "first": 8,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "handOfRagnaros",
+     "first": 6,
+     "every": 13.5,
+     "jitter": 1.5
+    },
+    {
+     "id": "swPain",
+     "first": 11,
+     "every": 20,
+     "jitter": 3
+    },
+    {
+     "id": "immolate",
+     "first": 16,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "darkStrike",
+     "first": 14,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "demoralizingShout",
+     "first": 15,
+     "every": 17.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "darkMending",
+     "first": 18,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "aggroPull",
+     "first": 40,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Take Sulfuron to the back of the room",
+     "tip": "Taunt him and walk him north to the back wall, well away from where the priests are going."
+    },
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "Every stun and knockback costs threat. The moment he turns, Taunt."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the priests before Sulfuron",
+     "tip": "Turn to face a priest and kill it. Sulfuron waits until they are dead."
+    },
+    {
+     "id": "priests",
+     "type": "afterEvent",
+     "event": "priests",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the priests",
+     "tip": "Run into them or Taunt one the moment they arrive, then hold them on your spot. Real fights give each priest its own corner and tank."
+    },
+    {
+     "id": "priestsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the priests off the raid",
+     "tip": "A priest in the raid means Immolate and Shadow Word: Pain on the healers."
+    },
+    {
+     "id": "kickMending",
+     "type": "continuous",
+     "metric": "mendingsLanded",
+     "role": "melee",
+     "label": "Kick every Dark Mending",
+     "tip": "Watch the cast bar. A 2 s Dark Mending heals 30,000. Kick it inside 2 s, every time; two people assigned to each priest."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "immolateDispel",
+     "type": "afterEvent",
+     "event": "immolate",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cleanse Immolate",
+     "tip": "Cleanse it the moment it lands. Stacks from several priests."
+    },
+    {
+     "id": "painDispel",
+     "type": "afterEvent",
+     "event": "swPain",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cleanse Shadow Word: Pain",
+     "tip": "Same again. Clear it before the next one lands on a different person."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Hand of Ragnaros and Dark Strike spike the tank together. Keep a heal landing after every one."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Sulfuron",
+   "subtitle": "Priests dead",
+   "hpFrom": 0.97,
+   "hpTo": 0,
+   "duration": 120,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "priestHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "flameSpear",
+     "first": 4,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "handOfRagnaros",
+     "first": 3,
+     "every": 13.5,
+     "jitter": 1.5
+    },
+    {
+     "id": "demoralizingShout",
+     "first": 8,
+     "every": 17.5,
+     "jitter": 2.5
+    },
+    {
+     "id": "aggroPull",
+     "first": 30,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "The whole raid is on him now. Taunt the moment he turns."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He hits harder now the raid is on him. Keep the tank above half through every Hand of Ragnaros."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands. Tanks first."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "mendingsLanded": {
+   "label": "Dark Mendings that landed",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 3,
+   "roles": "melee",
+   "phases": [
+    1
+   ],
+   "tip": "Each one is about 30,000 back onto a priest or Sulfuron. Kick inside the 2 s cast."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Press notes: Kick Dark Mending inside 2 s; Taunt when he turns; Taunt or walk into the priests; Dispel Immolate and Shadow Word: Pain; Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Sulfuron turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "kickMending",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:darkMending",
+    "offset": 0.5,
+    "early": 0.5,
+    "late": 1.4,
+    "role": "melee",
+    "short": "KICK",
+    "label": "Kick Dark Mending",
+    "tip": "A priest has started Dark Mending. Press Kick inside 2 s.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "tauntPriests",
+    "ability": "taunt",
+    "on": "event",
+    "event": "priests",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "PRIESTS",
+    "label": "Pick up the priests",
+    "tip": "Taunt one or run into them as they arrive, before they reach anyone.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "priestPickup",
+   "name": "Priest pickup",
+   "description": "Pick up the priests as they arrive and hold them on your spot, off the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "priests",
+     "first": 3,
+     "every": 40
+    }
+   ]
+  },
+  {
+   "id": "handHold",
+   "name": "Hold through Hand of Ragnaros",
+   "description": "Already tanking him. Hand of Ragnaros every 8 s throws you back and stuns you: walk straight back and Taunt him the moment an aggro pull turns him.",
+   "roles": "tank",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "handOfRagnaros",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "aggroPull",
+     "first": 10,
+     "every": 15,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "kickDrill",
+   "name": "Kick Dark Mending",
+   "description": "Dark Mending every 11 s (your Kick is ready again just in time). Interrupt each one and keep your threat under the tank.",
+   "roles": "melee",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "darkMending",
+     "first": 4,
+     "every": 11
+    },
+    {
+     "id": "aggroPull",
+     "first": 9,
+     "every": 20,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "spreadDps",
+   "name": "Spread and DPS",
+   "description": "Flame Spear keeps landing with a 10 yd splash: stay spread and keep your threat under the tank.",
+   "roles": "ranged",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "flameSpear",
+     "first": 3,
+     "every": 6
+    },
+    {
+     "id": "aggroPull",
+     "first": 8,
+     "every": 16,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "cleanseStream",
+   "name": "Immolate and Pain",
+   "description": "Immolate every 10 s, Shadow Word: Pain every 13 s, Dark Strike on the tank: cleanse fast and keep them above half.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "immolate",
+     "first": 3,
+     "every": 10
+    },
+    {
+     "id": "swPain",
+     "first": 7,
+     "every": 13
+    },
+    {
+     "id": "darkStrike",
+     "first": 5,
+     "every": 9
+    },
+    {
+     "id": "handOfRagnaros",
+     "first": 2,
+     "every": 13
+    }
+   ]
+  }
+ ]
+}

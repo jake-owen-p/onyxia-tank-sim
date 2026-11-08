@@ -64,7 +64,7 @@ export function computeScore(script, log, phaseMetrics, phasesPlayed, role = 'mt
     const metrics = phaseMetrics[pid] || {};
     let penalty = 0;
     const metricRows = [];
-    const relevant = relevantMetricIds(phaseDef, metricDefs, role);
+    const relevant = relevantMetricIds(phaseDef, metricDefs, role, holdsBoss(script, role));
     for (const mid of relevant) {
       const def = metricDefs[mid];
       const v = metrics[mid] || 0;
@@ -125,12 +125,21 @@ export function countStatuses(insts) {
 
 const TANK_ROLES = ['tank', 'offtank', 'mt'];
 
-/** Does a role filter (string or list; 'tanks', 'dps', 'nontank' groups allowed) include `role`? */
-export function roleMatches(spec, role) {
+/** Does this role hold the boss in this fight? An off-tank with `holdsBoss: false` works the adds instead. */
+export function holdsBoss(script, role) {
+  const r = role === 'mt' ? 'tank' : role;
+  return TANK_ROLES.includes(r) && !(script && script.roles && script.roles[r] && script.roles[r].holdsBoss === false);
+}
+
+/**
+ * Does a role filter (string or list) include `role`? Groups: `dps` is melee and ranged, `tanks` is whoever
+ * holds the boss, `nontank` is everyone else. `holding` says whether this role holds the boss in this fight.
+ */
+export function roleMatches(spec, role, holding = TANK_ROLES.includes(role)) {
   if (!spec) return true;
   const r = role === 'mt' ? 'tank' : role;
   const list = Array.isArray(spec) ? spec : [spec];
-  return list.some((x) => x === r || (x === 'mt' && r === 'tank') || (x === 'tanks' && TANK_ROLES.includes(r)) || (x === 'dps' && (r === 'melee' || r === 'ranged')) || (x === 'nontank' && !TANK_ROLES.includes(r)));
+  return list.some((x) => x === r || (x === 'mt' && r === 'tank') || (x === 'tanks' && holding) || (x === 'dps' && (r === 'melee' || r === 'ranged')) || (x === 'nontank' && !holding));
 }
 
 /**
@@ -138,16 +147,16 @@ export function roleMatches(spec, role) {
  * `roles` (role filter), `phases` (phase ids) and `bossStates`; the phase's
  * expectations add the metrics they name.
  */
-function relevantMetricIds(phaseDef, metricDefs, role) {
+function relevantMetricIds(phaseDef, metricDefs, role, holding) {
   const ids = new Set();
   for (const [id, def] of Object.entries(metricDefs)) {
-    if (!roleMatches(def.roles, role)) continue;
+    if (!roleMatches(def.roles, role, holding)) continue;
     if (def.phases && phaseDef && !def.phases.includes(phaseDef.id)) continue;
     if (def.bossStates && phaseDef && !def.bossStates.includes(phaseDef.bossState || 'grounded')) continue;
     ids.add(id);
   }
   if (phaseDef) for (const e of phaseDef.expectations) {
-    if (!roleMatches(e.role, role)) continue;
+    if (!roleMatches(e.role, role, holding)) continue;
     if (e.metric && metricDefs[e.metric]) ids.add(e.metric);
   }
   return [...ids];

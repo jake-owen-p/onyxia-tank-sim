@@ -135,7 +135,7 @@ export function idealPlayerPos(state, script) {
   if (bomb) return { x: bomb.runTo.x, y: bomb.runTo.y, reason: 'runOut' };
   // A telegraphed pulse around the boss: walk out of its radius for the cast.
   const castDef = b.cast && script.actions[b.cast.id];
-  if (castDef && castDef.moveOut && castDef.radius && roleMatches(castDef.moveOut === true ? null : castDef.moveOut, state.role)) {
+  if (castDef && castDef.moveOut && castDef.radius && roleMatches(castDef.moveOut === true ? null : castDef.moveOut, state.role, state.tankRole)) {
     const need = script.boss.radius + castDef.radius + 3;
     const p = w.player;
     if (dist(p.x, p.y, b.x, b.y) < need) {

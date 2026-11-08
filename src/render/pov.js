@@ -212,7 +212,7 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
     ctx.beginPath(); strokeSeg(ctx, cam, [bx, by, 0.05], [ex, ey, 0.05], w, h); ctx.stroke();
     const chev = [[ex, ey, 0.05], [ex - c * 1.4 - sn * 0.9, ey - sn * 1.4 + c * 0.9, 0.05], [ex - c * 1.4 + sn * 0.9, ey - sn * 1.4 - c * 0.9, 0.05]];
     floorPoly(ctx, cam, chev, w, h, pal.bossFront, null);
-    if (bz > 0.5) drawBossParts(ctx, cam, boss.x, boss.y, boss.heading, R, 0, w, h, pal, { shadow: true });
+    if (bz > 0.5) drawBossParts(ctx, cam, boss.x, boss.y, boss.heading, R, 0, w, h, pal, { shadow: true, shape: script.boss.shape });
   }
 
   // --- ideal boss outline + drag route
@@ -220,7 +220,7 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
   if (ib) {
     const a = ib.satisfied ? 0.3 : 0.75;
     ctx.setLineDash([8, 6]);
-    drawBossParts(ctx, cam, ib.x, ib.y, ib.heading, R, 0, w, h, pal, { outline: withAlpha(pal.idealBoss, a), flat: true });
+    drawBossParts(ctx, cam, ib.x, ib.y, ib.heading, R, 0, w, h, pal, { outline: withAlpha(pal.idealBoss, a), flat: true, shape: script.boss.shape });
     ctx.setLineDash([]);
     if (!ib.satisfied && dist(boss.x, boss.y, ib.x, ib.y) > 3) {
       ctx.strokeStyle = pal.route; ctx.lineWidth = 2; ctx.setLineDash([12, 10]); ctx.lineDashOffset = -now * 40;
@@ -367,6 +367,47 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
   ctx.fillRect(0, hy - fogH, w, fogH * 2);
 }
 
+/** Any boss that is not a dragon: a tapered wireframe body with shoulders, a head and an unmistakable front. */
+function drawStandingBoss(ctx, cam, view, script, pal, w, h, now) {
+  const boss = view.world.boss, t = view.t;
+  const R = script.boss.radius;
+  const hit = Math.max(0, 1 - (t - boss.lastHit) / 0.25);
+  const stroke = hit ? pal.bossFront : pal.bossStroke;
+  const parts = bossFootprint(R, 'standing');
+  const toW = (q, z) => { const [wx, wy] = localToWorld(q, boss.x, boss.y, boss.heading); return [wx, wy, z]; };
+  const H = Math.max(6, R * 1.9);
+  // Floor footprint: the part that must always read.
+  for (const k of ['wingL', 'wingR', 'body', 'head', 'tail']) floorPoly(ctx, cam, parts[k].poly.map((q) => toW(q, 0.05)), w, h, withAlpha(pal.boss, 0.14), withAlpha(stroke, 0.85), 2);
+  // Body: stacked rings, widest at the shoulders.
+  const rings = [[0, 0.55], [0.32, 0.68], [0.68, 0.92], [0.82, 0.62]];
+  const ring = (k, n = 10) => Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return [boss.x + Math.cos(a) * R * rings[k][1], boss.y + Math.sin(a) * R * rings[k][1], H * rings[k][0]]; });
+  for (let k = 0; k + 1 < rings.length; k++) {
+    const a = ring(k), b = ring(k + 1);
+    ctx.strokeStyle = withAlpha(stroke, 0.55); ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < a.length; i++) strokeSeg(ctx, cam, a[i], b[i], w, h);
+    ctx.stroke();
+    floorPoly(ctx, cam, b, w, h, withAlpha(pal.boss, 0.16), withAlpha(stroke, 0.85), 1.5);
+  }
+  // Head above the shoulders, pushed slightly forward.
+  const head = project(cam, boss.x + Math.cos(boss.heading) * R * 0.3, boss.y + Math.sin(boss.heading) * R * 0.3, H * 0.97, w, h);
+  if (head) { ctx.fillStyle = withAlpha(pal.bossSolid, 0.75); ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(head.x, head.y, Math.max(4, head.scale * R * 0.3), 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+  // Front: a chevron on the floor and the label above it.
+  floorPoly(ctx, cam, parts.marker.poly.map((q) => toW(q, 0.08)), w, h, pal.bossFront, null);
+  const lbl = toW([R * 1.1, 0], H * 1.25);
+  const label = project(cam, lbl[0], lbl[1], lbl[2], w, h);
+  if (label) {
+    const px = Math.max(10, Math.min(26, label.scale * 2));
+    ctx.font = `700 ${px}px ${pal.fontDisplay}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillStyle = pal.bossFront;
+    ctx.fillText('FRONT', label.x, label.y);
+  }
+  if (boss.target === 'raid' && boss.engaged) {
+    const pulse = 0.5 + 0.5 * Math.sin(now * 10);
+    floorPoly(ctx, cam, circlePoly(boss.x, boss.y, R * 1.25, 28).map(([x, y]) => [x, y, 0.06]), w, h, null, withAlpha(pal.bad, 0.4 + pulse * 0.5), 3);
+  }
+}
+
 /** A translucent wall quad with a brighter top edge. */
 function drawWall(ctx, cam, wall, depth, w, h, pal) {
   const sp = projectPoly(cam, wall.quad, w, h);
@@ -388,7 +429,7 @@ function drawWall(ctx, cam, wall, depth, w, h, pal) {
  * opts: shadow (flat dark footprint), outline (stroke colour, flat dashed ghost), flat.
  */
 function drawBossParts(ctx, cam, x, y, heading, R, z, w, h, pal, opts = {}) {
-  const parts = bossFootprint(R);
+  const parts = bossFootprint(R, opts.shape);
   const order = ['tail', 'wingL', 'wingR', 'body', 'neck', 'head'];
   if (opts.shadow) {
     ctx.fillStyle = pal.bossShadow;
@@ -408,9 +449,10 @@ function drawBoss(ctx, cam, view, script, pal, w, h, now) {
   const boss = view.world.boss;
   const R = script.boss.radius;
   if (boss.state === 'submerged') {
-    drawBossParts(ctx, cam, boss.x, boss.y, boss.heading, R, 0, w, h, pal, { flat: true, outline: withAlpha(pal.bossStroke, 0.35) });
+    drawBossParts(ctx, cam, boss.x, boss.y, boss.heading, R, 0, w, h, pal, { flat: true, outline: withAlpha(pal.bossStroke, 0.35), shape: script.boss.shape });
     return;
   }
+  if (script.boss.shape !== 'dragon') { drawStandingBoss(ctx, cam, view, script, pal, w, h, now); return; }
   const t = view.t;
   const z = boss.z || 0;
   const parts = bossFootprint(R);

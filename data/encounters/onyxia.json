@@ -230,7 +230,8 @@
   "takeoffDuration": 2.5,
   "pickupGrace": 5,
   "settleAfterLanding": 2.5,
-  "facingCone": "breath"
+  "facingCone": "breath",
+  "shape": "dragon"
  },
  "threat": {
   "autoAttackPerSecond": 80,

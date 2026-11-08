@@ -133,11 +133,13 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   // back wall highlight
   ctx.strokeStyle = pal.backWall;
   ctx.lineWidth = lw(compact ? 3 : 5);
-  ctx.beginPath();
   const bw = script.arena.backWall;
-  ctx.moveTo(bw[0][0], bw[0][1]);
-  for (let i = 1; i < bw.length; i++) ctx.lineTo(bw[i][0], bw[i][1]);
-  ctx.stroke();
+  if (bw && bw.length) {
+    ctx.beginPath();
+    ctx.moveTo(bw[0][0], bw[0][1]);
+    for (let i = 1; i < bw.length; i++) ctx.lineTo(bw[i][0], bw[i][1]);
+    ctx.stroke();
+  }
 
   // --- labels
   if (!compact && script.arena.labels) {
@@ -220,7 +222,7 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   const boss = w.boss;
   if (ib) {
     const a = ib.satisfied ? 0.35 : 0.8;
-    drawBossFlat(ctx, ib.x, ib.y, ib.heading, R, { stroke: withAlpha(pal.idealBoss, a), front: withAlpha(pal.idealBoss, a), dashed: true, lineWidth: lw(2), fill: ib.satisfied ? null : withAlpha(pal.idealBoss, 0.06) });
+    drawBossFlat(ctx, ib.x, ib.y, ib.heading, R, { shape: script.boss.shape, stroke: withAlpha(pal.idealBoss, a), front: withAlpha(pal.idealBoss, a), dashed: true, lineWidth: lw(2), fill: ib.satisfied ? null : withAlpha(pal.idealBoss, 0.06) });
     if (!ib.satisfied && dist(boss.x, boss.y, ib.x, ib.y) > 3) {
       ctx.setLineDash([lw(6), lw(6)]);
       ctx.strokeStyle = pal.route; ctx.lineWidth = lw(2);
@@ -289,16 +291,16 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   // --- boss
   const airborne = boss.state !== 'grounded';
   if (boss.state === 'submerged') {
-    drawBossFlat(ctx, boss.x, boss.y, boss.heading, R, { stroke: withAlpha(pal.bossStroke, 0.35), dashed: true, lineWidth: lw(1.5) });
+    drawBossFlat(ctx, boss.x, boss.y, boss.heading, R, { shape: script.boss.shape, stroke: withAlpha(pal.bossStroke, 0.35), dashed: true, lineWidth: lw(1.5) });
     if (!compact) worldText(ctx, tr, 'SUBMERGED', boss.x, boss.y - R * 1.6, Math.max(10, s * 3), pal.bossStroke, pal.fontDisplay);
   } else if (airborne) {
     const lift = (boss.z || 0) / Math.max(1, script.hoverHeight || 1);
-    drawBossFlat(ctx, boss.x + lift * 2, boss.y - lift * 2, boss.heading, R, { fill: pal.bossShadow, alpha: 0.6 * lift + 0.2 });
-    drawBossFlat(ctx, boss.x, boss.y, boss.heading, R * (1 + 0.18 * lift), { fill: withAlpha(pal.boss, 0.3), stroke: pal.bossStroke, front: pal.bossFront, dashed: true, lineWidth: lw(2) });
+    drawBossFlat(ctx, boss.x + lift * 2, boss.y - lift * 2, boss.heading, R, { shape: script.boss.shape, fill: pal.bossShadow, alpha: 0.6 * lift + 0.2 });
+    drawBossFlat(ctx, boss.x, boss.y, boss.heading, R * (1 + 0.18 * lift), { shape: script.boss.shape, fill: withAlpha(pal.boss, 0.3), stroke: pal.bossStroke, front: pal.bossFront, dashed: true, lineWidth: lw(2) });
     if (!compact && boss.state === 'airborne') worldText(ctx, tr, 'AIRBORNE', boss.x, boss.y - R * 2.2, Math.max(10, s * 3), pal.bossStroke, pal.fontDisplay);
   } else {
     const hit = Math.max(0, 1 - (t - boss.lastHit) / 0.25);
-    drawBossFlat(ctx, boss.x, boss.y, boss.heading, R, { fill: hit ? withAlpha(pal.bossStroke, 0.45) : pal.boss, stroke: pal.bossStroke, front: pal.bossFront, lineWidth: lw(2) });
+    drawBossFlat(ctx, boss.x, boss.y, boss.heading, R, { shape: script.boss.shape, fill: hit ? withAlpha(pal.bossStroke, 0.45) : pal.boss, stroke: pal.bossStroke, front: pal.bossFront, lineWidth: lw(2) });
     if ((boss.target === 'raid' || (boss.target === 'player' && view.tankRole === false)) && boss.engaged) {
       const pulse = 0.5 + 0.5 * Math.sin(now * 10);
       ctx.strokeStyle = withAlpha(pal.bad, 0.4 + pulse * 0.5); ctx.lineWidth = lw(3);

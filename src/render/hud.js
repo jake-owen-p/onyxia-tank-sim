@@ -119,19 +119,19 @@ function drawPhaseBlock(ctx, view, script, pal, u, w, h, t) {
   panel(ctx, pal, x, y, pw, ph, u * 0.5, u);
   font(ctx, pal, u * 1.05, 700, true);
   ctx.fillStyle = pal.text;
-  text(ctx, (view.phaseName || 'Phase').toUpperCase(), x + u * 0.8, y + u * 0.95);
+  text(ctx, fit(ctx, (view.phaseName || 'Phase').toUpperCase(), pw - u * 1.6), x + u * 0.8, y + u * 0.95);
+  const nameW = ctx.measureText ? measure(ctx, pal, u, (view.phaseName || 'Phase').toUpperCase()) : u * 5;
   font(ctx, pal, u * 0.72, 500);
   ctx.fillStyle = pal.textDim;
-  const sub = view.phaseSubtitle || '';
-  const nameW = ctx.measureText ? measure(ctx, pal, u, (view.phaseName || 'Phase').toUpperCase()) : u * 5;
-  text(ctx, sub, x + u * 0.8 + nameW + u * 0.5, y + u * 1.0);
+  const subRoom = pw - u * 1.6 - nameW - u * 0.5;
+  if (subRoom > u * 2) text(ctx, fit(ctx, view.phaseSubtitle || '', subRoom), x + u * 0.8 + nameW + u * 0.5, y + u * 1.0);
   // boss hp
   const hpPct = Math.max(0, Math.min(100, Math.round((view.hp ?? 1) * 100)));
   const bx = x + u * 0.8, by = y + u * 1.75, bw = pw - u * 1.6, bh = u * 0.75;
   bar(ctx, bx, by, bw, bh, view.hp ?? 1, pal.hp, pal.hpBg, bh / 2);
   font(ctx, pal, u * 0.62, 700);
   ctx.fillStyle = pal.text;
-  text(ctx, `ONYXIA  ${hpPct}%`, bx + bw / 2, by + bh / 2, 'center');
+  text(ctx, fit(ctx, `${(script.name || 'Boss').toUpperCase()}  ${hpPct}%`, bw - u), bx + bw / 2, by + bh / 2, 'center');
   // next expected
   const ne = view.nextExpected;
   if (ne) {
@@ -211,7 +211,7 @@ function drawWarnings(ctx, view, script, settings, pal, u, w, h, t, now) {
   const boss = view.world.boss;
   if (boss.state === 'landing') list.unshift({ label: 'LANDING', color: pal.accent, icon: 'landing', flash: 0.5 });
   if (boss.state === 'takeoff') list.unshift({ label: 'TAKEOFF', color: pal.accent, icon: 'takeoff', flash: 0.5 });
-  if (boss.target === 'raid' && boss.engaged && boss.state === 'grounded') list.unshift({ label: "SHE'S ON THE RAID", color: pal.bad, icon: 'taunt', flash: 0.6 + 0.4 * Math.sin(now * 6) });
+  if (boss.target === 'raid' && boss.engaged && boss.state === 'grounded') list.unshift({ label: 'BOSS ON THE RAID', color: pal.bad, icon: 'taunt', flash: 0.6 + 0.4 * Math.sin(now * 6) });
   if (!list.length) return;
 
   let y = h * 0.27;
@@ -322,8 +322,8 @@ function drawThreat(ctx, view, script, pal, u, w, y, bh, threatRatioFn, t) {
   font(ctx, pal, u * 0.62, 700);
   ctx.fillStyle = pal.text;
   const label = tankIsPlayer
-    ? (onRaid ? "SHE'S ON THE RAID  ·  TAUNT" : th.tauntUntil > t ? 'THREAT  ·  TAUNTED' : `THREAT  ·  RAID AT ${Math.round(ratio * 100)}%`)
-    : (onRaid ? "SHE'S ON YOU  ·  STOP" : b.target === 'raid' && b.engaged && b.state === 'grounded' ? 'SHE IS LOOSE  ·  HOLD' : th.ghostTauntUntil > t ? 'TANK TAUNTED  ·  HOLD' : `YOUR THREAT  ·  ${Math.round(ratio * 100)}% OF THE TANK`);
+    ? (onRaid ? 'BOSS ON THE RAID  ·  TAUNT' : th.tauntUntil > t ? 'THREAT  ·  TAUNTED' : `THREAT  ·  RAID AT ${Math.round(ratio * 100)}%`)
+    : (onRaid ? 'BOSS ON YOU  ·  STOP' : b.target === 'raid' && b.engaged && b.state === 'grounded' ? 'BOSS LOOSE  ·  HOLD' : th.ghostTauntUntil > t ? 'TANK TAUNTED  ·  HOLD' : `YOUR THREAT  ·  ${Math.round(ratio * 100)}% OF THE TANK`);
   text(ctx, label, x + bw / 2, y + bh / 2, 'center');
 }
 

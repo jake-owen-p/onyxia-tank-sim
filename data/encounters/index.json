@@ -1,13 +1,114 @@
 {
   "raids": [
-    { "id": "onyxia", "name": "Onyxia's Lair", "size": 40, "bosses": [
-      { "id": "onyxia", "name": "Onyxia", "file": "onyxia.json", "status": "ready" }
-    ]},
-    { "id": "molten-core", "name": "Molten Core", "size": 40, "bosses": [] },
-    { "id": "blackwing-lair", "name": "Blackwing Lair", "size": 40, "bosses": [] },
-    { "id": "zul-gurub", "name": "Zul'Gurub", "size": 20, "bosses": [] },
-    { "id": "ruins-of-ahnqiraj", "name": "Ruins of Ahn'Qiraj", "size": 20, "bosses": [] },
-    { "id": "temple-of-ahnqiraj", "name": "Temple of Ahn'Qiraj", "size": 40, "bosses": [] },
-    { "id": "naxxramas", "name": "Naxxramas", "size": 40, "bosses": [] }
+    {
+      "id": "onyxia",
+      "name": "Onyxia's Lair",
+      "size": 40,
+      "bosses": [
+        {
+          "id": "onyxia",
+          "name": "Onyxia",
+          "file": "onyxia.json",
+          "status": "ready"
+        }
+      ]
+    },
+    {
+      "id": "molten-core",
+      "name": "Molten Core",
+      "size": 40,
+      "bosses": [
+        {
+          "id": "lucifron",
+          "name": "Lucifron",
+          "file": "lucifron.json",
+          "status": "ready"
+        },
+        {
+          "id": "magmadar",
+          "name": "Magmadar",
+          "file": "magmadar.json",
+          "status": "ready"
+        },
+        {
+          "id": "gehennas",
+          "name": "Gehennas",
+          "file": "gehennas.json",
+          "status": "ready"
+        },
+        {
+          "id": "garr",
+          "name": "Garr",
+          "file": "garr.json",
+          "status": "ready"
+        },
+        {
+          "id": "baron-geddon",
+          "name": "Baron Geddon",
+          "file": "baron-geddon.json",
+          "status": "ready"
+        },
+        {
+          "id": "shazzrah",
+          "name": "Shazzrah",
+          "file": "shazzrah.json",
+          "status": "ready"
+        },
+        {
+          "id": "sulfuron-harbinger",
+          "name": "Sulfuron Harbinger",
+          "file": "sulfuron-harbinger.json",
+          "status": "ready"
+        },
+        {
+          "id": "golemagg",
+          "name": "Golemagg",
+          "file": "golemagg.json",
+          "status": "ready"
+        },
+        {
+          "id": "majordomo-executus",
+          "name": "Majordomo Executus",
+          "file": "majordomo-executus.json",
+          "status": "ready"
+        },
+        {
+          "id": "ragnaros",
+          "name": "Ragnaros",
+          "file": "ragnaros.json",
+          "status": "ready"
+        }
+      ]
+    },
+    {
+      "id": "blackwing-lair",
+      "name": "Blackwing Lair",
+      "size": 40,
+      "bosses": []
+    },
+    {
+      "id": "zul-gurub",
+      "name": "Zul'Gurub",
+      "size": 20,
+      "bosses": []
+    },
+    {
+      "id": "ruins-of-ahnqiraj",
+      "name": "Ruins of Ahn'Qiraj",
+      "size": 20,
+      "bosses": []
+    },
+    {
+      "id": "temple-of-ahnqiraj",
+      "name": "Temple of Ahn'Qiraj",
+      "size": 40,
+      "bosses": []
+    },
+    {
+      "id": "naxxramas",
+      "name": "Naxxramas",
+      "size": 40,
+      "bosses": []
+    }
   ]
 }

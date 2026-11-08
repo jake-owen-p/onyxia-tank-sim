@@ -6,9 +6,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createSim, FIXED_DT } from '../src/core/sim.js';
-import { computeScore } from '../src/core/scoring.js';
+import { computeScore, roleMatches, holdsBoss } from '../src/core/scoring.js';
 import { snapshot } from '../src/core/snapshot.js';
 import { roleBot } from '../tests/helpers.js';
+import { createRenderer } from '../src/render/renderer.js';
 
 const ROOT = path.resolve(new URL('.', import.meta.url).pathname, '..');
 const KINDS = new Set(['cone', 'knockback', 'fear', 'aoe', 'hazard', 'adds', 'aggroPull', 'targetSwitch', 'threatWipe', 'debuff', 'enrage', 'shield', 'projectile', 'transition']);
@@ -61,6 +62,47 @@ function lint(script, file) {
   return errs;
 }
 
+/** A canvas whose context accepts every call and rejects any NaN or Infinity it is handed. */
+function stubCanvas() {
+  const grad = { addColorStop() {} };
+  const target = {};
+  let canvas;
+  const ctx = new Proxy(target, {
+    get(_, k) {
+      if (k === 'measureText') return (s) => ({ width: String(s).length * 7 });
+      if (k === 'createLinearGradient' || k === 'createRadialGradient' || k === 'createPattern') return () => grad;
+      if (k === 'getTransform') return () => ({ a: 1, d: 1 });
+      if (k === 'canvas') return canvas;
+      if (typeof k === 'string' && k in target) return target[k];
+      return (...args) => { for (const a of args) if (typeof a === 'number' && !Number.isFinite(a)) throw new Error(`non-finite argument to ctx.${String(k)}`); };
+    },
+    set(_, k, v) { target[k] = v; return true; },
+  });
+  canvas = { width: 1280, height: 720, clientWidth: 1280, clientHeight: 720, getContext: () => ctx, getBoundingClientRect: () => ({ width: 1280, height: 720 }) };
+  return canvas;
+}
+
+/** Draw the whole fight, both views, live and from replay snapshots, and the menu backdrop. Throws on anything the renderers cannot handle. */
+function renderCheck(script, role, seconds) {
+  const r = createRenderer(stubCanvas(), script);
+  r.resize();
+  const settings = { view: 'pov', speed: 1, role, warningLead: 5, ghostAlpha: 0.6, hazardOpacity: 0.7, colorblind: false, minimap: true, cueLane: true, laneLead: 3 };
+  const keys = { taunt: '1', attack: '2', heal: '3', dispel: '4', interrupt: '5' };
+  const idleSim = createSim(script, { manual: true, freezeHp: true, bossPassive: true, start: 'wall', seed: 3 });
+  r.frame({ view: idleSim.state, settings, now: 0, dtReal: 1 / 60, abilityKeys: keys, overlay: { dim: true, idle: true } });
+  const sim = createSim(script, { role, seed: 11, start: 'entrance', startPhase: script.phases[0].id });
+  const bot = roleBot(role);
+  for (let i = 0; i < seconds * 60 && !sim.state.ended; i++) {
+    sim.step(bot(sim), FIXED_DT);
+    sim.drainEvents();
+    if (i % 12) continue;
+    settings.view = i % 24 ? 'topdown' : 'pov';
+    r.setView(settings.view, sim.state.t - 1);
+    r.frame({ view: sim.state, settings, now: sim.state.t, dtReal: 1 / 60, abilityKeys: keys, overlay: {} });
+    r.frame({ view: snapshot(sim.state), settings, now: sim.state.t, dtReal: 1 / 60, abilityKeys: keys, overlay: { replay: { t: sim.state.t, duration: seconds, playing: true } } });
+  }
+}
+
 const IDLE = () => ({ forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [], jump: false });
 const SEEDS = [11, 7, 23];
 const MIN_DECISION_GAP = 15;   // the bot must beat a player who does nothing by at least this many points
@@ -108,14 +150,14 @@ for (const { raid, boss, file } of targets) {
         const deaths = Math.max(...runs.map((r) => (r.metrics.deaths || 0) + (r.metrics.tankDeaths || 0)));
         const allWon = runs.every((r) => r.result === 'victory');
         const ok = allWon && worst.score.overall >= 70 && deaths === 0;
+        renderCheck(script, role, total);
         const idle = play(script, role, full, total, SEEDS[0], () => IDLE).score.overall;
         const gap = Math.min(...scores) - idle;
         console.log(`${ok ? '✔' : '✖'} ${key} ${role.padEnd(7)} full ${String(worst.result).padEnd(8)} ${Math.min(...scores)}-${Math.max(...scores)} ${worst.score.grade}  idle ${idle}${deaths ? `  deaths ${deaths}` : ''}${ok ? '' : '  fixes: ' + worst.score.fixes.map((f) => f.title + (f.detail ? ` (${f.detail})` : '')).join(' | ')}`);
         if (!ok) problems++;
         if (gap < MIN_DECISION_GAP) { console.log(`⚠ ${key} ${role}: a player who does nothing scores ${idle}, only ${gap} behind the bot: this role has no real decisions`); warnings++; }
         for (const d of script.drills || []) {
-          const rolesOk = !d.roles || (Array.isArray(d.roles) ? d.roles : [d.roles]).some((x) => x === role || (x === 'tanks' && (role === 'tank' || role === 'offtank')) || (x === 'dps' && (role === 'melee' || role === 'ranged')) || (x === 'nontank' && role !== 'tank' && role !== 'offtank'));
-          if (!rolesOk) continue;
+          if (!roleMatches(d.roles, role, holdsBoss(script, role))) continue;
           const dr = play(script, role, { startPhase: d.startPhase, startOffset: d.startOffset || 0, start: d.start || 'entrance', actions: d.actions || null, duration: d.duration }, d.duration + 2);
           const dok = dr.result === 'drillComplete';
           if (!dok) { console.log(`✖ ${key} ${role} drill ${d.id}: ${dr.result}`); problems++; }

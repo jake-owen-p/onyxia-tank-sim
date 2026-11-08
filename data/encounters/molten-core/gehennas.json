@@ -1,0 +1,1252 @@
+{
+ "id": "gehennas",
+ "name": "Gehennas",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/gehennas.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 351,780 HP, two Flamewaker guards (77,700 HP each). Two phases: guards alive (~55 s) then Gehennas (~120 s); a 2-4 minute kill. Gehennas' Curse: -75% healing taken for 5 min, 45 yd, Curse (`healingMult` 0.25). Cadence every 26-36 s per DBM/BigWigs (every 30, jitter 5). It is put on the tank, where the healing reduction matters; the rest of the raid carries it in the real fight too. Debuffs on others are only dispelled when the player is the healer, so the 8 s `duration` stands for the raid's decursers clearing it; left to run for 5 minutes it would kill a player tank nobody can decurse. Rain of Fire: 10 yd radius for 6 s on a random player; tick 925-1075 per 2 s (DBC) vs 368 per 2 s (wiki) vs 700+/s (Ten Ton Hammer): using 500 per second (the middle), 1.5 s warning (the rain starts falling). Cadence: DBM has only a 4.8 s minimum, cmangos 6-12 s; every 7, jitter 2 here, low confidence. Shadow Bolt on the tank: 2250-2750 every 3-6 s is too much for a 10,000 HP tank on passive healing; scaled to 1200 every 7 s as a non-dispellable 1.5 s debuff that ticks once. Shadow Bolt on a random player: a projectile for 2500 with a 7% chance to pick you. Flamewaker guards: killFirst adds, so attacking Gehennas while one lives is scored, and the off-tank role holds them (`holdsBoss: false`) on their own spot while a ghost tank has Gehennas. They are present from the start in the real fight; here they arrive 12 s in beside the tank spot. They are held at one spot south-west where ranged can reach them from the raid; real raids keep the two apart so their stuns do not overlap, which a single hold spot cannot show. Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Sunder Armor and Strike are not modelled (adds have no abilities). Fist of Ragnaros: instant, 8 yd radius around a guard, 4 s stun (20277), frequent. The engine has no AoE centred on an add and a debuff has no role filter, so it is a random 4 s stun on 12 of the raid (`count` 12, the melee and off-tanks who would be in reach) every 10 s while the guards live (cadence a placeholder). Ranged and healers, who in the real fight are out of reach, can also draw it at those odds: a known approximation. Engine gaps: debuffs on others only dispelled when the player is the healer, adds without abilities, no AoE centred on an add, no Free Action Potion, Dispel always takes the oldest debuff.",
+ "sources": [
+  "docs/research/molten-core/gehennas.md",
+  "https://warcraft.wiki.gg/wiki/Gehennas",
+  "https://www.wowhead.com/tbc/npc=12259/gehennas",
+  "https://www.wowhead.com/tbc/npc=11661/flamewaker",
+  "https://wotlkdb.com/?spell=19716",
+  "https://wotlkdb.com/?spell=19717",
+  "https://wotlkdb.com/?spell=19728",
+  "https://wotlkdb.com/?spell=19729",
+  "https://wotlkdb.com/?spell=20277",
+  "https://wotlkdb.com/?spell=24317",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_gehennas.cpp",
+  "https://www.wowhead.com/classic/guides/gehennas-molten-core-strategy",
+  "https://www.tentonhammer.com/guides/mc-boss-guide-boss-3-gehennas",
+  "https://legacy-wow.com/molten-core-boss-guide-gehennas/"
+ ],
+ "arena": {
+  "name": "Gehennas' hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      40,
+      0
+     ],
+     [
+      39.4,
+      6.9
+     ],
+     [
+      37.6,
+      13.7
+     ],
+     [
+      34.6,
+      20
+     ],
+     [
+      30.6,
+      25.7
+     ],
+     [
+      25.7,
+      30.6
+     ],
+     [
+      20,
+      34.6
+     ],
+     [
+      13.7,
+      37.6
+     ],
+     [
+      6.9,
+      39.4
+     ],
+     [
+      0,
+      40
+     ],
+     [
+      -6.9,
+      39.4
+     ],
+     [
+      -13.7,
+      37.6
+     ],
+     [
+      -20,
+      34.6
+     ],
+     [
+      -25.7,
+      30.6
+     ],
+     [
+      -30.6,
+      25.7
+     ],
+     [
+      -34.6,
+      20
+     ],
+     [
+      -37.6,
+      13.7
+     ],
+     [
+      -39.4,
+      6.9
+     ],
+     [
+      -40,
+      0
+     ],
+     [
+      -39.4,
+      -6.9
+     ],
+     [
+      -37.6,
+      -13.7
+     ],
+     [
+      -34.6,
+      -20
+     ],
+     [
+      -30.6,
+      -25.7
+     ],
+     [
+      -25.7,
+      -30.6
+     ],
+     [
+      -20,
+      -34.6
+     ],
+     [
+      -13.7,
+      -37.6
+     ],
+     [
+      -6.9,
+      -39.4
+     ],
+     [
+      0,
+      -40
+     ],
+     [
+      6.9,
+      -39.4
+     ],
+     [
+      13.7,
+      -37.6
+     ],
+     [
+      20,
+      -34.6
+     ],
+     [
+      25.7,
+      -30.6
+     ],
+     [
+      30.6,
+      -25.7
+     ],
+     [
+      34.6,
+      -20
+     ],
+     [
+      37.6,
+      -13.7
+     ],
+     [
+      39.4,
+      -6.9
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -36
+     ],
+     [
+      9,
+      -36
+     ],
+     [
+      9,
+      -60
+     ],
+     [
+      -9,
+      -60
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      9,
+      -39
+     ],
+     [
+      18.1,
+      -35.7
+     ],
+     [
+      26.2,
+      -30.3
+     ],
+     [
+      32.7,
+      -23.1
+     ],
+     [
+      37.3,
+      -14.6
+     ],
+     [
+      39.7,
+      -5.2
+     ],
+     [
+      39.7,
+      4.5
+     ],
+     [
+      37.5,
+      14
+     ],
+     [
+      33,
+      22.6
+     ],
+     [
+      26.6,
+      29.8
+     ],
+     [
+      18.7,
+      35.4
+     ],
+     [
+      9.6,
+      38.8
+     ],
+     [
+      0,
+      40
+     ],
+     [
+      -9.6,
+      38.8
+     ],
+     [
+      -18.7,
+      35.4
+     ],
+     [
+      -26.6,
+      29.8
+     ],
+     [
+      -33,
+      22.6
+     ],
+     [
+      -37.5,
+      14
+     ],
+     [
+      -39.7,
+      4.5
+     ],
+     [
+      -39.7,
+      -5.2
+     ],
+     [
+      -37.3,
+      -14.6
+     ],
+     [
+      -32.7,
+      -23.1
+     ],
+     [
+      -26.2,
+      -30.3
+     ],
+     [
+      -18.1,
+      -35.7
+     ],
+     [
+      -9,
+      -39
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -39
+     ],
+     [
+      -9,
+      -60
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -39
+     ],
+     [
+      9,
+      -60
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -54
+    ]
+   },
+   {
+    "text": "Guards tanked south-west, apart",
+    "at": [
+     -26,
+     -8
+    ]
+   },
+   {
+    "text": "Lava",
+    "at": [
+     30,
+     22
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -54,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 26,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -44,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 0,
+   "tolerance": 4,
+   "label": "Tank: centre of the room"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 7,
+   "heading": 270,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Gehennas"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -26,
+   "spread": 10
+  },
+  "raidSpotP2": {
+   "x": 0,
+   "y": -26,
+   "spread": 10
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -23,
+   "tolerance": 8,
+   "label": "Ranged: spread for Rain of Fire"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": -18,
+   "tolerance": 6,
+   "label": "Healers"
+  },
+  "guardWest": {
+   "x": -9,
+   "y": 6,
+   "label": "Flamewaker"
+  },
+  "guardEast": {
+   "x": 9,
+   "y": 6,
+   "label": "Flamewaker"
+  },
+  "guardHoldSpot": {
+   "x": -20,
+   "y": -6,
+   "tolerance": 5,
+   "label": "Guards held here, facing the wall"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 10,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 8.5,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 300,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull Gehennas to the centre so only you and your healers are inside his range, move him out of Rain of Fire and hold him through Shadow Bolts.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Guard off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the two Flamewaker guards, not Gehennas. Pick them up as they arrive and hold them on your spot so their Fist of Ragnaros stuns and Sunders stay off the raid; the raid kills them on you.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the guards first, then Gehennas. Fist of Ragnaros stuns everyone within 8 yd of a guard for 4 s from any side, so carry Free Action Potion and keep guards apart. Step out of Rain of Fire; keep threat under the tank.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Spread in small groups so Rain of Fire hits one person; guards first, then Gehennas. Mages and Druids decurse before they DPS.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Decurse the tank first (the curse cuts healing taken by 75%), heal Shadow Bolt and Rain of Fire victims, and keep the tank alive.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. Here one button stands in for Dispel Magic, Cleanse, Remove Curse and Remove Lesser Curse."
+  }
+ },
+ "actions": {
+  "gehennasCurse": {
+   "label": "Gehennas' Curse",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "curse",
+   "target": "tank",
+   "duration": 8,
+   "tickDamage": 0,
+   "healingMult": 0.25,
+   "warn": true,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Everyone within 45 yd: healing taken reduced by 75% for 5 minutes. Decurse the tank first, then the melee."
+  },
+  "rainOfFire": {
+   "label": "Rain of Fire",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "radius": 10,
+   "warning": 1.5,
+   "active": 6,
+   "tick": true,
+   "damage": 500,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Fire rains on a 10 yd circle under a random player for 6 s: about 1000 Fire every 2 s. Walk out; tanks move the boss out."
+  },
+  "shadowBoltTank": {
+   "label": "Shadow Bolt (tank)",
+   "kind": "debuff",
+   "cast": 0.5,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 1.5,
+   "tickDamage": 1200,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "2250-2750 Shadow on the tank every few seconds (scaled to 1200 here). Shadow Protection and steady healing."
+  },
+  "shadowBolt": {
+   "label": "Shadow Bolt",
+   "kind": "projectile",
+   "cast": 0.5,
+   "travel": 0.6,
+   "splash": 2,
+   "damage": 2500,
+   "playerChance": 0.07,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "2250-2750 Shadow on a random raid member every 3-6 s. Healers watch for it."
+  },
+  "fistOfRagnaros": {
+   "label": "Fist of Ragnaros",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "random",
+   "count": 12,
+   "duration": 4,
+   "tickDamage": 0,
+   "stun": 4,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A guard slams the ground: everyone within 8 yd is stunned for 4 s, from any side. Free Action Potion stops it. Off-tanks keep the guards apart."
+  },
+  "guards": {
+   "label": "Flamewaker guards",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardWest",
+    "guardEast"
+   ],
+   "speed": 5,
+   "aggroRange": 13,
+   "lifetime": 41,
+   "heldLifetime": 41,
+   "pickup": "offtank",
+   "holdSpot": "guardHoldSpot",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Two Flamewakers come in with him. Off-tanks peel them away from the raid and keep them apart so their stuns do not overlap."
+  },
+  "aggroPull": {
+   "label": "Aggro pull",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "conditional": "onPlayer",
+   "tip": "Someone overtakes the tank on threat."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Phase 1",
+   "subtitle": "Guards alive",
+   "hpFrom": 1,
+   "hpTo": 0.8,
+   "duration": 55,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "guardHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "guards",
+     "first": 12
+    },
+    {
+     "id": "shadowBoltTank",
+     "first": 12,
+     "every": 7,
+     "jitter": 1.5
+    },
+    {
+     "id": "shadowBolt",
+     "first": 14,
+     "every": 6,
+     "jitter": 1.5
+    },
+    {
+     "id": "gehennasCurse",
+     "first": 15,
+     "every": 30,
+     "jitter": 5
+    },
+    {
+     "id": "rainOfFire",
+     "first": 16,
+     "every": 7,
+     "jitter": 2
+    },
+    {
+     "id": "fistOfRagnaros",
+     "first": 16,
+     "every": 10,
+     "jitter": 2
+    },
+    {
+     "id": "aggroPull",
+     "first": 40,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull Gehennas to the centre",
+     "tip": "Taunt him and walk him to the centre of the room so only you and your healers are inside his curse and Shadow Bolt range."
+    },
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "The moment he turns, Taunt."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the guards before Gehennas",
+     "tip": "Turn to face a guard and kill it. Every attack on Gehennas while one lives is wasted."
+    },
+    {
+     "id": "guards",
+     "type": "afterEvent",
+     "event": "guards",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up both guards",
+     "tip": "The guards come in beside Gehennas. Taunt or run into them before they reach the raid, then hold them away and apart."
+    },
+    {
+     "id": "guardsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the guards off the raid",
+     "tip": "A guard in the raid stuns and Sunders the healers. Hold them on your spot."
+    },
+    {
+     "id": "rain",
+     "type": "afterEvent",
+     "event": "rainOfFire",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 1.5,
+     "label": "Get out of Rain of Fire",
+     "tip": "When the rain starts falling on you, walk 12 yd out. Tanks move the boss with you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "curseDispel",
+     "type": "afterEvent",
+     "event": "gehennasCurse",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 3,
+     "role": "healer",
+     "label": "Decurse the tank first",
+     "tip": "A cursed tank takes 75% less healing. Remove it from the tank at once, then the melee, then everyone else."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Bolts hit the tank for a quarter of their health every few seconds. Keep a heal landing behind each one."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Phase 2",
+   "subtitle": "Gehennas alone",
+   "hpFrom": 0.8,
+   "hpTo": 0,
+   "duration": 120,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "guardHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "shadowBoltTank",
+     "first": 3,
+     "every": 7,
+     "jitter": 1.5
+    },
+    {
+     "id": "shadowBolt",
+     "first": 5,
+     "every": 6,
+     "jitter": 1.5
+    },
+    {
+     "id": "gehennasCurse",
+     "first": 10,
+     "every": 30,
+     "jitter": 5
+    },
+    {
+     "id": "rainOfFire",
+     "first": 8,
+     "every": 7,
+     "jitter": 2
+    },
+    {
+     "id": "aggroPull",
+     "first": 35,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tank",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "The moment he turns, Taunt."
+    },
+    {
+     "id": "rain",
+     "type": "afterEvent",
+     "event": "rainOfFire",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 1.5,
+     "label": "Get out of Rain of Fire",
+     "tip": "Walk 12 yd out as soon as the rain starts. Tanks move the boss with you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "curseDispel",
+     "type": "afterEvent",
+     "event": "gehennasCurse",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 3,
+     "role": "healer",
+     "label": "Decurse the tank first",
+     "tip": "Tank first, then melee, then everyone else."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Bolts keep coming. Never let the tank sit under half."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 3,
+   "tip": "Rain of Fire is 10 yd wide and overlaps itself at this pace. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.6,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands. Tanks first."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Press notes: Taunt when he turns, Taunt or grab the guards, Dispel when the curse lands, Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Gehennas turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "tauntGuards",
+    "ability": "taunt",
+    "on": "event",
+    "event": "guards",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "GUARDS",
+    "label": "Pick up the guards",
+    "tip": "Taunt one or run into both as they arrive, before they reach a healer.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "pullGehennas",
+   "name": "Pull and Rain of Fire",
+   "description": "Pull Gehennas to the centre and move him out of three Rains of Fire while Shadow Bolts land on you.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "rainOfFire",
+     "first": 18,
+     "every": 10
+    },
+    {
+     "id": "shadowBoltTank",
+     "first": 12,
+     "every": 7
+    }
+   ]
+  },
+  {
+   "id": "guardPickup",
+   "name": "Guard pickup",
+   "description": "Grab both Flamewaker guards as they arrive and hold them on your spot, off the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "guards",
+     "first": 3,
+     "every": 22
+    },
+    {
+     "id": "fistOfRagnaros",
+     "first": 8,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "rainFootwork",
+   "name": "Rain of Fire footwork",
+   "description": "Already on him. Rain of Fire every 8 s: get out fast, keep attacking, never pull.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "rainOfFire",
+     "first": 4,
+     "every": 8,
+     "jitter": 1
+    },
+    {
+     "id": "aggroPull",
+     "first": 20,
+     "every": 25
+    }
+   ]
+  },
+  {
+   "id": "decurse",
+   "name": "Decurse and heal",
+   "description": "Already on him. The curse every 12 s and a Shadow Bolt on the tank every 6 s: decurse first, then heal.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "gehennasCurse",
+     "first": 4,
+     "every": 12
+    },
+    {
+     "id": "shadowBoltTank",
+     "first": 3,
+     "every": 6
+    },
+    {
+     "id": "rainOfFire",
+     "first": 10,
+     "every": 15
+    }
+   ]
+  }
+ ]
+}

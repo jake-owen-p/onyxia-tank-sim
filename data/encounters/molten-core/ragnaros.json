@@ -1,0 +1,1325 @@
+{
+ "id": "ragnaros",
+ "name": "Ragnaros",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "molten-core",
+  "name": "Molten Core",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/molten-core/ragnaros.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 1,099,230 HP. Three phases: emerged (180 s, to 60%; the research says he must be at 30-40% by the first submerge, so this runs a raid slightly behind that), Sons of Flame (90 s) and emerged again (180 s, to 0). A second Sons wave at 450 s is not modelled: this script assumes he dies first. Submerge: phase 2 is `bossState: submerged`, HP held at 60%: he is gone, nothing swings at the tank and nothing can hit him; the phase ends with a one-shot `threatWipe` emerge (2.9 s cast with a threat reset, per the research). In the real fight he emerges as soon as the last Son dies; here the phase runs its full 90 s. Wrath of Ragnaros: `knockback` radial, 25 yd from his edge, 1000 Fire, 12 yd push so the tank lands inside Taunt range (the wiki calls it a 25 yd knockback; DBC 400-450 units). Cadence DBM/BigWigs first 26-34 s, then 25-35 s, using 27.5. It has a 5 s cast (a stand-in for the raid watching the timer; real Wrath is instant) so `moveOut` can walk melee out of 25 yd, and the cast is flagged off the boss so he keeps swinging through it. Whether it wipes the tank's threat is an open question (scriptdev2 and a SoM guide say yes, wiki only knockback); it is followed by a `targetSwitch` so the tank has to Taunt, because a `threatCut` on the knockback also cuts the ghost tank and makes DPS instantly pull aggro. `playerMetric` scores melee, ranged and healers for standing inside 25 yd when it lands. Magma Blast: 6000 Fire on a random player, 1 s cast, every 1 s while nobody is in melee reach, with about 3 s grace (research). `aoe` for the whole room with `conditional: meleeEmpty`, scaled to 3000 (a 6000 hit would one-shot the 10,000 HP model), checked 3.5 s and 6 s after each Wrath and 4 s after the emerge. It only ever fires for a player tank who fails to get back in melee; scored for the tank as `magmaBlasts`. The ghost tank is not knocked back, so the check never fires in other roles. Elemental Fire: a passive melee proc (20563 procs 20564, cmangos), 2160-2640 + 600 Fire per second for 8 s. As written it would kill a 10,000 HP tank in two casts, so it is scaled to a non-dispellable 8 s debuff of 200 per second on a stand-in `every: 12` cadence (the engine has no procs; fire-resistance gear in the real fight absorbs most of it, and the scaling is a stand-in for that, not a claim about the number). Might of Ragnaros: 2000 Fire and knockback in 20 yd (DBC) vs 1000 (wiki), on a random mana user, every ~11 s (cmangos) vs 20-30 s (guides), using 18. As a `projectile` with splash 8 and `playerChance` 0.3: the real 20 yd circle is modelled small because the engine cannot spread the raid dots, and a 20 yd splash would hit the player nearly every time. Knockback on the target is not modelled. Lava Burst: implementation open (random geysers per emulator vs random mana user per SoM guides); damage 925-1075 in 35 yd (DBC 21158) vs 5184-5816 in 5 yd (17731) vs 1387 SoM. Modelled as 1000-damage geysers (radius 5, 3 s telegraph per the research) at a random raid member, with `playerChance` 0.25, cadence 5-25 s (using 15). Sons of Flame: an `adds` wave of 8 at the start of phase 2, killable; both tank roles pick them up (`pickup: tanks`) in front of the southern lip and the DPS kill them, since he cannot be hit while submerged. They live 85 s at most (15,260 HP; the Era value is an estimate from WotLK). Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Lava Shield mana burn and Double Attack are not modelled. Banishes, kiting and the \"kill one every 10 s\" rule are in the tip only. Melt Weapon and Hand of Ragnaros 19780 are not modelled (19780 is unused per the emulators). Boss melee 400 per 2 s is a placeholder scaled to the 10,000 HP tank. Engine gaps: ghost tank takes no Wrath damage and is not knocked back (only the player is); Might is a small stand-in; no fire resistance; no mana; a boss has one cast slot, so Might of Ragnaros can be skipped while the 5 s Wrath telegraph is up.",
+ "sources": [
+  "docs/research/molten-core/ragnaros.md",
+  "https://warcraft.wiki.gg/wiki/Ragnaros_(tactics)",
+  "https://www.wowhead.com/tbc/npc=11502/ragnaros",
+  "https://www.wowhead.com/wotlk/npc=12143/son-of-flame",
+  "https://wotlkdb.com/?spell=20566",
+  "https://wotlkdb.com/?spell=20564",
+  "https://wotlkdb.com/?spell=20565",
+  "https://wotlkdb.com/?spell=21154",
+  "https://wotlkdb.com/?spell=21155",
+  "https://wotlkdb.com/?spell=21158",
+  "https://wotlkdb.com/?spell=17731",
+  "https://wotlkdb.com/?spell=21108",
+  "https://wotlkdb.com/?spell=20568",
+  "https://wotlkdb.com/?spell=21857",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/molten_core/boss_ragnaros.cpp",
+  "https://raw.githubusercontent.com/scriptdev2/scriptdev2-classic/master/scripts/eastern_kingdoms/molten_core/boss_ragnaros.cpp",
+  "https://www.wowhead.com/classic/guides/ragnaros-molten-core-strategy",
+  "https://www.tentonhammer.com/guides/mc-boss-guide-boss-10-ragnaros"
+ ],
+ "arena": {
+  "name": "Ragnaros' lair",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      50,
+      0
+     ],
+     [
+      49.2,
+      8.7
+     ],
+     [
+      47,
+      17.1
+     ],
+     [
+      43.3,
+      25
+     ],
+     [
+      38.3,
+      32.1
+     ],
+     [
+      32.1,
+      38.3
+     ],
+     [
+      25,
+      43.3
+     ],
+     [
+      17.1,
+      47
+     ],
+     [
+      8.7,
+      49.2
+     ],
+     [
+      0,
+      50
+     ],
+     [
+      -8.7,
+      49.2
+     ],
+     [
+      -17.1,
+      47
+     ],
+     [
+      -25,
+      43.3
+     ],
+     [
+      -32.1,
+      38.3
+     ],
+     [
+      -38.3,
+      32.1
+     ],
+     [
+      -43.3,
+      25
+     ],
+     [
+      -47,
+      17.1
+     ],
+     [
+      -49.2,
+      8.7
+     ],
+     [
+      -50,
+      0
+     ],
+     [
+      -49.2,
+      -8.7
+     ],
+     [
+      -47,
+      -17.1
+     ],
+     [
+      -43.3,
+      -25
+     ],
+     [
+      -38.3,
+      -32.1
+     ],
+     [
+      -32.1,
+      -38.3
+     ],
+     [
+      -25,
+      -43.3
+     ],
+     [
+      -17.1,
+      -47
+     ],
+     [
+      -8.7,
+      -49.2
+     ],
+     [
+      0,
+      -50
+     ],
+     [
+      8.7,
+      -49.2
+     ],
+     [
+      17.1,
+      -47
+     ],
+     [
+      25,
+      -43.3
+     ],
+     [
+      32.1,
+      -38.3
+     ],
+     [
+      38.3,
+      -32.1
+     ],
+     [
+      43.3,
+      -25
+     ],
+     [
+      47,
+      -17.1
+     ],
+     [
+      49.2,
+      -8.7
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -11,
+      -46
+     ],
+     [
+      11,
+      -46
+     ],
+     [
+      11,
+      -70
+     ],
+     [
+      -11,
+      -70
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      11,
+      -48.8
+     ],
+     [
+      22.4,
+      -44.7
+     ],
+     [
+      32.5,
+      -38
+     ],
+     [
+      40.7,
+      -29
+     ],
+     [
+      46.5,
+      -18.3
+     ],
+     [
+      49.6,
+      -6.6
+     ],
+     [
+      49.7,
+      5.5
+     ],
+     [
+      46.9,
+      17.3
+     ],
+     [
+      41.3,
+      28.1
+     ],
+     [
+      33.3,
+      37.3
+     ],
+     [
+      23.4,
+      44.2
+     ],
+     [
+      12,
+      48.5
+     ],
+     [
+      0,
+      50
+     ],
+     [
+      -12,
+      48.5
+     ],
+     [
+      -23.4,
+      44.2
+     ],
+     [
+      -33.3,
+      37.3
+     ],
+     [
+      -41.3,
+      28.1
+     ],
+     [
+      -46.9,
+      17.3
+     ],
+     [
+      -49.7,
+      5.5
+     ],
+     [
+      -49.6,
+      -6.6
+     ],
+     [
+      -46.5,
+      -18.3
+     ],
+     [
+      -40.7,
+      -29
+     ],
+     [
+      -32.5,
+      -38
+     ],
+     [
+      -22.4,
+      -44.7
+     ],
+     [
+      -11,
+      -48.8
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -11,
+      -48.8
+     ],
+     [
+      -11,
+      -70
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      11,
+      -48.8
+     ],
+     [
+      11,
+      -70
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -64
+    ]
+   },
+   {
+    "text": "Lava pool: he stays here",
+    "at": [
+     0,
+     22
+    ]
+   },
+   {
+    "text": "Outer ring: ranged and healers, past 25 yd",
+    "at": [
+     -34,
+     -24
+    ]
+   },
+   {
+    "text": "Southern lip: the raid at submerge, tanks in front of it",
+    "at": [
+     0,
+     -44
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -66,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 8,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -54,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": -1,
+   "tolerance": 4,
+   "label": "Tank: in melee at all times"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 8,
+   "heading": 270,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Ragnaros"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -29,
+   "spread": 12
+  },
+  "raidSpotSons": {
+   "x": 0,
+   "y": -40,
+   "spread": 9
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -26,
+   "tolerance": 4,
+   "label": "Ranged: outer ring, past 25 yd"
+  },
+  "healerSpot": {
+   "x": 4,
+   "y": -27,
+   "tolerance": 4,
+   "label": "Healers: outer ring, in range of the tank"
+  },
+  "rangedLipSpot": {
+   "x": -4,
+   "y": -42,
+   "tolerance": 6,
+   "label": "Southern lip"
+  },
+  "healerLipSpot": {
+   "x": 4,
+   "y": -36,
+   "tolerance": 6,
+   "label": "Southern lip"
+  },
+  "sonWest": {
+   "x": -7,
+   "y": -5,
+   "label": "Son of Flame"
+  },
+  "sonEast": {
+   "x": 7,
+   "y": -5,
+   "label": "Son of Flame"
+  },
+  "sonNorthWest": {
+   "x": -9,
+   "y": -1,
+   "label": "Son of Flame"
+  },
+  "sonNorthEast": {
+   "x": 9,
+   "y": -1,
+   "label": "Son of Flame"
+  },
+  "sonSouthWest": {
+   "x": -5,
+   "y": -8,
+   "label": "Son of Flame"
+  },
+  "sonSouthEast": {
+   "x": 5,
+   "y": -8,
+   "label": "Son of Flame"
+  },
+  "sonMidWest": {
+   "x": -2,
+   "y": -10,
+   "label": "Son of Flame"
+  },
+  "sonMidEast": {
+   "x": 2,
+   "y": -10,
+   "label": "Son of Flame"
+  },
+  "sonsHoldSpot": {
+   "x": 0,
+   "y": -14,
+   "label": "Sons held here, away from the raid"
+  },
+  "sonsTankSpot": {
+   "x": 0,
+   "y": -22,
+   "tolerance": 5,
+   "label": "Tanks at submerge: catch the Sons before the casters"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 6,
+  "speed": 8,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 400,
+  "meleeInterval": 2,
+  "stationary": true,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Stay in melee every second he is up: an empty melee range means 6000-damage Magma Blasts on the raid. Wrath throws you 12 yd, so Taunt the moment you land and walk straight back. At submerge, get in front of the raid and catch the Sons. Be back on him the instant he emerges.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Second tank",
+   "short": "Off-tank",
+   "description": "Stand in melee with the main tank and Taunt the moment Wrath throws them; never both of you knocked at once. At submerge, pick up the Sons with the main tank and keep them off the casters.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Inner ring, burn him. Back out of 25 yd before each Wrath and come straight back; the Taunt note means the tank was thrown and he is loose. Mana users should not be in melee. At submerge, kill the Sons.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Outer ring, past 25 yd, and hold that line so Wrath never reaches you. Spread 15-20 yd so a Might of Ragnaros only hits one of you. Burn him before the first submerge, kill the Sons while he is under.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Constant healing on the tank through Elemental Fire and his hits. Stay past 25 yd so Wrath cannot reach you and 10+ yd from every Son of Flame.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "wrath": {
+   "label": "Wrath of Ragnaros",
+   "kind": "knockback",
+   "cast": 5,
+   "offBoss": true,
+   "radial": true,
+   "radius": 25,
+   "moveOut": "melee",
+   "knockbackRange": 25,
+   "knockback": 12,
+   "damage": 1000,
+   "playerMetric": "wrathsTaken",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "wrathTurn",
+     "delay": 0.1
+    },
+    {
+     "id": "magmaBlast",
+     "delay": 3.5
+    },
+    {
+     "id": "magmaBlast",
+     "delay": 6
+    }
+   ],
+   "tip": "TASTE THE FLAMES OF SULFURON! 1000 Fire and a huge knockback to everyone within 25 yd. Melee step out before it lands, ranged are already past it, the tank Taunts as soon as they land."
+  },
+  "wrathTurn": {
+   "label": "Wrath of Ragnaros",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 2.5,
+   "toast": "Wrath threw the tank. Taunt him!",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "The tank has been thrown and he is loose."
+  },
+  "elementalFire": {
+   "label": "Elemental Fire",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 8,
+   "tickDamage": 200,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "2160-2640 Fire and 600 more every second for 8 s, procced by his melee on the tank. Scaled here. Constant healing; if it is on anyone else that person has pulled."
+  },
+  "mightOfRagnaros": {
+   "label": "Might of Ragnaros",
+   "kind": "projectile",
+   "cast": 0.5,
+   "travel": 0.6,
+   "splash": 8,
+   "damage": 2000,
+   "playerChance": 0.3,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "BY FIRE BE PURGED! 2000 Fire and a knockback within 20 yd of a random mana user. Spread 15-20 yd so only one player is inside it; stand with your back to a wall segment."
+  },
+  "lavaBurst": {
+   "label": "Lava Burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.25,
+   "radius": 5,
+   "warning": 3,
+   "active": 1,
+   "damage": 1000,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A geyser of lava erupts after 3 s where the floor glows. Walk out if one lights up under you."
+  },
+  "magmaBlast": {
+   "label": "Magma Blast",
+   "kind": "aoe",
+   "cast": 0,
+   "conditional": "meleeEmpty",
+   "radius": 0,
+   "damage": 3000,
+   "tankDamage": 3000,
+   "playerMetric": "magmaBlasts",
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Nobody in melee: 6000 Fire on a random raid member every second (scaled here). Get back to him."
+  },
+  "sons": {
+   "label": "Sons of Flame",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "sonWest",
+    "sonEast",
+    "sonNorthWest",
+    "sonNorthEast",
+    "sonSouthWest",
+    "sonSouthEast",
+    "sonMidWest",
+    "sonMidEast"
+   ],
+   "speed": 6,
+   "aggroRange": 18,
+   "lifetime": 85,
+   "heldLifetime": 85,
+   "pickup": "tanks",
+   "killable": true,
+   "holdSpot": "sonsHoldSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "COME FORTH, MY SERVANTS! Eight Sons rush the raid. Tanks and rogues make a wall on the southern lip, mages freeze and kill one every 10 s. Never banish them all: he surfaces early."
+  },
+  "submerge": {
+   "label": "Submerge",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "hidden": true,
+   "tip": "COME FORTH, MY SERVANTS!"
+  },
+  "emerge": {
+   "label": "Emerge",
+   "kind": "threatWipe",
+   "cast": 0,
+   "follow": [
+    {
+     "id": "magmaBlast",
+     "delay": 4
+    }
+   ],
+   "toast": "He surfaces with an empty threat table. Taunt him now!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He comes back with no threat on anyone. Tanks are back in melee the instant he surfaces."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Emerged",
+   "subtitle": "Burn him: 180 s to submerge",
+   "hpFrom": 1,
+   "hpTo": 0.6,
+   "duration": 180,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "elementalFire",
+     "first": 3,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "mightOfRagnaros",
+     "first": 11,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "lavaBurst",
+     "first": 20,
+     "every": 15,
+     "jitter": 5
+    },
+    {
+     "id": "wrath",
+     "first": 25,
+     "every": 27.5,
+     "jitter": 2.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Be in melee on him as he comes up",
+     "tip": "Taunt him from the south lip of the pool. Every second with nobody in melee is Magma Blast on the raid in the real fight."
+    },
+    {
+     "id": "wrathTaunt",
+     "type": "afterEvent",
+     "event": "wrathTurn",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him the moment you land from Wrath",
+     "tip": "Wrath of Ragnaros throws you 25 yd and drops your threat. Land, Taunt, walk back: he must never be left without a tank in melee."
+    },
+    {
+     "id": "wrathRange",
+     "type": "continuous",
+     "metric": "wrathsTaken",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay past 25 yd of him",
+     "tip": "Wrath reaches 25 yd. Ranged and healers hold the outer ring, because a throw lands you in the lava or out of position."
+    },
+    {
+     "id": "wrathOut",
+     "type": "continuous",
+     "metric": "wrathsTaken",
+     "role": "melee",
+     "label": "Back out of 25 yd before Wrath",
+     "tip": "When the cast bar comes up, walk out of 25 yd and come straight back: the marker shows where."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Elemental Fire plus his hits never lets up. Heal through it and top the tank up before every Wrath."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Sons of Flame",
+   "subtitle": "Submerged: kill the Sons",
+   "hpFrom": 0.6,
+   "hpTo": 0.6,
+   "duration": 90,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotSons",
+   "spots": {
+    "tank": "sonsTankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedLipSpot",
+    "healer": "healerLipSpot"
+   },
+   "actions": [
+    {
+     "id": "sons",
+     "first": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sonsPicked",
+     "type": "afterEvent",
+     "event": "sons",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Pick up the Sons of Flame",
+     "tip": "Eight of them rush the casters. Taunt one or run into them and keep them 10+ yd from every healer."
+    },
+    {
+     "id": "sonsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the Sons off the raid",
+     "tip": "A Son on the casters burns 150 mana every 3 s. Hold them on the wall."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Emerged again",
+   "subtitle": "Finish him",
+   "hpFrom": 0.6,
+   "hpTo": 0,
+   "duration": 180,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "emerge",
+     "first": 0
+    },
+    {
+     "id": "elementalFire",
+     "first": 5,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "mightOfRagnaros",
+     "first": 11,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "lavaBurst",
+     "first": 20,
+     "every": 15,
+     "jitter": 5
+    },
+    {
+     "id": "wrath",
+     "first": 22,
+     "every": 27.5,
+     "jitter": 2.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeTaunt",
+     "type": "afterEvent",
+     "event": "emerge",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him the moment he surfaces",
+     "tip": "He comes up with an empty table. The tank is already in melee and Taunts on the emerge; the DPS wait for it."
+    },
+    {
+     "id": "wrathTaunt",
+     "type": "afterEvent",
+     "event": "wrathTurn",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him the moment you land from Wrath",
+     "tip": "Wrath of Ragnaros throws you 25 yd and drops your threat. Land, Taunt, walk back: he must never be left without a tank in melee."
+    },
+    {
+     "id": "wrathRange",
+     "type": "continuous",
+     "metric": "wrathsTaken",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Back past 25 yd",
+     "tip": "Everyone back on the outer ring. Wrath is still coming."
+    },
+    {
+     "id": "wrathOut",
+     "type": "continuous",
+     "metric": "wrathsTaken",
+     "role": "melee",
+     "label": "Back out of 25 yd before Wrath",
+     "tip": "When the cast bar comes up, walk out of 25 yd and come straight back."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Last burn. Keep the tank up through every Elemental Fire; he must die before the next submerge."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 40,
+   "roles": "dps",
+   "phases": [
+    1,
+    3
+   ],
+   "tip": "While he is up you should be attacking, apart from the walk out and back for every Wrath."
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "magmaBlasts": {
+   "label": "Magma Blasts you caused",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": "tank",
+   "tip": "Be back in melee within 3 s of every Wrath and of the emerge, or he blasts the raid."
+  },
+  "wrathsTaken": {
+   "label": "Wraths of Ragnaros taken",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": [
+    "melee",
+    "ranged",
+    "healer"
+   ],
+   "tip": "Past 25 yd from him. It is the whole point of the outer ring."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Press notes: Taunt when Wrath throws you or when he surfaces; Taunt or walk into the Sons; Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Ragnaros turns on the raid",
+    "tip": "The moment he turns, Taunt. Every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "tauntSons",
+    "ability": "taunt",
+    "on": "event",
+    "event": "sons",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "tanks",
+    "short": "SONS",
+    "label": "Pick up the Sons of Flame",
+    "tip": "Taunt one or run into them as they arrive.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "wrathDrill",
+   "name": "Wrath and Taunt",
+   "description": "Already in melee. Wrath every 14 s throws you back and he turns: Taunt the moment you land, walk straight back in.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "wrath",
+     "first": 5,
+     "every": 14,
+     "jitter": 1
+    },
+    {
+     "id": "elementalFire",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "outerRing",
+   "name": "The outer ring",
+   "description": "Hold your spot past 25 yd through the Wraths and keep your threat under the tank while Might of Ragnaros lands.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "wrath",
+     "first": 4,
+     "every": 12
+    },
+    {
+     "id": "mightOfRagnaros",
+     "first": 7,
+     "every": 9,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "fireHealing",
+   "name": "Healing Elemental Fire",
+   "description": "Elemental Fire every 8 s and Wrath every 14 s. Keep the tank above half and stay past 25 yd of him.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "elementalFire",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "wrath",
+     "first": 5,
+     "every": 14
+    },
+    {
+     "id": "mightOfRagnaros",
+     "first": 7,
+     "every": 9
+    }
+   ]
+  }
+ ]
+}
