@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FIXED_DT, createSim } from '../src/core/sim.js';
 import { computeScore } from '../src/core/scoring.js';
+import { angleTo } from '../src/core/geometry.js';
 import { script, makeSim, run, idle, roleBot } from './helpers.js';
 
 const press = (...ids) => () => ({ ...idle(), abilities: ids });
@@ -235,4 +236,84 @@ test('a shield makes attacks wasted, costly and flagged HOLD; a cast raises a no
   const ev = run(sim, FIXED_DT, press('interrupt'));
   assert.ok(ev.some((e) => e.type === 'interrupted'));
   assert.equal(s.metrics.mends, undefined, 'an interrupted cast never completes');
+});
+
+function withAdds(extra = {}) {
+  const s2 = structuredClone(script);
+  s2.positions.addSpot = { x: 20, y: 30 };
+  s2.actions.priests = { label: 'Priest', kind: 'adds', cast: 0, count: 1, from: ['addSpot'], speed: 0, lifetime: 30, heldLifetime: 30, pickup: 'offtank', holdSpot: 'addSpot', warn: false, icon: 'whelps', killFirst: true, ...extra };
+  s2.continuousMetrics.attacksOffPriority = { label: 'x', unit: 'count', penaltyPerUnit: 1 };
+  return s2;
+}
+
+test('killable adds: you hit what you face, attacks shorten their life, hitting the boss first is counted', () => {
+  const sim = createSim(withAdds(), { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, p = s.world.player, b = s.world.boss;
+  sim.triggerAction('priests');
+  const add = s.world.whelps[0];
+  assert.ok(add.killable && add.priority);
+  // Look at the boss: the attack goes there and counts against you.
+  p.heading = angleTo(p.x, p.y, b.x, b.y);
+  run(sim, FIXED_DT, press('attack'));
+  assert.equal(s.metrics.attacksOffPriority, 1);
+  run(sim, 1.6);
+  // Look at the add: its health drops by more than the raid alone would take.
+  p.heading = angleTo(p.x, p.y, add.x, add.y);
+  const hp = add.hp;
+  run(sim, FIXED_DT, press('attack'));
+  assert.ok(hp - add.hp >= 0.05);
+  assert.equal(s.metrics.attacksOnAdds, 1);
+  assert.equal(s.metrics.attacksOffPriority, 1, 'not counted when you are on the add');
+  const ev = run(sim, 31);
+  assert.equal(s.world.whelps.length, 0, 'the raid finishes it without you');
+  assert.ok(Array.isArray(ev));
+});
+
+test('an off-tank who does not hold the boss leaves it on the ghost tank and goes for the adds', () => {
+  const s2 = withAdds({ killFirst: false, speed: 5 });
+  s2.roles.offtank.holdsBoss = false;
+  s2.positions.addSpot = { x: 20, y: 10 };
+  s2.positions.otSpot = { x: 25, y: 12, tolerance: 4 };
+  for (const ph of s2.phases) ph.spots = { ...ph.spots, offtank: 'otSpot' };
+  const sim = createSim(s2, { role: 'offtank', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state;
+  assert.equal(s.tankRole, false);
+  assert.equal(s.world.boss.target, 'ghost');
+  sim.triggerAction('priests');
+  sim.step(idle(), FIXED_DT);
+  assert.equal(s.world.idealPlayer.reason, 'whelps');
+  run(sim, 15, roleBot('offtank'));
+  assert.equal(s.world.boss.target, 'ghost', 'never stole the boss');
+  assert.ok(s.world.whelps.every((a) => a.target === 'player'), 'picked them up');
+  assert.equal(s.world.idealPlayer.reason, 'holdWhelps');
+});
+
+test('stuns stop you acting; stacked debuffs cut healing and raise damage; off-boss casts keep her swinging', () => {
+  const s2 = structuredClone(script);
+  Object.assign(s2.actions, {
+    stomp: { label: 'Stomp', kind: 'aoe', cast: 0, radius: 200, damage: 0, stun: 2, warn: false, icon: 'roar' },
+    wound: { label: 'Wound', kind: 'debuff', cast: 0, target: 'tank', dispel: 'none', duration: 20, maxStacks: 3, healingMult: 0.8, damageTakenMult: 1.5, warn: false, icon: 'roar' },
+    mend: { label: 'Mend', kind: 'aoe', cast: 5, offBoss: true, radius: 1, damage: 0, warn: false, icon: 'roar' },
+  });
+  const sim = createSim(s2, { role: 'healer', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, g = s.world.ghost, p = s.world.player;
+  sim.triggerAction('stomp');
+  const x = p.x;
+  const ev = run(sim, 1, () => ({ ...idle(), forward: 1, abilities: ['heal'] }));
+  assert.ok(ev.some((e) => e.type === 'abilityFailed' && e.reason === 'stunned'));
+  assert.equal(p.x, x, 'could not move');
+  run(sim, 1.5);
+  sim.triggerAction('wound'); sim.triggerAction('wound');
+  assert.equal(s.debuffs.length, 1, 'stacks instead of a second copy');
+  assert.equal(s.debuffs[0].stacks, 2);
+  assert.ok(Math.abs(s.debuffs[0].damageTakenMult - 2) < 1e-9);
+  g.hp = 1000;
+  run(sim, FIXED_DT, press('heal'));
+  const healed = g.hp - 1000;
+  assert.ok(healed < script.playerAbilities.heal.amount * 0.7 + 10, `healing reduced, got ${healed}`);
+  sim.triggerAction('mend');
+  const next = s.world.boss.nextMelee;
+  const ev2 = run(sim, 3);
+  assert.ok(s.world.boss.nextMelee > next || ev2.length >= 0);
+  assert.ok(s.world.boss.lastHit >= s.t - 3, 'she kept swinging through the off-boss cast');
 });

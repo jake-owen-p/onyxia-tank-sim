@@ -323,7 +323,15 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
         floorPoly(ctx, cam, poly, w, h, color, null);
         const top = project(cam, wh.x, wh.y, 1.3, w, h);
         const base = project(cam, wh.x, wh.y, 0.3, w, h);
-        if (top && base) { ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, base.scale * 0.5); ctx.beginPath(); ctx.moveTo(base.x, base.y); ctx.lineTo(top.x, top.y); ctx.stroke(); }
+        if (top && base) {
+          ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, base.scale * 0.5); ctx.beginPath(); ctx.moveTo(base.x, base.y); ctx.lineTo(top.x, top.y); ctx.stroke();
+          if (wh.killable) {
+            const bw = Math.max(18, top.scale * 2.6), by = top.y - Math.max(6, top.scale * 0.5);
+            ctx.fillStyle = withAlpha(pal.text, 0.3); ctx.fillRect(top.x - bw / 2, by, bw, 3);
+            ctx.fillStyle = wh.priority ? pal.bad : pal.good; ctx.fillRect(top.x - bw / 2, by, bw * Math.max(0, wh.hp), 3);
+            if (view.feedback && view.feedback.target && view.feedback.target.add === wh.uid) { ctx.strokeStyle = pal.accent; ctx.lineWidth = 2; ctx.strokeRect(top.x - bw / 2 - 2, by - 2, bw + 4, 7); }
+          }
+        }
         ctx.globalAlpha = 1;
         break;
       }

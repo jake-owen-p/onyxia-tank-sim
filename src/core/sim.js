@@ -26,7 +26,7 @@ import {
   createPlayer, updatePlayer, knockback, createBoss, updateBoss, beginTakeoff, beginLanding, bossTargetPos,
   createRaid, setRaidSpot, updateRaid, spawnAdds, updateWhelps, pickupWhelps, createGhost, updateGhost,
 } from './entities.js';
-import { idealPlayerPos, idealTankPos, idealBossPos, isTankRole, spotName } from './ideal.js';
+import { idealPlayerPos, idealTankPos, idealBossPos, isTankRole, spotName, killTarget } from './ideal.js';
 
 export const FIXED_DT = 1 / 60;
 
@@ -51,7 +51,7 @@ export function createSim(script, options = {}) {
   opts.role = LEGACY_ROLE[opts.role] || opts.role;
   const rng = createRng(opts.seed);
   const roleDef = (script.roles && script.roles[opts.role]) || { abilities: Object.keys(script.playerAbilities) };
-  const tankRole = isTankRole(opts.role);
+  const tankRole = isTankRole(opts.role) && roleDef.holdsBoss !== false;   // an off-tank with `holdsBoss: false` has adds to mind while a ghost tank holds the boss
   const P = script.positions;
 
   const state = {
@@ -98,6 +98,7 @@ export function createSim(script, options = {}) {
     enraged: false,
     shieldUntil: -Infinity,  // a reflect or damage shield: attacks are wasted and scored until this time
     shieldDamage: 0,
+    shieldRoles: null,
     tankLowSince: null,
   };
   state.world.ghost.tanking = !tankRole;
@@ -136,8 +137,24 @@ export function createSim(script, options = {}) {
   const tankTarget = () => (tankRole ? 'player' : 'ghost');
   const bossLive = () => { const b = state.world.boss; return b.state === 'grounded' && b.engaged && !b.passive; };
 
+  /** Product of a debuff field over everything on `on` (1 when nothing applies). */
+  function debuffMult(on, key) {
+    let m = 1;
+    for (const d of state.debuffs) if (d.on === on && d[key] != null) m *= d[key];
+    return m;
+  }
+
+  function stunPlayer(seconds) {
+    if (!seconds) return;
+    const p = state.world.player;
+    p.stunnedUntil = Math.max(p.stunnedUntil, state.t + seconds);
+    emit('stunned', { duration: seconds });
+    toast('Stunned', 'bad');
+  }
+
   function damagePlayer(amount, source) {
     const p = state.world.player;
+    amount *= debuffMult('player', 'damageTakenMult');
     p.hp -= amount;
     emit('damage', { amount, source });
     if (p.hp <= 0) {
@@ -151,7 +168,7 @@ export function createSim(script, options = {}) {
   function damageGhost(amount, source) {
     const g = state.world.ghost;
     if (!g.tanking) return;
-    g.hp -= amount;
+    g.hp -= amount * debuffMult('ghost', 'damageTakenMult');
     if (g.hp <= 0) {
       g.hp = g.maxHp;
       addMetric('tankDeaths', 1);
@@ -381,10 +398,11 @@ export function createSim(script, options = {}) {
     if (requires === 'submerged' && b.state !== 'submerged') return false;
     if (def.kind === 'hazard' && def.placement === 'lanes' && !opts.freezeHp && state.phaseEnd - state.t < (def.warning || 0) + (def.active || 0) + 2) return false;
     if (def.conditional === 'behind' && !anyoneBehind()) return false;
+    if (def.conditional === 'meleeEmpty' && (tankRole ? playerInBossRange(script.boss.meleeRange + 1) : ghostInBossRange(script.boss.meleeRange + 1))) return false;
     if (def.conditional === 'onPlayer' && (b.target !== tankTarget() || state.threat.tauntUntil > state.t || state.threat.ghostTauntUntil > state.t)) return false;
     if (def.cast > 0) {
       if (b.cast) return false;
-      b.cast = { id, label: def.label, icon: def.icon, start: state.t, end: state.t + def.cast };
+      b.cast = { id, label: def.label, icon: def.icon, start: state.t, end: state.t + def.cast, offBoss: !!def.offBoss };
       emit('cast', { id, label: def.label, castTime: def.cast });
       for (const beat of onCueEvent(state, script, `cast:${id}`, state.t)) emitBeat(beat);
       return true;
@@ -441,6 +459,7 @@ export function createSim(script, options = {}) {
         if (d <= def.knockbackRange && front) {
           if (def.damage) damagePlayer(def.damage, id);
           if (def.playerMetric) addMetric(def.playerMetric, 1);
+          stunPlayer(def.stun);
           const offWall = tankRole && script.arena.backWall && !nearWall(state, script);
           knockback(p, b.x, b.y, def.knockback, state.t);
           if (tankRole) applyBuffet(state.threat, def.threatCut || 0, true);
@@ -453,7 +472,8 @@ export function createSim(script, options = {}) {
       }
       case 'fear': {
         const who = def.targets || 'all';
-        const me = who === 'all' || (who === 'tank' && tankRole) || (who === 'random' && pickRandomVictim(def));
+        const reach = (!def.radius || bossRangeTo(p.x, p.y) <= def.radius) && roleMatches(def.roles);
+        const me = reach && (who === 'all' || (who === 'tank' && tankRole) || (who === 'random' && pickRandomVictim(def)));
         if (me) {
           p.fearedUntil = state.t + (def.duration || script.player.fearDuration);
           p.wanderTimer = 0;
@@ -464,7 +484,7 @@ export function createSim(script, options = {}) {
       }
       case 'aoe': {
         const inRadius = !def.radius || bossRangeTo(p.x, p.y) <= def.radius;
-        if (inRadius) { damagePlayer(def.damage || 0, id); if (def.playerMetric) addMetric(def.playerMetric, 1); }
+        if (inRadius) { damagePlayer(def.damage || 0, id); if (def.playerMetric) addMetric(def.playerMetric, 1); stunPlayer(def.stun); }
         if (def.tankDamage || !def.radius || ghostInBossRange(def.radius)) damageGhost(def.tankDamage ?? def.damage ?? 0, id);
         emit('raidDamage', { id, label: def.label, amount: def.damage || 0 });
         break;
@@ -510,7 +530,8 @@ export function createSim(script, options = {}) {
       case 'shield': {
         state.shieldUntil = state.t + (def.duration || 10);
         state.shieldDamage = def.reflectDamage || 0;
-        toast(def.toast || `${def.label}: stop attacking`, 'bad');
+        state.shieldRoles = def.roles || null;
+        if (roleMatches(def.roles)) toast(def.toast || `${def.label}: stop attacking`, 'bad');
         break;
       }
       case 'enrage': {
@@ -609,16 +630,30 @@ export function createSim(script, options = {}) {
     else if (tgt === 'player') on = 'player';
     else if (tgt === 'all') on = 'player';
     else on = pickRandomVictim(def) ? 'player' : 'raid';
+    if (def.maxStacks) {
+      const cur = state.debuffs.find((x) => x.actionId === id && x.on === on);
+      if (cur) {
+        cur.stacks = Math.min(def.maxStacks, cur.stacks + 1);
+        cur.until = state.t + (def.duration || 10);
+        cur.tickDamage = (def.tickDamage || 0) * cur.stacks;
+        if (def.damageTakenMult != null) cur.damageTakenMult = 1 + (def.damageTakenMult - 1) * cur.stacks;
+        if (def.healingMult != null) cur.healingMult = Math.max(0, 1 + (def.healingMult - 1) * cur.stacks);
+        emit('debuffStacked', { uid: cur.uid, name: cur.name, on, stacks: cur.stacks });
+        return;
+      }
+    }
     const d = {
       uid: ++uid, name: def.label, dispel: def.dispel || 'none', on,
       appliedAt: state.t, until: state.t + (def.duration || 10),
       tickDamage: def.tickDamage || 0, nextTickAt: state.t + 1, actionId: id, tip: def.tip || '',
+      stacks: 1, damageTakenMult: def.damageTakenMult ?? null, healingMult: def.healingMult ?? null,
     };
     state.debuffs.push(d);
     emit('debuffApplied', { uid: d.uid, name: d.name, dispel: d.dispel, on, duration: def.duration || 10 });
     if (d.dispel !== 'none') for (const beat of onCueEvent(state, script, 'debuffApplied', state.t)) emitBeat(beat);
     if (on === 'player') toast(`${def.label} on you`, d.dispel !== 'none' ? 'warn' : 'bad');
     if (def.fear && on === 'player') { state.world.player.fearedUntil = state.t + (def.fear); emit('feared', { duration: def.fear }); }
+    if (on === 'player') stunPlayer(def.stun);
   }
 
   function updateDebuffs(dt) {
@@ -660,12 +695,18 @@ export function createSim(script, options = {}) {
     };
     if (!A.list.includes(id)) return fail('role');
     if (p.fearedUntil > state.t) return fail('feared', 'Feared');
+    if (p.stunnedUntil > state.t) return fail('stunned', 'Stunned');
     if (A.readyAt[id] > state.t) return fail('cooldown');
     if (def.gcd && A.gcdUntil > state.t) return fail('gcd');
     const kind = def.kind || id;
 
     switch (kind) {
       case 'taunt': {
+        if (!tankRole) {
+          if (pickupWhelps(state, script, def.range) > 0) onWhelpPickup();
+          else return fail('range', 'No adds in range');
+          break;
+        }
         if (b.state === 'grounded' && !b.passive && playerInBossRange(def.range)) {
           engage('player');
           applyTaunt(state.threat, state.t, threatCfg);
@@ -677,11 +718,19 @@ export function createSim(script, options = {}) {
       }
       case 'attack': {
         const range = def.range ?? attackRange(state, script);
-        if (b.state !== 'grounded' || !b.engaged || b.passive) return fail('range', b.state === 'grounded' ? 'Nothing to hit yet' : 'The boss cannot be hit right now');
-        if (!playerInBossRange(range)) return fail('range', 'Out of range');
-        applyPlayerThreat(state.threat, def.threat || 0);
+        const tgt = attackTarget(range);
+        if (!tgt) return fail('range', bossLive() ? 'Out of range' : 'Nothing to hit right now');
         addMetric('attacks', 1);
-        if (state.t < state.shieldUntil) { addMetric('attacksIntoShield', 1); if (state.shieldDamage) damagePlayer(state.shieldDamage, 'shield'); toast('Shield is up. Stop attacking', 'bad'); }
+        if (tgt.add) {
+          tgt.add.hp -= def.addDamage ?? 0.06;
+          addMetric('attacksOnAdds', 1);
+          if (tgt.add.hp <= 0) { w.whelps.splice(w.whelps.indexOf(tgt.add), 1); emit('addKilled', { label: tgt.add.label }); }
+          emit('attack', { id, on: 'add' });
+          break;
+        }
+        applyPlayerThreat(state.threat, def.threat || 0);
+        if (killTarget(state)) { addMetric('attacksOffPriority', 1); toast('Kill the add first', 'warn'); }
+        if (shieldUp()) { addMetric('attacksIntoShield', 1); if (state.shieldDamage) damagePlayer(state.shieldDamage, 'shield'); toast('Shield is up. Stop attacking', 'bad'); }
         else if (state.feedback.holdAttack) { addMetric('attacksInRed', 1); toast('Hold! You are about to pull aggro', 'bad'); }
         else if (holdAfterPull()) { addMetric('earlyAttacks', 1); toast('Wait for the tank to build threat', 'warn'); }
         emit('attack', { id });
@@ -692,7 +741,7 @@ export function createSim(script, options = {}) {
         if (!g.tanking) return fail('range', 'No one to heal');
         if (dist(p.x, p.y, g.x, g.y) > range) return fail('range', 'Tank out of range');
         const before = g.hp;
-        g.hp = Math.min(g.maxHp, g.hp + (def.amount || 1500));
+        g.hp = Math.min(g.maxHp, g.hp + (def.amount || 1500) * debuffMult('ghost', 'healingMult'));
         applyPlayerThreat(state.threat, def.threat || 0);
         addMetric('heals', 1);
         if (g.maxHp - before < (def.amount || 1500) * 0.25) addMetric('overheals', 1);
@@ -712,7 +761,7 @@ export function createSim(script, options = {}) {
       }
       case 'interrupt': {
         if (!b.cast || !script.actions[b.cast.id] || !script.actions[b.cast.id].interruptible) return fail('nothing', 'Nothing to interrupt');
-        if (!playerInBossRange(def.range ?? 8)) return fail('range', 'Out of range');
+        if (!b.cast.offBoss && !playerInBossRange(def.range ?? 8)) return fail('range', 'Out of range');
         const cid = b.cast.id;
         b.cast = null;
         addMetric('interrupts', 1);
@@ -727,6 +776,24 @@ export function createSim(script, options = {}) {
     emit('abilityUsed', { id, label: def.label });
     const beat = onCuePress(state, script, id, state.t, 'ok');
     if (beat) emitBeat(beat);
+  }
+
+  const shieldUp = () => state.t < state.shieldUntil && roleMatches(state.shieldRoles);
+
+  /** What an attack would hit: whatever in range you are looking at most directly (boss or a killable add). */
+  function attackTarget(range) {
+    const w = state.world, b = w.boss, p = w.player;
+    const options = [];
+    if (bossLive() && playerInBossRange(range)) options.push({ boss: true, d: bossRangeTo(p.x, p.y), a: angleTo(p.x, p.y, b.x, b.y) });
+    for (const add of w.whelps) {
+      if (!add.killable) continue;
+      const d = dist(p.x, p.y, add.x, add.y);
+      if (d <= range + 2) options.push({ add, d, a: angleTo(p.x, p.y, add.x, add.y) });
+    }
+    if (!options.length) return null;
+    for (const o of options) o.off = Math.abs(angleDelta(p.heading, o.a));
+    const faced = options.filter((o) => o.off <= rad(70));
+    return (faced.length ? faced : options).sort((x, y) => x.off - y.off || x.d - y.d)[0];
   }
 
   function holdAfterPull() {
@@ -788,7 +855,10 @@ export function createSim(script, options = {}) {
     // Urgent corrections first, then a near deadline, then hints, then far deadlines.
     if (ideal.reason === 'runOut') return set('Run out of the raid before it goes off', 'fix');
     if (ideal.reason === 'moveOut') return set(`Get out of range: ${b.cast ? b.cast.label : 'move'}`, 'fix');
-    if (!tankRole && state.t < state.shieldUntil) return set('Shield up: stop attacking', 'fix');
+    if (!tankRole && shieldUp()) return set('Shield up: stop attacking', 'fix');
+    if (!tankRole && ideal.reason === 'whelps') return set('Pick up the adds', 'fix');
+    if (!tankRole && ideal.reason === 'holdWhelps') return set('Hold the adds on your spot', 'hold');
+    if ((state.role === 'melee' || state.role === 'ranged') && killTarget(state)) return set(`Kill ${killTarget(state).label} first`, 'fix');
     if (ideal.reason === 'dodgeLane') return set('Step out of the lane', 'fix');
     if (ideal.reason === 'dodgeZone' || fb.inHazard) return set(fb.inHazard ? 'Get out of it' : 'Move away from the hazard', 'fix');
     if (tankRole) {
@@ -842,6 +912,9 @@ export function createSim(script, options = {}) {
       }
     }
 
+    p.healMult = debuffMult('player', 'healingMult');
+    g.healMult = debuffMult('ghost', 'healingMult');
+
     // Player.
     if (cmd.abilities) for (const id of cmd.abilities) useAbility(id);
     if (updatePlayer(state, script, cmd, dt, rng).jumped) emit('jump');
@@ -892,7 +965,7 @@ export function createSim(script, options = {}) {
       }
       if (b.target === tankTarget() && state.landedAt != null && state.metrics.pickupTime == null) setMetric('pickupTime', state.t - state.landedAt);
       // Melee swings.
-      if (state.t >= b.nextMelee && !b.cast) {
+      if (state.t >= b.nextMelee && (!b.cast || b.cast.offBoss)) {
         const dmg = script.boss.meleeDamage * (state.enraged ? (script.boss.enrageMultiplier || 1.5) : 1);
         if (b.target === 'player' && playerInBossRange(script.boss.meleeRange + 1)) { damagePlayer(dmg, 'melee'); b.lastHit = state.t; b.nextMelee = state.t + script.boss.meleeInterval; }
         else if (b.target === 'ghost' && ghostInBossRange(script.boss.meleeRange + 1)) { damageGhost(dmg, 'melee'); b.lastHit = state.t; b.nextMelee = state.t + script.boss.meleeInterval; }
@@ -902,8 +975,8 @@ export function createSim(script, options = {}) {
 
     // Raid, adds, projectiles, debuffs.
     updateRaid(state, script, dt);
-    if (state.role === 'offtank' && p.fearedUntil <= state.t) {
-      const addDef = Object.values(script.actions).find((a) => a.kind === 'adds');
+    if (p.fearedUntil <= state.t) {
+      const addDef = Object.values(script.actions).find((a) => a.kind === 'adds' && roleMatches(a.pickup || 'offtank'));
       if (addDef && pickupWhelps(state, script, addDef.aggroRange || 10) > 0) onWhelpPickup();
     }
     const wf = updateWhelps(state, script, dt);
@@ -966,16 +1039,29 @@ export function createSim(script, options = {}) {
         state.feedback.inFront = front && b.target !== 'player';
         if (state.feedback.inFront) addMetric('playerInFront', dt);
         const ratio = threatRatio(state.threat, threatCfg, false);
-        state.feedback.holdAttack = state.t < state.shieldUntil || (b.target === 'ghost' && ratio >= (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8));
+        state.feedback.holdAttack = shieldUp() || (b.target === 'ghost' && ratio >= (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8));
         if (state.role === 'melee' || state.role === 'ranged') {
-          const inR = playerInBossRange(attackRange(state, script));
+          const aim = attackTarget(attackRange(state, script));
+          const inR = !!aim;
           state.feedback.inRangeOk = inR;
+          state.feedback.target = aim ? (aim.add ? { add: aim.add.uid } : { boss: true }) : null;
           if (!inR && p.fearedUntil <= state.t) addMetric('outOfRange', dt);
           const attackReady = (state.abilities.readyAt.attack ?? -Infinity) <= state.t && state.abilities.gcdUntil <= state.t;
           if (inR && attackReady && !state.feedback.holdAttack && !raidHolding && b.target === 'ghost' && p.fearedUntil <= state.t) addMetric('dpsIdle', dt);
         }
       }
-    } else { state.feedback.facingWrong = false; state.feedback.inFront = false; state.feedback.holdAttack = false; }
+    } else {
+      state.feedback.facingWrong = false; state.feedback.inFront = false; state.feedback.holdAttack = false;
+      if ((state.role === 'melee' || state.role === 'ranged') && p.fearedUntil <= state.t && w.whelps.some((a) => a.killable)) {
+        // The boss is gone but there are adds to kill: the DPS still have a job.
+        addMetric('dpsWindow', dt);
+        const aim = attackTarget(attackRange(state, script));
+        state.feedback.inRangeOk = !!aim;
+        state.feedback.target = aim ? (aim.add ? { add: aim.add.uid } : { boss: true }) : null;
+        if (!aim) addMetric('outOfRange', dt);
+        else if (state.abilities.gcdUntil <= state.t) addMetric('dpsIdle', dt);
+      }
+    }
 
     // Tank health for the healer.
     if (g.tanking) {
@@ -1023,7 +1109,7 @@ export function createSim(script, options = {}) {
     const w = state.world, b = w.boss, g = w.ghost;
     w.whelps = []; w.projectiles = []; state.debuffs = [];
     w.hazards = w.hazards.filter((h) => h.kind === 'crack');
-    w.player.knock = null; w.player.fearedUntil = -Infinity; w.player.hp = w.player.maxHp; w.player.z = 0; w.player.vz = 0;
+    w.player.knock = null; w.player.fearedUntil = -Infinity; w.player.stunnedUntil = -Infinity; w.player.hp = w.player.maxHp; w.player.z = 0; w.player.vz = 0;
     g.hp = g.maxHp; g.viaSpot = false;
     if (preset === 'wall') {
       const ts = P.tankSpot, bs = P.bossSpot;

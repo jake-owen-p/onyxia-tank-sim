@@ -29,8 +29,7 @@ export function hasAggro(state) {
 /** Is the boss on the tank (the player in a tank role, the ghost tank otherwise)? */
 export function onTank(state) {
   const b = state.world.boss;
-  const tankIsPlayer = state.role === 'tank' || state.role === 'offtank';
-  return b.state === 'grounded' && b.target === (tankIsPlayer ? 'player' : 'ghost');
+  return b.state === 'grounded' && b.target === (state.tankRole ? 'player' : 'ghost');
 }
 
 /** Is the player outside every lane that is warning or active? */

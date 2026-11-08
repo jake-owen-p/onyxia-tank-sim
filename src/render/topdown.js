@@ -279,6 +279,11 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   for (const wh of w.whelps) {
     const color = wh.onRaid ? pal.hazardActive : wh.target === 'player' ? pal.whelpHeld : pal.whelp;
     drawWhelpFlat(ctx, wh.x, wh.y, wh.heading, color, compact ? 1.6 : 1.3);
+    if (wh.killable && !compact) {
+      ctx.fillStyle = withAlpha(pal.text, 0.25); ctx.fillRect(wh.x - 1.4, wh.y + 1.7, 2.8, 0.35);
+      ctx.fillStyle = wh.priority ? pal.bad : pal.good; ctx.fillRect(wh.x - 1.4, wh.y + 1.7, 2.8 * Math.max(0, wh.hp), 0.35);
+      if (view.feedback && view.feedback.target && view.feedback.target.add === wh.uid) { ctx.strokeStyle = pal.accent; ctx.lineWidth = lw(2); ctx.beginPath(); ctx.arc(wh.x, wh.y, 2.2, 0, Math.PI * 2); ctx.stroke(); }
+    }
   }
 
   // --- boss

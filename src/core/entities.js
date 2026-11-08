@@ -5,6 +5,7 @@
 import {
   rad, dist, angleTo, turnToward, moveWithCollision, onFloor, offsetPoint, clamp, lerp, normAngle,
 } from './geometry.js';
+import { roleMatches } from './scoring.js';
 
 // ---------------------------------------------------------------- player
 
@@ -13,6 +14,7 @@ export function createPlayer(script, pos) {
     x: pos.x, y: pos.y, heading: rad(pos.heading ?? 90),
     hp: script.player.hp, maxHp: script.player.hp,
     fearedUntil: -Infinity, wanderTimer: 0,
+    stunnedUntil: -Infinity,
     knock: null,            // { vx, vy, until }
     moving: false, backpedal: false, speed: 0,
     z: 0, vz: 0,            // jump height and vertical speed (yards, yards/s)
@@ -33,7 +35,7 @@ export function updatePlayer(state, script, cmd, dt, rng) {
 
   // Jump: a fixed arc (height h over duration T): v0 = 4h/T, g = 8h/T^2. Air control is full, like WoW.
   const J = cfg.jump || { height: 1.4, duration: 0.8 };
-  if (cmd.jump && p.z <= 0 && p.fearedUntil <= state.t) { p.vz = (4 * J.height) / J.duration; p.z = 1e-6; flags.jumped = true; }
+  if (cmd.jump && p.z <= 0 && p.fearedUntil <= state.t && p.stunnedUntil <= state.t) { p.vz = (4 * J.height) / J.duration; p.z = 1e-6; flags.jumped = true; }
   if (p.z > 0) {
     p.z += p.vz * dt;
     p.vz -= ((8 * J.height) / (J.duration * J.duration)) * dt;
@@ -50,6 +52,8 @@ export function updatePlayer(state, script, cmd, dt, rng) {
     dx = Math.cos(p.heading) * cfg.fearSpeed * dt;
     dy = Math.sin(p.heading) * cfg.fearSpeed * dt;
     p.moving = true; p.backpedal = false;
+  } else if (p.stunnedUntil > state.t) {
+    p.moving = false; p.backpedal = false;
   } else {
     p.heading = normAngle(p.heading + (cmd.turn || 0) * rad(cfg.turnRate) * dt + (cmd.mouseTurn || 0));
     const fwd = clamp(cmd.forward || 0, -1, 1);
@@ -82,7 +86,7 @@ export function updatePlayer(state, script, cmd, dt, rng) {
     p.x = r.x; p.y = r.y;
   }
   p.speed = Math.hypot(dx, dy) / (dt || 1);
-  p.hp = Math.min(p.maxHp, p.hp + cfg.healPerSecond * dt);
+  p.hp = Math.min(p.maxHp, p.hp + cfg.healPerSecond * (p.healMult ?? 1) * dt);
   return flags;
 }
 
@@ -129,7 +133,7 @@ export function updateBoss(state, script, dt) {
   const flags = {};
 
   if (b.state === 'grounded') {
-    if (!b.engaged || b.passive || b.cast) return flags;
+    if (!b.engaged || b.passive || (b.cast && !b.cast.offBoss)) return flags;
     const tgt = bossTargetPos(state);
     const d = dist(b.x, b.y, tgt.x, tgt.y);
     const want = angleTo(b.x, b.y, tgt.x, tgt.y);
@@ -306,7 +310,7 @@ export function updateGhost(state, script, dt, ideal) {
   g.heading = turnToward(g.heading, normAngle(faceTarget), rad(cfg.turnRate) * dt);
   if (g.tanking) {
     const heal = state.role === 'healer' ? (cfg.healPerSecondWithPlayerHealer ?? cfg.healPerSecond ?? 0) : (cfg.healPerSecond ?? script.player.healPerSecond);
-    g.hp = Math.min(g.maxHp, g.hp + heal * dt);
+    g.hp = Math.min(g.maxHp, g.hp + heal * (g.healMult ?? 1) * dt);
   }
 }
 
@@ -324,7 +328,7 @@ export function spawnAdds(state, script, actionDef) {
   for (const name of names) {
     const c = script.positions[name];
     // `playerFrom` limits the player to their own spawn point: another group handles the rest.
-    const playerPicks = state.role === (actionDef.pickup || 'offtank') && (!actionDef.playerFrom || actionDef.playerFrom.includes(name));
+    const playerPicks = roleMatches(actionDef.pickup || 'offtank', state.role) && (!actionDef.playerFrom || actionDef.playerFrom.includes(name));
     for (let i = 0; i < (actionDef.count || actionDef.perCave || 1); i++) {
       state.world.whelps.push({
         uid: ++addUid,
@@ -337,6 +341,10 @@ export function spawnAdds(state, script, actionDef) {
         diesAt: state.t + (playerPicks ? (actionDef.heldLifetime || 70) : (actionDef.lifetime || 28)),
         holdSpot: actionDef.holdSpot || 'ghostOfftankSpot',
         onRaid: false,
+        label: actionDef.label,
+        killable: !!(actionDef.killable || actionDef.killFirst),
+        priority: !!actionDef.killFirst,
+        hp: 1,                       // fraction left; the raid burns it down over `lifetime`, your attacks speed that up
       });
     }
   }
@@ -350,6 +358,7 @@ export function updateWhelps(state, script, dt) {
   for (let i = ws.length - 1; i >= 0; i--) {
     const wh = ws[i];
     if (state.t >= wh.diesAt) { ws.splice(i, 1); continue; }
+    if (wh.killable) { wh.hp -= dt / wh.lifetime; if (wh.hp <= 0) { ws.splice(i, 1); continue; } }
     let tx, ty, stop;
     if (wh.target === 'player') { tx = w.player.x; ty = w.player.y; stop = 2.5 + (wh.uid % 3) * 0.6; }
     else if (wh.target === 'ghost') { const g = script.positions[wh.holdSpot] || w.ghost; tx = g.x + (wh.uid % 5) - 2; ty = g.y + (wh.uid % 3) - 1; stop = 1; }

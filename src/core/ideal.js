@@ -100,6 +100,16 @@ export function idealTankPos(state, script, who = 'player') {
   return dodgeHazards(ts.x, ts.y, state, 'tankSpot');
 }
 
+/** The add the DPS should be on right now: the nearest kill-first add, or any killable add while the boss cannot be hit. */
+export function killTarget(state) {
+  const w = state.world, p = w.player, b = w.boss;
+  const bossUp = b.state === 'grounded' && b.engaged && !b.passive;
+  const pool = w.whelps.filter((a) => a.priority || (a.killable && !bossUp));
+  let best = null, bd = Infinity;
+  for (const a of pool) { const d = dist(p.x, p.y, a.x, a.y); if (d < bd) { bd = d; best = a; } }
+  return best;
+}
+
 /** A melee position: behind or beside the boss, clear of any rear cone. */
 function meleePos(state, script) {
   const b = state.world.boss;
@@ -135,9 +145,22 @@ export function idealPlayerPos(state, script) {
       }
     }
   }
-  if (isTankRole(state.role)) return idealTankPos(state, script, 'player');
+  if (state.tankRole) return idealTankPos(state, script, 'player');
   const raid = script.positions[state.phaseDef.raidSpot];
+  if (state.role === 'offtank') {
+    // Someone else has the boss: this job is the adds, then holding them on the assigned spot.
+    let nearest = null, nd = Infinity, held = 0;
+    for (const a of w.whelps) {
+      if (a.target === 'raid') { const d = dist(w.player.x, w.player.y, a.x, a.y); if (d < nd) { nd = d; nearest = a; } }
+      else if (a.target === 'player') held++;
+    }
+    if (nearest) return dodgeHazards(nearest.x, nearest.y, state, 'whelps');
+    const s = spot(state, script, 'offtank', 'offtankSpot') || raid;
+    return dodgeHazards(s.x, s.y, state, held ? 'holdWhelps' : 'raidSpot');
+  }
   if (state.role === 'melee') {
+    const add = killTarget(state);
+    if (add) return dodgeHazards(add.x, add.y, state, 'killAdd');
     if (b.state === 'grounded' && b.engaged && !b.passive) return dodgeHazards(meleePos(state, script).x, meleePos(state, script).y, state, 'meleeSpot');
     const s = spot(state, script, 'melee', 'meleeSpot') || raid;
     return dodgeHazards(s.x, s.y, state, 'raidSpot');

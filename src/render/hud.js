@@ -365,7 +365,7 @@ function drawDebuffTray(ctx, view, pal, u, w, h, t) {
     font(ctx, pal, u * 0.62, 600);
     ctx.fillStyle = pal.text;
     const who = d.on === 'player' ? 'you' : d.on === 'ghost' ? 'tank' : 'raid';
-    text(ctx, fit(ctx, `${d.name} on ${who}`, pw - u * 4.2), x + u * 1.5, ry, 'left');
+    text(ctx, fit(ctx, `${d.name}${d.stacks > 1 ? ` x${d.stacks}` : ''} on ${who}`, pw - u * 4.2), x + u * 1.5, ry, 'left');
     font(ctx, pal, u * 0.5, 600);
     ctx.fillStyle = pal.textDim;
     text(ctx, `${Math.max(0, Math.ceil(d.until - t))}s`, x + pw - u * 0.8, ry, 'right');

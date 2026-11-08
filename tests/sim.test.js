@@ -459,7 +459,7 @@ test('snapshot has the contract fields and is JSON-serialisable', () => {
   const snap = snapshot(sim.state);
   for (const k of ['t', 'phase', 'phaseName', 'phaseSubtitle', 'hp', 'role', 'world', 'threat', 'abilities', 'upcoming', 'nextExpected', 'feedback', 'metrics']) assert.ok(k in snap, k);
   for (const k of ['player', 'boss', 'raid', 'whelps', 'hazards', 'projectiles', 'ghost', 'idealPlayer', 'idealBoss', 'coneFlash']) assert.ok(k in snap.world, `world.${k}`);
-  assert.deepEqual(Object.keys(snap.world.player).sort(), ['backpedal', 'fearedUntil', 'heading', 'hp', 'maxHp', 'moving', 'x', 'y', 'z']);
+  assert.deepEqual(Object.keys(snap.world.player).sort(), ['backpedal', 'fearedUntil', 'heading', 'hp', 'maxHp', 'moving', 'stunnedUntil', 'x', 'y', 'z']);
   assert.equal(snap.world.raid.dots.length, script.raid.size);
   const json = JSON.stringify(snap);
   const back = JSON.parse(json);
