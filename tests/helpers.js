@@ -46,7 +46,7 @@ export function perfectTank() {
     const close = dist(p.x, p.y, ideal.x, ideal.y) < 2;
     const face = b.state === 'grounded' && b.engaged && close ? b : null;
     const cmd = driveToward(sim, ideal, face);
-    const inRange = b.state === 'grounded' && dist(p.x, p.y, b.x, b.y) - script.boss.radius <= script.playerAbilities.taunt.range;
+    const inRange = b.state === 'grounded' && dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= sim.script.playerAbilities.taunt.range;
     const ready = s.abilities.readyAt.taunt <= s.t;
     if (inRange && ready && (b.target !== 'player' || !b.engaged) && !b.passive && p.fearedUntil <= s.t) { cmd.abilities.push('taunt'); lastTaunt = s.t; }
     return cmd;
@@ -68,14 +68,18 @@ export function roleBot(role) {
     const face = b.state === 'grounded' && b.engaged && close ? b : null;
     const cmd = driveToward(sim, ideal, face);
     const gcdReady = s.abilities.gcdUntil <= s.t;
-    if (!gcdReady || p.fearedUntil > s.t) return cmd;
+    if (p.fearedUntil > s.t) return cmd;
+    const castDef = b.cast && sim.script.actions[b.cast.id];
+    const kick = sim.script.playerAbilities.interrupt;
+    if (castDef && castDef.interruptible && kick && s.abilities.list.includes('interrupt') && s.abilities.readyAt.interrupt <= s.t && dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= (kick.range ?? 8)) cmd.abilities.push('interrupt');
+    if (!gcdReady) return cmd;
     if (role === 'healer') {
       if (s.debuffs.some((d) => d.dispel !== 'none') && s.abilities.list.includes('dispel')) cmd.abilities.push('dispel');
       else if (g.hp / g.maxHp < 0.8) cmd.abilities.push('heal');
       return cmd;
     }
     const live = b.state === 'grounded' && b.engaged && !b.passive;
-    const holding = s.engagedAt != null && s.landedAt == null && s.t - s.engagedAt < script.raid.holdAfterPull;
+    const holding = s.engagedAt != null && s.landedAt == null && s.t - s.engagedAt < sim.script.raid.holdAfterPull;
     if (live && b.target === 'ghost' && !s.feedback.holdAttack && !holding && s.feedback.inRangeOk) cmd.abilities.push('attack');
     return cmd;
   };

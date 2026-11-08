@@ -1,7 +1,7 @@
 {
  "id": "onyxia",
  "name": "Onyxia",
- "version": "1.2.0",
+ "version": "1.3.0",
  "notes": "Numbers follow docs/research/onyxia/onyxia.md and the cross-check pass where the sources agree. Onyxia is immune to Taunt in the real fight: the tank's one button here is a threat burst (think Sunder + Revenge + Heroic Strike dumped at once) that plays the same role as a Taunt in every other encounter, so the lesson is still when to press it. Cadences are DBM/BigWigs variance timers; Knock Away is the -25% threat knockback, Wing Buffet knocks back without a threat cut. Placeholders: cone angles (60 front / 120 rear: no Blizzard data, vmangos default arc), knockback distances (derived from the emulator knock-back formula: ~39 / 25 / 47 yd, clamped here to 30 / 22 / 35), Deep Breath as an instant lane rather than a travelling wall and on a compressed cadence (real: a 30-35% roll every 15-25 s, so 0-2 per phase), whelp waves despawning after 30 s, Fireball threat wipes folded into the landing reset, melee damage ~600 per swing (one 2005 figure). Ranged and healer pockets are the NE/NW corners of the back wall per the Classic wiki and Warcraft Tavern.",
  "arena": {
   "name": "Onyxia's Lair",
@@ -398,7 +398,10 @@
    ],
    "pickup": "offtank",
    "holdSpot": "ghostOfftankSpot",
-   "tip": "Whelps pour from both egg pits. The whelp groups hold them at the pit mouths. (They do not despawn in the real fight; here each wave dies after 30 s so the sim stays readable.)"
+   "tip": "Whelps pour from both egg pits. The whelp groups hold them at the pit mouths. (They do not despawn in the real fight; here each wave dies after 30 s so the sim stays readable.)",
+   "playerFrom": [
+    "caveWest"
+   ]
   },
   "bellowingRoar": {
    "label": "Bellowing Roar",
@@ -496,7 +499,10 @@
    "pickup": "offtank",
    "holdSpot": "ghostOfftankSpot",
    "tip": "Whelps pour from both egg pits. The whelp groups hold them at the pit mouths.",
-   "hidden": true
+   "hidden": true,
+   "playerFrom": [
+    "caveWest"
+   ]
   }
  },
  "deepBreathLanes": [

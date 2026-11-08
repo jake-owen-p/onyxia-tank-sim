@@ -11,7 +11,7 @@ import { snapshot } from '../src/core/snapshot.js';
 import { roleBot } from '../tests/helpers.js';
 
 const ROOT = path.resolve(new URL('.', import.meta.url).pathname, '..');
-const KINDS = new Set(['cone', 'knockback', 'fear', 'aoe', 'hazard', 'adds', 'aggroPull', 'targetSwitch', 'threatWipe', 'debuff', 'enrage', 'projectile', 'transition']);
+const KINDS = new Set(['cone', 'knockback', 'fear', 'aoe', 'hazard', 'adds', 'aggroPull', 'targetSwitch', 'threatWipe', 'debuff', 'enrage', 'shield', 'projectile', 'transition']);
 const CHECKS = new Set(['nearWall', 'threatLead', 'hasAggro', 'onTank', 'outsideLane', 'outsideHazard', 'facingAway', 'whelpsPicked', 'inRange', 'notInFront', 'noDispellable']);
 const EXP_TYPES = new Set(['bossAtSpot', 'playerAtSpotBy', 'onEvent', 'afterEvent', 'continuous']);
 const ROLES = ['tank', 'offtank', 'melee', 'ranged', 'healer'];
@@ -31,7 +31,7 @@ function lint(script, file) {
     if (a.kind === 'hazard' && a.placement === 'polys' && !script[a.polys]) e(`action ${id}: polys key ${a.polys} missing`);
     if (a.kind === 'adds') for (const s of a.from || []) if (!P[s]) e(`action ${id}: spawn spot ${s} missing`);
     if (a.kind === 'hazard' && a.placement === 'spots') for (const s of a.spots || []) if (!P[s]) e(`action ${id}: spot ${s} missing`);
-    for (const key of ['raidMetric', 'playerMetric', 'wallMetric']) if (a[key] && !script.continuousMetrics[a[key]]) e(`action ${id}: ${key} ${a[key]} is not in continuousMetrics, so it would never be scored`);
+    for (const key of ['raidMetric', 'playerMetric', 'wallMetric', 'completedMetric']) if (a[key] && !script.continuousMetrics[a[key]]) e(`action ${id}: ${key} ${a[key]} is not in continuousMetrics, so it would never be scored`);
     if (a.carried && a.placement !== 'player' && a.placement !== 'random') e(`action ${id}: carried needs placement player or random`);
     if (a.kind === 'debuff' && !['magic', 'curse', 'poison', 'disease', 'none', undefined].includes(a.dispel)) e(`action ${id}: dispel type ${a.dispel}`);
   }
@@ -50,7 +50,7 @@ function lint(script, file) {
     for (const x of ph.expectations || []) {
       if (!EXP_TYPES.has(x.type)) e(`phase ${ph.id}: expectation ${x.id} type ${x.type}`);
       if ((x.type === 'onEvent' || x.type === 'afterEvent') && !CHECKS.has(x.check)) e(`phase ${ph.id}: expectation ${x.id} check ${x.check}`);
-      if ((x.type === 'onEvent' || x.type === 'afterEvent') && !script.actions[x.event] && !['landing', 'takeoff', 'deepBreath', 'threatLost'].includes(x.event)) e(`phase ${ph.id}: expectation ${x.id} event ${x.event} unknown`);
+      if ((x.type === 'onEvent' || x.type === 'afterEvent') && !script.actions[x.event] && !['landing', 'takeoff', 'deepBreath', 'threatLost', 'submerge', 'emerge'].includes(x.event)) e(`phase ${ph.id}: expectation ${x.id} event ${x.event} unknown`);
       if (x.type === 'continuous' && !script.continuousMetrics[x.metric]) e(`phase ${ph.id}: expectation ${x.id} metric ${x.metric} unknown`);
       if ((x.type === 'bossAtSpot' || x.type === 'playerAtSpotBy') && !P[x.spot]) e(`phase ${ph.id}: expectation ${x.id} spot ${x.spot} missing`);
       if (!x.label || !x.tip) e(`phase ${ph.id}: expectation ${x.id} needs label and tip`);
@@ -61,9 +61,13 @@ function lint(script, file) {
   return errs;
 }
 
-function play(script, role, opts, seconds) {
-  const sim = createSim(script, { role, seed: 11, ...opts });
-  const bot = roleBot(role);
+const IDLE = () => ({ forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [], jump: false });
+const SEEDS = [11, 7, 23];
+const MIN_DECISION_GAP = 15;   // the bot must beat a player who does nothing by at least this many points
+
+function play(script, role, opts, seconds, seed = 11, botFor = roleBot) {
+  const sim = createSim(script, { role, seed, ...opts });
+  const bot = botFor(role);
   const steps = Math.round(seconds / FIXED_DT);
   for (let i = 0; i < steps && !sim.state.ended; i++) { sim.step(bot(sim), FIXED_DT); sim.drainEvents(); }
   JSON.stringify(snapshot(sim.state));
@@ -73,7 +77,7 @@ function play(script, role, opts, seconds) {
 
 const want = process.argv[2] || null;
 const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/encounters/index.json'), 'utf8'));
-let problems = 0;
+let problems = 0, warnings = 0;
 const targets = [];
 if (want && want.endsWith('.json')) {
   // A file that is not (yet) in the index.
@@ -94,14 +98,21 @@ for (const { raid, boss, file } of targets) {
     for (const m of errs) console.log(`✖ ${m}`);
     problems += errs.length;
     if (errs.length) continue;
-    const total = script.phases.reduce((a, p) => a + p.duration, 0) + 20;
+    const total = script.phases.reduce((a, p) => a + p.duration, 0) + 45;
     for (const role of Object.keys(script.roles)) {
       try {
-        const r = play(script, role, { start: 'entrance', startPhase: script.phases[0].id }, total);
-        const deaths = (r.metrics.deaths || 0) + (r.metrics.tankDeaths || 0);
-        const ok = r.result === 'victory' && r.score.overall >= 70 && deaths === 0;
-        console.log(`${ok ? '✔' : '✖'} ${key} ${role.padEnd(7)} full ${String(r.result).padEnd(8)} ${String(r.score.overall).padStart(3)} ${r.score.grade}${deaths ? `  deaths ${deaths}` : ''}${ok ? '' : '  fixes: ' + r.score.fixes.map((f) => f.title + (f.detail ? ` (${f.detail})` : '')).join(' | ')}`);
+        const full = { start: 'entrance', startPhase: script.phases[0].id };
+        const runs = SEEDS.map((seed) => play(script, role, full, total, seed));
+        const scores = runs.map((r) => r.score.overall);
+        const worst = runs[scores.indexOf(Math.min(...scores))];
+        const deaths = Math.max(...runs.map((r) => (r.metrics.deaths || 0) + (r.metrics.tankDeaths || 0)));
+        const allWon = runs.every((r) => r.result === 'victory');
+        const ok = allWon && worst.score.overall >= 70 && deaths === 0;
+        const idle = play(script, role, full, total, SEEDS[0], () => IDLE).score.overall;
+        const gap = Math.min(...scores) - idle;
+        console.log(`${ok ? '✔' : '✖'} ${key} ${role.padEnd(7)} full ${String(worst.result).padEnd(8)} ${Math.min(...scores)}-${Math.max(...scores)} ${worst.score.grade}  idle ${idle}${deaths ? `  deaths ${deaths}` : ''}${ok ? '' : '  fixes: ' + worst.score.fixes.map((f) => f.title + (f.detail ? ` (${f.detail})` : '')).join(' | ')}`);
         if (!ok) problems++;
+        if (gap < MIN_DECISION_GAP) { console.log(`⚠ ${key} ${role}: a player who does nothing scores ${idle}, only ${gap} behind the bot: this role has no real decisions`); warnings++; }
         for (const d of script.drills || []) {
           const rolesOk = !d.roles || (Array.isArray(d.roles) ? d.roles : [d.roles]).some((x) => x === role || (x === 'tanks' && (role === 'tank' || role === 'offtank')) || (x === 'dps' && (role === 'melee' || role === 'ranged')) || (x === 'nontank' && role !== 'tank' && role !== 'offtank'));
           if (!rolesOk) continue;
@@ -115,5 +126,5 @@ for (const { raid, boss, file } of targets) {
     }
   }
 }
-console.log(problems ? `${problems} problem(s)` : 'all encounters valid');
+console.log(problems ? `${problems} problem(s)` : `all encounters valid${warnings ? ` (${warnings} warning(s))` : ''}`);
 process.exit(problems ? 1 : 0);

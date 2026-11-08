@@ -50,9 +50,9 @@ export function facingAway(state, script) {
   return hasAggro(state) && !bossFacingRaid(state, script);
 }
 
-/** Are all live adds aggroed onto the player (none heading for the raid)? */
+/** Are all the player's adds aggroed onto them (none heading for the raid)? Adds another group is handling do not count. */
 export function whelpsPicked(state) {
-  const ws = state.world.whelps;
+  const ws = state.world.whelps.filter((w) => w.target !== 'ghost');
   if (!ws.length) return false;
   return ws.every((w) => w.target === 'player');
 }

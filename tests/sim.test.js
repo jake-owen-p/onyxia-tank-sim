@@ -308,17 +308,20 @@ test('whelps: off-tank waves target the raid and are picked up by proximity; MT 
   const ot = makeSim({ role: 'offtank', startPhase: 2, start: 'pickup', manual: true });
   ot.triggerAction('whelpWave');
   const ws = ot.state.world.whelps;
-  assert.equal(ws.length, (script.actions.whelpWave.count || script.actions.whelpWave.perCave) * 2);
-  assert.ok(ws.every((w) => w.target === 'raid'));
-  // walk the player onto one whelp
-  const w0 = ws[0];
+  const perCave = script.actions.whelpWave.count;
+  assert.equal(ws.length, perCave * 2);
+  assert.equal(ws.filter((w) => w.target === 'raid').length, perCave, 'the west pit is the player\'s job');
+  assert.equal(ws.filter((w) => w.target === 'ghost').length, perCave, 'another group holds the east pit');
+  run(ot, FIXED_DT);
+  assert.equal(ot.state.world.idealPlayer.reason, 'whelps');
+  assert.ok(ot.state.expectations.some((i) => i.id === 'whelps' && i.status === 'pending'));
+  // walk the player onto their pack
+  const w0 = ws.find((w) => w.target === 'raid');
   ot.state.world.player.x = w0.x; ot.state.world.player.y = w0.y;
   const ev = run(ot, 0.1);
   assert.ok(ev.some((e) => e.type === 'whelpPickup'));
   assert.equal(w0.target, 'player');
-  assert.ok(ws.some((w) => w.target === 'raid'), 'the other cave is still loose');
-  assert.ok(ot.state.expectations.some((i) => i.id === 'whelps' && i.status === 'pending'));
-  assert.equal(ot.state.world.idealPlayer.reason, 'whelps');
+  assert.equal(expectations(ev, 'whelps')[0].status, 'ontime', 'the ghost group\'s whelps do not hold the expectation open');
 
   const mt = makeSim({ role: 'mt', startPhase: 2, start: 'pickup', manual: true });
   mt.triggerAction('whelpWave');

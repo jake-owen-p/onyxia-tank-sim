@@ -283,7 +283,10 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
 
   // --- boss
   const airborne = boss.state !== 'grounded';
-  if (airborne) {
+  if (boss.state === 'submerged') {
+    drawBossFlat(ctx, boss.x, boss.y, boss.heading, R, { stroke: withAlpha(pal.bossStroke, 0.35), dashed: true, lineWidth: lw(1.5) });
+    if (!compact) worldText(ctx, tr, 'SUBMERGED', boss.x, boss.y - R * 1.6, Math.max(10, s * 3), pal.bossStroke, pal.fontDisplay);
+  } else if (airborne) {
     const lift = (boss.z || 0) / Math.max(1, script.hoverHeight || 1);
     drawBossFlat(ctx, boss.x + lift * 2, boss.y - lift * 2, boss.heading, R, { fill: pal.bossShadow, alpha: 0.6 * lift + 0.2 });
     drawBossFlat(ctx, boss.x, boss.y, boss.heading, R * (1 + 0.18 * lift), { fill: withAlpha(pal.boss, 0.3), stroke: pal.bossStroke, front: pal.bossFront, dashed: true, lineWidth: lw(2) });

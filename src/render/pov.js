@@ -399,6 +399,10 @@ function drawBossParts(ctx, cam, x, y, heading, R, z, w, h, pal, opts = {}) {
 function drawBoss(ctx, cam, view, script, pal, w, h, now) {
   const boss = view.world.boss;
   const R = script.boss.radius;
+  if (boss.state === 'submerged') {
+    drawBossParts(ctx, cam, boss.x, boss.y, boss.heading, R, 0, w, h, pal, { flat: true, outline: withAlpha(pal.bossStroke, 0.35) });
+    return;
+  }
   const t = view.t;
   const z = boss.z || 0;
   const parts = bossFootprint(R);

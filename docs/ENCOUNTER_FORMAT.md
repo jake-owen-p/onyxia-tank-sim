@@ -22,7 +22,7 @@ plays the full fight and every drill with a scripted bot for each role.
 | `player` | `speed`, `turnRate`, `radius`, `hp`, `healPerSecond`, `fearDuration`, `fearSpeed`, `jump: { height, duration }` |
 | `ghostTank` | the raid's tank when the player is not one: `speed`, `turnRate`, `hp`, `healPerSecond` (passive healing when nobody plays healer), `healPerSecondWithPlayerHealer` (when the player is the healer; keep it well under the boss's damage so heals matter), `lowHp` (fraction that raises the HEAL note) |
 | `raid` | `size`, `melee` (dots at the flanks), `threatPerSecond`, `holdAfterPull`, `meleeFlankDistance`, `whelpContactRange` |
-| `boss` | `radius`, `speed`, `turnRate`, `meleeRange`, `meleeDamage`, `meleeInterval`, `stationary` (never walks), `cones` (below), `facingCone` (which cone defines "facing the raid"), `enrageMultiplier`, flying-boss fields `landingDuration`, `takeoffDuration`, `settleAfterLanding`, `pickupGrace` |
+| `boss` | `pullDeadline` (seconds the raid waits for a tank player before body-pulling, default 20), `radius`, `speed`, `turnRate`, `meleeRange`, `meleeDamage`, `meleeInterval`, `stationary` (never walks), `cones` (below), `facingCone` (which cone defines "facing the raid"), `enrageMultiplier`, flying-boss fields `landingDuration`, `takeoffDuration`, `settleAfterLanding`, `pickupGrace` |
 | `threat` | `autoAttackPerSecond` (tank player), `ghostTankPerSecond`, `tauntLead`, `tauntBonus`, `tauntDuration`, `buffetCut`, `pullMultiplier` (1.1), `dangerBand` (0.8), `dangerBandDps` (where DPS must stop, default `dangerBand`; lower it on bosses that cut the tank's threat), `resetOnLanding`, `landingRaidThreat`, `turnGrace`, `ghostTauntDelay` |
 | `gcd` | global cooldown in seconds (1.5) |
 | `roles` | which roles this fight offers (below) |
@@ -93,16 +93,17 @@ Every action has `label`, `kind`, `cast` (seconds, 0 = instant), `warn`
 `icon`, `requires` (`grounded` default, or `airborne`), optional `conditional`
 (`behind`: only when someone is in the rear cone; `onPlayer`: only while the
 boss is on the tank and not held by a Taunt), `interruptible`, `hidden`
-(never on the timeline) and `tip`.
+(never on the timeline), `follow: [{ id, delay }]` (queue another action), `teleportBossTo` (`raid` or a spot name: Blink), `teleportTankTo` (a spot name: Executus), `completedMetric` (scores a cast that finished, for the roles that can interrupt) and `tip`.
 
 | kind | fields | what happens |
 |---|---|---|
 | `cone` | `cone` (name in `boss.cones`), `damage`, `knockback`, `hitsMelee`, `raidMetric`, `raidToast`, `playerMetric` | hits whoever is in the cone: the player, the ghost tank, the raid dots (melee dots only with `hitsMelee`) |
 | `knockback` | `knockback`, `knockbackRange`, `damage`, `threatCut`, `wallMetric`, `radial`, `playerMetric` | pushes the player back if in front and in range (`radial`: all round her, like Wrath of Ragnaros); cuts the tank's threat |
 | `fear` | `duration`, `targets` (`all`, `tank`, `random` + `count`), `playerChance` | fears the player (random: with probability count / raid size, or `playerChance`) |
-| `aoe` | `damage`, `radius` (from her edge; 0 or missing = whole room), `tankDamage`, `playerMetric` | damages the player (and the ghost tank); `playerMetric` counts each hit, so a radius you were meant to leave is scored |
+| `aoe` | `damage`, `radius` (from her edge; 0 or missing = whole room), `tankDamage`, `playerMetric`, `moveOut` | damages the player (and the ghost tank); `playerMetric` counts each hit, so a radius you were meant to leave is scored. With a `cast` and `moveOut` (`true`, or a role filter) the ideal marker walks those roles out of the radius for the cast |
+| `shield` | `duration`, `reflectDamage`, `toast` | a reflect or damage shield on the boss: the Attack key shows HOLD, attacks count as `attacksIntoShield`, and each one costs `reflectDamage` |
 | `hazard` | `placement` (`player`, `tank`, `boss`, `random` + `count`, `spots` + `spots:[]`, `lanes` + `lanes` key, `polys` + `polys` key), `radius`, `warning`, `active`, `damage`, `tick` (damage per second instead of once), `laneWidth` for lanes, `playerChance` (odds that `random` lands on you), `carried` + `raidMetric` (a bomb: the zone follows you through `warning`, the ideal marker shows where to run, and `raidMetric` counts each time it goes off with raid members inside) | a telegraphed floor zone; `polys` pulses persistent polygons listed in a phase's `persistentHazards` |
-| `adds` | `count` per spot, `from: [spotNames]`, `speed`, `aggroRange`, `lifetime`, `heldLifetime`, `pickup` (role that takes them, default `offtank`), `holdSpot` | spawns a wave that walks at the raid; the pickup role catches them by proximity or Taunt |
+| `adds` | `count` per spot, `from: [spotNames]`, `playerFrom` (the spots that are the player's job; the others go to a ghost group), `speed`, `aggroRange`, `lifetime`, `heldLifetime`, `pickup` (role that takes them, default `offtank`), `holdSpot` | spawns a wave that walks at the raid; the pickup role catches them by proximity or Taunt |
 | `aggroPull` | `threatMultiplier` (tank roles), `duration` (others) | a DPS overtakes the tank: she turns on the raid until the tank Taunts |
 | `targetSwitch` | `duration`, `toast` | she goes for someone else; the tank has to take her back |
 | `threatWipe` | `toast` | the whole table resets (raid keeps `threat.landingRaidThreat`) |
@@ -127,7 +128,7 @@ boss is on the tank and not held by a Taunt), `interruptible`, `hidden`
 
 Boss HP drains from `hpFrom` to `hpTo` over `duration`; `spots` say where each
 role stands (`melee` defaults to a computed flank, the others to `raidSpot`).
-`bossState: "airborne"` makes the boss fly (Onyxia only).
+`bossState: "airborne"` makes the boss fly (Onyxia only). `bossState: "submerged"` removes the boss for the phase: no melee, no threat and nothing to hit, and the phase's actions need `requires: "submerged"` (or `"any"`). Give it `hpFrom` equal to `hpTo`. Leaving the phase fires an `emerge` event; add a one-shot `threatWipe` with `first: 0` if the real boss resets.
 
 ### Expectations
 
@@ -144,7 +145,7 @@ Each has `id`, `label`, `tip`, an optional `role` filter, and a type:
 Checks: `nearWall`, `threatLead`, `hasAggro` (boss on the player),
 `onTank` (boss on whoever tanks), `outsideLane`, `outsideHazard`,
 `facingAway`, `whelpsPicked`, `inRange`, `notInFront`, `noDispellable`.
-Events: action ids, `landing`, `takeoff`, `deepBreath`, `threatLost`.
+Events: action ids, `landing`, `takeoff`, `deepBreath`, `threatLost`, `submerge`, `emerge`.
 
 ### Built-in metrics the core accumulates
 
@@ -152,8 +153,8 @@ Tank: `bossFacingRaid` (s), `threatLostCount`, `buffetsOffWall`, `pickupTime`,
 `playerInTail`, plus any `raidMetric` named by a cone action. Everyone:
 `deaths`, `playerInHazard` (s), `playerInCrack` (s). Non-tank: `playerInFront`
 (s), `aggroPulls`, `earlyPulls`, any `playerMetric` named by a cone action.
-DPS: `attacks`, `attacksInRed`, `earlyAttacks`, `dpsIdle` (s), `outOfRange`
-(s). Healer: `heals`, `overheals`, `dispels`, `debuffSeconds` (s),
+DPS: `attacks`, `attacksInRed`, `attacksIntoShield`, `earlyAttacks`, `dpsIdle` (s), `outOfRange`
+(s), `interrupts`. Healer: `heals`, `overheals`, `dispels`, `debuffSeconds` (s),
 `tankLowSeconds` (s), `tankDeaths`. Off-tank: `whelpsOnRaid` (s). Only the
 metrics listed in `continuousMetrics` are scored or shown; use `roles`,
 `phases` and `bossStates` on a metric to limit where it applies.
@@ -164,7 +165,7 @@ metrics listed in `continuousMetrics` are scored or shown; use `roles`,
 { "id": "tauntLost", "ability": "taunt", "on": "event", "event": "threatLost", "offset": 0, "early": 0, "late": 3, "role": "tanks", "short": "ON RAID", "label": "...", "tip": "..." }
 ```
 
-Events that raise notes: action ids, `landing`, `threatLost`, `whelpWave`,
+Events that raise notes: action ids (when the action resolves), `cast:<actionId>` (when its cast bar appears, for interrupts), `landing`, `emerge`, `threatLost`, `whelpWave`,
 `whelpPickup` (as `doneBy`), `tankLow`, `debuffApplied`, `dispelled`,
 `interrupted`. A note is only raised when the ability can be ready inside its
 window.

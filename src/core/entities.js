@@ -320,9 +320,11 @@ let addUid = 0;
  */
 export function spawnAdds(state, script, actionDef) {
   const rng = state.rng;
-  const spots = (actionDef.from || []).map((name) => script.positions[name]).filter(Boolean);
-  const playerPicks = state.role === (actionDef.pickup || 'offtank');
-  for (const c of spots) {
+  const names = (actionDef.from || []).filter((name) => script.positions[name]);
+  for (const name of names) {
+    const c = script.positions[name];
+    // `playerFrom` limits the player to their own spawn point: another group handles the rest.
+    const playerPicks = state.role === (actionDef.pickup || 'offtank') && (!actionDef.playerFrom || actionDef.playerFrom.includes(name));
     for (let i = 0; i < (actionDef.count || actionDef.perCave || 1); i++) {
       state.world.whelps.push({
         uid: ++addUid,

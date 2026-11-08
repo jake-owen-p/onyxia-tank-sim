@@ -168,3 +168,71 @@ test('playerChance decides how often a random effect lands on you', () => {
   sim.triggerAction('never');
   assert.equal(sim.state.debuffs[1].on, 'raid');
 });
+
+test('every hazard placement actually spawns a zone', () => {
+  const zone = (placement, extra = {}) => ({ label: placement, kind: 'hazard', placement, radius: 5, warning: 1, active: 1, damage: 0, cast: 0, warn: false, icon: 'eruption', ...extra });
+  const actions = { ...script.actions, a: zone('player'), b: zone('boss'), c: zone('tank'), d: zone('random', { count: 3 }), e: zone('spots', { spots: ['tankSpot', 'bossSpot'] }) };
+  const expected = { a: 1, b: 1, c: 1, d: 3, e: 2 };
+  for (const [id, n] of Object.entries(expected)) {
+    const sim = createSim({ ...script, actions }, { role: 'melee', start: 'wall', manual: true, seed: 5 });
+    sim.triggerAction(id);
+    assert.equal(sim.state.world.hazards.filter((h) => h.kind === 'zone').length, n, id);
+  }
+});
+
+test('moveOut walks the marker out of a cast radius, for the roles it names', () => {
+  const inferno = { label: 'Inferno', kind: 'aoe', cast: 3, radius: 20, damage: 500, warn: true, icon: 'eruption', moveOut: 'dps' };
+  const s2 = { ...script, actions: { ...script.actions, inferno } };
+  const mk = (role) => { const sim = createSim(s2, { role, start: 'wall', manual: true, seed: 5 }); const p = sim.state.world.player, b = sim.state.world.boss; p.x = b.x + 12; p.y = b.y; sim.triggerAction('inferno'); sim.step(idle(), FIXED_DT); return sim; };
+  assert.equal(mk('melee').state.world.idealPlayer.reason, 'moveOut');
+  assert.notEqual(mk('healer').state.world.idealPlayer.reason, 'moveOut');
+});
+
+test('a submerged boss cannot be hit or taunted, deals nothing, and comes back on the tank', () => {
+  const s2 = structuredClone(script);
+  s2.actions.submerge = { label: 'Submerge', kind: 'transition', cast: 0 };
+  s2.phases = [
+    { id: 1, name: 'A', subtitle: '', hpFrom: 1, hpTo: 0.5, duration: 2, bossState: 'grounded', raidSpot: 'raidSpotP1', actions: [], expectations: [] },
+    { id: 2, name: 'B', subtitle: '', hpFrom: 0.5, hpTo: 0.5, duration: 3, bossState: 'submerged', raidSpot: 'raidSpotP1', actions: [], expectations: [] },
+    { id: 3, name: 'C', subtitle: '', hpFrom: 0.5, hpTo: 0, duration: 5, bossState: 'grounded', raidSpot: 'raidSpotP1', actions: [], expectations: [] },
+  ];
+  const sim = createSim(s2, { role: 'melee', start: 'wall', seed: 5 });
+  const s = sim.state, g = s.world.ghost;
+  run(sim, 2.5);
+  assert.equal(s.world.boss.state, 'submerged');
+  const hpBefore = g.hp, ev = run(sim, 1, press('attack'));
+  assert.ok(ev.some((e) => e.type === 'abilityFailed' && e.reason === 'range'), 'nothing to hit');
+  assert.ok(g.hp >= hpBefore, 'no melee on the tank');
+  const ev2 = run(sim, 2);
+  assert.ok(ev2.some((e) => e.type === 'action' && e.id === 'emerge'));
+  assert.equal(s.world.boss.state, 'grounded');
+  assert.equal(s.world.boss.target, 'ghost');
+});
+
+test('a shield makes attacks wasted, costly and flagged HOLD; a cast raises a note when the bar appears', () => {
+  const s2 = structuredClone(script);
+  Object.assign(s2.actions, {
+    wall: { label: 'Magic Reflection', kind: 'shield', duration: 4, reflectDamage: 300, cast: 0, warn: true, icon: 'roar' },
+    mend: { label: 'Dark Mending', kind: 'aoe', cast: 2, damage: 0, radius: 1, interruptible: true, completedMetric: 'mends', warn: true, icon: 'roar' },
+  });
+  s2.continuousMetrics.attacksIntoShield = { label: 'a', unit: 'count', penaltyPerUnit: 1 };
+  s2.continuousMetrics.mends = { label: 'm', unit: 'count', penaltyPerUnit: 1 };
+  s2.playerAbilities.interrupt = { kind: 'interrupt', label: 'Kick', cooldown: 10, gcd: false, range: 8, icon: 'interrupt' };
+  s2.roles.melee.abilities = ['attack', 'interrupt'];
+  s2.cues.list.push({ id: 'kickIt', ability: 'interrupt', on: 'event', event: 'cast:mend', offset: 0, early: 0, late: 1.9, role: 'melee', short: 'KICK', label: 'Kick', tip: 'Kick' });
+  const sim = createSim(s2, { role: 'melee', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, p = s.world.player;
+  sim.triggerAction('wall');
+  run(sim, FIXED_DT);
+  assert.equal(s.feedback.holdAttack, true);
+  const hp = p.hp;
+  run(sim, FIXED_DT, press('attack'));
+  assert.equal(s.metrics.attacksIntoShield, 1);
+  assert.ok(p.hp < hp, 'the reflect hurts');
+  run(sim, 5);
+  sim.triggerAction('mend');
+  assert.ok(s.cues.beats.some((b) => b.status === 'pending' && b.cue === 'kickIt'), 'note up at cast start');
+  const ev = run(sim, FIXED_DT, press('interrupt'));
+  assert.ok(ev.some((e) => e.type === 'interrupted'));
+  assert.equal(s.metrics.mends, undefined, 'an interrupted cast never completes');
+});

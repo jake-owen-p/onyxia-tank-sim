@@ -19,6 +19,7 @@ export function scorecardScreen({ score, scenario, sim, best, isNewBest, onRepla
       h('span', { class: 'count ok', text: `${p.counts.ontime} on time` }),
       h('span', { class: 'count late', text: `${p.counts.late} late` }),
       h('span', { class: 'count missed', text: `${p.counts.missed} missed` }),
+      p.activity != null ? h('span', { class: 'muted', text: `${sim.state.tankRole ? 'On you' : 'Uptime'} ${Math.round(p.activity * 100)}%` }) : null,
     ),
     p.cues && p.cues.total ? h('div', { class: 'counts cue-counts' },
       h('span', { class: 'count-label', text: 'Taunts' }),

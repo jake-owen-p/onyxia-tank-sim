@@ -76,7 +76,15 @@ export function computeScore(script, log, phaseMetrics, phasesPlayed, role = 'mt
       penalty += p;
       metricRows.push({ id: mid, label: def.label, unit: def.unit, value: v, penalty: p, severe: !def.info && def.severe != null && v >= def.severe, info: !!def.info });
     }
-    const expPoints = expScore * g.expectationPoints;
+    // Showing up is part of the job. A tank has to hold the boss, DPS have to be hitting it when they safely
+    // can, and a healer who loses the tank has not done their job, whatever else went right.
+    const pm = metrics;
+    let activity = null, roleFactor = 1;
+    if (TANK_ROLES.includes(role) && pm.tankWindow > 1) activity = 1 - (pm.bossLooseSeconds || 0) / pm.tankWindow;
+    else if ((role === 'melee' || role === 'ranged') && pm.dpsWindow > 1) activity = 1 - ((pm.dpsIdle || 0) + (pm.outOfRange || 0)) / pm.dpsWindow;
+    if (activity != null) { activity = Math.max(0, Math.min(1, activity)); roleFactor = Math.min(1, activity / (g.fullActivity ?? 0.7)); }
+    if (role === 'healer') roleFactor = Math.pow(0.5, pm.tankDeaths || 0);
+    const expPoints = expScore * g.expectationPoints * roleFactor;
     const metricPoints = Math.max(0, g.metricPoints - penalty);
     const beats = tallyCues(cueLog, pid);
     const cueScore = beats.total ? (beats.perfect * (bw.perfect ?? 1) + beats.good * (bw.good ?? 0.6) + beats.missed * (bw.missed ?? 0)) / beats.total : 1;
@@ -91,6 +99,7 @@ export function computeScore(script, log, phaseMetrics, phasesPlayed, role = 'mt
       counts: countStatuses(insts),
       metrics: metricRows,
       cues: { ...beats, score: cueScore, points: Math.round(cueScore * cuePts) },
+      activity,
     });
   }
   const overall = phases.length ? Math.round(phases.reduce((s, p) => s + p.total, 0) / phases.length) : 0;

@@ -4,6 +4,7 @@
 
 import { rad, dist, angleTo, escapeLane, escapeCircle, onFloor, pointInPoly } from './geometry.js';
 import { bossAtSpot } from './expectations.js';
+import { roleMatches } from './scoring.js';
 
 export const TANK_ROLES = ['tank', 'offtank'];
 export const isTankRole = (role) => TANK_ROLES.includes(role);
@@ -78,7 +79,7 @@ export function idealTankPos(state, script, who = 'player') {
   }
 
   const ts = spot(state, script, 'tank', 'tankSpot');
-  if (b.passive) return { x: ts.x, y: ts.y, reason: 'tankSpot' };
+  if (b.passive || b.state === 'submerged') return dodgeHazards(ts.x, ts.y, state, 'tankSpot');
   const mine = who === 'player' ? 'player' : 'ghost';
   if (!b.engaged || b.target !== mine) {
     // Go and take her: a point at taunt range on the near side of the boss.
@@ -122,6 +123,18 @@ export function idealPlayerPos(state, script) {
   if (!state.phaseDef) return { x: w.player.x, y: w.player.y, reason: 'wait' };
   const bomb = w.hazards.find((h) => h.carried && h.state === 'warning');
   if (bomb) return { x: bomb.runTo.x, y: bomb.runTo.y, reason: 'runOut' };
+  // A telegraphed pulse around the boss: walk out of its radius for the cast.
+  const castDef = b.cast && script.actions[b.cast.id];
+  if (castDef && castDef.moveOut && castDef.radius && roleMatches(castDef.moveOut === true ? null : castDef.moveOut, state.role)) {
+    const need = script.boss.radius + castDef.radius + 3;
+    const p = w.player;
+    if (dist(p.x, p.y, b.x, b.y) < need) {
+      for (const a of [angleTo(b.x, b.y, p.x, p.y), angleTo(b.x, b.y, w.raid.anchor.x, w.raid.anchor.y)]) {
+        const x = b.x + Math.cos(a) * need, y = b.y + Math.sin(a) * need;
+        if (onFloor(x, y, script.arena.floor)) return { x, y, reason: 'moveOut' };
+      }
+    }
+  }
   if (isTankRole(state.role)) return idealTankPos(state, script, 'player');
   const raid = script.positions[state.phaseDef.raidSpot];
   if (state.role === 'melee') {
