@@ -158,6 +158,7 @@ export function idealPlayerPos(state, script) {
   for (const u of state.upcoming) {
     const def = script.actions[u.id];
     if (!def || !def.safeIfDebuff || u.in > (def.seekLead ?? 12)) continue;
+    if (!roleMatches(def.seekRoles ?? 'nontank', state.role, state.tankRole)) continue;   // whoever holds the boss stays put unless the script says otherwise
     if (state.debuffs.some((d) => d.on === 'player' && d.actionId === def.safeIfDebuff)) continue;
     let best = null, bd = Infinity;
     for (const h of w.hazards) { if (h.applies !== def.safeIfDebuff || h.state !== 'active') continue; const d = dist(w.player.x, w.player.y, h.centroid.x, h.centroid.y); if (d < bd) { bd = d; best = h; } }

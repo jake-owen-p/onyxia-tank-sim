@@ -1,0 +1,1728 @@
+{
+ "id": "thekal",
+ "name": "High Priest Thekal",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/thekal.md: Thekal 133,250 (+ Lor'Khan 90,650 + Zath 113,295), tiger form resets him to full. Modelled phases: the council (100-20%), the 10 s kill window (10 s per cmangos, the wiki and Wowhead; DBM shows a 15 s bar, so the length is not settled; three bodies must drop inside it or they rise, shown as a short phase where the two Zealots are killFirst at their low health and his clock ends), tiger form from full health (100-20%, threat reset, permanent haste as the engine's `enrage`), and the last 20% Enrage as a separate non-dispellable tank debuff because the engine has one enrage flag. Cadences for Great Heal, Silence, Mortal Cleave, Force Punch, Speed Slash and Charge are estimates that could not be verified (no boss mod times Force Punch and Warcraft Logs was not reachable); the research has no timer for any of them except Guardians (every minute). Boss melee (280 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. The 10 s window cannot fail in this engine: Thekal's HP is a fixed clock and it ends the phase on time regardless. The window is scored instead by attacks off priority (Zealots first) and by the player's own kill speed on them; a wipe from one Zealot rising alone is not reproducible. Lor'Khan and Zath are present through the council phase as killable (not priority) adds that lose health to the raid over the phase length; Great Heal on any of them is one `offBoss` interruptible cast, with no target selection. Gouge, Blind, Kick, Lightning Shield, Bloodlust and Dispel Magic are left out because the Zealots are `adds` without abilities; Zath's tank swaps cannot be expressed. Silence (Thekal) is a Magic debuff on a random player and the only dispel in the council phase. Mortal Cleave is a 5 s -50% healing received debuff on the tank (via `healingMult`), scored by the healer through tank health. Force Punch is a 1 s cast `knockback` with `radial: true` reaching 45 yd and a separate follow-up `targetSwitch`, because in the real fight the punch drops him off the main tank and a second tank must Taunt. The engine's own threat cut was not used because it would hand the player aggro the instant a DPS is near the top of the table. The knockback strength is 8 yd, shorter than live, because the tank stands near the alcove wall which stops a push and the scoring needs a fair recovery window (a longer shove is still shortened by the wall). Charge is a `targetSwitch` teleport to the raid's edge, with the Taunt timer spaced so Force Punch and Charge never overlap the 10 s Taunt cooldown (real raids have a second tank for that). Zulian Guardians are killFirst adds held by the off-tank role; the real CC is not modelled. The two pull Tigers are killFirst adds.",
+ "sources": [
+  "docs/research/zul-gurub/thekal.md",
+  "https://classic.warcraftdb.com/data/npc/14509",
+  "https://warcraft.wiki.gg/wiki/High_Priest_Thekal",
+  "https://www.wowhead.com/classic/guide/high-priest-thekal-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://www.tentonhammer.com/guides/zul-gurub-boss-guide-boss-5-high-priest-thekal",
+  "https://us.millenium.gg/guide/6831.html?page=5",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_thekal.cpp",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Thekal.lua"
+ ],
+ "arena": {
+  "name": "Thekal's court",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -66
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "Thekal, south of his hut",
+    "at": [
+     0,
+     30
+    ]
+   },
+   {
+    "text": "Lor'Khan: far corner",
+    "at": [
+     30,
+     22
+    ]
+   },
+   {
+    "text": "Zath: opposite corner",
+    "at": [
+     -30,
+     22
+    ]
+   },
+   {
+    "text": "Tiger form: alcove wall",
+    "at": [
+     0,
+     43
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 18,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -38,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 32,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 24,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 50,
+   "label": "Thekal"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": 2,
+   "spread": 11
+  },
+  "raidSpotP2": {
+   "x": 0,
+   "y": 6,
+   "spread": 11
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": 3,
+   "tolerance": 8,
+   "label": "Ranged, centre of the triangle"
+  },
+  "healerSpot": {
+   "x": 5,
+   "y": 7,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "tankSpotTiger": {
+   "x": 0,
+   "y": 43,
+   "tolerance": 4,
+   "label": "Alcove wall"
+  },
+  "bossSpotTiger": {
+   "x": 0,
+   "y": 36,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 50,
+   "label": "Tiger Thekal"
+  },
+  "rangedSpotTiger": {
+   "x": -3,
+   "y": 9,
+   "tolerance": 8,
+   "label": "Ranged, back to the wall"
+  },
+  "healerSpotTiger": {
+   "x": 4,
+   "y": 12,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "lorKhanSpot": {
+   "x": 28,
+   "y": 18,
+   "tolerance": 6,
+   "label": "Lor'Khan"
+  },
+  "zathSpot": {
+   "x": -28,
+   "y": 18,
+   "tolerance": 6,
+   "label": "Zath"
+  },
+  "zathHold": {
+   "x": -26,
+   "y": 14,
+   "tolerance": 6,
+   "label": "Zath held here"
+  },
+  "lorKhanHold": {
+   "x": 28,
+   "y": 18,
+   "tolerance": 6,
+   "label": "Lor'Khan"
+  },
+  "tigerA": {
+   "x": 16,
+   "y": 36,
+   "label": "Tiger"
+  },
+  "tigerB": {
+   "x": -16,
+   "y": 36,
+   "label": "Tiger"
+  },
+  "tigerHold": {
+   "x": 14,
+   "y": 14,
+   "tolerance": 8,
+   "label": "Tigers"
+  },
+  "guardianA": {
+   "x": 24,
+   "y": 34,
+   "label": "Guardian"
+  },
+  "guardianB": {
+   "x": -24,
+   "y": 34,
+   "label": "Guardian"
+  },
+  "guardianHold": {
+   "x": 0,
+   "y": 20,
+   "tolerance": 8,
+   "label": "Guardians held here"
+  },
+  "offtankSpot": {
+   "x": -18,
+   "y": 12,
+   "tolerance": 7,
+   "label": "Off-tank"
+  },
+  "chargeSpot": {
+   "x": 6,
+   "y": 18,
+   "label": "Charge landing"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 280,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.8
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold Thekal south of his hut through the council, take him back when he rises as a tiger, and Taunt after every Force Punch. Back against the alcove wall so the knockback is short.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Zealot off-tank",
+   "short": "Off-tank",
+   "description": "Your job is Zealot Zath in the council and Zulian Guardians in tiger form. Lor'Khan goes to another off-tank. Pick them up, hold them on your spot and keep them off the raid.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Tigers first, then split as the raid leader calls: Thekal to 20%, Zath to 15%, Lor'Khan to 10%, then all three together inside 10 s. Interrupt Great Heal. In tiger form stay on him and be ready to run back in after each Force Punch.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand in the middle of the triangle, kill the Tigers, interrupt Great Heal and watch the health bars. In tiger form put your back to a wall and stop after each Force Punch until the tank has him.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Dispel Silence the moment it lands, heal through Mortal Cleave windows (healing received is halved), and in tiger form stand with your back to a wall: Force Punch hits everyone for 875 and shoves you.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Dispel Silence the instant it lands, healers and interrupters first."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 40,
+   "icon": "interrupt",
+   "tip": "Lor'Khan's Great Heal is a 4 s cast that heals any of the three for 37,000. Interrupt it, every time. Kick, Pummel, Earth Shock, Counterspell."
+  }
+ },
+ "actions": {
+  "pullTigers": {
+   "label": "Zulian Tigers",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "tigerA",
+    "tigerB"
+   ],
+   "speed": 8,
+   "lifetime": 16,
+   "heldLifetime": 16,
+   "pickup": "offtank",
+   "playerFrom": [],
+   "holdSpot": "tigerHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Two Tigers charge in on the pull. Kill them first."
+  },
+  "zealotLorKhan": {
+   "label": "Zealot Lor'Khan",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "lorKhanSpot"
+   ],
+   "speed": 7,
+   "lifetime": 150,
+   "heldLifetime": 150,
+   "pickup": "offtank",
+   "playerFrom": [],
+   "holdSpot": "lorKhanHold",
+   "killable": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Lor'Khan is tanked at the far corner: she casts Great Heal on whoever is lowest."
+  },
+  "zealotZath": {
+   "label": "Zealot Zath",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "zathSpot"
+   ],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 150,
+   "heldLifetime": 150,
+   "pickup": "offtank",
+   "holdSpot": "zathHold",
+   "killable": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Zath is tanked at the opposite corner: he Gouges and Blinds his tank, so his tank needs a Taunt partner."
+  },
+  "greatHeal": {
+   "label": "Great Heal",
+   "kind": "transition",
+   "cast": 4,
+   "offBoss": true,
+   "interruptible": true,
+   "completedMetric": "greatHealsLanded",
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "heal",
+   "requires": "grounded",
+   "tip": "Lor'Khan casts Great Heal for 37,000 on whoever is lowest. Interrupt it every time."
+  },
+  "silence": {
+   "label": "Silence",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "playerChance": 0.25,
+   "duration": 6,
+   "tickDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Silences a random player for 6 s. Dispel it, especially on a healer or an interrupter."
+  },
+  "mortalCleave": {
+   "label": "Mortal Cleave",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 5,
+   "tickDamage": 300,
+   "healingMult": 0.5,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "His main tank takes a big hit and has healing cut in half for 5 s. Keep the tank high going into it."
+  },
+  "zealotFinishL": {
+   "label": "Lor'Khan: finish her",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "lorKhanSpot"
+   ],
+   "speed": 7,
+   "lifetime": 10,
+   "heldLifetime": 10,
+   "pickup": "offtank",
+   "playerFrom": [],
+   "holdSpot": "lorKhanHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Ten seconds to kill all three. Everybody on the Zealots first."
+  },
+  "zealotFinishZ": {
+   "label": "Zath: finish him",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "zathHold"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 10,
+   "heldLifetime": 10,
+   "pickup": "offtank",
+   "holdSpot": "zathHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Ten seconds to kill all three. Everybody on the Zealots first."
+  },
+  "tigerWipe": {
+   "label": "Tiger form: threat reset",
+   "kind": "threatWipe",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Thekal rises as a tiger: threat wiped",
+   "tip": "Five seconds after the three fall he rises as a tiger at full health. The table is empty; the tank Taunts before the DPS start."
+  },
+  "aspectOfShirvallah": {
+   "label": "Aspect of Shirvallah",
+   "kind": "enrage",
+   "cast": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "hidden": true,
+   "toast": "Tiger form: attack speed doubled",
+   "tip": "He swings much faster in tiger form."
+  },
+  "forcePunch": {
+   "label": "Force Punch",
+   "kind": "knockback",
+   "cast": 1,
+   "knockback": 8,
+   "knockbackRange": 45,
+   "radial": true,
+   "damage": 875,
+   "follow": [
+    {
+     "id": "punchSwitch",
+     "delay": 0.1
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "A 1 s cast: 875 and a shove for everyone within 45 yd, and he drops the tank. Back against a wall, and the next tank Taunts."
+  },
+  "punchSwitch": {
+   "label": "Force Punch drops the tank",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 2,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "toast": "Force Punch drops him off the tank",
+   "tip": "After the punch he turns on the next target. Taunt him back."
+  },
+  "speedSlash": {
+   "label": "Speed Slash",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 438,
+   "radius": 5,
+   "tankDamage": 300,
+   "follow": [
+    {
+     "id": "speedBleed",
+     "delay": 0.1
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A melee-range slash for 438 and a 6 s bleed: 438 a second at full value."
+  },
+  "speedBleed": {
+   "label": "Speed Slash bleed",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "roles": [
+    "tanks",
+    "melee"
+   ],
+   "dispel": "none",
+   "duration": 6,
+   "tickDamage": 110,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "The bleed from Speed Slash."
+  },
+  "charge": {
+   "label": "Charge",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 2,
+   "teleportBossTo": "chargeSpot",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "toast": "Thekal Charges a raid member",
+   "tip": "He charges a random player and comes back to the tank when taunted."
+  },
+  "guardians": {
+   "label": "Zulian Guardians",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardianA",
+    "guardianB"
+   ],
+   "speed": 8,
+   "aggroRange": 11,
+   "lifetime": 24,
+   "heldLifetime": 26,
+   "pickup": "offtank",
+   "holdSpot": "guardianHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "He summons two Guardians on transform and every minute after. Off-tank takes them, DPS kill one at a time."
+  },
+  "enrage20": {
+   "label": "Enrage",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 300,
+   "damageTakenMult": 1.35,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "At 20% he enrages: +60% attack speed and more damage on every hit. Healers pour it on."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The council",
+   "subtitle": "Tigers, Great Heal, keep the three in step",
+   "hpFrom": 1,
+   "hpTo": 0.2,
+   "duration": 150,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "zathHold"
+   },
+   "actions": [
+    {
+     "id": "pullTigers",
+     "first": 4
+    },
+    {
+     "id": "zealotLorKhan",
+     "first": 1
+    },
+    {
+     "id": "zealotZath",
+     "first": 1
+    },
+    {
+     "id": "greatHeal",
+     "first": 14,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "silence",
+     "first": 12,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "mortalCleave",
+     "first": 16,
+     "every": 14,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Hold Thekal south of his hut",
+     "tip": "Taunt him and hold him here, away from the Zealots: Lor'Khan must not be able to reach him."
+    },
+    {
+     "id": "grabZath",
+     "type": "afterEvent",
+     "event": "zealotZath",
+     "check": "whelpsPicked",
+     "within": 14,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up Zealot Zath",
+     "tip": "Zath goes to your corner. Grab him before he reaches anyone."
+    },
+    {
+     "id": "zathAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep Zath off the raid",
+     "tip": "Hold him at your corner. A loose Zath means Blinds and Gouges on healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Tigers first, then split as called",
+     "tip": "Two Tigers die first. Then the raid leader calls who to hit: Thekal 20%, Zath 15%, Lor'Khan 10%."
+    },
+    {
+     "id": "kickHeal",
+     "type": "continuous",
+     "metric": "greatHealsLanded",
+     "role": "dps",
+     "label": "Interrupt every Great Heal",
+     "tip": "Each one puts 37,000 back on one of the three. Have your interrupt ready."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "dispelSilence",
+     "type": "afterEvent",
+     "event": "silence",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 3,
+     "role": "healer",
+     "label": "Dispel Silence",
+     "tip": "Silence on a healer or an interrupter is the danger. Dispel it the moment it lands."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Thekal hits hard and Mortal Cleave halves your heals. Keep the tank high going into each one."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not let the tank sit under half: healing is halved for 5 s after Mortal Cleave."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Kill window",
+   "subtitle": "Ten seconds: all three, now",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 10,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "zathHold"
+   },
+   "actions": [
+    {
+     "id": "zealotFinishL",
+     "first": 0.1
+    },
+    {
+     "id": "zealotFinishZ",
+     "first": 0.1
+    },
+    {
+     "id": "silence",
+     "first": 3,
+     "every": 12,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grabZathW",
+     "type": "afterEvent",
+     "event": "zealotFinishZ",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 2,
+     "role": "offtank",
+     "label": "Keep Zath in place for the kill",
+     "tip": "Do not let him walk. The raid needs him where they are facing."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Zealots first in the kill window",
+     "tip": "Hit the Zealots first; Thekal is on the last ten percent. All three down inside 10 s or they get back up."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank alive for the rise."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Tiger form",
+   "subtitle": "Full health, threat reset, Force Punch",
+   "hpFrom": 1,
+   "hpTo": 0.2,
+   "duration": 110,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpotTiger",
+    "boss": "bossSpotTiger",
+    "melee": null,
+    "ranged": "rangedSpotTiger",
+    "healer": "healerSpotTiger",
+    "offtank": "guardianHold"
+   },
+   "actions": [
+    {
+     "id": "tigerWipe",
+     "first": 0
+    },
+    {
+     "id": "aspectOfShirvallah",
+     "first": 0.2
+    },
+    {
+     "id": "guardians",
+     "first": 3,
+     "every": 60
+    },
+    {
+     "id": "forcePunch",
+     "first": 12,
+     "every": 24,
+     "jitter": 1
+    },
+    {
+     "id": "charge",
+     "first": 24,
+     "every": 24,
+     "jitter": 1
+    },
+    {
+     "id": "speedSlash",
+     "first": 10,
+     "every": 11,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "wipeBack",
+     "type": "afterEvent",
+     "event": "tigerWipe",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him as he rises",
+     "tip": "He comes back at full health with an empty threat table. Taunt inside 3 s."
+    },
+    {
+     "id": "walkAlcove",
+     "type": "bossAtSpot",
+     "spot": "bossSpotTiger",
+     "within": 18,
+     "grace": 8,
+     "role": "tank",
+     "label": "Drag him to the alcove wall",
+     "tip": "Force Punch shoves everyone: your back to the wall means you only go a few yards."
+    },
+    {
+     "id": "punchBack",
+     "type": "afterEvent",
+     "event": "punchSwitch",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt after every Force Punch",
+     "tip": "The punch drops him off you. Taunt within 3 s and walk him back to the wall."
+    },
+    {
+     "id": "chargeBack",
+     "type": "afterEvent",
+     "event": "charge",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt him back after a Charge",
+     "tip": "Same as the punch: he went for someone else. Taunt."
+    },
+    {
+     "id": "grabGuards",
+     "type": "afterEvent",
+     "event": "guardians",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Grab the Guardians",
+     "tip": "Run to them and Taunt. Do not let them reach the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Guardians first",
+     "tip": "Kill them one at a time. Polymorph the other if you can."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "stopAfterPunch",
+     "type": "continuous",
+     "metric": "attacksInRed",
+     "role": "dps",
+     "label": "Stop until the tank has him back",
+     "tip": "After a Force Punch the tank is at zero with him. Do not be the one he turns on."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He hits twice as fast as a tiger. Keep heals landing on the tank every time he comes back."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Force Punch drops the tank too. Top them before it lands."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Enrage",
+   "subtitle": "20% to dead",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 32,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpotTiger",
+    "boss": "bossSpotTiger",
+    "melee": null,
+    "ranged": "rangedSpotTiger",
+    "healer": "healerSpotTiger",
+    "offtank": "guardianHold"
+   },
+   "actions": [
+    {
+     "id": "enrage20",
+     "first": 0
+    },
+    {
+     "id": "forcePunch",
+     "first": 8,
+     "every": 22,
+     "jitter": 1
+    },
+    {
+     "id": "charge",
+     "first": 20,
+     "every": 24,
+     "jitter": 1
+    },
+    {
+     "id": "speedSlash",
+     "first": 6,
+     "every": 11,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "punchBack2",
+     "type": "afterEvent",
+     "event": "punchSwitch",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt after every Force Punch",
+     "tip": "Keep going until he falls."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Enrage at 20%: the biggest heals you have now."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "One bad second at 20% and the tank is gone."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "greatHealsLanded": {
+   "label": "Great Heals that finished",
+   "unit": "count",
+   "penaltyPerUnit": 10,
+   "severe": 1,
+   "roles": "dps",
+   "tip": "Interrupt every Great Heal."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt on the rise and every Force Punch, the off-tank grabs Zath and the Guardians, Interrupt Great Heal, Dispel Silence, Heal.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Thekal turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabZealot",
+    "ability": "taunt",
+    "on": "event",
+    "event": "zealotZath",
+    "offset": 3,
+    "early": 3,
+    "late": 8,
+    "role": "offtank",
+    "short": "ZATH",
+    "label": "Grab Zath",
+    "tip": "Taunt him before he reaches anyone.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabGuardians",
+    "ability": "taunt",
+    "on": "event",
+    "event": "guardians",
+    "offset": 3,
+    "early": 3,
+    "late": 8,
+    "role": "offtank",
+    "short": "GUARDIANS",
+    "label": "Grab the Guardians",
+    "tip": "Run to them and Taunt.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "kickGreatHeal",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:greatHeal",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 3.4,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Interrupt Great Heal",
+    "tip": "Lor'Khan has started a 4 s Great Heal. Interrupt inside the cast.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "punchRecover",
+   "name": "Force Punch recovery",
+   "description": "In tiger form. He punches and you Taunt him back, again and again.",
+   "roles": "tank",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "forcePunch",
+     "first": 6,
+     "every": 15,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "zealotHold",
+   "name": "Zath and the Guardians",
+   "description": "Pick up Zath, then the Guardians, and keep them off the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "zealotZath",
+     "first": 2
+    },
+    {
+     "id": "guardians",
+     "first": 20,
+     "every": 25
+    }
+   ]
+  },
+  {
+   "id": "kickDrill",
+   "name": "Great Heal interrupts",
+   "description": "Interrupt every Great Heal while holding your threat. Lor'Khan casts it from anywhere.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "greatHeal",
+     "first": 5,
+     "every": 11,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "silenceDrill",
+   "name": "Silence and Mortal Cleave",
+   "description": "Dispel every Silence and keep the tank alive through Mortal Cleave windows.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "silence",
+     "first": 3,
+     "every": 7
+    },
+    {
+     "id": "mortalCleave",
+     "first": 5,
+     "every": 9
+    }
+   ]
+  }
+ ]
+}

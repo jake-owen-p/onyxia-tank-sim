@@ -1,0 +1,1443 @@
+{
+ "id": "mandokir",
+ "name": "Bloodlord Mandokir",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/mandokir.md: Era 466,340 HP, Ohgan 91,560, 20-man. Single event-driven fight, modelled as three phases: Ohgan alive (kill him first, the guides' default), the 90 s Enrage after Ohgan dies, then the burn. Cadences for Charge, Gaze, Whirlwind and Fear are estimates; Mortal Strike and Sunder intervals are from the sources. Boss melee (320 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Ohgan's Enrage (+50% damage, +65% attack speed for 90 s) is a non-dispellable tank debuff that raises damage taken by 60% for the phase, because the engine has one enrage flag. Threatening Gaze is modelled in two parts. The real mechanic, a 6 s debuff on a random player who must stop everything that makes threat or be charged for a lethal Guillotine, is a `debuff` with `forbidAbilities`: any press while it is on you costs 12,000 (a placeholder: DBC weapon + 7,500, the wiki says about 15,000) and is scored as `gazeBroken`; walking is safe (cmangos punishes only a rise in the target's threat; Wowhead says any action). Separately, when he watches the tank, everyone must stop attacking: that is a `shield` on all DPS for 6 s, where every attack costs a reflected hit and counts in `attacksIntoShield`, since the sim has no player-held threat to punish on the tank. Charge is a `threatWipe` with `teleportBossTo` the bait spot (the threat wipe and target switch from the guidance are one action here, because the wipe already throws him at the raid and a second switch would only burn the tank's Taunt). DPS stop until the tank has him back; the real hunters Feign Death after the charge, which is not modelled. Whirlwind is a 2 s cast `aoe` with moveOut for melee. Intimidating Shout fears melee within 8 yd. Level Up is the engine's `enrage` (multiplier 1.1, one step), fired once at a fixed time because the real trigger is three player deaths, which the engine cannot count across the raid. Chained Spirits and Revive are not modelled; a real raid that wipes down people will see more levels. Overpower and Execute are not modelled. Ohgan is a killable killFirst add with a 70 s lifetime, held by the off-tank role; the two-tank Sunder swap at 3-5 stacks has no representation here because the add has no abilities. The Vilebranch Speaker pull trigger is not modelled.",
+ "sources": [
+  "docs/research/zul-gurub/mandokir.md",
+  "https://classic.warcraftdb.com/data/npc/11382",
+  "https://classic.warcraftdb.com/data/npc/14988",
+  "https://warcraft.wiki.gg/wiki/Bloodlord_Mandokir_(Classic)",
+  "https://warcraft.wiki.gg/wiki/Ohgan_(Classic)",
+  "https://www.wowhead.com/classic/guide/bloodlord-mandokir-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://us.millenium.gg/guide/6831.html?page=8",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_mandokir.cpp",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Bloodlord.lua",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/ZulGurub_Classic/Mandokir.lua"
+ ],
+ "arena": {
+  "name": "Mandokir's stair foot",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -66
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "The pillar: tank him here",
+    "at": [
+     10,
+     34
+    ]
+   },
+   {
+    "text": "Ohgan, 30+ yd away",
+    "at": [
+     -28,
+     16
+    ]
+   },
+   {
+    "text": "Charge bait",
+    "at": [
+     20,
+     8
+    ]
+   },
+   {
+    "text": "Ranged, long range",
+    "at": [
+     -2,
+     -18
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 8,
+   "y": 16,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 7
+  },
+  "tankSpot": {
+   "x": 8,
+   "y": 30,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 8,
+   "y": 22,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 50,
+   "label": "Mandokir"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -12,
+   "spread": 13
+  },
+  "rangedSpot": {
+   "x": -3,
+   "y": -14,
+   "tolerance": 4,
+   "label": "Ranged, long range"
+  },
+  "healerSpot": {
+   "x": 8,
+   "y": -6,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "chargeBait": {
+   "x": 16,
+   "y": 6,
+   "tolerance": 6,
+   "label": "Charge bait"
+  },
+  "ohganSpot": {
+   "x": -26,
+   "y": 20,
+   "tolerance": 7,
+   "label": "Ohgan"
+  },
+  "ohganHold": {
+   "x": -24,
+   "y": 13,
+   "tolerance": 7,
+   "label": "Ohgan held here"
+  },
+  "offtankSpot": {
+   "x": -14,
+   "y": 20,
+   "tolerance": 7,
+   "label": "Off-tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 320,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.1
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him at the pillar, Taunt him back after every Charge and walk him home before the DPS restart. If you are watched, press nothing for 6 s; walking is safe.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Ohgan off-tank",
+   "short": "Off-tank",
+   "description": "Your job is Ohgan: pick him up as he rides in and hold him far from Mandokir while the raid kills him first.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Ohgan dies first, then Mandokir. Stand at his feet so you are not a Charge target, walk out of Whirlwind a second early, and stop attacking for 6 s if he watches you (walking is safe).",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Kill Ohgan first, then Mandokir, from long range (past the 8 to 30 yd Charge band). Stop the moment he watches the tank, and stop after every Charge until the tank has him back.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 36
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Pre-heal the tank for Mortal Strike. During the Enrage everything goes on the tank. If he watches you, stop casting for 6 s.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. One button here stands in for Dispel Magic, Cleanse, Decurse and Cure Poison."
+  }
+ },
+ "actions": {
+  "ohgan": {
+   "label": "Ohgan",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "ohganSpot"
+   ],
+   "speed": 6,
+   "aggroRange": 12,
+   "lifetime": 68,
+   "heldLifetime": 70,
+   "pickup": "offtank",
+   "holdSpot": "ohganHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "His raptor. Off-tank takes him far from Mandokir and the raid kills him first. His Sunder Armor stacks, so tanks swap at 3-5."
+  },
+  "charge": {
+   "label": "Charge",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "chargeBait",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "toast": "Mandokir Charges: threat wiped",
+   "tip": "He charges a raid member between 8 and 40 yd away and the whole threat table goes. Stop attacking until the tank has him back at the pillar."
+  },
+  "threateningGaze": {
+   "label": "Threatening Gaze",
+   "kind": "debuff",
+   "cast": 2,
+   "target": "random",
+   "playerChance": 0.3,
+   "dispel": "none",
+   "duration": 6,
+   "tickDamage": 0,
+   "forbidAbilities": true,
+   "breakMetric": "gazeBroken",
+   "breakDamage": 12000,
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Stop attacking, casting and healing for 6 s. Anything that makes threat gets you charged and killed. Walking is safe."
+  },
+  "gazeOnTank": {
+   "label": "He is watching the tank",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 6,
+   "reflectDamage": 1500,
+   "roles": "dps",
+   "toast": "He is watching the tank: STOP ATTACKING",
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He has the tank under his gaze. Everyone stops attacking for 6 s, or the threat table flips."
+  },
+  "whirlwind": {
+   "label": "Whirlwind",
+   "kind": "aoe",
+   "cast": 2,
+   "damage": 2500,
+   "radius": 8,
+   "tankDamage": 800,
+   "playerMetric": "whirlwindHits",
+   "moveOut": [
+    "melee"
+   ],
+   "warn": true,
+   "cue": "whelps",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Melee, walk out of the spin a second before it lands. Each tick is around 2,500."
+  },
+  "intimidatingShout": {
+   "label": "Intimidating Shout",
+   "kind": "fear",
+   "cast": 0,
+   "duration": 6,
+   "targets": "all",
+   "radius": 8,
+   "roles": "melee",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Fears everyone within 8 yd. Melee, stay at his feet in small numbers."
+  },
+  "mortalStrike": {
+   "label": "Mortal Strike",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 5,
+   "tickDamage": 300,
+   "healingMult": 0.5,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A heavy hit on the tank and -50% healing received for 5 s. Pre-heal it."
+  },
+  "ohganEnrage": {
+   "label": "Ohgan's death: Enrage",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 90,
+   "damageTakenMult": 1.6,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Ohgan is dead and Mandokir goes berserk for 90 s: +50% damage, +65% attack speed."
+  },
+  "levelUp": {
+   "label": "Level Up",
+   "kind": "enrage",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Mandokir levels up",
+   "tip": "Every 3 raid deaths he gains a level: +10% damage, permanently. Do not feed him."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Ohgan alive",
+   "subtitle": "Kill the raptor first",
+   "hpFrom": 1,
+   "hpTo": 0.9,
+   "duration": 70,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ohganHold"
+   },
+   "actions": [
+    {
+     "id": "ohgan",
+     "first": 2
+    },
+    {
+     "id": "charge",
+     "first": 15,
+     "every": 22,
+     "jitter": 2
+    },
+    {
+     "id": "threateningGaze",
+     "first": 26,
+     "every": 25,
+     "jitter": 3
+    },
+    {
+     "id": "gazeOnTank",
+     "first": 40,
+     "every": 34,
+     "jitter": 3
+    },
+    {
+     "id": "whirlwind",
+     "first": 20,
+     "every": 19,
+     "jitter": 3
+    },
+    {
+     "id": "intimidatingShout",
+     "first": 32,
+     "every": 28,
+     "jitter": 4
+    },
+    {
+     "id": "mortalStrike",
+     "first": 18,
+     "every": 22,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Hold him at the pillar",
+     "tip": "Taunt him and walk him to the pillar, away from the raid."
+    },
+    {
+     "id": "chargeBack",
+     "type": "afterEvent",
+     "event": "charge",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after each Charge",
+     "tip": "He teleports to the bait and the table is empty. Taunt, then walk him home."
+    },
+    {
+     "id": "grabOhgan",
+     "type": "afterEvent",
+     "event": "ohgan",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up Ohgan",
+     "tip": "He rides in with his master. Take him to your spot, 30 yards away from Mandokir."
+    },
+    {
+     "id": "ohganAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep Ohgan off the raid",
+     "tip": "A loose raptor in the healers is a disaster."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Ohgan first",
+     "tip": "Kill Ohgan before Mandokir. Every attack on Mandokir while he lives is the kill order broken."
+    },
+    {
+     "id": "stopGaze",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop when he watches the tank",
+     "tip": "For the 6 s of the Gaze, not a single attack. Then pick up again."
+    },
+    {
+     "id": "gazeStill",
+     "type": "continuous",
+     "metric": "gazeBroken",
+     "label": "Press nothing while he watches you",
+     "tip": "Stop everything for the 6 s of the Gaze."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "mortalPreheal",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Pre-heal Mortal Strike",
+     "tip": "A 5 s -50% healing window on the tank every 20-40 s. Heal before it lands."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Charges and Mortal Strike are the danger now. Keep the tank high."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Enrage",
+   "subtitle": "Ohgan is dead, 90 s of berserk",
+   "hpFrom": 0.9,
+   "hpTo": 0.5,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "ohganEnrage",
+     "first": 0
+    },
+    {
+     "id": "charge",
+     "first": 12,
+     "every": 22,
+     "jitter": 2
+    },
+    {
+     "id": "threateningGaze",
+     "first": 20,
+     "every": 25,
+     "jitter": 3
+    },
+    {
+     "id": "gazeOnTank",
+     "first": 36,
+     "every": 34,
+     "jitter": 3
+    },
+    {
+     "id": "whirlwind",
+     "first": 16,
+     "every": 19,
+     "jitter": 3
+    },
+    {
+     "id": "intimidatingShout",
+     "first": 30,
+     "every": 28,
+     "jitter": 4
+    },
+    {
+     "id": "mortalStrike",
+     "first": 10,
+     "every": 22,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "chargeBack2",
+     "type": "afterEvent",
+     "event": "charge",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after each Charge",
+     "tip": "Every second he is off you he is running at the raid. Taunt."
+    },
+    {
+     "id": "otReposition",
+     "type": "playerAtSpotBy",
+     "spot": "offtankSpot",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Reposition near the tank",
+     "tip": "Ohgan is dead. Stay close enough to be useful if the main tank drops."
+    },
+    {
+     "id": "stopGaze",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop when he watches the tank",
+     "tip": "A tank who loses aggro now is a wipe."
+    },
+    {
+     "id": "gazeStill2",
+     "type": "continuous",
+     "metric": "gazeBroken",
+     "label": "Press nothing while he watches you",
+     "tip": "Stop everything for the 6 s of the Gaze."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "whirlwindOut",
+     "type": "continuous",
+     "metric": "whirlwindHits",
+     "role": "melee",
+     "label": "Step out of Whirlwind",
+     "tip": "You have 2 s of warning. Use it."
+    },
+    {
+     "id": "enrageHealing",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "All heals on the tank during Enrage",
+     "tip": "+50% damage and +65% attack speed for 90 s. Nothing else matters."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Enrage: all heals on the tank."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "The burn",
+   "subtitle": "50% to dead",
+   "hpFrom": 0.5,
+   "hpTo": 0,
+   "duration": 110,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "levelUp",
+     "first": 25
+    },
+    {
+     "id": "charge",
+     "first": 12,
+     "every": 22,
+     "jitter": 2
+    },
+    {
+     "id": "threateningGaze",
+     "first": 18,
+     "every": 25,
+     "jitter": 3
+    },
+    {
+     "id": "gazeOnTank",
+     "first": 32,
+     "every": 34,
+     "jitter": 3
+    },
+    {
+     "id": "whirlwind",
+     "first": 16,
+     "every": 19,
+     "jitter": 3
+    },
+    {
+     "id": "intimidatingShout",
+     "first": 28,
+     "every": 28,
+     "jitter": 4
+    },
+    {
+     "id": "mortalStrike",
+     "first": 8,
+     "every": 22,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "chargeBack3",
+     "type": "afterEvent",
+     "event": "charge",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after each Charge",
+     "tip": "Keep on it until he falls."
+    },
+    {
+     "id": "stopGaze",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop when he watches the tank",
+     "tip": "Do not throw it away at the end."
+    },
+    {
+     "id": "gazeStill3",
+     "type": "continuous",
+     "metric": "gazeBroken",
+     "label": "Press nothing while he watches you",
+     "tip": "Stop everything for the 6 s of the Gaze."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "whirlwindOut",
+     "type": "continuous",
+     "metric": "whirlwindHits",
+     "role": "melee",
+     "label": "Step out of Whirlwind",
+     "tip": "Every hit you stand in is another bandage you do not have."
+    },
+    {
+     "id": "burnHealing",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Mortal Strike windows keep coming."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank alive to the end."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "gazeBroken": {
+   "label": "Actions while watched",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "tip": "Stop everything for the 6 s of the Gaze."
+  },
+  "attacksIntoShield": {
+   "label": "Attacks while the tank was watched",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": "dps",
+   "tip": "When he watches the tank, stop attacking for the full 6 s."
+  },
+  "whirlwindHits": {
+   "label": "Whirlwinds you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 1,
+   "roles": "melee",
+   "tip": "Walk out a second early."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt after each Charge, the off-tank grabs Ohgan, Heal the tank.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Mandokir turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabOhganCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "ohgan",
+    "offset": 3,
+    "early": 3,
+    "late": 8,
+    "role": "offtank",
+    "short": "OHGAN",
+    "label": "Grab Ohgan",
+    "tip": "Run to him and Taunt him away.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "chargeDrill",
+   "name": "Charge and return",
+   "description": "He Charges every 15 s and the table wipes. Taunt, then walk him home to the pillar.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "charge",
+     "first": 5,
+     "every": 15
+    }
+   ]
+  },
+  {
+   "id": "ohganPickup",
+   "name": "Ohgan pickup",
+   "description": "Pick up Ohgan and hold him away from everyone.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 45,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "ohgan",
+     "first": 3,
+     "every": 22
+    }
+   ]
+  },
+  {
+   "id": "gazeStop",
+   "name": "Stop on the Gaze",
+   "description": "He watches the tank every 12 s. Stop attacking for the full 6 s, then pick straight back up.",
+   "roles": "dps",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "gazeOnTank",
+     "first": 5,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "whirlwindDrill",
+   "name": "Whirlwind footwork",
+   "description": "Walk out of every Whirlwind and come straight back.",
+   "roles": "melee",
+   "startPhase": 3,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "whirlwind",
+     "first": 5,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "tankHeal",
+   "name": "Mortal Strike and Enrage healing",
+   "description": "Keep the tank alive through Mortal Strike windows and the 90 s berserk.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "mortalStrike",
+     "first": 4,
+     "every": 10
+    },
+    {
+     "id": "ohganEnrage",
+     "first": 2
+    }
+   ]
+  }
+ ]
+}

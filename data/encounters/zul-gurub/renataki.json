@@ -1,0 +1,1245 @@
+{
+ "id": "renataki",
+ "name": "Renataki of the Thousand Blades",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow the Renataki section of docs/research/zul-gurub/edge-of-madness.md: 333,100 HP (Era), level 63, 20-man, no adds. No cadences or Enrage threshold are published: the cycle length (Gouge, then Vanish after 45/40/40 s), Thousand Blades interval, and the 25% Enrage are estimates. Boss melee (380 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Vanish is a `submerged` phase with hpFrom = hpTo, and on reappearing he is teleported into the raid with a threat reset, standing in for the Ambush and 2 s stun on a random player. Ambush is a one-tick debuff on a random player (playerChance 0.35, 2,600 hit) because the sim has no burst on reappearance otherwise; the real one can kill cloth outright. Pets following him, AoE and Demoralizing Shout revealing him early are not modelled; he always comes back on a timer. Gouge is an `aoe` with a 4 s stun (DBC) that also catches the tank at 8 yd, which is real. Thousand Blades is an `aoe` on the whole raid (radius 0) for 1,094. Enrage is the engine's `enrage` at 25%; real raids report he also enrages, threshold unknown. Thrash is not modelled.",
+ "sources": [
+  "docs/research/zul-gurub/edge-of-madness.md",
+  "https://classic.warcraftdb.com/data/npc/15084",
+  "https://warcraft.wiki.gg/wiki/Renataki_(Classic)",
+  "https://www.wowhead.com/classic/guide/edge-of-madness-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_renataki.cpp"
+ ],
+ "arena": {
+  "name": "The Edge of Madness",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -62
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Brazier of Madness",
+    "at": [
+     0,
+     38
+    ]
+   },
+   {
+    "text": "Renataki: tank here",
+    "at": [
+     0,
+     28
+    ]
+   },
+   {
+    "text": "Raid",
+    "at": [
+     -8,
+     -20
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -56,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 16,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 28,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 20,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 60,
+   "label": "Renataki"
+  },
+  "raidSpotP1": {
+   "x": -6,
+   "y": -12,
+   "spread": 11
+  },
+  "rangedSpot": {
+   "x": -8,
+   "y": -11,
+   "tolerance": 8,
+   "label": "Ranged, spread"
+  },
+  "healerSpot": {
+   "x": 7,
+   "y": -10,
+   "tolerance": 7,
+   "label": "Healers"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 380,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him in the middle. When he Gouges and vanishes, stand with the raid, and Taunt him the moment he reappears on someone.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay on him, expect the Gouge then the Vanish, and after he reappears let the tank take him before going back in.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stay with the raid. Attack on every global, and stop after he reappears until the tank has him back.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Raid heals for Thousand Blades and the Ambush victim; keep the tank topped for when he comes back.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "thousandBlades": {
+   "label": "Thousand Blades",
+   "kind": "aoe",
+   "cast": 0.25,
+   "damage": 1094,
+   "tankDamage": 1500,
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A 0.25 s cast that hits every player for 1,094. Heal through it."
+  },
+  "gougeAll": {
+   "label": "Gouge",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 20,
+   "radius": 8,
+   "stun": 4,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Everyone within 8 yd is incapacitated for 4 s, and he vanishes right after."
+  },
+  "reappear": {
+   "label": "Ambush",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "raid",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "toast": "Renataki reappears on the raid: threat wiped",
+   "tip": "He reappears behind a random player. Tanks Taunt."
+  },
+  "ambushHit": {
+   "label": "Ambush",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.35,
+   "dispel": "none",
+   "duration": 1.2,
+   "tickDamage": 2600,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "A heavy hit on a random player. It can kill cloth outright."
+  },
+  "enrage": {
+   "label": "Enrage",
+   "kind": "enrage",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Renataki enrages",
+   "tip": "Below a quarter health he goes berserk. Healers, all on the tank."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Blades",
+   "subtitle": "Thousand Blades, then Gouge",
+   "hpFrom": 1,
+   "hpTo": 0.8,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "thousandBlades",
+     "first": 12,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "gougeAll",
+     "first": 40
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull him to his spot",
+     "tip": "Taunt him and walk him to the middle of the clearing."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Thousand Blades lands on everyone. Keep the tank above it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The next Ambush will not wait for you."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Vanish",
+   "subtitle": "He is gone",
+   "hpFrom": 0.8,
+   "hpTo": 0.8,
+   "duration": 12,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [],
+   "expectations": [
+    {
+     "id": "tankHold2",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 3,
+     "role": "tank",
+     "label": "Be ready to pick him up",
+     "tip": "He can come back on anyone. Stand with the raid, Taunt in hand."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Blades",
+   "subtitle": "Thousand Blades, then Gouge",
+   "hpFrom": 0.8,
+   "hpTo": 0.6,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "reappear",
+     "first": 0.2
+    },
+    {
+     "id": "ambushHit",
+     "first": 0.5
+    },
+    {
+     "id": "thousandBlades",
+     "first": 12,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "gougeAll",
+     "first": 35
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeBack3",
+     "type": "afterEvent",
+     "event": "reappear",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after the Ambush",
+     "tip": "He reappears on someone in the raid and the table is empty. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Thousand Blades lands on everyone. Keep the tank above it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The next Ambush will not wait for you."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Vanish",
+   "subtitle": "He is gone",
+   "hpFrom": 0.6,
+   "hpTo": 0.6,
+   "duration": 12,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [],
+   "expectations": [
+    {
+     "id": "tankHold4",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 3,
+     "role": "tank",
+     "label": "Be ready to pick him up",
+     "tip": "He can come back on anyone. Stand with the raid, Taunt in hand."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Blades",
+   "subtitle": "Thousand Blades, then Gouge",
+   "hpFrom": 0.6,
+   "hpTo": 0.4,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "reappear",
+     "first": 0.2
+    },
+    {
+     "id": "ambushHit",
+     "first": 0.5
+    },
+    {
+     "id": "thousandBlades",
+     "first": 12,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "gougeAll",
+     "first": 35
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeBack5",
+     "type": "afterEvent",
+     "event": "reappear",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after the Ambush",
+     "tip": "He reappears on someone in the raid and the table is empty. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Thousand Blades lands on everyone. Keep the tank above it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The next Ambush will not wait for you."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Vanish",
+   "subtitle": "He is gone",
+   "hpFrom": 0.4,
+   "hpTo": 0.4,
+   "duration": 12,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [],
+   "expectations": [
+    {
+     "id": "tankHold6",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 3,
+     "role": "tank",
+     "label": "Be ready to pick him up",
+     "tip": "He can come back on anyone. Stand with the raid, Taunt in hand."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Blades",
+   "subtitle": "Thousand Blades, then Gouge",
+   "hpFrom": 0.4,
+   "hpTo": 0.25,
+   "duration": 35,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "reappear",
+     "first": 0.2
+    },
+    {
+     "id": "ambushHit",
+     "first": 0.5
+    },
+    {
+     "id": "thousandBlades",
+     "first": 12,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "gougeAll",
+     "first": 30
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeBack7",
+     "type": "afterEvent",
+     "event": "reappear",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after the Ambush",
+     "tip": "He reappears on someone in the raid and the table is empty. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Thousand Blades lands on everyone. Keep the tank above it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The next Ambush will not wait for you."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Enrage",
+   "subtitle": "25% to dead",
+   "hpFrom": 0.25,
+   "hpTo": 0,
+   "duration": 38,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "enrage",
+     "first": 0
+    },
+    {
+     "id": "thousandBlades",
+     "first": 10,
+     "every": 11,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Enrage is on. Everything on the tank."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "One bad second now and the tank is gone."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt on the reappear, Heal the tank.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 5,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Renataki turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "reappearDrill",
+   "name": "Ambush recovery",
+   "description": "He reappears every 18 s with an empty table: Taunt and walk him back.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "reappear",
+     "first": 5,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "threatAfter",
+   "name": "Stop after the Ambush",
+   "description": "After each Ambush the tank has a clean table. Stop until the bar is safe.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "reappear",
+     "first": 5,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "bladeHeal",
+   "name": "Thousand Blades healing",
+   "description": "Keep the tank healed through a Thousand Blades every 8 s.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thousandBlades",
+     "first": 3,
+     "every": 8
+    }
+   ]
+  }
+ ]
+}

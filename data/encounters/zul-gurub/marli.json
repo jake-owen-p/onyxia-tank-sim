@@ -1,0 +1,1645 @@
+{
+ "id": "marli",
+ "name": "High Priestess Mar'li",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/marli.md: Era 333,125 HP, 20-man, modelled as five 60 s phases: three troll forms and two spider forms. Cadences for Poison Bolt Volley, Corrosive Poison, Poison Shock and Drain Life are estimates; the research only pins the 60 s form cycle. No enrage. Tentonhammer's single spider form at 90% is treated as obsolete. Boss melee (280 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Tank model: a real raid has two tanks, one on her and one waiting with the ranged group. Here you play both in turn. In troll form you are on her; when she shifts, Webs stun the melee, she Charges the ranged group (`teleportBossTo`) and the game moves you to the fresh tank's spot among the ranged (`teleportTankTo`), then the table is wiped: Taunt and walk her back to the boss spot. Melee are stunned for the full 8 s of Webs (the real root, silence and -100% attack speed leave them with nothing to do). Her charge is a teleport; the real one is a run-in. Tanks are not webbed here, because the sim has one tank player and a webbed tank could not answer the Charge. Spiders are `adds` killFirst with a short lifetime: the real ones grow every 4 s and become CC-immune and deadly after 20 s, which the engine cannot show, so killing them fast is scored instead. Witherbark Speaker is not modelled (the raid Mind Controls or sheeps it away at the pull). Enlarge (DBM warns to dispel it off the Spawn) is a Magic debuff proxy on the raid in troll form, the same stand-in as Venoxis's Renew, with an estimated cadence. Spawn poison and Thrash are not modelled. Drain Life is a 3 s interruptible cast (the channel's opening) that, if it finishes, leaves a 7 s Magic debuff ticking 500 per second on a random player; she heals herself 25x in the real fight, which the fixed HP clock cannot show, so a completed cast is scored against the interrupters. Poison Bolt Volley is an `aoe` with a 30 yd radius measured from her edge, plus a Poison debuff that lands on tanks and melee; ranged and healers are assumed to stand beyond 30 yd (their spots are 30 to 34 yd from her), and their attack range is 36 yd (talented casters and hunters). The real fight also lets you dodge the volley entirely by range; here standing inside 30 yd costs you the hit and is scored.",
+ "sources": [
+  "docs/research/zul-gurub/marli.md",
+  "https://classic.warcraftdb.com/data/npc/14510",
+  "https://warcraft.wiki.gg/wiki/High_Priestess_Mar%27li_(Classic)",
+  "https://www.wowhead.com/classic/guide/high-priestess-marli-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://www.tentonhammer.com/guides/zul-gurrub-boss-guide-boss-4-high-priestess-mar-li",
+  "https://us.millenium.gg/guide/6831.html?page=4",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_marli.cpp",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Marli.lua"
+ ],
+ "arena": {
+  "name": "Mar'li's den",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -66
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "Boss spot, melee only",
+    "at": [
+     0,
+     34
+    ]
+   },
+   {
+    "text": "Ranged group: over 30 yd",
+    "at": [
+     30,
+     16
+    ]
+   },
+   {
+    "text": "Egg sacs",
+    "at": [
+     -26,
+     24
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 18,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 30,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 22,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 60,
+   "label": "Mar'li"
+  },
+  "raidSpotP1": {
+   "x": 31,
+   "y": 5,
+   "spread": 9
+  },
+  "raidSpotP2": {
+   "x": 31,
+   "y": 5,
+   "spread": 9
+  },
+  "rangedSpot": {
+   "x": 30,
+   "y": 0,
+   "tolerance": 8,
+   "label": "Ranged, over 30 yd out"
+  },
+  "healerSpot": {
+   "x": 36,
+   "y": 18,
+   "tolerance": 2,
+   "label": "Healers"
+  },
+  "chargeLanding": {
+   "x": 24,
+   "y": 7,
+   "label": "She lands here"
+  },
+  "tankSwapSpot": {
+   "x": 23,
+   "y": 12,
+   "tolerance": 5,
+   "label": "Fresh tank"
+  },
+  "eggA": {
+   "x": -24,
+   "y": 30,
+   "label": "Egg"
+  },
+  "eggB": {
+   "x": -32,
+   "y": 12,
+   "label": "Egg"
+  },
+  "eggC": {
+   "x": 8,
+   "y": 40,
+   "label": "Egg"
+  },
+  "eggD": {
+   "x": -14,
+   "y": -10,
+   "label": "Egg"
+  },
+  "spiderHold": {
+   "x": 14,
+   "y": 12,
+   "tolerance": 8,
+   "label": "Spiders reach the raid here"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 280,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.4
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold her at the boss spot in troll form. Every time she shifts to spider form the table wipes: the fresh tank waiting with the ranged group, played by you, Taunts her the moment she lands and walks her back.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the spiders that hatch, then stay on her. Interrupt Drain Life. When you are webbed, wait: do not run after her.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand over 30 yd from her, outside Poison Bolt Volley. Kill spiders first, interrupt Drain Life, and stop at each shift until the fresh tank has her.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 36
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Stand over 30 yd out with the ranged. Cleanse Poison Bolt Volley and Corrosive Poison off tanks and melee, dispel Drain Life if it lands, and keep both tanks healed through each shift.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. One button here stands in for Dispel Magic, Cleanse, Decurse and Cure Poison."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 36,
+   "icon": "interrupt",
+   "tip": "Drain Life heals her for 25 times what she takes. Stop every one you can reach. Kick, Pummel, Earth Shock, Counterspell."
+  }
+ },
+ "actions": {
+  "drainLife": {
+   "label": "Drain Life",
+   "kind": "debuff",
+   "cast": 3,
+   "target": "random",
+   "playerChance": 0.3,
+   "dispel": "magic",
+   "duration": 7,
+   "tickDamage": 500,
+   "interruptible": true,
+   "completedMetric": "drainsLanded",
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "She channels Drain Life on a random player for 7 s, 500 a second, healing herself 25 times that. Interrupt it, and dispel it if it lands."
+  },
+  "poisonVolley": {
+   "label": "Poison Bolt Volley",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 375,
+   "radius": 30,
+   "tankDamage": 200,
+   "playerMetric": "volleyHits",
+   "follow": [
+    {
+     "id": "volleyPoison",
+     "delay": 0.1
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Everyone within 30 yd takes 375 and a Poison DoT of 289 every 2 s for 10 s. Ranged and healers stand beyond it."
+  },
+  "volleyPoison": {
+   "label": "Volley poison",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "roles": [
+    "tanks",
+    "melee"
+   ],
+   "dispel": "poison",
+   "duration": 10,
+   "tickDamage": 145,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "The DoT from Poison Bolt Volley. Healers cleanse it from tanks and melee."
+  },
+  "spiders": {
+   "label": "Spawn of Mar'li",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "eggA",
+    "eggB",
+    "eggC",
+    "eggD"
+   ],
+   "speed": 7,
+   "lifetime": 18,
+   "heldLifetime": 18,
+   "pickup": "offtank",
+   "holdSpot": "spiderHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Four spiders hatch at the pull, and more later. They grow every few seconds and are CC-immune after 20 s. Kill them first."
+  },
+  "enlarge": {
+   "label": "Enlarge",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0,
+   "dispel": "magic",
+   "duration": 12,
+   "tickDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "She enlarges a Spawn: Magic. Dispel it the moment it lands."
+  },
+  "spiderPair": {
+   "label": "Spawn of Mar'li",
+   "kind": "adds",
+   "cast": 0,
+   "count": 2,
+   "from": [
+    "eggA"
+   ],
+   "speed": 7,
+   "lifetime": 18,
+   "heldLifetime": 18,
+   "pickup": "offtank",
+   "holdSpot": "spiderHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "More spiders hatch. Kill them before you touch her."
+  },
+  "envelopingWebs": {
+   "label": "Enveloping Webs",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "roles": "melee",
+   "dispel": "none",
+   "duration": 8,
+   "stun": 8,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "As she shifts to spider form she webs everyone near her: rooted, silenced, and unable to swing for 8 s. Melee: wait, do not run after her."
+  },
+  "charge": {
+   "label": "Charge",
+   "kind": "transition",
+   "cast": 0,
+   "teleportBossTo": "chargeLanding",
+   "teleportTankTo": "tankSwapSpot",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "A second after the webs she Charges into the ranged group. The fresh tank is waiting there."
+  },
+  "phaseWipe": {
+   "label": "Spider Form: threat reset",
+   "kind": "threatWipe",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Mar'li shifts: threat wiped",
+   "tip": "The table wipes. DPS stop until the fresh tank has her back."
+  },
+  "corrosivePoison": {
+   "label": "Corrosive Poison",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "poison",
+   "duration": 30,
+   "maxStacks": 1,
+   "tickDamage": 131,
+   "damageTakenMult": 1.25,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A big Poison DoT on the tank that also cuts their armor by 5,000. Cleanse it first."
+  },
+  "poisonShock": {
+   "label": "Poison Shock",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 875,
+   "radius": 10,
+   "tankDamage": 400,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Spider form: 875 Nature to anyone within 10 yd of her."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Troll form",
+   "subtitle": "Spiders hatch, Drain Life",
+   "hpFrom": 1,
+   "hpTo": 0.78,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "spiders",
+     "first": 5
+    },
+    {
+     "id": "poisonVolley",
+     "first": 12,
+     "every": 13,
+     "jitter": 3
+    },
+    {
+     "id": "drainLife",
+     "first": 16,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "enlarge",
+     "first": 20,
+     "every": 20,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull her to the boss spot",
+     "tip": "Taunt her and walk her north to her spot, with the melee group behind her."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the spiders first",
+     "tip": "They grow fast and are immune to crowd control after 20 s."
+    },
+    {
+     "id": "kickDrain",
+     "type": "continuous",
+     "metric": "drainsLanded",
+     "role": "dps",
+     "label": "Interrupt every Drain Life",
+     "tip": "A Drain Life that lands is 12,500 a second healed on her. Stop it."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "stayFar",
+     "type": "continuous",
+     "metric": "volleyHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay over 30 yd from her",
+     "tip": "Poison Bolt Volley has a 30 yd radius. Beyond that you never take it."
+    },
+    {
+     "id": "cureVolley",
+     "type": "afterEvent",
+     "event": "poisonVolley",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cure the volley poison",
+     "tip": "Tanks and melee first: 289 every 2 s adds up."
+    },
+    {
+     "id": "enlargeOff",
+     "type": "afterEvent",
+     "event": "enlarge",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Enlarge",
+     "tip": "Magic. Dispel it the moment it lands on a Spawn."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Volley poison and her melee together are the bulk of the damage."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep the tank topped before the next shift."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Spider form",
+   "subtitle": "Webs, Charge, poison",
+   "hpFrom": 0.78,
+   "hpTo": 0.58,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "envelopingWebs",
+     "first": 0
+    },
+    {
+     "id": "charge",
+     "first": 0.6
+    },
+    {
+     "id": "phaseWipe",
+     "first": 1.2
+    },
+    {
+     "id": "corrosivePoison",
+     "first": 12,
+     "every": 14,
+     "jitter": 3
+    },
+    {
+     "id": "poisonShock",
+     "first": 15,
+     "every": 12,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "swapTank",
+     "type": "afterEvent",
+     "event": "phaseWipe",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Fresh tank: Taunt her on the landing",
+     "tip": "She has just landed in the ranged group and the table is empty. Taunt, then walk her back."
+    },
+    {
+     "id": "walkBack",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 22,
+     "grace": 8,
+     "role": "tank",
+     "label": "Walk her back to her spot",
+     "tip": "Do not fight her among the ranged. Walk her back to the boss spot."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cureCorrosive",
+     "type": "afterEvent",
+     "event": "corrosivePoison",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cleanse Corrosive Poison",
+     "tip": "Tank first. The armor loss is what kills them."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The fresh tank starts at zero threat and cold heals. Have one landing as she arrives."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Spider form hits harder and poisons stack on the tank."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Troll form",
+   "subtitle": "More spiders",
+   "hpFrom": 0.58,
+   "hpTo": 0.38,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "spiderPair",
+     "first": 8,
+     "every": 22,
+     "jitter": 3
+    },
+    {
+     "id": "poisonVolley",
+     "first": 10,
+     "every": 13,
+     "jitter": 3
+    },
+    {
+     "id": "drainLife",
+     "first": 14,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "enlarge",
+     "first": 18,
+     "every": 20,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the new spiders first",
+     "tip": "They are small now. In 20 s they will not be."
+    },
+    {
+     "id": "kickDrain",
+     "type": "continuous",
+     "metric": "drainsLanded",
+     "role": "dps",
+     "label": "Interrupt every Drain Life",
+     "tip": "Do not let this one through either."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "stayFar",
+     "type": "continuous",
+     "metric": "volleyHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay over 30 yd from her",
+     "tip": "Melee only take this volley. Keep your distance."
+    },
+    {
+     "id": "cureVolley",
+     "type": "afterEvent",
+     "event": "poisonVolley",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cure the volley poison",
+     "tip": "Tanks and melee first."
+    },
+    {
+     "id": "enlargeOff",
+     "type": "afterEvent",
+     "event": "enlarge",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Enlarge",
+     "tip": "Magic. Dispel it the moment it lands on a Spawn."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank topped before the next shift."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The next form change is coming."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Spider form",
+   "subtitle": "Webs, Charge, poison",
+   "hpFrom": 0.38,
+   "hpTo": 0.2,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "envelopingWebs",
+     "first": 0
+    },
+    {
+     "id": "charge",
+     "first": 0.6
+    },
+    {
+     "id": "phaseWipe",
+     "first": 1.2
+    },
+    {
+     "id": "corrosivePoison",
+     "first": 12,
+     "every": 14,
+     "jitter": 3
+    },
+    {
+     "id": "poisonShock",
+     "first": 15,
+     "every": 12,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "swapTank2",
+     "type": "afterEvent",
+     "event": "phaseWipe",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Fresh tank: Taunt her on the landing",
+     "tip": "Second shift. Same job: Taunt on the landing, walk her back."
+    },
+    {
+     "id": "walkBack2",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 22,
+     "grace": 8,
+     "role": "tank",
+     "label": "Walk her back to her spot",
+     "tip": "Back to the boss spot, facing away from the raid."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cureCorrosive2",
+     "type": "afterEvent",
+     "event": "corrosivePoison",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cleanse Corrosive Poison",
+     "tip": "Tank first."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Expect the spike as she lands on the fresh tank."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not let the tank drift low before the last troll form."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Troll form",
+   "subtitle": "Finish her",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "spiderPair",
+     "first": 8,
+     "every": 22,
+     "jitter": 3
+    },
+    {
+     "id": "poisonVolley",
+     "first": 10,
+     "every": 13,
+     "jitter": 3
+    },
+    {
+     "id": "drainLife",
+     "first": 14,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "enlarge",
+     "first": 18,
+     "every": 20,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Spiders first, even now",
+     "tip": "Finish the spiders, then finish her."
+    },
+    {
+     "id": "kickDrain",
+     "type": "continuous",
+     "metric": "drainsLanded",
+     "role": "dps",
+     "label": "Interrupt every Drain Life",
+     "tip": "The last one is the one that costs you the kill."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "stayFar",
+     "type": "continuous",
+     "metric": "volleyHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay over 30 yd from her",
+     "tip": "Do not creep in at the end."
+    },
+    {
+     "id": "cureVolley",
+     "type": "afterEvent",
+     "event": "poisonVolley",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cure the volley poison",
+     "tip": "Tanks and melee first."
+    },
+    {
+     "id": "enlargeOff",
+     "type": "afterEvent",
+     "event": "enlarge",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Enlarge",
+     "tip": "Magic. Dispel it the moment it lands on a Spawn."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up until she falls."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Finish strong: never let the tank sit low."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "volleyHits": {
+   "label": "Poison Bolt Volleys you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "Stay over 30 yd from her."
+  },
+  "drainsLanded": {
+   "label": "Drain Lifes that finished",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "dps",
+   "tip": "Interrupt Drain Life every time."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt the moment she lands, Interrupt Drain Life, Dispel the poisons, Heal.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Mar'li turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "kickDrain",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:drainLife",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 2.6,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Interrupt Drain Life",
+    "tip": "A 3 s Drain Life has started. Interrupt inside the cast.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "shiftDrill",
+   "name": "Shift and Charge",
+   "description": "Already on her. Every 18 s she shifts, webs and Charges: Taunt the moment she lands, then walk her back.",
+   "roles": "tank",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "charge",
+     "first": 5,
+     "every": 18
+    },
+    {
+     "id": "phaseWipe",
+     "first": 5.6,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "interruptDrain",
+   "name": "Drain Life interrupts",
+   "description": "Interrupt every Drain Life while managing your threat.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "drainLife",
+     "first": 5,
+     "every": 10,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "poisonRoutine",
+   "name": "Poison routine",
+   "description": "Volley poison and Corrosive Poison keep coming. Cure them, tank first, and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "poisonVolley",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "corrosivePoison",
+     "first": 4,
+     "every": 10
+    }
+   ]
+  }
+ ]
+}

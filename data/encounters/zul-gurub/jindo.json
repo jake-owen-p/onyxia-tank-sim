@@ -1,0 +1,1219 @@
+{
+ "id": "jindo",
+ "name": "Jin'do the Hexxer",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/jindo.md: Era 319,800 HP, 20-man; a 5-8 minute kill in the real fight, modelled here at 4 minutes by the fixed HP clock and split into two equal phases for scoring. Brain Wash Totem's cadence comes from DBM (log-based: first 11.3 to 30.9 s, then 11.3 to 26.2 s apart, here about 20 s then every 12 to 26 s). Delusions and the Healing Ward have no boss-mod timer (Warcraft Logs was not reachable) and neither Hex nor Banish has a cadence: those intervals are estimates that stand. Boss melee (480 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Delusions of Jin'do is a Curse debuff (175 Shadow per 2 s for 20 s) on a random player. Only the cursed can see and attack the Shade in the real fight, which the engine cannot express: every player can see and attack every Shade here, so one Shade (always from the same side) spawns on each Delusions regardless of whether it landed on you. The healer's Dispel can only remove Magic in this script, so Delusions cannot be decursed; the real rule is 'never decurse it'. Shades are killFirst adds; the real kill priority (Shade over Ward over Totem over Jin'do) cannot be expressed beyond killFirst, and the bot goes for the nearest. Powerful Healing Ward and Brain Wash Totem are killFirst adds with short lifetimes (the Totem 8 s, because the real ones die in seconds and a longer one would keep Jin'do unattackable), so that switching targets is scored. A Ward left up in the real fight heals him 10,000 every 3 s, which the fixed clock cannot show; it is scored by the attacks-off-priority metric instead. Brain Wash Totem spawns with a `debuff` that, for the player on whom it lands, stands in for being mind-controlled until the totem dies: 6 s of lost control (the engine has no mind control). Sacrificed Trolls and Banish to the pit are not modelled. Hex on the tank is a Magic debuff with a 5 s stun and a follow-up `targetSwitch` to the next player; the real raid has the off-tank Taunt during those 5 s, so here the tank Taunts back once free and the boss is loose for the 5 s. Shadow resistance, Shadow Shock from Shades, and the off-tank roles for Hex are assumptions; there is no off-tank role because Jin'do's real off-tank work is Hex and Brain Wash coverage, which the engine cannot express.",
+ "sources": [
+  "docs/research/zul-gurub/jindo.md",
+  "https://classic.warcraftdb.com/data/npc/11380",
+  "https://classic.warcraftdb.com/data/npc/15112",
+  "https://classic.warcraftdb.com/data/npc/14987",
+  "https://classic.warcraftdb.com/data/npc/14986",
+  "https://warcraft.wiki.gg/wiki/Jin%27do_the_Hexxer",
+  "https://www.wowhead.com/classic/guide/jindo-the-hexxer-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://www.tentonhammer.com/guides/zul-gurub-boss-guide-boss-7-jin-do-the-hexxer",
+  "https://us.millenium.gg/guide/6831.html",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Jindo.lua"
+ ],
+ "arena": {
+  "name": "Jin'do's terrace",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -66
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "Jin'do",
+    "at": [
+     0,
+     30
+    ]
+   },
+   {
+    "text": "Bloodfire Pit (skeletons)",
+    "at": [
+     -30,
+     26
+    ]
+   },
+   {
+    "text": "Ranged, spread within reach of totems",
+    "at": [
+     -2,
+     -14
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 18,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 30,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 22,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 60,
+   "label": "Jin'do"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -8,
+   "spread": 14
+  },
+  "rangedSpot": {
+   "x": -2,
+   "y": -8,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerSpot": {
+   "x": 6,
+   "y": -5,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "wardSpot": {
+   "x": 8,
+   "y": 14,
+   "label": "Ward"
+  },
+  "wardSpot2": {
+   "x": -8,
+   "y": 14,
+   "label": "Ward"
+  },
+  "totemSpot": {
+   "x": 14,
+   "y": 8,
+   "label": "Totem"
+  },
+  "totemSpot2": {
+   "x": -14,
+   "y": 8,
+   "label": "Totem"
+  },
+  "addHold": {
+   "x": 0,
+   "y": 6,
+   "tolerance": 8,
+   "label": "Adds"
+  },
+  "shadeSpotA": {
+   "x": -18,
+   "y": 0,
+   "label": "Shade"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 480,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Face him away and hold him at his spot where melee can reach the totems. When Hex lands you are out for 5 s: Taunt him back the moment you are free.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Strict priority: Shades, then the Healing Ward, then the Brain Wash Totem, then Jin'do. Never hit him while a totem is up.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stay in range of the totems. Switch to every Shade and totem the moment it appears, then back to him. Mark the Ward or Totem for the raid.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Dispel Hex off the tank instantly. Never decurse Delusions: the curse is how the raid sees the Shades. Keep the tank up on the side.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "magic"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0.12
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Dispel Magic: Hex off the tank, first thing. Do not try to decurse Delusions."
+  }
+ },
+ "actions": {
+  "delusions": {
+   "label": "Delusions of Jin'do",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.35,
+   "dispel": "curse",
+   "duration": 20,
+   "tickDamage": 88,
+   "follow": [
+    {
+     "id": "shade",
+     "delay": 0.1
+    }
+   ],
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A curse on a random player. It lets them see the Shade of Jin'do that spawns with it. Never decurse it. Kill the Shade."
+  },
+  "shade": {
+   "label": "Shade of Jin'do",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "shadeSpotA"
+   ],
+   "speed": 8,
+   "lifetime": 12,
+   "heldLifetime": 12,
+   "pickup": "offtank",
+   "holdSpot": "addHold",
+   "killFirst": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Shades appear and interrupt spellcasting. Kill yours first if you are cursed."
+  },
+  "healingWard": {
+   "label": "Powerful Healing Ward",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "wardSpot"
+   ],
+   "speed": 0,
+   "lifetime": 14,
+   "heldLifetime": 14,
+   "pickup": "offtank",
+   "holdSpot": "wardSpot",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Ward that heals him 10,000 every 3 s. Kill it within one tick. Everyone not on a Shade switches now."
+  },
+  "brainWashTotem": {
+   "label": "Brain Wash Totem",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "totemSpot"
+   ],
+   "speed": 0,
+   "lifetime": 8,
+   "heldLifetime": 8,
+   "pickup": "offtank",
+   "holdSpot": "totemSpot",
+   "killFirst": true,
+   "follow": [
+    {
+     "id": "brainWash",
+     "delay": 0.3
+    }
+   ],
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A totem that mind-controls a raid member until it dies. Kill it. Polymorph the mind-controlled player, and do not Multi-Shot through them."
+  },
+  "brainWash": {
+   "label": "Brain Wash",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.25,
+   "dispel": "none",
+   "duration": 8,
+   "fear": 6,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "You are mind-controlled until the totem dies. Nothing to do but wait."
+  },
+  "hex": {
+   "label": "Hex",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "magic",
+   "duration": 5,
+   "stun": 5,
+   "follow": [
+    {
+     "id": "hexSwitch",
+     "delay": 0.1
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A Magic hex on the tank: you are a frog for 5 s and he turns on the next target. Priests and Paladins dispel it at once."
+  },
+  "hexSwitch": {
+   "label": "Hex: tank dropped",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 4,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "toast": "Hexed: Jin'do turns on the next target",
+   "tip": "He turned on someone else. Taunt him back as soon as you are free."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Hexxer",
+   "subtitle": "Shades, Ward, Totem",
+   "hpFrom": 1,
+   "hpTo": 0.5,
+   "duration": 120,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "delusions",
+     "first": 14,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "healingWard",
+     "first": 30,
+     "every": 45,
+     "jitter": 4
+    },
+    {
+     "id": "brainWashTotem",
+     "first": 20,
+     "every": 19,
+     "jitter": 7
+    },
+    {
+     "id": "hex",
+     "first": 20,
+     "every": 26,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Hold him at his spot",
+     "tip": "Taunt him and hold him here, facing away, close enough that melee can reach the totems."
+    },
+    {
+     "id": "hexBack",
+     "type": "afterEvent",
+     "event": "hexSwitch",
+     "check": "hasAggro",
+     "within": 7,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Hex",
+     "tip": "You are a frog for 5 s. The moment you are back, Taunt."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Shades, Ward, Totem, then Jin'do",
+     "tip": "Never hit him while a totem or your Shade is up. Turn to face the target and kill it."
+    },
+    {
+     "id": "hexOff",
+     "type": "afterEvent",
+     "event": "hex",
+     "check": "noDispellable",
+     "within": 3,
+     "grace": 3,
+     "role": "healer",
+     "label": "Dispel Hex at once",
+     "tip": "Dispel the Hex off the tank the instant it lands. Nothing else matters as much."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Everyone is taking curse ticks. Keep the tank above them."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Hex drops the tank; keep them high going into it."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Hexxer",
+   "subtitle": "Same, faster",
+   "hpFrom": 0.5,
+   "hpTo": 0,
+   "duration": 120,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "delusions",
+     "first": 8,
+     "every": 13,
+     "jitter": 2
+    },
+    {
+     "id": "healingWard",
+     "first": 22,
+     "every": 42,
+     "jitter": 4
+    },
+    {
+     "id": "brainWashTotem",
+     "first": 20,
+     "every": 19,
+     "jitter": 7
+    },
+    {
+     "id": "hex",
+     "first": 14,
+     "every": 24,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "hexBack2",
+     "type": "afterEvent",
+     "event": "hexSwitch",
+     "check": "hasAggro",
+     "within": 7,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Hex",
+     "tip": "Same as before. Taunt as soon as you are back."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Shades, Ward, Totem, then Jin'do",
+     "tip": "Do not get lazy. A Ward left up undoes your burn."
+    },
+    {
+     "id": "hexOff2",
+     "type": "afterEvent",
+     "event": "hex",
+     "check": "noDispellable",
+     "within": 3,
+     "grace": 3,
+     "role": "healer",
+     "label": "Dispel Hex at once",
+     "tip": "The sooner it comes off, the less time he spends on the next target."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up until he falls."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not let the tank sit low."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt back after Hex, Attack the new totem, Dispel Hex, Heal.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 7,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Jin'do turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "switchWard",
+    "ability": "attack",
+    "on": "event",
+    "event": "healingWard",
+    "offset": 0.5,
+    "early": 0.5,
+    "late": 6,
+    "role": "dps",
+    "short": "WARD",
+    "label": "Switch to the Healing Ward",
+    "tip": "Turn to face it and kill it within a tick or two."
+   },
+   {
+    "id": "switchTotem",
+    "ability": "attack",
+    "on": "event",
+    "event": "brainWashTotem",
+    "offset": 0.5,
+    "early": 0.5,
+    "late": 6,
+    "role": "dps",
+    "short": "TOTEM",
+    "label": "Switch to the Brain Wash Totem",
+    "tip": "Turn to face it and kill it."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "hexDrill",
+   "name": "Hex recovery",
+   "description": "Every 12 s you are hexed for 5 s. Taunt him back the moment you are free.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "hex",
+     "first": 6,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "switchDrill",
+   "name": "Totem switches",
+   "description": "A Ward every 15 s and a Totem every 21 s. Switch instantly and go back to him only when they are dead.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "healingWard",
+     "first": 4,
+     "every": 15
+    },
+    {
+     "id": "brainWashTotem",
+     "first": 9,
+     "every": 21
+    },
+    {
+     "id": "delusions",
+     "first": 6,
+     "every": 11
+    }
+   ]
+  },
+  {
+   "id": "hexDispel",
+   "name": "Hex dispels",
+   "description": "Dispel every Hex at once and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "hex",
+     "first": 4,
+     "every": 9
+    }
+   ]
+  }
+ ]
+}

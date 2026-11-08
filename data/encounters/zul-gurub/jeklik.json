@@ -1,0 +1,1712 @@
+{
+ "id": "jeklik",
+ "name": "High Priestess Jeklik",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/jeklik.md: Era 333,125 HP, 20-man. P1 bat form 100-50%, then troll form with Great Heal and Mind Flay, then Gurubashi Bat Riders bombing below 35%. Great Heal's cadence follows the boss mods (DBM and BW: first about 22 s after the shift, then every 20.5 s, carried across the 45 s phase boundaries) and Curse of Blood's BW timer (21 s). Sonic Burst and Charge have no boss-mod timer (Warcraft Logs was not reachable), and Swoop, Mind Flay and Scream have no source: those intervals are plausible estimates that stand. Boss melee (250 per 2 s, doubled by Pierce Armor windows) and the big hits are scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Bats: 8 per wave at 60 and 120 s (the research has 6-8; two waves is the normal raid). Modelled as 4 from each of two spots, killFirst, picked up by the off-tank role; a ghost off-tank holds them otherwise. The real Challenging Shout and Frost Nova + AoE are not modelled; adds simply lose health to the raid over their lifetime and your attacks speed that up. Sonic Burst (20 yd, 1,750, 10 s Magic silence) has no warning in the real fight, so it is an instant `aoe` around her. The silence is not modelled (the engine has no silence on `aoe`); instead a hit counts against ranged and healers, who are meant to stand over 20 yd away. Melee and tanks are in range by design and take the damage. The real raid keeps melee off her in bat form; the engine scores melee on uptime, so the melee role stays in and accepts the bursts. Say so if you want the alternative. Charge is a `targetSwitch` with `teleportBossTo` the bait spot, so the tank has to take her back; the research says she has to be regained. The 2 s stun and landing damage on the bait are not modelled, since only the player's own hits exist. Whether the real charge drops her threat is not settled by the sources. Great Heal is a 4 s cast by her (so she stops swinging) with `completedMetric`, scored for the roles that have Interrupt. Boss HP runs on a fixed clock, so a heal that lands is scored but does not lengthen the fight. Mind Flay is a 3 s interruptible cast (BW and Wowhead); the engine lands a debuff when its cast ends, so an interrupted Flay does nothing and a completed one deals its ticks afterwards rather than during the channel. With a 10 s interrupt against Great Heal every 20.5 s, Curse of Blood every 21 s and Mind Flay every 15 s, the choice of what to kick is real, and Great Heal is the priority. Curse of Blood is spell 16098: a 2 s interruptible cast (BW) whose tooltip reads +2 physical damage taken for 10 minutes, so it is a token 5% here; the wiki's +500 is not supported. Mages and druids decurse it if it lands. Pierce Armor is approximated as +25% damage taken on the tank for 20 s. Psychic Scream fears melee within 8 yd; the tank is assumed to hold Fear Ward or Tremor Totem, as guides require. Liquid Fire bombs: `hazard` placement random, 2 s fall warning, and the fire stays 20 s. Riders are scripted from 35%, the second 15 s behind the first, one bomb every 8 s each. Blaze hits 875 and is modelled as one hit when you enter a patch; time standing in it is scored as fire instead of ticking, because the engine's per-second tick would make a 20 s patch far deadlier than the real 250-a-tick burn. The bat riders cannot be attacked, matching the guides. Silence on Charge is not modelled because its source is unclear (spell 22911 has no silence). The kiting oval below 35% is two boss spots the tank walks between, not a real circle. There is no line of sight, no threat reset for the bait, and no way to Sacrifice a hunter.",
+ "sources": [
+  "docs/research/zul-gurub/jeklik.md",
+  "https://classic.warcraftdb.com/data/npc/14517",
+  "https://warcraft.wiki.gg/wiki/High_Priestess_Jeklik_(tactics)",
+  "https://www.wowhead.com/classic/guide/high-priestess-jeklik-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://www.tentonhammer.com/guides/zul-gurub-boss-guide-boss-1-high-priestess-jeklik",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_jeklik.cpp",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Jeklik.lua",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/ZulGurub_Classic/Jeklik.lua",
+  "https://www.wowhead.com/classic/spell=16098"
+ ],
+ "arena": {
+  "name": "Jeklik's hill",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -66
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "Jeklik's hill: tank her here",
+    "at": [
+     26,
+     22
+    ]
+   },
+   {
+    "text": "Ranged and healers, over 20 yd from her",
+    "at": [
+     -14,
+     24
+    ]
+   },
+   {
+    "text": "Charge bait",
+    "at": [
+     8,
+     21
+    ]
+   },
+   {
+    "text": "Bats come from the trees",
+    "at": [
+     -26,
+     -26
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 20,
+   "y": 12,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 29,
+   "y": 13,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 21,
+   "y": 12,
+   "heading": 0,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Jeklik"
+  },
+  "raidSpotP1": {
+   "x": -9,
+   "y": 11,
+   "spread": 9
+  },
+  "raidSpotP2": {
+   "x": -6,
+   "y": 8,
+   "spread": 16
+  },
+  "rangedSpot": {
+   "x": -7,
+   "y": 9,
+   "tolerance": 8,
+   "label": "Ranged, over 20 yd out"
+  },
+  "healerSpot": {
+   "x": -7,
+   "y": 14,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "chargeBait": {
+   "x": 11,
+   "y": 14,
+   "tolerance": 6,
+   "label": "Charge bait"
+  },
+  "batSpotN": {
+   "x": -30,
+   "y": 28,
+   "label": "Bats"
+  },
+  "batSpotS": {
+   "x": -30,
+   "y": -20,
+   "label": "Bats"
+  },
+  "batHoldSpot": {
+   "x": -24,
+   "y": 6,
+   "tolerance": 6,
+   "label": "Bats held here"
+  },
+  "bossSpotB": {
+   "x": 19,
+   "y": 26,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Oval, north leg"
+  },
+  "tankSpotB": {
+   "x": 19,
+   "y": 33,
+   "tolerance": 5
+  },
+  "bossSpotC": {
+   "x": 25,
+   "y": 18,
+   "heading": 310,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Oval, south leg"
+  },
+  "rangedSpotB": {
+   "x": 1,
+   "y": 12,
+   "tolerance": 9,
+   "label": "Spread out, away from fire"
+  },
+  "healerSpotB": {
+   "x": -2,
+   "y": 16,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "offtankReserve": {
+   "x": 30,
+   "y": 27,
+   "tolerance": 6,
+   "label": "Off-tank, ready for a tank death"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 250,
+  "meleeInterval": 2,
+  "cones": {
+   "swoop": {
+    "angle": 100,
+    "range": 11,
+    "label": "Swoop",
+    "facing": "front"
+   }
+  },
+  "facingCone": "swoop",
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull her onto the hill, hold her through the Charges, and take her back after the 50% threat reset. Below 35% walk her between the two oval spots so the fire lands behind you. Fear Ward or Tremor is assumed.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Bat off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the bats: grab each wave of eight as it comes in and hold them on your spot so the mages can AoE them. A ghost tank has Jeklik.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay on her from behind, kill bats when they come, and be ready to Interrupt Great Heal in phase 2. Sonic Burst is the cost of standing here.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand over 20 yd from her: Sonic Burst is 1,750 and a 10 s silence. Kill bats first. In phase 2 interrupt Great Heal, then keep moving out of the fire.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Keep the tank up through Charge and Pierce Armor, stay over 20 yd out in phase 1, and in phase 2 dispel Shadow Word: Pain and Curse of Blood while the fire comes down.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. One button here stands in for Dispel Magic, Cleanse, Decurse and Cure Poison."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 30,
+   "icon": "interrupt",
+   "tip": "Great Heal is a 4 s cast that heals her about a quarter of her health. It must never finish. Kick, Pummel, Earth Shock, Counterspell."
+  }
+ },
+ "actions": {
+  "bloodLeech": {
+   "label": "Blood Leech",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 150,
+   "radius": 10,
+   "tankDamage": 150,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "Drains health from everyone within 10 yd and heals her."
+  },
+  "sonicBurst": {
+   "label": "Sonic Burst",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 1750,
+   "radius": 20,
+   "tankDamage": 500,
+   "playerMetric": "sonicBurstHits",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Everyone within 20 yd takes 1,750 and is silenced for 10 s. It has no warning: if you are a caster, simply do not be in range."
+  },
+  "swoop": {
+   "label": "Swoop",
+   "kind": "cone",
+   "cone": "swoop",
+   "cast": 0,
+   "damage": 700,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A frontal strike for weapon damage + 500 and a 2 s stun. Keep her facing the tank, and nobody else in front."
+  },
+  "charge": {
+   "label": "Charge",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 2,
+   "teleportBossTo": "chargeBait",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "toast": "Jeklik Charges the bait",
+   "tip": "She charges a ranged player at range. The bait stands between her and the raid so nobody else eats it. Tanks, take her back at once."
+  },
+  "pierceArmor": {
+   "label": "Pierce Armor",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 20,
+   "tickDamage": 0,
+   "damageTakenMult": 1.25,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Her current target loses 75% of their armor for 20 s. Tank healers expect heavier swings."
+  },
+  "batWave": {
+   "label": "Frenzied Bloodseeker Bats",
+   "kind": "adds",
+   "cast": 0,
+   "count": 4,
+   "from": [
+    "batSpotN",
+    "batSpotS"
+   ],
+   "speed": 9,
+   "aggroRange": 11,
+   "lifetime": 24,
+   "heldLifetime": 26,
+   "pickup": "offtank",
+   "holdSpot": "batHoldSpot",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Eight bats fly in once a minute. The off-tank grabs them, the mages AoE them, and you kill them before you go back to Jeklik."
+  },
+  "phaseWipe": {
+   "label": "Transform: threat reset",
+   "kind": "threatWipe",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Jeklik changes form: threat wiped",
+   "tip": "At 50% she drops back to her troll form and the threat table is wiped. DPS stop until the tank has her."
+  },
+  "greatHeal": {
+   "label": "Great Heal",
+   "kind": "transition",
+   "cast": 4,
+   "interruptible": true,
+   "completedMetric": "greatHealsLanded",
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "heal",
+   "requires": "grounded",
+   "tip": "A 4 s cast that heals her about 92,500 health. Interrupt it, every single time."
+  },
+  "mindFlay": {
+   "label": "Mind Flay",
+   "kind": "debuff",
+   "cast": 3,
+   "interruptible": true,
+   "dispel": "none",
+   "target": "random",
+   "playerChance": 0.25,
+   "duration": 3,
+   "tickDamage": 750,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A 750-per-second channel on a random raid member that jumps to people nearby. Great Heal first, this second."
+  },
+  "psychicScream": {
+   "label": "Psychic Scream",
+   "kind": "fear",
+   "cast": 0,
+   "duration": 4,
+   "targets": "all",
+   "radius": 8,
+   "roles": "melee",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Fears everyone within 8 yd for 4 s. Melee will be feared; come back as soon as it ends."
+  },
+  "swPain": {
+   "label": "Shadow Word: Pain",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "playerChance": 0.3,
+   "duration": 18,
+   "tickDamage": 141,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A DoT on a random player, 422 Shadow every 3 s. Dispel it."
+  },
+  "curseOfBlood": {
+   "label": "Curse of Blood",
+   "kind": "debuff",
+   "cast": 2,
+   "interruptible": true,
+   "dispel": "curse",
+   "target": "random",
+   "playerChance": 0.3,
+   "duration": 600,
+   "damageTakenMult": 1.05,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A 2 s cast. Interrupt it after Great Heal, and decurse if it lands."
+  },
+  "liquidFire": {
+   "label": "Liquid Fire",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.3,
+   "radius": 5,
+   "warning": 2,
+   "active": 20,
+   "damage": 875,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The Bat Riders drop fire bombs on the raid; two seconds later the patch burns for 20 s. Spread out so a bomb hits one of you, and never stand still in fire."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Bat form",
+   "subtitle": "100 to 50%: Sonic Burst, Charge, bat waves",
+   "hpFrom": 1,
+   "hpTo": 0.5,
+   "duration": 150,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "batHoldSpot"
+   },
+   "actions": [
+    {
+     "id": "bloodLeech",
+     "first": 12,
+     "every": 11,
+     "jitter": 3
+    },
+    {
+     "id": "sonicBurst",
+     "first": 18,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "swoop",
+     "first": 14,
+     "every": 13,
+     "jitter": 3
+    },
+    {
+     "id": "pierceArmor",
+     "first": 20,
+     "every": 25,
+     "jitter": 3
+    },
+    {
+     "id": "charge",
+     "first": 12,
+     "every": 30,
+     "jitter": 2
+    },
+    {
+     "id": "batWave",
+     "first": 60,
+     "every": 60
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull her up onto the hill",
+     "tip": "Taunt her and walk her up to the tank spot, so the bats are seen coming in and her front points away from the raid."
+    },
+    {
+     "id": "chargeBack",
+     "type": "afterEvent",
+     "event": "charge",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Take her back after each Charge",
+     "tip": "She lands on the bait 12 yd from you. Taunt the moment she turns, then walk her back to the hill."
+    },
+    {
+     "id": "batsPicked",
+     "type": "afterEvent",
+     "event": "batWave",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Grab the bat wave",
+     "tip": "Run at the bats as they arrive and Taunt. Eight loose bats in the healers is a wipe."
+    },
+    {
+     "id": "batsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the bats off the raid",
+     "tip": "Bats on a healer means no heals. Hold them on your spot."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the bats before Jeklik",
+     "tip": "Turn to face a bat and kill it. Every attack on Jeklik while bats live is damage you owe the raid."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "stayOut",
+     "type": "continuous",
+     "metric": "sonicBurstHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay over 20 yd from her",
+     "tip": "Sonic Burst silences everyone within 20 yd for 10 s with no warning. A silenced healer is a dead tank."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Charge, Swoop and Pierce Armor all hit the tank at once. Keep heals landing."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Pierce Armor doubles the swings for 20 s. Never let the tank sit under half."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Troll form",
+   "subtitle": "50 to 35%: Great Heal, Mind Flay",
+   "hpFrom": 0.5,
+   "hpTo": 0.35,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "offtankReserve"
+   },
+   "actions": [
+    {
+     "id": "phaseWipe",
+     "first": 0
+    },
+    {
+     "id": "greatHeal",
+     "first": 22,
+     "every": 20.5,
+     "jitter": 1
+    },
+    {
+     "id": "mindFlay",
+     "first": 8,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "psychicScream",
+     "first": 16,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "swPain",
+     "first": 6,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "curseOfBlood",
+     "first": 18,
+     "every": 21,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "wipeBack",
+     "type": "afterEvent",
+     "event": "phaseWipe",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Pick her up after the threat reset",
+     "tip": "At 50% everyone is back to zero and she looks for a target. Taunt inside 3 s, before the DPS restart."
+    },
+    {
+     "id": "otReady",
+     "type": "playerAtSpotBy",
+     "spot": "offtankReserve",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Stand by the tank, away from the raid",
+     "tip": "No more bats in this form. Stay near the main tank, ready to Taunt if they die, and out of the fire aimed at the raid."
+    },
+    {
+     "id": "kickHeal",
+     "type": "continuous",
+     "metric": "greatHealsLanded",
+     "role": "dps",
+     "label": "Interrupt every Great Heal",
+     "tip": "Each one that lands puts back a quarter of her health. Have your interrupt in hand."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "dispelPain",
+     "type": "afterEvent",
+     "event": "swPain",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Shadow Word: Pain",
+     "tip": "422 every 3 s on a random player. Priest and Paladin dispels clear it."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mind Flay and the DoTs leave the tank short of heals. Keep them rolling."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "She stops swinging while she casts: use those seconds to top the tank."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Bat Riders",
+   "subtitle": "35 to 18%: fire from above",
+   "hpFrom": 0.35,
+   "hpTo": 0.18,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpotB",
+    "boss": "bossSpotB",
+    "melee": null,
+    "ranged": "rangedSpotB",
+    "healer": "healerSpotB",
+    "offtank": "offtankReserve"
+   },
+   "actions": [
+    {
+     "id": "greatHeal",
+     "first": 18,
+     "every": 20.5,
+     "jitter": 1
+    },
+    {
+     "id": "mindFlay",
+     "first": 9,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "psychicScream",
+     "first": 18,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "swPain",
+     "first": 5,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "curseOfBlood",
+     "first": 15,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "liquidFire",
+     "first": 6,
+     "every": 8,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "ovalA",
+     "type": "bossAtSpot",
+     "spot": "bossSpotB",
+     "within": 10,
+     "grace": 6,
+     "role": "tank",
+     "label": "Walk her to the north leg of the oval",
+     "tip": "Fire is coming down where you stood. Keep her moving so the patches land behind you, and never stand in them."
+    },
+    {
+     "id": "otReady",
+     "type": "playerAtSpotBy",
+     "spot": "offtankReserve",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Stand by the tank, away from the raid",
+     "tip": "No more bats in this form. Stay near the main tank, ready to Taunt if they die, and out of the fire aimed at the raid."
+    },
+    {
+     "id": "kickHeal",
+     "type": "continuous",
+     "metric": "greatHealsLanded",
+     "role": "dps",
+     "label": "Interrupt every Great Heal",
+     "tip": "The fire makes you want to stop and look. Great Heal first, then the fire."
+    },
+    {
+     "id": "outOfFire",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the fire",
+     "tip": "A bomb hits for 875 and the patch keeps burning. If it is under you, move, then carry on."
+    },
+    {
+     "id": "dispelPain",
+     "type": "afterEvent",
+     "event": "swPain",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Shadow Word: Pain",
+     "tip": "Dispel it before you worry about the curse."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Fire and DoTs on top of melee: this is the phase where tanks die."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The tank is walking the oval, stay in range of them."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Bat Riders",
+   "subtitle": "18% to dead: keep walking",
+   "hpFrom": 0.18,
+   "hpTo": 0,
+   "duration": 55,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpotC",
+    "melee": null,
+    "ranged": "rangedSpotB",
+    "healer": "healerSpotB",
+    "offtank": "offtankReserve"
+   },
+   "actions": [
+    {
+     "id": "greatHeal",
+     "first": 14,
+     "every": 20.5,
+     "jitter": 1
+    },
+    {
+     "id": "mindFlay",
+     "first": 9,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "psychicScream",
+     "first": 16,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "swPain",
+     "first": 5,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "curseOfBlood",
+     "first": 15,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "liquidFire",
+     "first": 5,
+     "every": 8,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "ovalB",
+     "type": "bossAtSpot",
+     "spot": "bossSpotC",
+     "within": 10,
+     "grace": 6,
+     "role": "tank",
+     "label": "Walk her back to the south leg",
+     "tip": "Keep her moving. The north leg is full of fire by now."
+    },
+    {
+     "id": "kickHeal",
+     "type": "continuous",
+     "metric": "greatHealsLanded",
+     "role": "dps",
+     "label": "Interrupt every Great Heal",
+     "tip": "The last heal costs the most. Do not lose one at the finish line."
+    },
+    {
+     "id": "outOfFire",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the fire",
+     "tip": "Move out, then carry on. Nothing is worth standing in it."
+    },
+    {
+     "id": "dispelPain",
+     "type": "afterEvent",
+     "event": "swPain",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Shadow Word: Pain",
+     "tip": "Dispel it. Everything is on fire and the DoTs add up."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up until she falls."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The fire on the ground moves the tank: stay in range."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tank"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "sonicBurstHits": {
+   "label": "Sonic Bursts you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "Stay over 20 yd from Jeklik in bat form."
+  },
+  "greatHealsLanded": {
+   "label": "Great Heals that finished",
+   "unit": "count",
+   "penaltyPerUnit": 12,
+   "severe": 1,
+   "roles": "dps",
+   "tip": "Interrupt Great Heal every time. A rotation of three short-cooldown interrupts is the norm."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt when she turns or the threat resets, the off-tank grabs bats, Interrupt on Great Heal, Dispel and Heal for the healer.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Jeklik turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabBats",
+    "ability": "taunt",
+    "on": "event",
+    "event": "batWave",
+    "offset": 3.5,
+    "early": 3.5,
+    "late": 8,
+    "role": "offtank",
+    "short": "BATS",
+    "label": "Grab the bats",
+    "tip": "Taunt the wave or run into them before they reach a healer.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "kickGreatHeal",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:greatHeal",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 3.4,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Interrupt Great Heal",
+    "tip": "She has started a 4 s Great Heal. Interrupt inside the cast.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "chargeRecover",
+   "name": "Charge recovery",
+   "description": "Already on her. Every Charge she lands on the bait: Taunt, then walk her back to the hill.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "swoop",
+     "first": 6,
+     "every": 10
+    },
+    {
+     "id": "charge",
+     "first": 8,
+     "every": 16,
+     "jitter": 3
+    }
+   ]
+  },
+  {
+   "id": "batPickup",
+   "name": "Bat pickup",
+   "description": "Eight bats come in every 25 s. Grab them and hold them on your spot.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "batWave",
+     "first": 4,
+     "every": 25
+    }
+   ]
+  },
+  {
+   "id": "kickDrill",
+   "name": "Great Heal interrupts",
+   "description": "Interrupt every Great Heal while keeping your threat out of the red band.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "greatHeal",
+     "first": 5,
+     "every": 12,
+     "jitter": 1
+    },
+    {
+     "id": "swPain",
+     "first": 7,
+     "every": 9
+    }
+   ]
+  },
+  {
+   "id": "fireFeet",
+   "name": "Liquid Fire footwork",
+   "description": "Bombs every few seconds. Step out of every patch and keep your rotation going.",
+   "roles": "dps",
+   "startPhase": 3,
+   "duration": 45,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "liquidFire",
+     "first": 3,
+     "every": 5,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "dispelDrill",
+   "name": "Dispel race",
+   "description": "Shadow Word: Pain and Curse of Blood keep landing. Keep them cleared and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "swPain",
+     "first": 3,
+     "every": 7
+    },
+    {
+     "id": "curseOfBlood",
+     "first": 5,
+     "every": 13
+    },
+    {
+     "id": "swoop",
+     "first": 4,
+     "every": 8
+    }
+   ]
+  }
+ ]
+}

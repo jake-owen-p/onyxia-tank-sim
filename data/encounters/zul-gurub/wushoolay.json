@@ -1,0 +1,1003 @@
+{
+ "id": "wushoolay",
+ "name": "Wushoolay the Storm-Witch",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow the Wushoolay section of docs/research/zul-gurub/edge-of-madness.md: 293,150 HP (Era), 31,440 mana, level 63, 20-man. No cadences are published: Chain Lightning, Forked Lightning, Lightning Cloud and Lightning Wave intervals are estimates. Boss melee (280 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. The real raid's central job is draining his 31,440 mana so Chain and Forked Lightning stop; the engine has no mana, so this cannot be modelled, and the lightning simply continues all fight, which makes this script harsher than a well-drained real fight and easier to pass than an undrained one. Chain Lightning is a 1.5 s interruptible cast that hits a frontal cone of 15 yd (its jumps and escalating damage cannot be expressed): whether Chain Lightning is frontal is an open question (Wowhead yes, wiki/DBC no) and this script takes Wowhead's reading. Forked Lightning is an instant cone. Lightning Cloud: `hazard` at a random player's feet, 10 yd, 1 s warning, 15 s, 200 Nature per second; Lightning Cloud's numbers could not be verified: BW tracks 26550 (657 to 843 every 3 s), DBM and warcraftdb 24683 (875 every 5 s), and the script's 200 per second sits between them. Lightning Wave is a one-tick debuff on a random player. Melee reach is 7 yd and a harmless rear cone (nothing uses it) puts melee on his flank, so they can stand just clear of a cloud's edge and still hit him.",
+ "sources": [
+  "docs/research/zul-gurub/edge-of-madness.md",
+  "https://classic.warcraftdb.com/data/npc/15085",
+  "https://warcraft.wiki.gg/wiki/Wushoolay_(Classic)",
+  "https://www.wowhead.com/classic/guide/edge-of-madness-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/"
+ ],
+ "arena": {
+  "name": "The Edge of Madness",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -62
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Brazier of Madness",
+    "at": [
+     0,
+     38
+    ]
+   },
+   {
+    "text": "Wushoolay: tank here",
+    "at": [
+     0,
+     28
+    ]
+   },
+   {
+    "text": "Raid",
+    "at": [
+     -8,
+     -20
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -56,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 16,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 28,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 20,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 60,
+   "label": "Wushoolay"
+  },
+  "raidSpotP1": {
+   "x": -6,
+   "y": -12,
+   "spread": 11
+  },
+  "rangedSpot": {
+   "x": -6,
+   "y": -6,
+   "tolerance": 8,
+   "label": "Ranged, spread"
+  },
+  "healerSpot": {
+   "x": 7,
+   "y": -5,
+   "tolerance": 7,
+   "label": "Healers"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 280,
+  "meleeInterval": 2,
+  "cones": {
+   "forkedLightning": {
+    "angle": 70,
+    "range": 18,
+    "label": "Forked Lightning",
+    "facing": "front",
+    "style": "breath"
+   },
+   "tail": {
+    "angle": 90,
+    "range": 10,
+    "label": "Tail",
+    "facing": "back"
+   }
+  },
+  "facingCone": "forkedLightning",
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Face him away from the raid so only you take the lightning, and walk him out of each Lightning Cloud. Nature Resistance is assumed.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay strictly behind him (Chain and Forked Lightning go forward), walk out of every cloud, and interrupt Chain Lightning when you can.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 7
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stay spread behind him, out of the frontal cone. Interrupt Chain Lightning when you can and walk out of clouds.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 36
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Tank focus: lightning bursts hit the tank fast. Stay behind him, spread, and out of the clouds.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 34,
+   "icon": "interrupt",
+   "tip": "Chain Lightning is a 1.5 s cast that hits everyone in front of him. Kick it when you can."
+  }
+ },
+ "actions": {
+  "chainLightning": {
+   "label": "Chain Lightning",
+   "kind": "cone",
+   "cone": "forkedLightning",
+   "cast": 1.5,
+   "damage": 1100,
+   "hitsMelee": false,
+   "interruptible": true,
+   "completedMetric": "chainsLanded",
+   "playerMetric": "lightningHits",
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A 1.5 s cast: 875 Nature, jumping to nearby players with rising damage. Interrupt it and stay spread."
+  },
+  "forkedLightning": {
+   "label": "Forked Lightning",
+   "kind": "cone",
+   "cone": "forkedLightning",
+   "cast": 0,
+   "damage": 1157,
+   "hitsMelee": false,
+   "playerMetric": "lightningHits",
+   "warn": false,
+   "cue": null,
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "An instant frontal blast. Only the tank should be in it."
+  },
+  "lightningCloud": {
+   "label": "Lightning Cloud",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.25,
+   "radius": 10,
+   "warning": 1,
+   "active": 15,
+   "damage": 200,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A cloud under a raid member: 463 Nature and then 875 every 5 s for 15 s within 10 yd. Move out at once."
+  },
+  "lightningWave": {
+   "label": "Lightning Wave",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.3,
+   "dispel": "none",
+   "duration": 1.2,
+   "tickDamage": 463,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "463 Nature on a random player."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Wushoolay",
+   "subtitle": "Forked Lightning, clouds",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 150,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "chainLightning",
+     "first": 14,
+     "every": 15,
+     "jitter": 2
+    },
+    {
+     "id": "forkedLightning",
+     "first": 8,
+     "every": 12,
+     "jitter": 3
+    },
+    {
+     "id": "lightningCloud",
+     "first": 10,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "lightningWave",
+     "first": 6,
+     "every": 10,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull him away from the raid",
+     "tip": "Taunt him and walk him to the middle, facing away from the raid."
+    },
+    {
+     "id": "face",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tank",
+     "label": "Keep him facing away from the raid",
+     "tip": "Chain and Forked Lightning go forward. Point them at nothing but you."
+    },
+    {
+     "id": "noClouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "Lightning Cloud does more than most boss abilities. Move out now."
+    },
+    {
+     "id": "behind",
+     "type": "continuous",
+     "metric": "lightningHits",
+     "role": "nontank",
+     "label": "Stay out of his front",
+     "tip": "Melee behind him. Ranged and healers spread at the back."
+    },
+    {
+     "id": "kickChain",
+     "type": "continuous",
+     "metric": "chainsLanded",
+     "role": "dps",
+     "label": "Interrupt Chain Lightning",
+     "tip": "A Chain Lightning you stop is a whole raid not jumped."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Lightning bursts are the danger. Keep the tank above them."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not let the tank sit low between lightnings."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 20,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tank"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "lightningHits": {
+   "label": "Lightnings you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": "nontank",
+   "tip": "Stay out of his front."
+  },
+  "chainsLanded": {
+   "label": "Chain Lightnings that finished",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": "dps",
+   "tip": "Interrupt Chain Lightning."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Interrupt Chain Lightning, Heal the tank.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Wushoolay turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "kickChain",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:chainLightning",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 1.2,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Interrupt Chain Lightning",
+    "tip": "A 1.5 s Chain Lightning has started. Interrupt inside the cast.",
+    "doneBy": "interrupted"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "faceDrill",
+   "name": "Pull and face away",
+   "description": "Pull him and hold him facing away while lightning goes off.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 45,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "forkedLightning",
+     "first": 12,
+     "every": 8
+    }
+   ]
+  },
+  {
+   "id": "cloudDrill",
+   "name": "Step out of clouds",
+   "description": "Clouds every few seconds. Step out, keep attacking, and kick Chain Lightning.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "lightningCloud",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 11
+    }
+   ]
+  },
+  {
+   "id": "lightningHeal",
+   "name": "Lightning tank healing",
+   "description": "Keep the tank alive through forward lightning.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "forkedLightning",
+     "first": 3,
+     "every": 6
+    }
+   ]
+  }
+ ]
+}

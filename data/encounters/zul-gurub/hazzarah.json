@@ -1,0 +1,927 @@
+{
+ "id": "hazzarah",
+ "name": "Hazza'rah the Dreamweaver",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow the Hazza'rah section of docs/research/zul-gurub/edge-of-madness.md: 266,500 HP (Era), 5,240 mana, level 63, 20-man, no real adds except the Illusions. No cadences are published: Sleep, Illusions and Earth Shock intervals here are estimates. Boss melee (300 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. The fight's central job in the real raid is draining his 5,240 mana to zero so Chain Burn stops (Viper Sting, Drain Mana); the engine has no mana, so this cannot be modelled and Chain Burn is left out entirely. A raid that did not drain him would suffer far more than this script shows. Mass Sleep is a 6 s `debuff` (stun) on non-tanks; damage waking you early is not modelled, nor Tremor Totem or Divine Shield breaking it, and the tank is not put to sleep because the real tank is woken instantly by the next hit (and the sim has one tank player). HoTs on the tank before each sleep cannot be expressed; the healer simply has to heal ahead of time. Illusions: three `adds` per wave, killFirst, with a high per-attack damage to stand in for the one-global kills of the real 458 HP, fixed-target adds; their fixation on a raid member and their 5,000 hits are not modelled. Earth Shock is a one-tick debuff on the tank (1,094 Nature). There is no Silence on the shock (it interrupts casters) because the engine has no spell-school locks.",
+ "sources": [
+  "docs/research/zul-gurub/edge-of-madness.md",
+  "https://classic.warcraftdb.com/data/npc/15083",
+  "https://warcraft.wiki.gg/wiki/Hazza%27rah_(Classic)",
+  "https://www.wowhead.com/classic/guide/edge-of-madness-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/"
+ ],
+ "arena": {
+  "name": "The Edge of Madness",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -62
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Brazier of Madness",
+    "at": [
+     0,
+     38
+    ]
+   },
+   {
+    "text": "Hazza'rah: tank here",
+    "at": [
+     0,
+     28
+    ]
+   },
+   {
+    "text": "Raid",
+    "at": [
+     -8,
+     -20
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -56,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 16,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 28,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 20,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 60,
+   "label": "Hazza'rah"
+  },
+  "raidSpotP1": {
+   "x": -6,
+   "y": -12,
+   "spread": 11
+  },
+  "rangedSpot": {
+   "x": -8,
+   "y": -11,
+   "tolerance": 8,
+   "label": "Ranged, spread"
+  },
+  "healerSpot": {
+   "x": 7,
+   "y": -10,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "illusionA": {
+   "x": -20,
+   "y": 2,
+   "label": "Illusion"
+  },
+  "illusionB": {
+   "x": 22,
+   "y": 6,
+   "label": "Illusion"
+  },
+  "illusionC": {
+   "x": 2,
+   "y": -28,
+   "label": "Illusion"
+  },
+  "illusionHold": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Illusions"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 300,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him in the middle. Mass Sleep puts everyone but you down for 6 s: keep yourself alive on the healing already landed, and do not move him.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay on him and swing at the Illusions the moment they appear: they die in one or two hits and hit like trucks.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "You are the Illusion killers. The instant three appear, turn and kill each in a global. Then back to him. Stop when the bar goes red.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Heal ahead of every Mass Sleep: you will be out for 6 s and so will every other healer. Keep the tank above the danger line going into each one.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0.4
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "massSleep": {
+   "label": "Mass Sleep",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 6,
+   "stun": 6,
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Everyone in range falls asleep for 6 s. Only damage wakes you. Healers: heal ahead of this."
+  },
+  "illusions": {
+   "label": "Nightmare Illusions",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "illusionA",
+    "illusionB",
+    "illusionC"
+   ],
+   "speed": 9,
+   "lifetime": 9,
+   "heldLifetime": 9,
+   "pickup": "offtank",
+   "holdSpot": "illusionHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Three illusions appear and each one goes for a raid member. 458 HP and immune to AoE: one Multi-Shot or Fire Blast each. They hit for 5,000."
+  },
+  "earthShock": {
+   "label": "Earth Shock",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.2,
+   "tickDamage": 1094,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "1,094 Nature on the tank."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Hazza'rah",
+   "subtitle": "Sleep and Illusions",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 150,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "illusions",
+     "first": 18,
+     "every": 26,
+     "jitter": 3
+    },
+    {
+     "id": "massSleep",
+     "first": 28,
+     "every": 30,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 10,
+     "every": 13,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull him to his spot",
+     "tip": "Taunt him and hold him in the middle of the clearing."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Illusions first",
+     "tip": "Each one hits for 5,000. Three seconds on one is someone dead."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "sleepReady",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank up ahead of each sleep",
+     "tip": "You will sleep for 6 s. Have the tank topped before it lands."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The sleep is your enemy. Everyone is out for 6 s."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not let the tank sit low going into a sleep."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Heal the tank and do not get caught by Mass Sleep.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Hazza'rah turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "hold",
+   "name": "Hold him",
+   "description": "Pull him and hold him at the spot through Earth Shocks.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 45,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "earthShock",
+     "first": 10,
+     "every": 9
+    }
+   ]
+  },
+  {
+   "id": "illusionKill",
+   "name": "Illusion kills",
+   "description": "Three illusions every 14 s. Face each one and kill it, then go back to him.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "illusions",
+     "first": 4,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "preheal",
+   "name": "Pre-heal the sleep",
+   "description": "A sleep every 18 s. Top the tank up before each one so they live 6 s without you.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "massSleep",
+     "first": 8,
+     "every": 18
+    },
+    {
+     "id": "earthShock",
+     "first": 3,
+     "every": 6
+    }
+   ]
+  }
+ ]
+}

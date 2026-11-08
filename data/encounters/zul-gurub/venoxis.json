@@ -1,0 +1,1915 @@
+{
+ "id": "venoxis",
+ "name": "High Priest Venoxis",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/venoxis.md: Era 213,200 HP, 20-man. Troll form 100-50%, snake form below 50% with a threat reset, Parasitic Serpents below 25%, Frenzy below 20%. No source publishes cadences for Holy Fire, Holy Nova, Holy Wrath, Venom Spit or Poison Cloud: every interval here is an estimate. Holy Fire's target rule (the tank here) rests on one 2005 source and could not be confirmed; DBM only shows that it lands on players. Boss melee (260 per 2 s) and Holy Fire (a 2,203 spike) are scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Snake form's +75% physical damage is the engine's `enrage` (multiplier 1.6) and is permanent from 50%; the real Frenzy below 20% is modelled as a separate non-dispellable tank debuff that raises damage taken, because the engine has one enrage flag. Holy Fire: a 3.5 s interruptible cast that lands a single 2,203 tick and leaves a dispellable Magic DoT. Renew is a Magic buff on him in the real fight, modelled as a Magic debuff on the raid so the healer's Dispel and the scoring treat it the same way: dispel it fast. There is no boss-heal in the engine, so a Renew left up is scored, not healed. Cobras: four elites released one at a time by CC (three held, one killed), scripted as four spawns 25 s apart, killFirst and killable, off-tank picks them up. The real CC, Polymorph breaks and his Dispel Magic are not modelled. Holy Wrath is an `aoe` on the whole raid; its bouncing and +30% per jump, which is what makes clumping lethal, cannot be expressed, so the tip tells you to spread and the damage is a fixed average. Poison Cloud: `hazard` at the boss, 1.5 s telegraph (the raised hands), 500 per second, 8 yd, 10 s (DBM's 10 s bar and the DBC value; Wowhead's 'remainder of the fight' is not supported by the boss mod). Venom Spit is a 1.5 s cast Poison debuff on tanks and melee (within 30 yd in the real fight, so ranged and healers at over 30 yd are not targets): 1,500 direct plus 200 every 2 s cannot both be a DoT, so it is 200 per second for 10 s. Tank spots: the walk between the spots is scored; the real tank sidesteps every cloud ad lib. In snake form the healer and ranged spots follow him (one spot per boss location, all over 30 yd from his edge and inside the 40 yd heal and 36 yd attack ranges). Melee reach is set to 7 yd and a harmless rear cone (nothing uses it) puts melee on his flank, so they can stand just clear of a cloud's edge and still hit him; the real melee run to the far side of each new cloud. Melee in troll form: the guides keep melee off him (Holy Nova reaches 15 yd and Holy Wrath bounces through a melee pack), so here melee kill the Cobras and wait between them at a spot with the ranged, over 15 yd from him, and only come to him when he turns at 50%. The engine still counts that wait as out of range for the activity factor, so a little of the melee score in phase 1 is lost to it; the out-of-range penalty itself is limited to the snake phases. Virulent Poison is a tank Poison stacking to 3. Parasitic Serpents are `adds` killFirst for DPS and picked up by the off-tank role; the engine cannot make them infest a player, so the 300-per-2 s DoT is not modelled.",
+ "sources": [
+  "docs/research/zul-gurub/venoxis.md",
+  "https://classic.warcraftdb.com/data/npc/14507",
+  "https://warcraft.wiki.gg/wiki/High_Priest_Venoxis_(Classic)",
+  "https://www.wowhead.com/classic/guide/high-priest-venoxis-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://us.millenium.gg/guide/6831.html?page=3",
+  "https://www.tentonhammer.com/guides/zul-gurub-boss-guide-boss-2-high-priest-venoxis",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_venoxis.cpp",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Venoxis.lua"
+ ],
+ "arena": {
+  "name": "Venoxis's bonfire court",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -64
+     ],
+     [
+      -9,
+      -64
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -64
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -64
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -58
+    ]
+   },
+   {
+    "text": "The bonfire: tank him here",
+    "at": [
+     0,
+     32
+    ]
+   },
+   {
+    "text": "Cobras held at the steps",
+    "at": [
+     16,
+     -8
+    ]
+   },
+   {
+    "text": "Ranged, over 30 yd in snake form",
+    "at": [
+     -4,
+     -30
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -58,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 16,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 28,
+   "tolerance": 4,
+   "label": "Tank, by the bonfire"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 20,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 45,
+   "label": "Venoxis"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -10,
+   "spread": 12
+  },
+  "raidSpotP2": {
+   "x": -2,
+   "y": -16,
+   "spread": 12
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -9,
+   "tolerance": 9,
+   "label": "Ranged, over 15 yd from him"
+  },
+  "healerSpot": {
+   "x": 6,
+   "y": -7,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "rangedSpotSnakeB": {
+   "x": 13,
+   "y": -14,
+   "tolerance": 3,
+   "label": "Ranged, over 30 yd"
+  },
+  "rangedSpotSnakeC": {
+   "x": -13,
+   "y": -14,
+   "tolerance": 3,
+   "label": "Ranged, over 30 yd"
+  },
+  "rangedSpotSnakeD": {
+   "x": -2,
+   "y": -10,
+   "tolerance": 3,
+   "label": "Ranged, over 30 yd"
+  },
+  "healerSpotSnakeB": {
+   "x": 35,
+   "y": -10,
+   "tolerance": 2,
+   "label": "Healers, 30+ yd from him"
+  },
+  "healerSpotSnakeC": {
+   "x": -34,
+   "y": -10,
+   "tolerance": 2,
+   "label": "Healers, 30+ yd from him"
+  },
+  "healerSpotSnakeD": {
+   "x": 0,
+   "y": -9,
+   "tolerance": 2,
+   "label": "Healers, 30+ yd from him"
+  },
+  "meleeWait": {
+   "x": 10,
+   "y": -4,
+   "tolerance": 7,
+   "label": "Melee: wait here, off him until 50%"
+  },
+  "cobraA": {
+   "x": 26,
+   "y": 30,
+   "label": "Cobra"
+  },
+  "cobraB": {
+   "x": -26,
+   "y": 30,
+   "label": "Cobra"
+  },
+  "cobraC": {
+   "x": 30,
+   "y": 6,
+   "label": "Cobra"
+  },
+  "cobraD": {
+   "x": -30,
+   "y": 6,
+   "label": "Cobra"
+  },
+  "cobraHold": {
+   "x": 16,
+   "y": -2,
+   "tolerance": 7,
+   "label": "Cobras held here"
+  },
+  "offtankSpot": {
+   "x": 0,
+   "y": 0,
+   "tolerance": 7,
+   "label": "Off-tank, ready for serpents"
+  },
+  "bossSpotB": {
+   "x": 13,
+   "y": 22,
+   "heading": 10,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Second spot"
+  },
+  "tankSpotB": {
+   "x": 20,
+   "y": 24,
+   "tolerance": 4
+  },
+  "bossSpotC": {
+   "x": -13,
+   "y": 22,
+   "heading": 170,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Third spot"
+  },
+  "tankSpotC": {
+   "x": -20,
+   "y": 24,
+   "tolerance": 4
+  },
+  "bossSpotD": {
+   "x": -7,
+   "y": 25,
+   "heading": 45,
+   "tolerance": 8,
+   "headingTolerance": 90,
+   "label": "Back to the bonfire"
+  },
+  "serpentA": {
+   "x": -28,
+   "y": -24,
+   "label": "Serpent"
+  },
+  "serpentB": {
+   "x": 28,
+   "y": -24,
+   "label": "Serpent"
+  },
+  "serpentHold": {
+   "x": 10,
+   "y": -20,
+   "tolerance": 8,
+   "label": "Serpents killed here"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 260,
+  "meleeInterval": 2,
+  "cones": {
+   "tail": {
+    "angle": 90,
+    "range": 10,
+    "label": "Tail",
+    "facing": "back"
+   }
+  },
+  "enrageMultiplier": 1.6
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him at the bonfire in troll form, take him back at 50% when he turns into a snake, and sidestep every Poison Cloud as soon as he raises his hands.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Cobra off-tank",
+   "short": "Off-tank",
+   "description": "Pick up each Razzashi Cobra as it comes off crowd control and hold it on the steps for the raid to kill. Later, catch the Parasitic Serpents before they reach the raid.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the Cobras one at a time and stay off him until he turns into a snake at 50%. Holy Wrath bounces through melee. Interrupt Holy Fire. In snake form step out of the clouds and keep hitting.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 7
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand over 15 yd out in troll form and over 30 in snake form. Kill the Cobras first, interrupt Holy Fire, then burn him after the threat reset.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 36
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Dispel Renew off Venoxis the moment it lands and clear the poisons on the tank. In snake form stay over 30 yd away and stay in range of the tank.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. One button here stands in for Dispel Magic, Cleanse, Decurse and Cure Poison."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 30,
+   "icon": "interrupt",
+   "tip": "Holy Fire is a 3.5 s cast that hits the tank for 2,200 and leaves a burn. Stop it every time you can. Kick, Pummel, Earth Shock, Counterspell."
+  }
+ },
+ "actions": {
+  "holyFire": {
+   "label": "Holy Fire",
+   "kind": "debuff",
+   "cast": 3.5,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.2,
+   "tickDamage": 2203,
+   "interruptible": true,
+   "completedMetric": "holyFiresLanded",
+   "follow": [
+    {
+     "id": "holyFireDot",
+     "delay": 0.5
+    }
+   ],
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "A 3.5 s cast on his target for 2,200 Fire and a burn. Interrupt it."
+  },
+  "holyFireDot": {
+   "label": "Holy Fire burn",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "magic",
+   "duration": 8,
+   "tickDamage": 63,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "The burn left by Holy Fire: 125 every 2 s for 8 s. Magic, dispel it."
+  },
+  "holyNova": {
+   "label": "Holy Nova",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 875,
+   "radius": 15,
+   "tankDamage": 300,
+   "playerMetric": "holyNovaHits",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Instant 875 Holy to everyone within 15 yd, and it heals him. The reason ranged and healers stand well back."
+  },
+  "holyWrath": {
+   "label": "Holy Wrath",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 600,
+   "tankDamage": 300,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A chain that jumps between players and gets 30% stronger each jump. Spread out: if you clump it can kill healers from full."
+  },
+  "renew": {
+   "label": "Renew",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0,
+   "dispel": "magic",
+   "duration": 15,
+   "tickDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A 10,000-health HoT on Venoxis. Priests and Shamans dispel it off him the instant it lands."
+  },
+  "cobra1": {
+   "label": "Razzashi Cobra",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "cobraA"
+   ],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 34,
+   "heldLifetime": 36,
+   "pickup": "offtank",
+   "holdSpot": "cobraHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Cobra comes off crowd control. Kill it before you touch Venoxis."
+  },
+  "cobra2": {
+   "label": "Razzashi Cobra",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "cobraB"
+   ],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 34,
+   "heldLifetime": 36,
+   "pickup": "offtank",
+   "holdSpot": "cobraHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next Cobra is released. Kill it, then the next."
+  },
+  "cobra3": {
+   "label": "Razzashi Cobra",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "cobraC"
+   ],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 34,
+   "heldLifetime": 36,
+   "pickup": "offtank",
+   "holdSpot": "cobraHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The next Cobra is released. Kill it, then the next."
+  },
+  "cobra4": {
+   "label": "Razzashi Cobra",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "cobraD"
+   ],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 34,
+   "heldLifetime": 36,
+   "pickup": "offtank",
+   "holdSpot": "cobraHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The last Cobra is released. Kill it, then the boss."
+  },
+  "phaseWipe": {
+   "label": "Snake Form: threat reset",
+   "kind": "threatWipe",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Venoxis becomes a snake: threat wiped",
+   "tip": "At 50% he shifts to snake form and the threat table resets. DPS stop until the tank has him."
+  },
+  "snakeForm": {
+   "label": "Snake Form",
+   "kind": "enrage",
+   "cast": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "hidden": true,
+   "toast": "Snake form: +75% physical damage",
+   "tip": "He hits much harder in snake form."
+  },
+  "poisonCloud": {
+   "label": "Poison Cloud",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "boss",
+   "radius": 8,
+   "warning": 1.5,
+   "active": 10,
+   "damage": 500,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "He raises both hands and drops a cloud under himself: 500 Nature a second inside 8 yd. Tanks sidestep, melee follow, and everybody cleanses after they leave it."
+  },
+  "venomSpit": {
+   "label": "Venom Spit",
+   "kind": "debuff",
+   "cast": 1.5,
+   "target": "random",
+   "playerChance": 0.35,
+   "roles": [
+    "tanks",
+    "melee"
+   ],
+   "dispel": "poison",
+   "duration": 10,
+   "tickDamage": 200,
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A 1.5 s cast, 1,500 Nature and a Poison DoT, on someone within 30 yd. Ranged and healers stand beyond that range; healers cleanse it."
+  },
+  "virulentPoison": {
+   "label": "Virulent Poison",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "poison",
+   "maxStacks": 3,
+   "duration": 15,
+   "tickDamage": 40,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Stacks up on the tank from his melee hits. Cure it before the stacks climb."
+  },
+  "parasiticSerpent": {
+   "label": "Parasitic Serpents",
+   "kind": "adds",
+   "cast": 0,
+   "count": 2,
+   "from": [
+    "serpentA",
+    "serpentB"
+   ],
+   "speed": 8,
+   "aggroRange": 11,
+   "lifetime": 16,
+   "heldLifetime": 18,
+   "pickup": "offtank",
+   "holdSpot": "serpentHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Below 25% he calls little serpents that infest a player. Kill them on sight."
+  },
+  "frenzy": {
+   "label": "Frenzy",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 300,
+   "damageTakenMult": 1.25,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Below 20% he frenzies. Healers pour everything into the tank now."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Troll form",
+   "subtitle": "100 to 50%: Cobras, Holy Fire",
+   "hpFrom": 1,
+   "hpTo": 0.5,
+   "duration": 110,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": "meleeWait",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "cobraHold"
+   },
+   "actions": [
+    {
+     "id": "cobra1",
+     "first": 6
+    },
+    {
+     "id": "cobra2",
+     "first": 34
+    },
+    {
+     "id": "cobra3",
+     "first": 62
+    },
+    {
+     "id": "cobra4",
+     "first": 90
+    },
+    {
+     "id": "holyFire",
+     "first": 14,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "holyNova",
+     "first": 18,
+     "every": 17,
+     "jitter": 3
+    },
+    {
+     "id": "holyWrath",
+     "first": 28,
+     "every": 24,
+     "jitter": 4
+    },
+    {
+     "id": "renew",
+     "first": 22,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull him to the bonfire",
+     "tip": "Taunt him and walk him north to the bonfire, facing away from everyone."
+    },
+    {
+     "id": "grabCobra",
+     "type": "afterEvent",
+     "event": "cobra1",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Grab the first Cobra",
+     "tip": "Run to it and Taunt. Bring it to the steps and face it away from the raid."
+    },
+    {
+     "id": "cobrasAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the Cobras off the raid",
+     "tip": "A Cobra loose in the healers means Spits and poison on people who cannot take it."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Cobras first",
+     "tip": "Each Cobra is killed in turn, the others held by crowd control. Do not touch Venoxis while one lives."
+    },
+    {
+     "id": "kickFire",
+     "type": "continuous",
+     "metric": "holyFiresLanded",
+     "role": "dps",
+     "label": "Interrupt Holy Fire",
+     "tip": "Holy Fire is 2,200 on the tank and a DoT. Stop it."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "stayOutNova",
+     "type": "continuous",
+     "metric": "holyNovaHits",
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay over 15 yd from him",
+     "tip": "Holy Nova is instant and heals him: do not feed it."
+    },
+    {
+     "id": "renewOff",
+     "type": "afterEvent",
+     "event": "renew",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Renew",
+     "tip": "Renew puts 10,000 health back on him over 15 s. Dispel it the moment it lands."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Holy Fire and his melee together are the spike. Keep the tank above it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not let the tank sit under half when the next Holy Fire is being cast."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Snake form",
+   "subtitle": "50 to 37%: clouds and spits",
+   "hpFrom": 0.5,
+   "hpTo": 0.37,
+   "duration": 28,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpotB",
+    "boss": "bossSpotB",
+    "melee": null,
+    "ranged": "rangedSpotSnakeB",
+    "healer": "healerSpotSnakeB",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "phaseWipe",
+     "first": 0
+    },
+    {
+     "id": "snakeForm",
+     "first": 0.2
+    },
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "venomSpit",
+     "first": 13,
+     "every": 13,
+     "jitter": 2
+    },
+    {
+     "id": "virulentPoison",
+     "first": 10,
+     "every": 14,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "wipeBack",
+     "type": "afterEvent",
+     "event": "phaseWipe",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Take him back at 50%",
+     "tip": "Snake form wipes the table. Taunt inside 3 s and get him turned away."
+    },
+    {
+     "id": "moveOne",
+     "type": "bossAtSpot",
+     "spot": "bossSpotB",
+     "within": 12,
+     "grace": 6,
+     "role": "tank",
+     "label": "Walk him off the first cloud",
+     "tip": "When he raises his hands, walk out, then bring him to the next clean spot."
+    },
+    {
+     "id": "otReady",
+     "type": "playerAtSpotBy",
+     "spot": "offtankSpot",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Reposition for the serpents",
+     "tip": "Cobras are dead. Move to your spot and get ready to catch serpents below 25%."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "noClouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is 500 a second. Step out, then cleanse."
+    },
+    {
+     "id": "curePoison",
+     "type": "afterEvent",
+     "event": "venomSpit",
+     "check": "noDispellable",
+     "within": 7,
+     "grace": 3,
+     "role": "healer",
+     "label": "Cure the poisons",
+     "tip": "Venom Spit is 200 a second for 10 s. Cure it quickly, tank and melee first."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Snake form hits 75% harder. Healers start pre-healing the tank now."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay in range of the tank while they are kiting clouds."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Snake form",
+   "subtitle": "37 to 25%: keep moving",
+   "hpFrom": 0.37,
+   "hpTo": 0.25,
+   "duration": 27,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpotC",
+    "boss": "bossSpotC",
+    "melee": null,
+    "ranged": "rangedSpotSnakeC",
+    "healer": "healerSpotSnakeC",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "venomSpit",
+     "first": 10,
+     "every": 13,
+     "jitter": 2
+    },
+    {
+     "id": "virulentPoison",
+     "first": 8,
+     "every": 14,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "moveTwo",
+     "type": "bossAtSpot",
+     "spot": "bossSpotC",
+     "within": 12,
+     "grace": 6,
+     "role": "tank",
+     "label": "Walk him to the third spot",
+     "tip": "Do not back up into the clouds behind you. Pick a clean direction and go."
+    },
+    {
+     "id": "noClouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "Melee, follow the tank: the boss leaves a cloud behind every time."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "curePoison3",
+     "type": "afterEvent",
+     "event": "venomSpit",
+     "check": "noDispellable",
+     "within": 7,
+     "grace": 3,
+     "role": "healer",
+     "label": "Cure the poisons",
+     "tip": "Tank and melee first."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up through the clouds."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The snake hits harder every swing; never let them sit under half."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Serpents",
+   "subtitle": "25 to 20%: Parasitic Serpents",
+   "hpFrom": 0.25,
+   "hpTo": 0.2,
+   "duration": 15,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpotD",
+    "melee": null,
+    "ranged": "rangedSpotSnakeD",
+    "healer": "healerSpotSnakeD",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 6,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "venomSpit",
+     "first": 9,
+     "every": 13,
+     "jitter": 2
+    },
+    {
+     "id": "parasiticSerpent",
+     "first": 3,
+     "every": 14,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grabSerpents",
+     "type": "afterEvent",
+     "event": "parasiticSerpent",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Catch the serpents",
+     "tip": "Run at them and Taunt. They infest whoever they touch."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the serpents on sight",
+     "tip": "Each serpent you ignore is a 300-per-2 s DoT on a raid member."
+    },
+    {
+     "id": "noClouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "Every cloud is still there. Keep moving."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Keep the tank up through the clouds and spits."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The last quarter is where tanks die."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Frenzy",
+   "subtitle": "20% to dead",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 42,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpotB",
+    "boss": "bossSpotB",
+    "melee": null,
+    "ranged": "rangedSpotSnakeB",
+    "healer": "healerSpotSnakeB",
+    "offtank": "offtankSpot"
+   },
+   "actions": [
+    {
+     "id": "frenzy",
+     "first": 0
+    },
+    {
+     "id": "poisonCloud",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "venomSpit",
+     "first": 11,
+     "every": 13,
+     "jitter": 2
+    },
+    {
+     "id": "virulentPoison",
+     "first": 8,
+     "every": 14,
+     "jitter": 3
+    },
+    {
+     "id": "parasiticSerpent",
+     "first": 10,
+     "every": 14,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grabSerpents2",
+     "type": "afterEvent",
+     "event": "parasiticSerpent",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Catch the serpents",
+     "tip": "Run at them and Taunt."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the serpents on sight",
+     "tip": "Each serpent you ignore is a DoT on a raid member."
+    },
+    {
+     "id": "noClouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "Execute range is no excuse. Step out of the cloud."
+    },
+    {
+     "id": "curePoison2",
+     "type": "afterEvent",
+     "event": "venomSpit",
+     "check": "noDispellable",
+     "within": 7,
+     "grace": 3,
+     "role": "healer",
+     "label": "Cure the poisons",
+     "tip": "Keep clearing them, tank first."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frenzy is on. Everything you have goes on the tank."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Below 20% the tank is one crushing blow away. Do not let them sit low."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps",
+   "phases": [
+    2,
+    3,
+    4,
+    5
+   ],
+   "tip": "In snake form stay in range. In troll form melee wait off him on purpose: only the Cobras are yours until he turns at 50%."
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "holyNovaHits": {
+   "label": "Holy Novas you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": [
+    "melee",
+    "ranged",
+    "healer"
+   ],
+   "tip": "Stay over 15 yd from him in troll form."
+  },
+  "holyFiresLanded": {
+   "label": "Holy Fires that finished",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "dps",
+   "tip": "Holy Fire is 2,200 on the tank every time. Interrupt it."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt at the threat reset, Interrupt Holy Fire, Dispel Renew and the poisons, Heal when the tank drops.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Venoxis turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabCobraCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "cobra1",
+    "offset": 3,
+    "early": 3,
+    "late": 8,
+    "role": "offtank",
+    "short": "COBRA",
+    "label": "Grab the Cobra",
+    "tip": "Run to it and Taunt before it reaches anyone.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabSerpentCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "parasiticSerpent",
+    "offset": 3,
+    "early": 3,
+    "late": 7,
+    "role": "offtank",
+    "short": "SERPENTS",
+    "label": "Grab the serpents",
+    "tip": "Run at them and Taunt.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "kickHolyFire",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:holyFire",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 3,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Interrupt Holy Fire",
+    "tip": "He has started a 3.5 s Holy Fire. Interrupt inside the cast.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "pullTank",
+   "name": "Pull to the bonfire",
+   "description": "Pull Venoxis to the bonfire and hold him there.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "holyNova",
+     "first": 15,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "snakeWipe",
+   "name": "Snake form pickup",
+   "description": "Already on him. The table wipes: Taunt him back and step out of each Poison Cloud.",
+   "roles": "tank",
+   "startPhase": 2,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "phaseWipe",
+     "first": 3,
+     "every": 18
+    },
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 10,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "cobraPickup",
+   "name": "Cobra pickup",
+   "description": "A Cobra every 18 s. Run it down and hold it on the steps.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cobra1",
+     "first": 4,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "kickFire",
+   "name": "Holy Fire interrupts",
+   "description": "Interrupt every Holy Fire while holding your threat.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "holyFire",
+     "first": 5,
+     "every": 12,
+     "jitter": 1
+    },
+    {
+     "id": "renew",
+     "first": 8,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "poisonDrill",
+   "name": "Poison and Renew dispels",
+   "description": "Renew on the boss, poison on the tank and melee. Clear them all and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "renew",
+     "first": 4,
+     "every": 10
+    },
+    {
+     "id": "venomSpit",
+     "first": 6,
+     "every": 9
+    },
+    {
+     "id": "virulentPoison",
+     "first": 5,
+     "every": 7
+    }
+   ]
+  }
+ ]
+}

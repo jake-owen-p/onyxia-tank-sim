@@ -1,0 +1,1867 @@
+{
+ "id": "hakkar",
+ "name": "Hakkar the Soulflayer",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/hakkar.md and docs/research/zul-gurub/README.md: Era 719,550 HP (priests assumed dead: their Aspects and the extra health are not modelled), 20-man, modelled as seven 90 s phases on the real 90 s Blood Siphon cycle with the Enrage at 10 minutes (600 s, BW and the guides; DBM's berserk bar shows 585 s, so this is unsettled) in the last one. Boss HP is a fixed clock, so missing the poison trick is scored, not healed: this is the largest single misrepresentation of the fight and is ranked in the report. Cause Insanity follows the boss mods (DBM and BW: every 20 to 21 s, a 10 s debuff). Corrupted Blood has no boss-mod timer (Warcraft Logs was not reachable), so its cadence is an estimate that stands; the HP steps per phase are estimates. Boss melee (360 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Blood Siphon: instant in the real fight, an 8 s channel that stuns everyone and drains 200 per second, feeding Hakkar 1,000 per player per second unless the player is carrying Poisonous Blood (then he takes 200 per second per poisoned player instead). The engine can't heal the boss, so the feed is scored, not healed. The poison trick is modelled through the debuff itself: the Son's death drops a Poison Cloud at the cloud spot (a `hazard` with `applies`, at 77.5 s, up for about 13 s), and whoever stands in it gets `poisonousBlood`, a 90 s debuff of 33 Nature per second that follows them around. The `siphonPoison` telegraph, an offBoss 8 s cast timed so it ends at 89.5 s, is an `aoe` with `safeIfDebuff` on that debuff: anyone without Poisonous Blood when it resolves counts as `siphonUnpoisoned` (the biggest single penalty in the script). Its `safeSpots` (`cloudSpot`, safeRadius 8) walk the non-tanks into the cloud for the 8 s cast, and the cloud lasts long enough to get it. `seekLead` is 0 so the marker does not walk the tank to the cloud as well (the engine's `seekLead` walk has no role filter, and the real tank stays out). Then a real 8 s `bloodSiphon` channel (Hakkar stops swinging) stuns everyone and deals 1,600 at the end. Poisonous Blood is `dispel: none` here and the healer has no Dispel in this script, so 'never cleanse it' stays a tip; the real debuff is a Poison. Corrupted Blood is a `carried` hazard: if it lands on you, run out of the raid before it goes off and hits everyone near. Non-player carriers are handled silently; the real 10 yd splash, 875 + 200 per 2 s for 10 s is condensed to one 1,000 hit on the carrier and to the metric. Cause Insanity (on the MT, 10 s charm) is a `targetSwitch` plus a 10 s tank stun standing in for the charm; the real raid has two more tanks at threat 2 and 3 and Hakkar is taunt-immune, while here the sim has one tank player who Taunts him back when free. Will of Hakkar, the Cleave and double attack, the Aspects (priests assumed dead), Mortal Strike or threat-table ordering between tanks are not modelled. Sons are killFirst `adds` held by the off-tank role, spawned 32 s before each Siphon, alternating between the left and right stair platforms as the guides describe, so they die about 12 s before it; the real timing (Son pulled, sheeped, killed 10 to 15 s before the Siphon) depends on crowd control the engine lacks. Enrage is the engine's `enrage` kind firing at 600 s (the 5% HP trigger is not modelled).",
+ "sources": [
+  "docs/research/zul-gurub/hakkar.md",
+  "docs/research/zul-gurub/README.md",
+  "https://classic.warcraftdb.com/data/npc/14834",
+  "https://classic.warcraftdb.com/data/npc/11357",
+  "https://classic.warcraftdb.com/data/npc/14989",
+  "https://warcraft.wiki.gg/wiki/Hakkar_(tactics)",
+  "https://warcraft.wiki.gg/wiki/Corrupted_Blood_(debuff)",
+  "https://www.wowhead.com/classic/guide/hakkar-the-soulflayer-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://www.tentonhammer.com/guides/zul-gurub-boss-guide-boss-8-hakkar",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://us.millenium.gg/guide/6831.html?page=7",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_hakkar.cpp",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Hakkar.lua",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/ZulGurub_Classic/Hakkar.lua"
+ ],
+ "arena": {
+  "name": "Altar of the Soulflayer",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -66
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "The altar: Hakkar",
+    "at": [
+     0,
+     36
+    ]
+   },
+   {
+    "text": "Cloud spot: stand in it before each Siphon",
+    "at": [
+     0,
+     2
+    ]
+   },
+   {
+    "text": "Son of Hakkar's stairs",
+    "at": [
+     -30,
+     10
+    ]
+   },
+   {
+    "text": "Son of Hakkar's stairs",
+    "at": [
+     30,
+     10
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -58,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 24,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 7
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 34,
+   "tolerance": 4,
+   "label": "Tank, on the altar"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 26,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 60,
+   "label": "Hakkar"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -2,
+   "spread": 13
+  },
+  "rangedSpot": {
+   "x": -6,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Ranged, spread"
+  },
+  "healerSpot": {
+   "x": 8,
+   "y": 0,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "cloudSpot": {
+   "x": 0,
+   "y": 4,
+   "tolerance": 8,
+   "label": "Poison Cloud"
+  },
+  "sonLeft": {
+   "x": -34,
+   "y": 8,
+   "label": "Son of Hakkar"
+  },
+  "sonRight": {
+   "x": 34,
+   "y": 8,
+   "label": "Son of Hakkar"
+  },
+  "sonHold": {
+   "x": 0,
+   "y": 4,
+   "tolerance": 8,
+   "label": "Hold the Son here"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 120,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 720,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him on the altar facing away. Cause Insanity takes you out for 10 s and he turns on the next tank: Taunt him back when you are free (the real fight has two more tanks at #2 and #3 and he is taunt-immune). Stay out of the Poison Cloud yourself.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Son off-tank",
+   "short": "Off-tank",
+   "description": "Your job is the Son of Hakkar: pick each one up as it arrives from the stairs and hold it on the cloud spot. It dies there, and its poison cloud is the raid's protection from the Siphon.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Spread behind him for Corrupted Blood. Kill the Son when it comes, then walk into the Poison Cloud at the end of each 90 s cycle.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Spread on the sides. Kill the Son, step into the Poison Cloud before every Siphon, and carry any Corrupted Blood out of the raid before it detonates.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Top the tank up before every Siphon: you will be stunned for 8 s and so will everyone else. Stand in the Poison Cloud like everyone else. Never cleanse Poisonous Blood in the real fight.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "sonOfHakkar": {
+   "label": "Son of Hakkar",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "sonLeft"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 20,
+   "heldLifetime": 22,
+   "pickup": "offtank",
+   "holdSpot": "sonHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Son of Hakkar comes in from the stairs. Hold him on the cloud spot, kill him about ten seconds before the Siphon, and the cloud he leaves poisons everyone standing in it."
+  },
+  "sonOfHakkarR": {
+   "label": "Son of Hakkar",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "sonRight"
+   ],
+   "speed": 8,
+   "aggroRange": 12,
+   "lifetime": 20,
+   "heldLifetime": 22,
+   "pickup": "offtank",
+   "holdSpot": "sonHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Son of Hakkar comes in from the other stairs. Hold him on the cloud spot, kill him about ten seconds before the Siphon, and the cloud he leaves poisons everyone standing in it."
+  },
+  "poisonousBlood": {
+   "label": "Poisonous Blood",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "dispel": "none",
+   "duration": 90,
+   "tickDamage": 33,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "The Son's cloud. It lasts 90 s. Do not let it be cleansed before the Siphon."
+  },
+  "poisonCloud": {
+   "label": "Poison Cloud",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "cloudSpot"
+   ],
+   "radius": 8,
+   "warning": 0.3,
+   "active": 13,
+   "damage": 0,
+   "applies": "poisonousBlood",
+   "hidden": true,
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The death cloud of the Son. Stand in it now: it gives you Poisonous Blood for 90 s."
+  },
+  "siphonPoison": {
+   "label": "Blood Siphon incoming",
+   "kind": "aoe",
+   "cast": 8,
+   "offBoss": true,
+   "damage": 0,
+   "safeIfDebuff": "poisonousBlood",
+   "seekLead": 12,
+   "safeSpots": [
+    "cloudSpot"
+   ],
+   "safeRadius": 8,
+   "safeRoles": "nontank",
+   "playerMetric": "siphonUnpoisoned",
+   "follow": [
+    {
+     "id": "siphonStun",
+     "delay": 0.05
+    },
+    {
+     "id": "bloodSiphon",
+     "delay": 0.05
+    }
+   ],
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "In 8 s he starts the Siphon. Be in the Poison Cloud when it lands, or you feed him 1,000 health per second instead of damaging him 200."
+  },
+  "siphonStun": {
+   "label": "Blood Siphon: stunned",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 0,
+   "stun": 8,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Everyone is stunned for 8 s and drained for 200 a second. Nothing to do until it ends."
+  },
+  "bloodSiphon": {
+   "label": "Blood Siphon",
+   "kind": "aoe",
+   "cast": 8,
+   "damage": 1600,
+   "tankDamage": 1600,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The 8 s channel: 200 per second to every player, and it heals Hakkar for each unpoisoned player. Once it ends, bandage up and go back to your job."
+  },
+  "corruptedBlood": {
+   "label": "Corrupted Blood",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "carried": true,
+   "playerChance": 0.3,
+   "radius": 10,
+   "warning": 4,
+   "active": 1.5,
+   "damage": 1000,
+   "raidMetric": "bloodsInRaid",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A bomb on a random player, 875 Shadow and a DoT that hits everyone within 10 yd. If it is you, walk out of the raid now."
+  },
+  "causeInsanity": {
+   "label": "Cause Insanity",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 10,
+   "toast": "Cause Insanity: the tank is charmed",
+   "follow": [
+    {
+     "id": "insanityStun",
+     "delay": 0.1
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He mind-controls his top-threat target for 10 s. Sheep them; the next tank holds him until they recover."
+  },
+  "insanityStun": {
+   "label": "Cause Insanity: charmed",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 10,
+   "stun": 10,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "You are charmed for 10 s."
+  },
+  "enrage": {
+   "label": "Enrage",
+   "kind": "enrage",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "Hakkar enrages",
+   "tip": "Ten minutes are up. He enrages for +50% damage and +65% attack speed. Finish him now."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Before the first Siphon",
+   "subtitle": "Siphon every 90 s",
+   "hpFrom": 1,
+   "hpTo": 0.86,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "sonHold"
+   },
+   "actions": [
+    {
+     "id": "sonOfHakkar",
+     "first": 58
+    },
+    {
+     "id": "poisonCloud",
+     "first": 77.5
+    },
+    {
+     "id": "siphonPoison",
+     "first": 81.5
+    },
+    {
+     "id": "causeInsanity",
+     "first": 21,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 12,
+     "every": 21,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull him onto the altar",
+     "tip": "Taunt him and walk him onto the altar, facing away."
+    },
+    {
+     "id": "insanityBack1",
+     "type": "afterEvent",
+     "event": "causeInsanity",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Cause Insanity",
+     "tip": "He mind-controls you for 10 s and turns on the next tank. Taunt the moment you are back."
+    },
+    {
+     "id": "grabSon1",
+     "type": "afterEvent",
+     "event": "sonOfHakkar",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Son of Hakkar",
+     "tip": "Bring him to the cloud spot and hold him there. The raid will kill him ten or fifteen seconds before the Siphon."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Son before the Siphon",
+     "tip": "His death cloud is your Poisonous Blood. Kill him in time and everyone stands in it."
+    },
+    {
+     "id": "poisoned1",
+     "type": "continuous",
+     "metric": "siphonUnpoisoned",
+     "role": "nontank",
+     "label": "Be in the Poison Cloud when the Siphon lands",
+     "tip": "Stand in the cloud spot as the Siphon comes. Without the poison, every second feeds him 1,000 health instead of hurting him."
+    },
+    {
+     "id": "bloodOut1",
+     "type": "continuous",
+     "metric": "bloodsInRaid",
+     "role": "nontank",
+     "label": "Carry Corrupted Blood out of the raid",
+     "tip": "If it lands on you, walk out of the raid. It hits everyone near you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Stay in range through each stun; heal hard before the Siphon lands."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Cause Insanity drops the tank, then the Siphon stuns you for 8 s. Keep them high."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Siphon 2",
+   "subtitle": "Siphon every 90 s",
+   "hpFrom": 0.86,
+   "hpTo": 0.71,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "sonHold"
+   },
+   "actions": [
+    {
+     "id": "sonOfHakkarR",
+     "first": 58
+    },
+    {
+     "id": "poisonCloud",
+     "first": 77.5
+    },
+    {
+     "id": "siphonPoison",
+     "first": 81.5
+    },
+    {
+     "id": "causeInsanity",
+     "first": 21,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 14,
+     "every": 21,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "insanityBack2",
+     "type": "afterEvent",
+     "event": "causeInsanity",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Cause Insanity",
+     "tip": "He mind-controls you for 10 s and turns on the next tank. Taunt the moment you are back."
+    },
+    {
+     "id": "grabSon2",
+     "type": "afterEvent",
+     "event": "sonOfHakkarR",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Son of Hakkar",
+     "tip": "Bring him to the cloud spot and hold him there. The raid will kill him ten or fifteen seconds before the Siphon."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Son before the Siphon",
+     "tip": "His death cloud is your Poisonous Blood. Kill him in time and everyone stands in it."
+    },
+    {
+     "id": "poisoned2",
+     "type": "continuous",
+     "metric": "siphonUnpoisoned",
+     "role": "nontank",
+     "label": "Be in the Poison Cloud when the Siphon lands",
+     "tip": "Stand in the cloud spot as the Siphon comes. Without the poison, every second feeds him 1,000 health instead of hurting him."
+    },
+    {
+     "id": "bloodOut2",
+     "type": "continuous",
+     "metric": "bloodsInRaid",
+     "role": "nontank",
+     "label": "Carry Corrupted Blood out of the raid",
+     "tip": "If it lands on you, walk out of the raid. It hits everyone near you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Stay in range through each stun; heal hard before the Siphon lands."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Cause Insanity drops the tank, then the Siphon stuns you for 8 s. Keep them high."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Siphon 3",
+   "subtitle": "Siphon every 90 s",
+   "hpFrom": 0.71,
+   "hpTo": 0.57,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "sonHold"
+   },
+   "actions": [
+    {
+     "id": "sonOfHakkar",
+     "first": 58
+    },
+    {
+     "id": "poisonCloud",
+     "first": 77.5
+    },
+    {
+     "id": "siphonPoison",
+     "first": 81.5
+    },
+    {
+     "id": "causeInsanity",
+     "first": 21,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 12,
+     "every": 21,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "insanityBack3",
+     "type": "afterEvent",
+     "event": "causeInsanity",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Cause Insanity",
+     "tip": "He mind-controls you for 10 s and turns on the next tank. Taunt the moment you are back."
+    },
+    {
+     "id": "grabSon3",
+     "type": "afterEvent",
+     "event": "sonOfHakkar",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Son of Hakkar",
+     "tip": "Bring him to the cloud spot and hold him there. The raid will kill him ten or fifteen seconds before the Siphon."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Son before the Siphon",
+     "tip": "His death cloud is your Poisonous Blood. Kill him in time and everyone stands in it."
+    },
+    {
+     "id": "poisoned3",
+     "type": "continuous",
+     "metric": "siphonUnpoisoned",
+     "role": "nontank",
+     "label": "Be in the Poison Cloud when the Siphon lands",
+     "tip": "Stand in the cloud spot as the Siphon comes. Without the poison, every second feeds him 1,000 health instead of hurting him."
+    },
+    {
+     "id": "bloodOut3",
+     "type": "continuous",
+     "metric": "bloodsInRaid",
+     "role": "nontank",
+     "label": "Carry Corrupted Blood out of the raid",
+     "tip": "If it lands on you, walk out of the raid. It hits everyone near you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Stay in range through each stun; heal hard before the Siphon lands."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Cause Insanity drops the tank, then the Siphon stuns you for 8 s. Keep them high."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Siphon 4",
+   "subtitle": "Siphon every 90 s",
+   "hpFrom": 0.57,
+   "hpTo": 0.43,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "sonHold"
+   },
+   "actions": [
+    {
+     "id": "sonOfHakkarR",
+     "first": 58
+    },
+    {
+     "id": "poisonCloud",
+     "first": 77.5
+    },
+    {
+     "id": "siphonPoison",
+     "first": 81.5
+    },
+    {
+     "id": "causeInsanity",
+     "first": 21,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 13,
+     "every": 21,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "insanityBack4",
+     "type": "afterEvent",
+     "event": "causeInsanity",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Cause Insanity",
+     "tip": "He mind-controls you for 10 s and turns on the next tank. Taunt the moment you are back."
+    },
+    {
+     "id": "grabSon4",
+     "type": "afterEvent",
+     "event": "sonOfHakkarR",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Son of Hakkar",
+     "tip": "Bring him to the cloud spot and hold him there. The raid will kill him ten or fifteen seconds before the Siphon."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Son before the Siphon",
+     "tip": "His death cloud is your Poisonous Blood. Kill him in time and everyone stands in it."
+    },
+    {
+     "id": "poisoned4",
+     "type": "continuous",
+     "metric": "siphonUnpoisoned",
+     "role": "nontank",
+     "label": "Be in the Poison Cloud when the Siphon lands",
+     "tip": "Stand in the cloud spot as the Siphon comes. Without the poison, every second feeds him 1,000 health instead of hurting him."
+    },
+    {
+     "id": "bloodOut4",
+     "type": "continuous",
+     "metric": "bloodsInRaid",
+     "role": "nontank",
+     "label": "Carry Corrupted Blood out of the raid",
+     "tip": "If it lands on you, walk out of the raid. It hits everyone near you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Stay in range through each stun; heal hard before the Siphon lands."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Cause Insanity drops the tank, then the Siphon stuns you for 8 s. Keep them high."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Siphon 5",
+   "subtitle": "Siphon every 90 s",
+   "hpFrom": 0.43,
+   "hpTo": 0.29,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "sonHold"
+   },
+   "actions": [
+    {
+     "id": "sonOfHakkar",
+     "first": 58
+    },
+    {
+     "id": "poisonCloud",
+     "first": 77.5
+    },
+    {
+     "id": "siphonPoison",
+     "first": 81.5
+    },
+    {
+     "id": "causeInsanity",
+     "first": 21,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 14,
+     "every": 21,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "insanityBack5",
+     "type": "afterEvent",
+     "event": "causeInsanity",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Cause Insanity",
+     "tip": "He mind-controls you for 10 s and turns on the next tank. Taunt the moment you are back."
+    },
+    {
+     "id": "grabSon5",
+     "type": "afterEvent",
+     "event": "sonOfHakkar",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Son of Hakkar",
+     "tip": "Bring him to the cloud spot and hold him there. The raid will kill him ten or fifteen seconds before the Siphon."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Son before the Siphon",
+     "tip": "His death cloud is your Poisonous Blood. Kill him in time and everyone stands in it."
+    },
+    {
+     "id": "poisoned5",
+     "type": "continuous",
+     "metric": "siphonUnpoisoned",
+     "role": "nontank",
+     "label": "Be in the Poison Cloud when the Siphon lands",
+     "tip": "Stand in the cloud spot as the Siphon comes. Without the poison, every second feeds him 1,000 health instead of hurting him."
+    },
+    {
+     "id": "bloodOut5",
+     "type": "continuous",
+     "metric": "bloodsInRaid",
+     "role": "nontank",
+     "label": "Carry Corrupted Blood out of the raid",
+     "tip": "If it lands on you, walk out of the raid. It hits everyone near you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Stay in range through each stun; heal hard before the Siphon lands."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Cause Insanity drops the tank, then the Siphon stuns you for 8 s. Keep them high."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Siphon 6",
+   "subtitle": "Siphon every 90 s",
+   "hpFrom": 0.29,
+   "hpTo": 0.14,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "sonHold"
+   },
+   "actions": [
+    {
+     "id": "sonOfHakkarR",
+     "first": 58
+    },
+    {
+     "id": "poisonCloud",
+     "first": 77.5
+    },
+    {
+     "id": "siphonPoison",
+     "first": 81.5
+    },
+    {
+     "id": "causeInsanity",
+     "first": 21,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 12,
+     "every": 21,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "insanityBack6",
+     "type": "afterEvent",
+     "event": "causeInsanity",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Cause Insanity",
+     "tip": "He mind-controls you for 10 s and turns on the next tank. Taunt the moment you are back."
+    },
+    {
+     "id": "grabSon6",
+     "type": "afterEvent",
+     "event": "sonOfHakkarR",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Pick up the Son of Hakkar",
+     "tip": "Bring him to the cloud spot and hold him there. The raid will kill him ten or fifteen seconds before the Siphon."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Son before the Siphon",
+     "tip": "His death cloud is your Poisonous Blood. Kill him in time and everyone stands in it."
+    },
+    {
+     "id": "poisoned6",
+     "type": "continuous",
+     "metric": "siphonUnpoisoned",
+     "role": "nontank",
+     "label": "Be in the Poison Cloud when the Siphon lands",
+     "tip": "Stand in the cloud spot as the Siphon comes. Without the poison, every second feeds him 1,000 health instead of hurting him."
+    },
+    {
+     "id": "bloodOut6",
+     "type": "continuous",
+     "metric": "bloodsInRaid",
+     "role": "nontank",
+     "label": "Carry Corrupted Blood out of the raid",
+     "tip": "If it lands on you, walk out of the raid. It hits everyone near you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Stay in range through each stun; heal hard before the Siphon lands."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Cause Insanity drops the tank, then the Siphon stuns you for 8 s. Keep them high."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Last Siphon and Enrage",
+   "subtitle": "Enrage at 10 minutes",
+   "hpFrom": 0.14,
+   "hpTo": 0,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "sonHold"
+   },
+   "actions": [
+    {
+     "id": "enrage",
+     "first": 60
+    },
+    {
+     "id": "causeInsanity",
+     "first": 21,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 13,
+     "every": 21,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "insanityBack7",
+     "type": "afterEvent",
+     "event": "causeInsanity",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt him back after Cause Insanity",
+     "tip": "Same job until he dies."
+    },
+    {
+     "id": "bloodOut7",
+     "type": "continuous",
+     "metric": "bloodsInRaid",
+     "role": "nontank",
+     "label": "Carry Corrupted Blood out of the raid",
+     "tip": "Walk out of the raid if it lands on you."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Enrage is here. Everything on the tank."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Enrage hits harder every swing: heal."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.05,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "siphonUnpoisoned": {
+   "label": "Blood Siphons while not poisoned",
+   "unit": "count",
+   "penaltyPerUnit": 18,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stand in the Poison Cloud at the end of the cycle. Without it, you feed Hakkar 1,000 health per second."
+  },
+  "bloodsInRaid": {
+   "label": "Corrupted Bloods detonated in the raid",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Walk out of the raid if it lands on you."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt after Cause Insanity, the off-tank grabs Sons, Heal the tank.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 13,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Hakkar turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabSonCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "sonOfHakkar",
+    "offset": 3,
+    "early": 3,
+    "late": 9,
+    "role": "offtank",
+    "short": "SON",
+    "label": "Grab the Son of Hakkar",
+    "tip": "Pick him up and bring him to the cloud spot.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabSonCueR",
+    "ability": "taunt",
+    "on": "event",
+    "event": "sonOfHakkarR",
+    "offset": 3,
+    "early": 3,
+    "late": 9,
+    "role": "offtank",
+    "short": "SON",
+    "label": "Grab the Son of Hakkar",
+    "tip": "Pick him up and bring him to the cloud spot.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "insanityDrill",
+   "name": "Cause Insanity recovery",
+   "description": "He charms you every 16 s. Taunt him back the moment you are free.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "causeInsanity",
+     "first": 4,
+     "every": 16
+    }
+   ]
+  },
+  {
+   "id": "sonPickup",
+   "name": "Son pickup",
+   "description": "A Son every 20 s. Pick him up and hold him on the cloud spot.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "sonOfHakkar",
+     "first": 3,
+     "every": 20
+    }
+   ]
+  },
+  {
+   "id": "siphonRun",
+   "name": "Into the cloud",
+   "description": "A Siphon telegraph every 20 s. Get into the Poison Cloud before it ends and carry your Corrupted Blood out of the raid.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 3,
+     "every": 20
+    },
+    {
+     "id": "siphonPoison",
+     "first": 8,
+     "every": 20
+    },
+    {
+     "id": "corruptedBlood",
+     "first": 5,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "siphonHeal",
+   "name": "Pre-heal the Siphon",
+   "description": "Every 22 s you are stunned for 8 s. Top the tank up each time before it lands, and stand in the cloud.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 66,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 3,
+     "every": 22
+    },
+    {
+     "id": "siphonPoison",
+     "first": 8,
+     "every": 22
+    }
+   ]
+  }
+ ]
+}

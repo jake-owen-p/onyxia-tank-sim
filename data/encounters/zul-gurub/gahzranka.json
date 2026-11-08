@@ -1,0 +1,963 @@
+{
+ "id": "gahzranka",
+ "name": "Gahz'ranka",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/gahzranka.md: Era 333,100 HP, 20-man, fished up once per lockout. There are no adds and one phase; he is modelled as one 180 s phase. Frost Breath, Massive Geyser and Slam have no published cadences, so every interval here is an estimate. Frost Breath's exact spell is unresolved: BW tracks 21099 (5 s slow, 30 yd), DBM 16099 (10 s), so the 10 s slow in the tip may be wrong. Boss melee (320 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Frost Breath's mana drain and slow are not modelled. Massive Geyser is a `hazard` that lands under a random raid member (35% chance it is you): a 2 s telegraph and 463 in a 10 yd radius, plus a follow-up `targetSwitch` for the threat drop as it erupts (the tank has to Taunt him back). The launch itself has no engine equivalent, so stepping out is the footwork the script scores; falling damage onto land is not modelled and the raid is assumed to fight over water. Slam is a radial `knockback` of 20 yd, weapon damage plus 250 and a shove. There is no line of sight, no water. The real fight has two tanks alternating after each launch, because the launched tank's threat is cut; the sim has one tank player who Taunts him back. Feign Death and Vanish on geysers are not modelled. Thrash is not modelled.",
+ "sources": [
+  "docs/research/zul-gurub/gahzranka.md",
+  "https://classic.warcraftdb.com/data/npc/15114",
+  "https://warcraft.wiki.gg/wiki/Gahz%27ranka",
+  "https://www.wowhead.com/classic/guide/gahzranka-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://us.millenium.gg/guide/6831.html?page=9",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Gahzranka.lua",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/ZulGurub_Classic/Gahzranka.lua"
+ ],
+ "arena": {
+  "name": "Pagle's Pointe moat",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      48,
+      0
+     ],
+     [
+      47.3,
+      8.3
+     ],
+     [
+      45.1,
+      16.4
+     ],
+     [
+      41.6,
+      24
+     ],
+     [
+      36.8,
+      30.9
+     ],
+     [
+      30.9,
+      36.8
+     ],
+     [
+      24,
+      41.6
+     ],
+     [
+      16.4,
+      45.1
+     ],
+     [
+      8.3,
+      47.3
+     ],
+     [
+      0,
+      48
+     ],
+     [
+      -8.3,
+      47.3
+     ],
+     [
+      -16.4,
+      45.1
+     ],
+     [
+      -24,
+      41.6
+     ],
+     [
+      -30.9,
+      36.8
+     ],
+     [
+      -36.8,
+      30.9
+     ],
+     [
+      -41.6,
+      24
+     ],
+     [
+      -45.1,
+      16.4
+     ],
+     [
+      -47.3,
+      8.3
+     ],
+     [
+      -48,
+      0
+     ],
+     [
+      -47.3,
+      -8.3
+     ],
+     [
+      -45.1,
+      -16.4
+     ],
+     [
+      -41.6,
+      -24
+     ],
+     [
+      -36.8,
+      -30.9
+     ],
+     [
+      -30.9,
+      -36.8
+     ],
+     [
+      -24,
+      -41.6
+     ],
+     [
+      -16.4,
+      -45.1
+     ],
+     [
+      -8.3,
+      -47.3
+     ],
+     [
+      0,
+      -48
+     ],
+     [
+      8.3,
+      -47.3
+     ],
+     [
+      16.4,
+      -45.1
+     ],
+     [
+      24,
+      -41.6
+     ],
+     [
+      30.9,
+      -36.8
+     ],
+     [
+      36.8,
+      -30.9
+     ],
+     [
+      41.6,
+      -24
+     ],
+     [
+      45.1,
+      -16.4
+     ],
+     [
+      47.3,
+      -8.3
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -44
+     ],
+     [
+      9,
+      -44
+     ],
+     [
+      9,
+      -66
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -47.1
+     ],
+     [
+      20.2,
+      -43.5
+     ],
+     [
+      30.2,
+      -37.3
+     ],
+     [
+      38.4,
+      -28.8
+     ],
+     [
+      44.3,
+      -18.6
+     ],
+     [
+      47.4,
+      -7.3
+     ],
+     [
+      47.8,
+      4.5
+     ],
+     [
+      45.2,
+      16
+     ],
+     [
+      40,
+      26.6
+     ],
+     [
+      32.3,
+      35.5
+     ],
+     [
+      22.7,
+      42.3
+     ],
+     [
+      11.7,
+      46.6
+     ],
+     [
+      0,
+      48
+     ],
+     [
+      -11.7,
+      46.6
+     ],
+     [
+      -22.7,
+      42.3
+     ],
+     [
+      -32.3,
+      35.5
+     ],
+     [
+      -40,
+      26.6
+     ],
+     [
+      -45.2,
+      16
+     ],
+     [
+      -47.8,
+      4.5
+     ],
+     [
+      -47.4,
+      -7.3
+     ],
+     [
+      -44.3,
+      -18.6
+     ],
+     [
+      -38.4,
+      -28.8
+     ],
+     [
+      -30.2,
+      -37.3
+     ],
+     [
+      -20.2,
+      -43.5
+     ],
+     [
+      -9,
+      -47.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -47.1
+     ],
+     [
+      -9,
+      -66
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -47.1
+     ],
+     [
+      9,
+      -66
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -60
+    ]
+   },
+   {
+    "text": "Deep water: tank him here",
+    "at": [
+     0,
+     36
+    ]
+   },
+   {
+    "text": "Stay in the water",
+    "at": [
+     0,
+     -8
+    ]
+   },
+   {
+    "text": "Upper path: he evades if pulled here",
+    "at": [
+     -34,
+     34
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 24,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 38,
+   "tolerance": 4,
+   "label": "Tank, in deep water"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 30,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 50,
+   "label": "Gahz'ranka"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -2,
+   "spread": 14
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": 0,
+   "tolerance": 8,
+   "label": "Ranged, in the water"
+  },
+  "healerSpot": {
+   "x": 6,
+   "y": 4,
+   "tolerance": 7,
+   "label": "Healers"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 8,
+  "meleeDamage": 320,
+  "meleeInterval": 2,
+  "cones": {
+   "frostBreath": {
+    "angle": 70,
+    "range": 24,
+    "label": "Frost Breath",
+    "facing": "front",
+    "style": "breath"
+   }
+  },
+  "facingCone": "frostBreath",
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him in the deep water with his back to the raid so only you eat Frost Breath. Every Massive Geyser drops him off you: Taunt him back at once.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay behind him, out of the cone, and accept the Slam knockbacks. After a Massive Geyser, pause until the tank has him again.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stay in the water behind him, out of the cone. Attack on every global, but stop after a Geyser until the tank has him back.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Heal the tank through Frost Breath and every Slam, and heal the Geyser hits. Stay behind him, out of the cone.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "frostBreath": {
+   "label": "Frost Breath",
+   "kind": "cone",
+   "cone": "frostBreath",
+   "cast": 2,
+   "damage": 1000,
+   "warn": true,
+   "cue": "deepBreath",
+   "icon": "breath",
+   "requires": "grounded",
+   "playerMetric": "frontHits",
+   "tip": "A 2 s cone: about 1,000 Frost and a 10 s slow. Only the tank should be in it."
+  },
+  "slam": {
+   "label": "Gahz'ranka Slam",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 12,
+   "knockbackRange": 20,
+   "radial": true,
+   "damage": 450,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "A melee-range Slam that hits within 20 yd and shoves you away. Run back in."
+  },
+  "massiveGeyser": {
+   "label": "Massive Geyser",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.35,
+   "radius": 10,
+   "warning": 2,
+   "active": 0.5,
+   "damage": 463,
+   "follow": [
+    {
+     "id": "geyserThreatDrop",
+     "delay": 2
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "The water erupts under a random raid member within 40 yd: 2 s to step out of the 10 yd ring, 463 Frost if you are caught, and it drops his threat as it goes off. Tanks Taunt, DPS wait."
+  },
+  "geyserThreatDrop": {
+   "label": "Threat dropped",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 2,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "toast": "The launch dropped him off the tank",
+   "tip": "The launched tank has lost him. Taunt."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Gahz'ranka",
+   "subtitle": "Frost Breath, Slam, Massive Geyser",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 180,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "frostBreath",
+     "first": 12,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "slam",
+     "first": 9,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "massiveGeyser",
+     "first": 22,
+     "every": 22,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 16,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull him out into the deep water",
+     "tip": "Taunt him as he surfaces and walk him north into the deep water, so every launch lands you in water."
+    },
+    {
+     "id": "faceAway",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tanks",
+     "label": "Keep him facing away from the raid",
+     "tip": "Only you should be in the Frost Breath cone."
+    },
+    {
+     "id": "geyserBack",
+     "type": "afterEvent",
+     "event": "geyserThreatDrop",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt him back after each Geyser",
+     "tip": "The launch dropped him off you. Taunt the moment you land."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "stayBehind",
+     "type": "continuous",
+     "metric": "frontHits",
+     "role": "nontank",
+     "label": "Never stand in front of him",
+     "tip": "Frost Breath drains mana and slows you. Stay behind him."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Slam and Frost Breath spike the tank. Keep heals rolling."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The launched tank has been dropped: heal them as they land."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in front of him",
+   "unit": "s",
+   "penaltyPerSecond": 1.5,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "frontHits": {
+   "label": "Frost Breaths you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stay behind him."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt after every Massive Geyser, Heal the tank.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Gahz'ranka turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "geyserTaunt",
+   "name": "Massive Geyser recovery",
+   "description": "Every 14 s the water launches you and he drops you: Taunt him back and walk him home.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "massiveGeyser",
+     "first": 5,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "behindBoss",
+   "name": "Stay behind him",
+   "description": "Frost Breath every 8 s. Stay out of the cone, keep attacking, and stop after a Geyser.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frostBreath",
+     "first": 4,
+     "every": 8
+    },
+    {
+     "id": "massiveGeyser",
+     "first": 11,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "spikeHeal",
+   "name": "Tank spike healing",
+   "description": "Keep the tank alive through Slam, Frost Breath and each launch.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frostBreath",
+     "first": 3,
+     "every": 7
+    },
+    {
+     "id": "slam",
+     "first": 5,
+     "every": 9
+    }
+   ]
+  }
+ ]
+}

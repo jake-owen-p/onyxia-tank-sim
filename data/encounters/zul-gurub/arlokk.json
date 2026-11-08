@@ -1,0 +1,1696 @@
+{
+ "id": "arlokk",
+ "name": "High Priestess Arlokk",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "zul-gurub",
+  "name": "Zul'Gurub",
+  "size": 20
+ },
+ "notes": "Numbers follow docs/research/zul-gurub/arlokk.md: Era 279,825 HP, 20-man. The timeline follows DBM (Arlokk.lua) and cmangos: first Vanish 34 s after the pull (DBM: 33.7 to 34.4 s), she stays hidden about 50 s (DBM: 43.7 to 61.5 s; cmangos: 50 s), panther form about 20 s (Wowhead), next Vanish 65 to 70 s after she returns (DBM, here 66 s), and only two Vanishes in this script, because DBM's comment says more than one is rare and Tentonhammer says three. HP per phase and the panther-form length are estimates. Boss melee (520 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Gouge is a `targetSwitch`: she goes for the next tank, and a 3 s tank stun stands in for the incapacitate, so the tank really cannot answer until it wears off. The real raid has another tank taunt during those 3 s; the sim only has one tank player, who Taunts her back when free, so the boss is loose for those seconds and that is excused from the facing metric by `turnGrace` but counts as looseness. Gouge's 18 s cadence is a placeholder. Mark of Arlokk: a non-dispellable debuff on a random player during Vanish, with `shelterAt` sending you to the gong wall (the safe spot). The engine has no fixate, so the panther-magnet part of the Mark (5,000 threat to panthers within 15 yd every 2 s) is not modelled; only the movement the Mark forces on you is, and whether you reached the wall is not scored: the marker walks you there but no check can say the debuff was on you. Duration is 20 s rather than the real 2 minutes for the same reason; real raids dispel it with immunity tricks. Vanish is a `submerged` phase with hpFrom = hpTo. The panthers (Zulian Prowlers) are `adds`: a trickle through the troll form is held by the off-tank role and not killFirst (the raid is told to ignore them until she vanishes), and waves of eight spawn every 12 s through each 50 s Vanish as killFirst (four waves, under the real cap of 40 alive), which the raid is meant to AoE down. The real panthers are stealthed and come from the pens continuously with a 40-add cap, which the engine cannot show. Reappearing is scripted: she is teleported into the raid (`teleportBossTo: raid`), then the table is wiped (threatWipe) as she reappears. Whirlwind is a 1.5 s cast (moveOut for melee and tanks excluded) that lands about 1,900 in one hit, rather than an instant 2 s channel ticking 954 twice (wiki), so that the telegraph exists at all. Ravage is a one-tick 900-damage debuff on the tank. Panther form ends after each phase by the fixed schedule. The Thrash passive and the double cleave are not modelled. Her stealth opener is not modelled beyond the teleport. On her death the remaining stealthed panthers rushing the raid is not modelled.",
+ "sources": [
+  "docs/research/zul-gurub/arlokk.md",
+  "https://classic.warcraftdb.com/data/npc/14515",
+  "https://warcraft.wiki.gg/wiki/High_Priestess_Arlokk",
+  "https://www.wowhead.com/classic/guide/high-priestess-arlokk-zul-gurub-strategy",
+  "https://www.warcrafttavern.com/guides/wow-classic-zulgurub-raid-guide/",
+  "https://www.tentonhammer.com/guides/zul-gurub-boss-guide-boss-6-high-priestess-arlokk",
+  "https://us.millenium.gg/guide/6831.html?page=6",
+  "https://theamazonbasin.com/wiki/index.php/Alliance_ZG_Strategies",
+  "https://raw.githubusercontent.com/cmangos/mangos-classic/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/zulgurub/boss_arlokk.cpp",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/VanillaZG/Arlokk.lua"
+ ],
+ "arena": {
+  "name": "Arlokk's temple floor",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -62
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Gong of Bethekk",
+    "at": [
+     0,
+     38
+    ]
+   },
+   {
+    "text": "Marked? Run to the gong wall",
+    "at": [
+     12,
+     42
+    ]
+   },
+   {
+    "text": "Pens: keep clear",
+    "at": [
+     -36,
+     2
+    ]
+   },
+   {
+    "text": "Pens: keep clear",
+    "at": [
+     36,
+     2
+    ]
+   },
+   {
+    "text": "Ranged and healers",
+    "at": [
+     -8,
+     -22
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -56,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": -14,
+   "heading": 90
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 18,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 11,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 50,
+   "label": "Arlokk"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -16,
+   "spread": 11
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -14,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerSpot": {
+   "x": 6,
+   "y": -12,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "gongWall": {
+   "x": 0,
+   "y": 38,
+   "tolerance": 8,
+   "label": "Gong wall"
+  },
+  "tankRaidSpot": {
+   "x": -8,
+   "y": -6,
+   "tolerance": 7,
+   "label": "Be near the raid"
+  },
+  "penWest": {
+   "x": -38,
+   "y": -4,
+   "label": "Pen"
+  },
+  "penEast": {
+   "x": 38,
+   "y": -4,
+   "label": "Pen"
+  },
+  "penHold": {
+   "x": 14,
+   "y": -2,
+   "tolerance": 7,
+   "label": "Hold panthers here"
+  },
+  "panHoldGhost": {
+   "x": -14,
+   "y": -2,
+   "tolerance": 7,
+   "label": "Panthers"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 20,
+  "melee": 6,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 520,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pick her up off the gong, hold her at the centre, Taunt her back after every Gouge, and be near the raid when she reappears from Vanish: the table is empty.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Pen off-tank",
+   "short": "Off-tank",
+   "description": "Your job is panthers. Hold the trickle through troll form without killing it, then pick up each wave when she vanishes and stand still for the raid to AoE.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay on her in troll form and ignore the panthers. When she vanishes, kill panthers. When she reappears, stay over 8 yd away for Whirlwind, then go back in.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Burst her in troll form, kill panthers only while she is gone, and never stand near the pens. If the Mark lands on you, run to the gong wall.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Dispel Shadow Word: Pain, keep the pen tanks up through the panther waves, and cover the marked player. If the Mark lands on you, run to the gong wall.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. One button here stands in for Dispel Magic, Cleanse, Decurse and Cure Poison."
+  }
+ },
+ "actions": {
+  "gouge": {
+   "label": "Gouge",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "gougeStun",
+     "delay": 0
+    }
+   ],
+   "toast": "Gouge: she runs at the next target",
+   "tip": "A 3 s incapacitate on her target. She goes for the next person until you Taunt her back."
+  },
+  "gougeStun": {
+   "label": "Gouge incapacitate",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 3,
+   "stun": 3,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "You are out for 3 s. Taunt back the moment it ends."
+  },
+  "swPain": {
+   "label": "Shadow Word: Pain",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "playerChance": 0.3,
+   "duration": 18,
+   "tickDamage": 235,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "704 Shadow every 3 s for 18 s on a random player. Dispel it."
+  },
+  "panthersTrickle": {
+   "label": "Zulian Prowlers",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "penWest",
+    "penEast"
+   ],
+   "speed": 9,
+   "aggroRange": 12,
+   "lifetime": 18,
+   "heldLifetime": 18,
+   "pickup": "offtank",
+   "holdSpot": "panHoldGhost",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Prowlers trickle from the pens all fight. Off-tanks gather them; do not kill them yet."
+  },
+  "panthersVanish": {
+   "label": "Panther wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 4,
+   "from": [
+    "penWest",
+    "penEast"
+   ],
+   "speed": 9,
+   "aggroRange": 12,
+   "lifetime": 16,
+   "heldLifetime": 16,
+   "pickup": "offtank",
+   "holdSpot": "panHoldGhost",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "She has vanished. All the prowlers unstealth and rush in: AoE them on the pen tanks."
+  },
+  "markOfArlokk": {
+   "label": "Mark of Arlokk",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.35,
+   "dispel": "none",
+   "duration": 20,
+   "tickDamage": 0,
+   "maxStacks": 1,
+   "shelterAt": 1,
+   "safeSpots": [
+    "gongWall"
+   ],
+   "safeRadius": 8,
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "any",
+   "tip": "\"Feast, my pretties!\" A big V appears over a random player and every panther in sight goes for them. Run to the gong wall and let the raid cover you."
+  },
+  "reappear": {
+   "label": "Reappears",
+   "kind": "transition",
+   "cast": 0,
+   "teleportBossTo": "raid",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "She reappears in the raid. Melee, stay out of her Whirlwind range."
+  },
+  "emergeWipe": {
+   "label": "Reappears: threat reset",
+   "kind": "threatWipe",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "toast": "She is back: threat wiped",
+   "tip": "The table is empty when she reappears. Tank Taunts first."
+  },
+  "whirlwind": {
+   "label": "Whirlwind",
+   "kind": "aoe",
+   "cast": 1.5,
+   "damage": 1900,
+   "radius": 8,
+   "tankDamage": 600,
+   "playerMetric": "whirlwindHits",
+   "moveOut": [
+    "melee"
+   ],
+   "warn": true,
+   "cue": "whelps",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "As she reappears she spins for about 1,900 in total to everyone within 8 yd. Melee: back off for the 2 s, then go in."
+  },
+  "ravage": {
+   "label": "Ravage",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.2,
+   "tickDamage": 900,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A heavy hit on the tank with a 2 s stun in panther form."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Troll form",
+   "subtitle": "Gouge, SW:P, panther trickle",
+   "hpFrom": 1,
+   "hpTo": 0.88,
+   "duration": 34,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "penHold"
+   },
+   "actions": [
+    {
+     "id": "gouge",
+     "first": 14,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "swPain",
+     "first": 8,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "panthersTrickle",
+     "first": 5,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 16,
+     "grace": 6,
+     "from": "engage",
+     "role": "tank",
+     "label": "Pull her to the centre",
+     "tip": "Taunt her off the gong and walk her to the middle of the room, facing away from the raid."
+    },
+    {
+     "id": "gougeBack1",
+     "type": "afterEvent",
+     "event": "gouge",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt her back after Gouge",
+     "tip": "You are Gouged for 3 s and she runs at the next target. Taunt her back the moment you are free."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "dispelPain1",
+     "type": "afterEvent",
+     "event": "swPain",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Shadow Word: Pain",
+     "tip": "704 Shadow every 3 s for 18 s. Dispel it fast, cloth first."
+    },
+    {
+     "id": "trollAdds",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the panthers on you",
+     "tip": "Do not kill them yet; hold them away from the raid until she vanishes."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Gouge and panthers both chew on tanks. Keep the heals flowing."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep the tank high before she vanishes."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Vanish",
+   "subtitle": "She is gone: kill the panthers",
+   "hpFrom": 0.88,
+   "hpTo": 0.88,
+   "duration": 50,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankRaidSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "penHold"
+   },
+   "actions": [
+    {
+     "id": "markOfArlokk",
+     "first": 3
+    },
+    {
+     "id": "panthersVanish",
+     "first": 3,
+     "every": 12
+    }
+   ],
+   "expectations": [
+    {
+     "id": "vanishPos2",
+     "type": "playerAtSpotBy",
+     "spot": "tankRaidSpot",
+     "grace": 3,
+     "role": "tank",
+     "label": "Be near the raid when she reappears",
+     "tip": "She comes back next to someone in the raid. Be there to pick her up."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the panthers while she is gone",
+     "tip": "This is your window. AoE everything on the pen tanks."
+    },
+    {
+     "id": "penHold",
+     "type": "afterEvent",
+     "event": "panthersVanish",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 4,
+     "role": "offtank",
+     "label": "Grab the panther wave",
+     "tip": "They come from the pens. Pick them up and stand still for the AoE."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Pre-heal the pen tanks now; panthers hit them for the whole vanish."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Panther form",
+   "subtitle": "Reappears: Whirlwind, Ravage",
+   "hpFrom": 0.88,
+   "hpTo": 0.8,
+   "duration": 20,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "penHold"
+   },
+   "actions": [
+    {
+     "id": "reappear",
+     "first": 0.2
+    },
+    {
+     "id": "emergeWipe",
+     "first": 0.5
+    },
+    {
+     "id": "whirlwind",
+     "first": 1
+    },
+    {
+     "id": "ravage",
+     "first": 6,
+     "every": 7,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeBack3",
+     "type": "afterEvent",
+     "event": "emergeWipe",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt her as she reappears",
+     "tip": "She came back on someone in the raid. Taunt inside 3 s."
+    },
+    {
+     "id": "walkCenter3",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Drag her back to the centre",
+     "tip": "Get her off the ranged and face her away from them."
+    },
+    {
+     "id": "whirlwindAway",
+     "type": "continuous",
+     "metric": "whirlwindHits",
+     "role": "melee",
+     "label": "Melee: stay clear of Whirlwind",
+     "tip": "For the 2 s of Whirlwind stay over 8 yd away, then go back in."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Ravage spikes and she has a clean table. Have heals landing."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not get caught out by the Ravage on top of melee."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Troll form",
+   "subtitle": "Faster now",
+   "hpFrom": 0.8,
+   "hpTo": 0.45,
+   "duration": 46,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "penHold"
+   },
+   "actions": [
+    {
+     "id": "gouge",
+     "first": 12,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "swPain",
+     "first": 8,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "panthersTrickle",
+     "first": 5,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "gougeBack4",
+     "type": "afterEvent",
+     "event": "gouge",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt her back after Gouge",
+     "tip": "You are Gouged for 3 s and she runs at the next target. Taunt her back the moment you are free."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "dispelPain4",
+     "type": "afterEvent",
+     "event": "swPain",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Shadow Word: Pain",
+     "tip": "704 Shadow every 3 s for 18 s. Dispel it fast, cloth first."
+    },
+    {
+     "id": "trollAdds",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the panthers on you",
+     "tip": "Do not kill them yet; hold them away from the raid until she vanishes."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Gouge and panthers both chew on tanks. Keep the heals flowing."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep the tank high before she vanishes."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Vanish",
+   "subtitle": "She is gone: kill the panthers",
+   "hpFrom": 0.45,
+   "hpTo": 0.45,
+   "duration": 50,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankRaidSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "penHold"
+   },
+   "actions": [
+    {
+     "id": "markOfArlokk",
+     "first": 3
+    },
+    {
+     "id": "panthersVanish",
+     "first": 3,
+     "every": 12
+    }
+   ],
+   "expectations": [
+    {
+     "id": "vanishPos5",
+     "type": "playerAtSpotBy",
+     "spot": "tankRaidSpot",
+     "grace": 3,
+     "role": "tank",
+     "label": "Be near the raid when she reappears",
+     "tip": "She comes back next to someone in the raid. Be there to pick her up."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the panthers while she is gone",
+     "tip": "This is your window. AoE everything on the pen tanks."
+    },
+    {
+     "id": "penHold",
+     "type": "afterEvent",
+     "event": "panthersVanish",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 4,
+     "role": "offtank",
+     "label": "Grab the panther wave",
+     "tip": "They come from the pens. Pick them up and stand still for the AoE."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Pre-heal the pen tanks now; panthers hit them for the whole vanish."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Panther form",
+   "subtitle": "Reappears: Whirlwind, Ravage",
+   "hpFrom": 0.45,
+   "hpTo": 0.35,
+   "duration": 20,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "penHold"
+   },
+   "actions": [
+    {
+     "id": "reappear",
+     "first": 0.2
+    },
+    {
+     "id": "emergeWipe",
+     "first": 0.5
+    },
+    {
+     "id": "whirlwind",
+     "first": 1
+    },
+    {
+     "id": "ravage",
+     "first": 6,
+     "every": 7,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeBack6",
+     "type": "afterEvent",
+     "event": "emergeWipe",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt her as she reappears",
+     "tip": "She came back on someone in the raid. Taunt inside 3 s."
+    },
+    {
+     "id": "walkCenter6",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 14,
+     "grace": 6,
+     "role": "tank",
+     "label": "Drag her back to the centre",
+     "tip": "Get her off the ranged and face her away from them."
+    },
+    {
+     "id": "whirlwindAway",
+     "type": "continuous",
+     "metric": "whirlwindHits",
+     "role": "melee",
+     "label": "Melee: stay clear of Whirlwind",
+     "tip": "For the 2 s of Whirlwind stay over 8 yd away, then go back in."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Ravage spikes and she has a clean table. Have heals landing."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Do not get caught out by the Ravage on top of melee."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Troll form",
+   "subtitle": "Finish her",
+   "hpFrom": 0.35,
+   "hpTo": 0,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "penHold"
+   },
+   "actions": [
+    {
+     "id": "gouge",
+     "first": 10,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "swPain",
+     "first": 8,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "panthersTrickle",
+     "first": 5,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "gougeBack7",
+     "type": "afterEvent",
+     "event": "gouge",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tank",
+     "label": "Taunt her back after Gouge",
+     "tip": "You are Gouged for 3 s and she runs at the next target. Taunt her back the moment you are free."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "dispelPain7",
+     "type": "afterEvent",
+     "event": "swPain",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel Shadow Word: Pain",
+     "tip": "704 Shadow every 3 s for 18 s. Dispel it fast, cloth first."
+    },
+    {
+     "id": "trollAdds",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the panthers on you",
+     "tip": "Do not kill them yet; hold them away from the raid until she vanishes."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Gouge and panthers both chew on tanks. Keep the heals flowing."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The last stretch: keep the tank up until she falls."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "whirlwindHits": {
+   "label": "Whirlwinds you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 1,
+   "roles": "melee",
+   "tip": "Stay over 8 yd away as she reappears."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Taunt after Gouge and on the reappear, the off-tank grabs panthers, Dispel Shadow Word: Pain, Heal.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 5,
+    "role": "tank",
+    "short": "ON RAID",
+    "label": "Taunt when Arlokk turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabPanthers",
+    "ability": "taunt",
+    "on": "event",
+    "event": "panthersVanish",
+    "offset": 3,
+    "early": 3,
+    "late": 7,
+    "role": "offtank",
+    "short": "PANTHERS",
+    "label": "Grab the panthers",
+    "tip": "Pick up the wave and stand still for the AoE.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "gougeDrill",
+   "name": "Gouge recovery",
+   "description": "She Gouges you every 14 s. Taunt her back the moment you are free.",
+   "roles": "tank",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "gouge",
+     "first": 6,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "panthers",
+   "name": "Panther waves",
+   "description": "A wave every 12 s. Pick them up and hold them for the AoE.",
+   "roles": "offtank",
+   "startPhase": 2,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "panthersVanish",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "markedDps",
+   "name": "Vanish and the Mark",
+   "description": "She has vanished. Kill panthers, and if the Mark lands on you run to the gong wall.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "panthersVanish",
+     "first": 3,
+     "every": 10
+    },
+    {
+     "id": "markOfArlokk",
+     "first": 6,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "painDrill",
+   "name": "Shadow Word: Pain",
+   "description": "Dispel every Pain and keep the tank up while she Gouges.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "swPain",
+     "first": 3,
+     "every": 6
+    },
+    {
+     "id": "gouge",
+     "first": 8,
+     "every": 16
+    }
+   ]
+  }
+ ]
+}

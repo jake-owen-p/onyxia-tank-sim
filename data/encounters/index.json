@@ -139,7 +139,86 @@
       "id": "zul-gurub",
       "name": "Zul'Gurub",
       "size": 20,
-      "bosses": []
+      "bosses": [
+        {
+          "id": "jeklik",
+          "name": "High Priestess Jeklik",
+          "file": "jeklik.json",
+          "status": "ready"
+        },
+        {
+          "id": "venoxis",
+          "name": "High Priest Venoxis",
+          "file": "venoxis.json",
+          "status": "ready"
+        },
+        {
+          "id": "marli",
+          "name": "High Priestess Mar'li",
+          "file": "marli.json",
+          "status": "ready"
+        },
+        {
+          "id": "thekal",
+          "name": "High Priest Thekal",
+          "file": "thekal.json",
+          "status": "ready"
+        },
+        {
+          "id": "arlokk",
+          "name": "High Priestess Arlokk",
+          "file": "arlokk.json",
+          "status": "ready"
+        },
+        {
+          "id": "mandokir",
+          "name": "Bloodlord Mandokir",
+          "file": "mandokir.json",
+          "status": "ready"
+        },
+        {
+          "id": "gahzranka",
+          "name": "Gahz'ranka",
+          "file": "gahzranka.json",
+          "status": "ready"
+        },
+        {
+          "id": "grilek",
+          "name": "Gri'lek",
+          "file": "grilek.json",
+          "status": "ready"
+        },
+        {
+          "id": "hazzarah",
+          "name": "Hazza'rah",
+          "file": "hazzarah.json",
+          "status": "ready"
+        },
+        {
+          "id": "renataki",
+          "name": "Renataki",
+          "file": "renataki.json",
+          "status": "ready"
+        },
+        {
+          "id": "wushoolay",
+          "name": "Wushoolay",
+          "file": "wushoolay.json",
+          "status": "ready"
+        },
+        {
+          "id": "jindo",
+          "name": "Jin'do the Hexxer",
+          "file": "jindo.json",
+          "status": "ready"
+        },
+        {
+          "id": "hakkar",
+          "name": "Hakkar",
+          "file": "hakkar.json",
+          "status": "ready"
+        }
+      ]
     },
     {
       "id": "ruins-of-ahnqiraj",

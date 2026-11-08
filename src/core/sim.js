@@ -232,7 +232,8 @@ export function createSim(script, options = {}) {
     state.phaseMetrics[def.id] = state.phaseMetrics[def.id] || {};
 
     const actionDefs = opts.manual ? [] : (opts.actions || def.actions);
-    state.schedule = buildSchedule(actionDefs, state.t, rng);
+    // Follow-ups already queued (an eruption after a roar) survive the phase change.
+    state.schedule = buildSchedule(actionDefs, state.t, rng).concat(state.schedule.filter((e) => e.once));
 
     // Raid moves to its phase position (unless still waiting for the pull).
     if ((b.engaged || def.bossState === 'airborne') && P[def.raidSpot]) setRaidSpot(w.raid, P[def.raidSpot]);
