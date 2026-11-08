@@ -75,9 +75,10 @@ export function roleBot(role) {
     const kick = sim.script.playerAbilities.interrupt;
     if (castDef && castDef.interruptible && kick && s.abilities.list.includes('interrupt') && s.abilities.readyAt.interrupt <= s.t && (castDef.offBoss || dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= (kick.range ?? 8))) cmd.abilities.push('interrupt');
     if (!gcdReady) return cmd;
+    const types = s.roleDef.dispels || (sim.script.playerAbilities.dispel || {}).dispels;
+    if (s.abilities.list.includes('dispel') && s.debuffs.some((d) => d.dispel !== 'none' && (!types || types.includes(d.dispel)))) { cmd.abilities.push('dispel'); return cmd; }
     if (role === 'healer') {
-      if (s.debuffs.some((d) => d.dispel !== 'none') && s.abilities.list.includes('dispel')) cmd.abilities.push('dispel');
-      else if (g.hp / g.maxHp < 0.8) cmd.abilities.push('heal');
+      if (g.hp / g.maxHp < 0.8) cmd.abilities.push('heal');
       return cmd;
     }
     const live = b.state === 'grounded' && b.engaged && !b.passive;

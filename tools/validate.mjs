@@ -35,7 +35,7 @@ function lint(script, file) {
     for (const key of ['raidMetric', 'playerMetric', 'wallMetric', 'completedMetric']) if (a[key] && !script.continuousMetrics[a[key]]) e(`action ${id}: ${key} ${a[key]} is not in continuousMetrics, so it would never be scored`);
     for (const n of a.safeSpots || []) if (!P[n]) e(`action ${id}: safe spot ${n} missing`);
     if (a.carried && a.placement !== 'player' && a.placement !== 'random') e(`action ${id}: carried needs placement player or random`);
-    if (a.kind === 'debuff' && !['magic', 'curse', 'poison', 'disease', 'none', undefined].includes(a.dispel)) e(`action ${id}: dispel type ${a.dispel}`);
+    if (a.kind === 'debuff' && !['magic', 'curse', 'poison', 'disease', 'enrage', 'none', undefined].includes(a.dispel)) e(`action ${id}: dispel type ${a.dispel}`);
   }
   for (const [name, c] of Object.entries(script.boss.cones || {})) if (c.angle == null || c.range == null) e(`cone ${name} needs angle and range`);
   for (const [id, r] of Object.entries(script.roles)) {

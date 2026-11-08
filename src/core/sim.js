@@ -400,6 +400,7 @@ export function createSim(script, options = {}) {
     if (requires === 'submerged' && b.state !== 'submerged') return false;
     if (def.kind === 'hazard' && def.placement === 'lanes' && !opts.freezeHp && state.phaseEnd - state.t < (def.warning || 0) + (def.active || 0) + 2) return false;
     if (def.conditional === 'behind' && !anyoneBehind()) return false;
+    if (typeof def.conditional === 'string' && def.conditional.startsWith('debuff:') && !state.debuffs.some((d) => d.actionId === def.conditional.slice(7))) return false;
     if (def.conditional === 'meleeEmpty' && (tankRole ? playerInBossRange(script.boss.meleeRange + 1) : ghostInBossRange(script.boss.meleeRange + 1))) return false;
     if (def.conditional === 'onPlayer' && (b.target !== tankTarget() || state.threat.tauntUntil > state.t || state.threat.ghostTauntUntil > state.t)) return false;
     if (def.cast > 0) {
@@ -662,6 +663,13 @@ export function createSim(script, options = {}) {
     if (on === 'player') stunPlayer(def.stun);
   }
 
+  /** Can this role remove this debuff? A role may limit its button with `dispels` (Tranquilizing Shot only removes enrages). */
+  function canDispel(d) {
+    if (d.dispel === 'none' || !state.abilities.list.includes('dispel')) return false;
+    const types = roleDef.dispels || (script.playerAbilities.dispel || {}).dispels;
+    return !types || types.includes(d.dispel);
+  }
+
   function updateDebuffs(dt) {
     for (let i = state.debuffs.length - 1; i >= 0; i--) {
       const d = state.debuffs[i];
@@ -671,7 +679,7 @@ export function createSim(script, options = {}) {
         if (d.on === 'player') damagePlayer(d.tickDamage, d.actionId);
         else if (d.on === 'ghost') damageGhost(d.tickDamage, d.actionId);
       }
-      if (d.dispel !== 'none' && state.role === 'healer') addMetric('debuffSeconds', dt);
+      if (canDispel(d)) addMetric('debuffSeconds', dt);
     }
   }
 
@@ -757,8 +765,7 @@ export function createSim(script, options = {}) {
         break;
       }
       case 'dispel': {
-        const types = def.dispels || null;
-        const idx = state.debuffs.findIndex((d) => d.dispel !== 'none' && (!types || types.includes(d.dispel)));
+        const idx = state.debuffs.findIndex(canDispel);
         if (idx < 0) return fail('nothing', 'Nothing to dispel');
         const d = state.debuffs.splice(idx, 1)[0];
         applyPlayerThreat(state.threat, def.threat || 0);
@@ -881,7 +888,7 @@ export function createSim(script, options = {}) {
     } else {
       if (bossLive() && b.target === 'player') return set('The boss is on you. Stop and let the tank take it', 'fix');
       if (fb.inFront) return set('Get out of the front of the boss', 'fix');
-      const dsp = state.role === 'healer' && state.debuffs.find((d) => d.dispel !== 'none');
+      const dsp = state.debuffs.find(canDispel);
       if (dsp) return set(`Dispel ${dsp.name}`, 'fix');
       if (state.role === 'healer' && state.world.ghost.hp / state.world.ghost.maxHp < (script.ghostTank.lowHp ?? 0.5)) return set('Heal the tank', 'fix');
       if (fb.holdAttack) return set('Hold your attacks: you are about to pull', 'fix');

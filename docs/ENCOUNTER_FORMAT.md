@@ -84,7 +84,7 @@ ghost tank alive.
 Kinds: `taunt` (also picks up loose adds in range), `attack` (adds `threat`,
 counted for uptime), `heal` (heals the ghost tank by `amount`), `dispel`
 (removes the oldest dispellable debuff, optionally only of the listed types),
-`interrupt` (stops a cast whose action has `interruptible: true`).
+`interrupt` (stops a cast whose action has `interruptible: true`). Any role can be given `dispel`; a role's own `dispels` list limits what its button removes (ranged Hunters with `"dispels": ["enrage"]` for Tranquilizing Shot).
 
 ### Actions
 
@@ -92,7 +92,7 @@ Every action has `label`, `kind`, `cast` (seconds, 0 = instant), `warn`
 (big centre warning + spoken countdown), `cue` (audio cue id or null),
 `icon`, `requires` (`grounded` default, or `airborne`), optional `conditional`
 (`behind`: only when someone is in the rear cone; `onPlayer`: only while the
-boss is on the tank and not held by a Taunt; `meleeEmpty`: only when the tank is out of melee, like Ragnaros' Magma Blast), `offBoss` (cast by something other than the boss, such as a priest: the boss keeps swinging and moving through it, and an interrupt needs no range to the boss), `interruptible`, `hidden`
+boss is on the tank and not held by a Taunt; `meleeEmpty`: only when the tank is out of melee, like Ragnaros' Magma Blast; `debuff:<actionId>`: only while that debuff is up, so pulses stop once it is dispelled), `offBoss` (cast by something other than the boss, such as a priest: the boss keeps swinging and moving through it, and an interrupt needs no range to the boss), `interruptible`, `hidden`
 (never on the timeline), `follow: [{ id, delay }]` (queue another action), `teleportBossTo` (`raid` or a spot name: Blink), `teleportTankTo` (a spot name: Executus), `completedMetric` (scores a cast that finished, for the roles that can interrupt), `safeSpots` with `safeRadius` and `safeRoles` (cover: on an `aoe` or `debuff`, a player within `safeRadius` of a named spot is out of its line of sight, and on a cast the marker walks `safeRoles` to the nearest one) and `tip`.
 
 | kind | fields | what happens |
@@ -107,7 +107,7 @@ boss is on the tank and not held by a Taunt; `meleeEmpty`: only when the tank is
 | `aggroPull` | `threatMultiplier` (tank roles), `duration` (others) | a DPS overtakes the tank: she turns on the raid until the tank Taunts |
 | `targetSwitch` | `duration`, `toast` | she goes for someone else; the tank has to take her back |
 | `threatWipe` | `toast` | the whole table resets (raid keeps `threat.landingRaidThreat`) |
-| `debuff` | `dispel` (`magic`, `curse`, `poison`, `disease`, `none`), `duration`, `tickDamage`, `target` (`random` + `count`, `tank`, `player`, `all`), `playerChance`, `roles` (who it can land on), `fear`, `stun` (seconds the player cannot act), `maxStacks` (re-application stacks instead of adding a copy), `shelterAt` (with `safeSpots`: at this many stacks the marker sends you to cover until they fall off), `playerMetric`, `damageTakenMult` and `healingMult` (per stack: 1.5 means +50% damage taken, 0.5 means -50% healing received) | puts a debuff on someone; dispellable ones raise the healer's DISPEL note |
+| `debuff` | `dispel` (`magic`, `curse`, `poison`, `disease`, `enrage`, `none`), `duration`, `tickDamage`, `target` (`random` + `count`, `tank`, `player`, `all`), `playerChance`, `roles` (who it can land on), `fear`, `stun` (seconds the player cannot act), `maxStacks` (re-application stacks instead of adding a copy), `shelterAt` (with `safeSpots`: at this many stacks the marker sends you to cover until they fall off), `playerMetric`, `damageTakenMult` and `healingMult` (per stack: 1.5 means +50% damage taken, 0.5 means -50% healing received) | puts a debuff on someone; dispellable ones raise the healer's DISPEL note |
 | `enrage` | `toast` | melee damage x `boss.enrageMultiplier` from now on |
 | `projectile` | `travel`, `splash`, `damage`, `playerChance` | a fireball at a random target |
 | `transition` | | `landing` / `takeoff` are driven by `phases[].bossState`; define them so the timeline can name them |

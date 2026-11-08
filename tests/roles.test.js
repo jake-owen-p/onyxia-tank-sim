@@ -400,3 +400,27 @@ test('a cast that comes due during another cast waits its turn', () => {
   const done = ev.filter((e) => e.type === 'action' && (e.id === 'first' || e.id === 'second')).map((e) => e.id);
   assert.deepEqual(done, ['first', 'second']);
 });
+
+test('any role can dispel what its own list allows, and pulses can depend on a debuff staying up', () => {
+  const s2 = structuredClone(script);
+  s2.playerAbilities.dispel.dispels = ['magic', 'curse', 'enrage'];
+  s2.roles.ranged.abilities = ['attack', 'dispel'];
+  s2.roles.ranged.dispels = ['enrage'];
+  Object.assign(s2.actions, {
+    frenzy: { label: 'Frenzy', kind: 'debuff', cast: 0, target: 'tank', dispel: 'enrage', duration: 10, warn: false, icon: 'roar' },
+    curse: { label: 'Curse', kind: 'debuff', cast: 0, target: 'player', dispel: 'curse', duration: 10, warn: false, icon: 'roar' },
+    nova: { label: 'Nova', kind: 'aoe', cast: 0, radius: 500, damage: 10, conditional: 'debuff:frenzy', warn: false, icon: 'roar' },
+  });
+  const sim = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state;
+  sim.triggerAction('curse');
+  run(sim, FIXED_DT, press('dispel'));
+  assert.equal(s.debuffs.length, 1, 'a Hunter cannot remove a curse');
+  sim.triggerAction('frenzy');
+  assert.equal(sim.triggerAction('nova'), true, 'pulses while it is up');
+  run(sim, 1.6);
+  run(sim, FIXED_DT, press('dispel'));
+  assert.deepEqual(s.debuffs.map((d) => d.dispel), ['curse'], 'Tranq removed the enrage');
+  s.pendingTrigger = null;
+  assert.equal(sim.triggerAction('nova'), false, 'no pulses once it is gone');
+});
