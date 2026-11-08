@@ -1,0 +1,963 @@
+{
+ "id": "patchwerk",
+ "name": "Patchwerk",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/patchwerk.md (3.85M HP, Hateful Strike, Enrage at 5%, Berserk 7:00). The room size is an estimate. The HP clock runs 385 s to 5% plus 30 s of Enrage, a 6:55 kill, so a raid that wins does not see the real 7:00 Berserk: see the Berserk note below. The real requirement (about 9,500 raid DPS, wiki) is a kill before 7:00; this script cannot express a raid that is too slow because boss HP is a clock. HATEFUL STRIKE (the fight's defining mechanic): the real spell is ~8,000 after armor every 1.2 s (wiki; Wowhead says 1.5 to 2 s), on the highest-HP of the 2nd/3rd/4th threat in melee range. Three off-tanks trade it. The engine has one ghost tank and cannot show three targets or a highest-HP rule, so each player role sees its own honest slice: the healer role heals the ghost, which here stands for the off-tank you are assigned, and takes every third Strike as a spike (5,500 scaled, every 3.6 s = 1.2 s x 3 OTs, jitter 0.4): the Hateful Strike cadence on one OT. The player off-tank role takes the same 5,500 share every 3.6 s and must stay in melee range: `otMelee` is checked on every Hateful Strike, so each Strike you are out of range for is scored, though the engine cannot stop the Strike landing on you when you leave. The engine also has no threat rank among non-tanks, so the real 2nd-to-4th threat rule cannot be scored. The main tank role is never struck (true: Hateful Strike never hits #1 on threat). Approximations: 5,500 instead of 8,000 because the engine's healer has one target and a 3.5k heal; no highest-HP rule; no dodge/parry cooldown skip. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. The healer's real decision here is the pre-heal: the ghost must be above 5,500 when the next Strike lands, and the passive rate alone (300/s) cannot get it there, so a healer who does nothing loses the tank inside 10 seconds. Melee and ranged take no Hateful Strike because the engine cannot rank the raid; instead the red band on the threat bar is the line where you would become a Hateful Strike target (real rule: 2nd to 4th on threat, in melee range). Holding attacks in the red band is scored. The slime river (melee dipping to lower HP, Wowhead) is not modelled: the engine has no self-damage button. ENRAGE at 5% (28131: +40% attack speed, +25% damage per spell data, so x1.75 DPS) is the last phase, `enrageMultiplier` 1.75. BERSERK (26662, 7:00, +150% attack speed and +500% damage) is about x15 tank damage and a wipe in the real game. A raid that wins finishes at 6:55 and never sees it, so `berserk` is not in the fight's schedule; `berserkDrill` loops it for healers, as a x1.4 damage-taken debuff on the tank, far weaker than the real thing because the real x15 is a wipe. Slime Bolt (7:30, Poison, after Berserk) is omitted: the fight ends first. Boss melee is 700 per 1.5 s (the wiki's 1,800 to 2,700 per swing, scaled to a 10k tank and an estimated 1.5 s swing; classicdb's 12,075 to 12,498 is pre-mitigation). AggroPull events (a DPS climbing the table: the real instruction 'never let anyone pass you on threat') are estimates so the tank role has reactions; the real fight mostly has none if threat is handled. `meleeCheck` is a hidden zero-damage heartbeat every 20 s that only samples whether the DPS are in range (the off-tank is scored on every Hateful Strike instead); it is not a boss ability.",
+ "sources": [
+  "docs/research/naxxramas/patchwerk.md",
+  "https://warcraft.wiki.gg/wiki/Patchwerk_(Classic)",
+  "https://www.wowhead.com/classic/guide/patchwerk-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28308/hateful-strike",
+  "https://www.wowhead.com/classic/spell=28131/enrage",
+  "https://www.wowhead.com/classic/spell=26662/berserk",
+  "https://www.wowhead.com/classic/spell=28311/slime-bolt",
+  "https://classicdb.ch/?npc=16028",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/ConstructQuarter/Patchwerk.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Patchwerk's Hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -34,
+      -26
+     ],
+     [
+      34,
+      -26
+     ],
+     [
+      34,
+      26
+     ],
+     [
+      -34,
+      26
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -48
+     ],
+     [
+      8,
+      -48
+     ],
+     [
+      8,
+      -22
+     ],
+     [
+      -8,
+      -22
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -8,
+      -26
+     ],
+     [
+      -34,
+      -26
+     ],
+     [
+      -34,
+      26
+     ],
+     [
+      34,
+      26
+     ],
+     [
+      34,
+      -26
+     ],
+     [
+      8,
+      -26
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -8,
+      -26
+     ],
+     [
+      -8,
+      -48
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      8,
+      -26
+     ],
+     [
+      8,
+      -48
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -42
+    ]
+   },
+   {
+    "text": "Patchwerk",
+    "at": [
+     0,
+     12
+    ]
+   },
+   {
+    "text": "Main tank corner",
+    "at": [
+     0,
+     24
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -44,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 12,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -30,
+   "spread": 10
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 22,
+   "tolerance": 4,
+   "label": "Main tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 16,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Patchwerk"
+  },
+  "raidCenter": {
+   "x": 0,
+   "y": -4,
+   "spread": 12,
+   "label": "Raid"
+  },
+  "meleeSpot": {
+   "x": -2,
+   "y": 10,
+   "tolerance": 4,
+   "label": "Melee: his flank"
+  },
+  "rangedSpot": {
+   "x": -5,
+   "y": -4,
+   "tolerance": 8,
+   "label": "Ranged: well back"
+  },
+  "healerSpot": {
+   "x": 8,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Healers: in range of the tanks"
+  },
+  "otSpot": {
+   "x": -6,
+   "y": 20,
+   "tolerance": 2.5,
+   "label": "Off-tank: in melee, in front of him"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1800,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 3000,
+  "healPerSecondWithPlayerHealer": 300,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4.5,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 700,
+  "meleeInterval": 1.5,
+  "cones": {},
+  "enrageMultiplier": 1.75
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "You are the main tank. Patchwerk only ever hits you with his normal swings, Hateful Strike goes to the off-tanks beside you. Build a big threat lead on the pull and keep it: if anyone passes you, Taunt him back at once.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Hateful Strike tank",
+   "short": "Off-tank",
+   "description": "You are one of the three Hateful Strike tanks. Get into melee range next to the main tank and stay there the whole fight: you take a share of 8,000 hits so nobody in the raid has to. If you step out of melee, the next one lands on a rogue. You have no button in this fight: your whole job is where you stand.",
+   "abilities": [],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stand at his side and hit him. The red band on your threat bar is the line where you would start eating Hateful Strikes: stop before it.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand back and burn him down. Hateful Strike is melee range only, so your only job is the DPS clock and not pulling him off the main tank.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "You are assigned to one off-tank in the reactive scheme: three off-tanks each eat a Strike every 3.6 seconds. Land your heal after each Strike, before the next one. The real raid also chooses which off-tank to keep highest on health; that choice is not in this seat.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 3500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Land it after each Strike, before the next."
+  }
+ },
+ "actions": {
+  "hatefulStrike": {
+   "label": "Hateful Strike",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 5500,
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Hateful Strike hits one of the three off-tanks in melee range about every 1.2 seconds, for about 8,000. Whoever has the most health takes it. Stay in melee, stay full, and it never touches the raid."
+  },
+  "hatefulStrikeOt": {
+   "label": "Hateful Strike on you",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "offtank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 5500,
+   "playerMetric": "hatefulOnYou",
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Hateful Strike hits one of the three off-tanks in melee range about every 1.2 seconds, for about 8,000. Whoever has the most health takes it. Stay in melee, stay full, and it never touches the raid."
+  },
+  "meleeCheck": {
+   "label": "Hateful Strike",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Hateful Strike hits one of the three off-tanks in melee range about every 1.2 seconds, for about 8,000. Whoever has the most health takes it. Stay in melee, stay full, and it never touches the raid."
+  },
+  "aggroClimb": {
+   "label": "A rogue climbs the threat table",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Someone just passed you on threat. Taunt him back this second or Hateful Strike rotation falls apart."
+  },
+  "enrage5": {
+   "label": "Enrage",
+   "kind": "enrage",
+   "cast": 0,
+   "duration": 300,
+   "toast": "Patchwerk enrages at 5%!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "At 5% he enrages: +40% attack speed, +25% damage. Shield Wall now if you are a tank, and pre-heal."
+  },
+  "berserk": {
+   "label": "Berserk",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "tanks",
+   "dispel": "none",
+   "duration": 12,
+   "damageTakenMult": 1.4,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Seven minutes. Berserk. This is the end of the fight whether he is dead or not."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The Clock",
+   "subtitle": "Hateful Strike every few seconds",
+   "hpFrom": 1,
+   "hpTo": 0.05,
+   "duration": 385,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "hatefulStrike",
+     "first": 3,
+     "every": 3.6,
+     "jitter": 0.4
+    },
+    {
+     "id": "hatefulStrikeOt",
+     "first": 3,
+     "every": 3.6,
+     "jitter": 0.4
+    },
+    {
+     "id": "meleeCheck",
+     "first": 10,
+     "every": 20,
+     "jitter": 1
+    },
+    {
+     "id": "aggroClimb",
+     "first": 75,
+     "every": 90,
+     "jitter": 12
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Drag him to the tank spot",
+     "tip": "Pick him up and bring him to the marked spot, with the off-tanks beside you in melee."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back the moment he turns",
+     "tip": "Someone passed you on threat. Taunt now, every second counts."
+    },
+    {
+     "id": "threat",
+     "type": "afterEvent",
+     "event": "hatefulStrike",
+     "check": "onTank",
+     "within": 1.5,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Keep him on you the whole fight",
+     "tip": "He must stay on the main tank so the Hateful Strikes keep going to the off-tanks and not into the melee."
+    },
+    {
+     "id": "otPlace",
+     "type": "playerAtSpotBy",
+     "spot": "otSpot",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Get into melee next to the main tank",
+     "tip": "If you are not in melee range when a Strike comes, it goes to the highest-health melee raider and they die."
+    },
+    {
+     "id": "otMelee",
+     "type": "onEvent",
+     "event": "hatefulStrikeOt",
+     "check": "inRange",
+     "role": "offtank",
+     "label": "Stay in melee every second",
+     "tip": "Do not step out for anything. Out of melee means someone in the raid takes 8,000."
+    },
+    {
+     "id": "meleeRange",
+     "type": "afterEvent",
+     "event": "meleeCheck",
+     "check": "inRange",
+     "within": 5,
+     "grace": 8,
+     "role": "melee",
+     "label": "Stay in melee range of him",
+     "tip": "Melee at his flank, not in front of the Hateful Strike tanks."
+    },
+    {
+     "id": "rangedRange",
+     "type": "afterEvent",
+     "event": "meleeCheck",
+     "check": "inRange",
+     "within": 5,
+     "grace": 8,
+     "role": "ranged",
+     "label": "Stay in casting range",
+     "tip": "Stay inside 30 yards. There is nothing to dodge, just the clock."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "redBand",
+     "type": "continuous",
+     "metric": "attacksInRed",
+     "role": "dps",
+     "label": "Stop at the red band",
+     "tip": "In the red band you are about to become a Hateful Strike target. Stop until the tank pulls ahead again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Your off-tank takes a Strike every 3.6 seconds. Heal after each one."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A 5,500 Strike comes in about 3.6 seconds, so never let your tank be under 55%."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Enrage",
+   "subtitle": "5%: finish him",
+   "hpFrom": 0.05,
+   "hpTo": 0,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "enrage5",
+     "first": 0.5
+    },
+    {
+     "id": "hatefulStrike",
+     "first": 1,
+     "every": 3.6,
+     "jitter": 0.4
+    },
+    {
+     "id": "hatefulStrikeOt",
+     "first": 1,
+     "every": 3.6,
+     "jitter": 0.4
+    },
+    {
+     "id": "meleeCheck",
+     "first": 8,
+     "every": 20,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "regain2",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Keep him on you to the end",
+     "tip": "He is enraged. Do not lose him now."
+    },
+    {
+     "id": "otPlace2",
+     "type": "playerAtSpotBy",
+     "spot": "otSpot",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Stay in melee through the Enrage",
+     "tip": "Shield Wall if you have it and hold your spot."
+    },
+    {
+     "id": "otMelee2",
+     "type": "onEvent",
+     "event": "hatefulStrikeOt",
+     "check": "inRange",
+     "role": "offtank",
+     "label": "Stay in melee every second",
+     "tip": "The last 5% is when people panic and step out. Do not."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He is enraged now: heal through the final 5%."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Hit harder and faster than before. Stay ahead."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.25,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "hatefulOnYou": {
+   "label": "Hateful Strikes on you",
+   "unit": "count",
+   "info": true,
+   "roles": "offtank"
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Taunt back; heal the spike after every Strike.",
+  "windows": {
+   "perfect": 0.5
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Patchwerk turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "healStrike",
+    "ability": "heal",
+    "on": "event",
+    "event": "hatefulStrike",
+    "offset": 1.2,
+    "early": 0.9,
+    "late": 2.2,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal between Strikes",
+    "tip": "The next Strike is 3.6 seconds away. Get your target full."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "aggroDrill",
+   "name": "Hold threat",
+   "description": "Someone keeps climbing past you on the table. Taunt him back every time.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "aggroClimb",
+     "first": 3,
+     "every": 8,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "strikeDrill",
+   "name": "Hold your spot",
+   "description": "A Hateful Strike every 3.6 seconds. Stay in melee range for every one; each Strike you are out of range for is scored.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 45,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "hatefulStrikeOt",
+     "first": 3,
+     "every": 3.6,
+     "jitter": 0.4
+    }
+   ]
+  },
+  {
+   "id": "redDrill",
+   "name": "Stay under the red",
+   "description": "Attack as hard as you can and stop the moment the bar turns red.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 45,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "meleeCheck",
+     "first": 5,
+     "every": 15
+    }
+   ]
+  },
+  {
+   "id": "healDrill",
+   "name": "Pre-heal the Strike",
+   "description": "A 5,500 hit lands every 3.6 seconds. Land your heal after every hit, then the next.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "hatefulStrike",
+     "first": 3,
+     "every": 3.6,
+     "jitter": 0.4
+    }
+   ]
+  },
+  {
+   "id": "berserkDrill",
+   "name": "The seven minute mark",
+   "description": "He is enraged and Berserk hits the tank hard. Heal through a Berserk you will never see if the raid does its job.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 28,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "enrage5",
+     "first": 1
+    },
+    {
+     "id": "berserk",
+     "first": 3
+    },
+    {
+     "id": "hatefulStrike",
+     "first": 2,
+     "every": 3.6,
+     "jitter": 0.4
+    }
+   ]
+  }
+ ]
+}

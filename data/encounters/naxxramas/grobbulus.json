@@ -1,0 +1,2547 @@
+{
+ "id": "grobbulus",
+ "name": "Grobbulus",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/grobbulus.md. HP is a clock: 2,116,591 HP over 310 s (real kills run 5 to 8 min; the 12:00 Enrage is not reached and is a wipe, so it is not simulated). The round room radius 46 and the ring the tank walks are estimates from prose. THE KITE: Grobbulus is walked slowly around the outer wall (wiki, Wowhead, Warcraft Tavern). Each phase is one waypoint: `tankSpot` and `bossSpot` move on, so the tank really does drag him along the wall, the clouds really do trail behind him, and the raid (`raidSpot`) shuffles round the middle with him. The real walk is continuous, here it is seven hops of about 25 yards on a ring of 40 to 43 yd radius. Breaking melee range fires Slime Stream through the real `meleeEmpty` conditional (real 1,500 per second for 3 s on up to 10 players; here one 900 pulse every 5 s while the tank stays out of melee, cmangos's delay before it casts, hitting the player and the ghost), so the tank must walk at a pace he can follow: his speed is 7 yd/s (estimate). POISON CLOUD: `hazard` at the boss every ~15 s (DBM 14.5 to 16.6), 60 s (spell 28158, the damaging aura; TrinityCore despawns the cloud at 61 s; the 75 s in the research is the summon spell's duration), radius 6 (wiki says ~10 yd wide and it grows; the engine has a fixed radius), 800 per second (scaled: spell 28241, the cloud tick, is 1,110 Nature in a 30 yd radius and spell 28158 is 1 tick per second; 800 is an estimate for a raid wearing Greater Nature Protection). The clouds persist across phases as the real ones do, so up to four sit on the kite line at once. MUTATING INJECTION: a `carried` bomb, `playerChance` 0.3, 10 s (the spell), radius 8 (spell 28322 Embalming Cloud, 3,515 Nature in 8 yd, which cmangos casts on natural expiry; spell 28206 Mutagen Explosion is 2,380 to 3,220 Physical in 20 yd, which cmangos casts on dispel and TrinityCore on expiry too; the wiki's 4,500 physical on expiry matches neither), 3,000 scaled from 4,500 and `raidMetric` scoring each one that goes off in the raid. The cadence is `every: 12, jitter: 1.5`, and below 30% `every: 9` on two players (BigWigs notes the next one is sometimes applied just before the previous expires, TrinityCore's WotLK comment gives 10.8 and 12 s then about 8 and 10 s, and the wiki and Warcraft Tavern say more often at 30%; the exact timers remain estimates). Because the cleansed explosion reaches 20 yd, a cleanse must wait until the carrier is out. ENGINE GAPS: (1) the real rule is to cleanse the Injection only once the carrier is in position, because cleansing also drops the cloud at their feet and shrinks the AoE (Wowhead): the engine scores a dispel as good whenever it happens, so the healer role here has no dispel at all rather than being taught to dispel on sight, and this is the fight's biggest misrepresentation. (2) The carrier's own cloud should appear where the carrier stands when it goes off; the engine cannot anchor a follow-up to a carried bomb, so the cloud appears at one fixed spot at the end of the line (`cloudLineEnd`), which is where a disciplined raid puts them anyway. (3) On a ghost raider the Injection has no floor marker and no consequence. (4) The engine's run-out point for a carried bomb is chosen when the bomb lands and cannot see a cloud that lands on it later, so step out of one if it does; the penalty for clouds is lowered to 1.5 per second for that reason. (5) The marker only knows the nearest clear ground, not the real instruction to run to the end of the cloud line behind him; the tips carry that. SLIME SPRAY: frontal `cone` 60 degrees 45 yd (spell 28157, range and radius 45 yd; Wowhead calls it short-range in prose; the width is a guess), every 18 s (not sourced: DBM and BigWigs have no timer, the guides say 'often', and the only data point is TrinityCore's WotLK comment of about 30 s, 30 s, then 55 s, which this estimate does not follow), 2,200 scaled from 3,200 to 4,800 for a tank wearing Greater Nature Protection. It summons one Fallout Slime (`follow`) which walks into the raid (real: one slime per player hit, only the tank should be hit). A raider caught in the cone is scored by `raidMetric` (the tank's facing) and a melee player in front by `playerMetric`. Slime AoE (300 per 2 s within 10 yd, wiki) is not modelled. Fallout Slime is `killFirst` for melee only (`killFirstRoles: melee`, the real assignment; ranged stay on him) with a 16 s `lifetime` (real 48,293 HP), picked up by the player off-tank or a ghost group. The Taunt notes on `aggroClimb` are estimates: the real tank mostly just walks, but a ranged-heavy raid can out-threat a moving tank. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Boss melee 1,000 per 2 s plus Slime Spray 2,200 every 18 s runs about 620 damage per second against 200 passive healing with a player healer, so a healer who does nothing loses the tank in about 25 seconds.",
+ "sources": [
+  "docs/research/naxxramas/grobbulus.md",
+  "https://warcraft.wiki.gg/wiki/Grobbulus_(Classic)",
+  "https://www.wowhead.com/classic/guide/grobbulus-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28240/poison-cloud",
+  "https://www.wowhead.com/classic/spell=28169/mutating-injection",
+  "https://www.wowhead.com/classic/spell=28157/slime-spray",
+  "https://www.wowhead.com/classic/spell=28218/summon-fallout-slime",
+  "https://www.wowhead.com/classic/spell=28137/slime-stream",
+  "https://classicdb.ch/?npc=15931",
+  "https://classicdb.ch/?npc=16290",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/ConstructQuarter/Grobbulus.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Grobbulus's Hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -70
+     ],
+     [
+      -9,
+      -70
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -70
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -70
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -64
+    ]
+   },
+   {
+    "text": "Grobbulus",
+    "at": [
+     -34,
+     22
+    ]
+   },
+   {
+    "text": "Ramp",
+    "at": [
+     -40,
+     14
+    ]
+   },
+   {
+    "text": "Cloud line",
+    "at": [
+     -30,
+     -33
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -66,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": -37.6,
+   "y": 13.7,
+   "heading": 340
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -40,
+   "spread": 9
+  },
+  "meleeWait": {
+   "x": -6,
+   "y": -40,
+   "spread": 6
+  },
+  "slimeSpawn": {
+   "x": 6,
+   "y": 8,
+   "label": "Fallout Slime spawn"
+  },
+  "slimeHold": {
+   "x": -6,
+   "y": 4,
+   "label": "Slime held"
+  },
+  "cloudLineEnd": {
+   "x": -30,
+   "y": -33,
+   "label": "Cloud line"
+  },
+  "bossSpot": {
+   "x": -37.6,
+   "y": 13.7,
+   "heading": 79,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Grobbulus, mark 1"
+  },
+  "tankSpot": {
+   "x": -35.6,
+   "y": 24,
+   "tolerance": 4,
+   "label": "Tank, mark 1"
+  },
+  "raidW0": {
+   "x": -11.3,
+   "y": 4.1,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "rangedW0": {
+   "x": -12.7,
+   "y": 7.9,
+   "tolerance": 9,
+   "label": "Ranged"
+  },
+  "healerW0": {
+   "x": -14.9,
+   "y": 2.1,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "otW0": {
+   "x": -17.5,
+   "y": 4.4,
+   "tolerance": 8,
+   "label": "Slime tank"
+  },
+  "bossW1": {
+   "x": -24.6,
+   "y": 31.5,
+   "heading": 48,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Grobbulus, mark 2"
+  },
+  "tankW1": {
+   "x": -17.5,
+   "y": 39.3,
+   "tolerance": 4,
+   "label": "Tank, mark 2"
+  },
+  "raidW1": {
+   "x": -7.4,
+   "y": 9.5,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "rangedW1": {
+   "x": -6.6,
+   "y": 13.5,
+   "tolerance": 9,
+   "label": "Ranged"
+  },
+  "healerW1": {
+   "x": -11.5,
+   "y": 9.6,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "otW1": {
+   "x": -12.5,
+   "y": 12.9,
+   "tolerance": 8,
+   "label": "Slime tank"
+  },
+  "bossW2": {
+   "x": -4.2,
+   "y": 39.8,
+   "heading": 15,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Grobbulus, mark 3"
+  },
+  "tankW2": {
+   "x": 6,
+   "y": 42.6,
+   "tolerance": 4,
+   "label": "Tank, mark 3"
+  },
+  "raidW2": {
+   "x": -1.3,
+   "y": 11.9,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "rangedW2": {
+   "x": 1.6,
+   "y": 14.9,
+   "tolerance": 9,
+   "label": "Ranged"
+  },
+  "healerW2": {
+   "x": -4.6,
+   "y": 14.3,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "otW2": {
+   "x": -3.7,
+   "y": 17.6,
+   "tolerance": 8,
+   "label": "Slime tank"
+  },
+  "bossW3": {
+   "x": 17.5,
+   "y": 36,
+   "heading": -17,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Grobbulus, mark 4"
+  },
+  "tankW3": {
+   "x": 27.6,
+   "y": 32.9,
+   "tolerance": 4,
+   "label": "Tank, mark 4"
+  },
+  "raidW3": {
+   "x": 5.3,
+   "y": 10.8,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "rangedW3": {
+   "x": 9.2,
+   "y": 11.8,
+   "tolerance": 9,
+   "label": "Ranged"
+  },
+  "healerW3": {
+   "x": 3.6,
+   "y": 14.6,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "otW3": {
+   "x": 6.2,
+   "y": 16.9,
+   "tolerance": 8,
+   "label": "Slime tank"
+  },
+  "bossW4": {
+   "x": 33.9,
+   "y": 21.2,
+   "heading": -48,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Grobbulus, mark 5"
+  },
+  "tankW4": {
+   "x": 40.9,
+   "y": 13.3,
+   "tolerance": 4,
+   "label": "Tank, mark 5"
+  },
+  "raidW4": {
+   "x": 10.2,
+   "y": 6.4,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "rangedW4": {
+   "x": 14.1,
+   "y": 5.1,
+   "tolerance": 9,
+   "label": "Ranged"
+  },
+  "healerW4": {
+   "x": 10.8,
+   "y": 10.4,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "otW4": {
+   "x": 14.2,
+   "y": 11.1,
+   "tolerance": 8,
+   "label": "Slime tank"
+  },
+  "bossW5": {
+   "x": 40,
+   "y": 0,
+   "heading": -81,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Grobbulus, mark 6"
+  },
+  "tankW5": {
+   "x": 41.7,
+   "y": -10.4,
+   "tolerance": 4,
+   "label": "Tank, mark 6"
+  },
+  "raidW5": {
+   "x": 12,
+   "y": 0,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "rangedW5": {
+   "x": 14.7,
+   "y": -3.1,
+   "tolerance": 9,
+   "label": "Ranged"
+  },
+  "healerW5": {
+   "x": 14.7,
+   "y": 3.1,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "otW5": {
+   "x": 17.9,
+   "y": 1.9,
+   "tolerance": 8,
+   "label": "Slime tank"
+  },
+  "bossW6": {
+   "x": 33.9,
+   "y": -21.2,
+   "heading": -112,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Grobbulus, mark 7"
+  },
+  "tankW6": {
+   "x": 29.9,
+   "y": -30.9,
+   "tolerance": 4,
+   "label": "Tank, mark 7"
+  },
+  "raidW6": {
+   "x": 10.2,
+   "y": -6.4,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "rangedW6": {
+   "x": 10.8,
+   "y": -10.4,
+   "tolerance": 9,
+   "label": "Ranged"
+  },
+  "healerW6": {
+   "x": 14.1,
+   "y": -5.1,
+   "tolerance": 9,
+   "label": "Healers"
+  },
+  "otW6": {
+   "x": 16.2,
+   "y": -7.9,
+   "tolerance": 8,
+   "label": "Slime tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1200,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1400,
+  "healPerSecondWithPlayerHealer": 200,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 7,
+  "meleeDamage": 1000,
+  "meleeInterval": 2,
+  "cones": {
+   "spray": {
+    "angle": 60,
+    "range": 45,
+    "label": "Slime Spray",
+    "facing": "front",
+    "style": "breath"
+   }
+  },
+  "facingCone": "spray",
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pick him up at the ramp and walk him slowly around the outer wall, one mark at a time, always facing away from the raid. His clouds trail behind you. Do not get more than a step ahead of him or Slime Stream hits the whole raid.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Slime tank",
+   "short": "Off-tank",
+   "description": "Every Slime Spray drops a Fallout Slime into the raid. Grab each one before it reaches the healers and keep it on you while the melee kill it.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Melee kill the Fallout Slimes: they come first. On him the rest of the time, out of his front. If you get the Mutating Injection, run out to the end of the cloud line behind him before it goes off.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Burn him from the middle of the room and walk with the raid. The Fallout Slimes are the melee's job: stay on him. If you get the Mutating Injection you have 10 seconds to run out of the raid to the end of the cloud line behind him.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Keep the tank up through his swings and every Slime Spray. Stay out of the clouds, walk with the raid. If you are injected, run out like everyone else.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "poisonCloud": {
+   "label": "Poison Cloud",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "boss",
+   "radius": 6,
+   "warning": 1.5,
+   "active": 60,
+   "damage": 800,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A Poison Cloud sits under Grobbulus and lasts about a minute. Keep walking him on so it is behind you."
+  },
+  "injection": {
+   "label": "Mutating Injection",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "radius": 8,
+   "warning": 10,
+   "active": 0.4,
+   "damage": 3000,
+   "carried": true,
+   "raidMetric": "injectionInRaid",
+   "follow": [
+    {
+     "id": "injectionCloud",
+     "delay": 10.2
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+  },
+  "injection2": {
+   "label": "Mutating Injection",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.25,
+   "roles": "nontank",
+   "radius": 8,
+   "warning": 10,
+   "active": 0.4,
+   "damage": 3000,
+   "carried": true,
+   "raidMetric": "injectionInRaid",
+   "follow": [
+    {
+     "id": "injectionCloud",
+     "delay": 10.2
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+  },
+  "injectionCloud": {
+   "label": "Injection cloud",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "cloudLineEnd"
+   ],
+   "radius": 6,
+   "warning": 0.5,
+   "active": 60,
+   "damage": 800,
+   "tick": true,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The Injection leaves a cloud at the end of the line."
+  },
+  "slimeSpray": {
+   "label": "Slime Spray",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "spray",
+   "damage": 2200,
+   "hitsMelee": true,
+   "raidMetric": "sprayOnRaid",
+   "raidToast": "Slime Spray hit the raid. Turn him away.",
+   "playerMetric": "sprayOnYou",
+   "follow": [
+    {
+     "id": "falloutSlime",
+     "delay": 0.15
+    }
+   ],
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A cone in front of him. Only the tank is ever in it, and it spawns a Fallout Slime."
+  },
+  "falloutSlime": {
+   "label": "Fallout Slime",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "slimeSpawn"
+   ],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 16,
+   "heldLifetime": 26,
+   "killFirst": true,
+   "killFirstRoles": "melee",
+   "pickup": "offtank",
+   "holdSpot": "slimeHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A slime drops into the raid. Grab it, kill it."
+  },
+  "slimeStream": {
+   "label": "Slime Stream",
+   "kind": "aoe",
+   "cast": 0,
+   "conditional": "meleeEmpty",
+   "damage": 900,
+   "tankDamage": 900,
+   "playerMetric": "slimeStreamTicks",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The top of his threat table is out of melee range. Get back on him."
+  },
+  "aggroClimb": {
+   "label": "A ranged out-threats the tank",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Someone passed you while you were walking. Taunt."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The Ramp",
+   "subtitle": "Pick him up and start walking",
+   "hpFrom": 1,
+   "hpTo": 0.9,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidW0",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedW0",
+    "healer": "healerW0",
+    "offtank": "otW0"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 15,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "slimeSpray",
+     "first": 10,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "slimeStream",
+     "first": 8,
+     "every": 5
+    },
+    {
+     "id": "injection",
+     "first": 20,
+     "every": 12,
+     "jitter": 1.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 26,
+     "every": 75,
+     "jitter": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "kite0",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 8,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pick him up and start the walk",
+     "tip": "Slowly, along the outer wall, with him facing away from the raid. Do not outpace him or Slime Stream hits everyone."
+    },
+    {
+     "id": "spray",
+     "type": "continuous",
+     "metric": "sprayOnRaid",
+     "role": "tanks",
+     "label": "Keep the Slime Spray off the raid",
+     "tip": "He sprays a cone in front of him. Only you are ever in it. Keep your back to the wall and his back to the raid."
+    },
+    {
+     "id": "stream",
+     "type": "continuous",
+     "metric": "slimeStreamTicks",
+     "role": "tanks",
+     "label": "Never leave melee range",
+     "tip": "If you get more than a step away from him, Slime Stream hits the whole raid for 900 a tick."
+    },
+    {
+     "id": "grabSlime0",
+     "type": "afterEvent",
+     "event": "falloutSlime",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Fallout Slime",
+     "tip": "Every Slime Spray drops one by the raid. Taunt it onto you before it starts ticking on the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Fallout Slime first, then him",
+     "tip": "Slimes first. Their poison aura hurts everyone near them."
+    },
+    {
+     "id": "meleeFront0",
+     "type": "onEvent",
+     "event": "slimeSpray",
+     "check": "notInFront",
+     "role": "melee",
+     "label": "Stay out of his front",
+     "tip": "Slime Spray is a cone in front of him. Melee stand behind him or beside him."
+    },
+    {
+     "id": "rangedSpot0",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW0",
+     "grace": 12,
+     "role": "ranged",
+     "label": "Keep up with the raid",
+     "tip": "Walk with the group as he moves along the wall. Stay clear of the cloud line."
+    },
+    {
+     "id": "healerSpot0",
+     "type": "playerAtSpotBy",
+     "spot": "healerW0",
+     "grace": 12,
+     "role": "healer",
+     "label": "Stay with the group and in range",
+     "tip": "Keep the tank in range as he walks, but never stand in a cloud to do it."
+    },
+    {
+     "id": "bomb",
+     "type": "continuous",
+     "metric": "injectionInRaid",
+     "role": "nontank",
+     "label": "Carry the Injection out of the raid",
+     "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+    },
+    {
+     "id": "clouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is high Nature damage every second. Nothing is worth standing in one."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A Slime Spray comes every 18 seconds on top of his swings. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Never let the tank be under half when Slime Spray is due."
+    },
+    {
+     "id": "regain0",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back the moment he turns",
+     "tip": "A ranged player out-threated a moving tank. Taunt him back."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "First Stretch",
+   "subtitle": "Keep the clouds behind you",
+   "hpFrom": 0.9,
+   "hpTo": 0.78,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidW1",
+   "spots": {
+    "tank": "tankW1",
+    "boss": "bossW1",
+    "ranged": "rangedW1",
+    "healer": "healerW1",
+    "offtank": "otW1"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "slimeSpray",
+     "first": 6,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "slimeStream",
+     "first": 8,
+     "every": 5
+    },
+    {
+     "id": "injection",
+     "first": 12,
+     "every": 12,
+     "jitter": 1.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 27,
+     "every": 75,
+     "jitter": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "kite1",
+     "type": "bossAtSpot",
+     "spot": "bossW1",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Walk him to the next mark along the wall",
+     "tip": "Slowly, along the outer wall, with him facing away from the raid. Do not outpace him or Slime Stream hits everyone."
+    },
+    {
+     "id": "spray",
+     "type": "continuous",
+     "metric": "sprayOnRaid",
+     "role": "tanks",
+     "label": "Keep the Slime Spray off the raid",
+     "tip": "He sprays a cone in front of him. Only you are ever in it. Keep your back to the wall and his back to the raid."
+    },
+    {
+     "id": "stream",
+     "type": "continuous",
+     "metric": "slimeStreamTicks",
+     "role": "tanks",
+     "label": "Never leave melee range",
+     "tip": "If you get more than a step away from him, Slime Stream hits the whole raid for 900 a tick."
+    },
+    {
+     "id": "grabSlime1",
+     "type": "afterEvent",
+     "event": "falloutSlime",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Fallout Slime",
+     "tip": "Every Slime Spray drops one by the raid. Taunt it onto you before it starts ticking on the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Fallout Slime first, then him",
+     "tip": "Slimes first. Their poison aura hurts everyone near them."
+    },
+    {
+     "id": "meleeFront1",
+     "type": "onEvent",
+     "event": "slimeSpray",
+     "check": "notInFront",
+     "role": "melee",
+     "label": "Stay out of his front",
+     "tip": "Slime Spray is a cone in front of him. Melee stand behind him or beside him."
+    },
+    {
+     "id": "rangedSpot1",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW1",
+     "grace": 12,
+     "role": "ranged",
+     "label": "Keep up with the raid",
+     "tip": "Walk with the group as he moves along the wall. Stay clear of the cloud line."
+    },
+    {
+     "id": "healerSpot1",
+     "type": "playerAtSpotBy",
+     "spot": "healerW1",
+     "grace": 12,
+     "role": "healer",
+     "label": "Stay with the group and in range",
+     "tip": "Keep the tank in range as he walks, but never stand in a cloud to do it."
+    },
+    {
+     "id": "bomb",
+     "type": "continuous",
+     "metric": "injectionInRaid",
+     "role": "nontank",
+     "label": "Carry the Injection out of the raid",
+     "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+    },
+    {
+     "id": "clouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is high Nature damage every second. Nothing is worth standing in one."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A Slime Spray comes every 18 seconds on top of his swings. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Never let the tank be under half when Slime Spray is due."
+    },
+    {
+     "id": "regain1",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back the moment he turns",
+     "tip": "He is walking at the raid. Taunt, then keep walking the line."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Second Stretch",
+   "subtitle": "Stay ahead of the line",
+   "hpFrom": 0.78,
+   "hpTo": 0.62,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidW2",
+   "spots": {
+    "tank": "tankW2",
+    "boss": "bossW2",
+    "ranged": "rangedW2",
+    "healer": "healerW2",
+    "offtank": "otW2"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "slimeSpray",
+     "first": 6,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "slimeStream",
+     "first": 8,
+     "every": 5
+    },
+    {
+     "id": "injection",
+     "first": 12,
+     "every": 12,
+     "jitter": 1.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 28,
+     "every": 75,
+     "jitter": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "kite2",
+     "type": "bossAtSpot",
+     "spot": "bossW2",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Walk him to the next mark along the wall",
+     "tip": "Slowly, along the outer wall, with him facing away from the raid. Do not outpace him or Slime Stream hits everyone."
+    },
+    {
+     "id": "spray",
+     "type": "continuous",
+     "metric": "sprayOnRaid",
+     "role": "tanks",
+     "label": "Keep the Slime Spray off the raid",
+     "tip": "He sprays a cone in front of him. Only you are ever in it. Keep your back to the wall and his back to the raid."
+    },
+    {
+     "id": "stream",
+     "type": "continuous",
+     "metric": "slimeStreamTicks",
+     "role": "tanks",
+     "label": "Never leave melee range",
+     "tip": "If you get more than a step away from him, Slime Stream hits the whole raid for 900 a tick."
+    },
+    {
+     "id": "grabSlime2",
+     "type": "afterEvent",
+     "event": "falloutSlime",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Fallout Slime",
+     "tip": "Every Slime Spray drops one by the raid. Taunt it onto you before it starts ticking on the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Fallout Slime first, then him",
+     "tip": "Slimes first. Their poison aura hurts everyone near them."
+    },
+    {
+     "id": "meleeFront2",
+     "type": "onEvent",
+     "event": "slimeSpray",
+     "check": "notInFront",
+     "role": "melee",
+     "label": "Stay out of his front",
+     "tip": "Slime Spray is a cone in front of him. Melee stand behind him or beside him."
+    },
+    {
+     "id": "rangedSpot2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW2",
+     "grace": 12,
+     "role": "ranged",
+     "label": "Keep up with the raid",
+     "tip": "Walk with the group as he moves along the wall. Stay clear of the cloud line."
+    },
+    {
+     "id": "healerSpot2",
+     "type": "playerAtSpotBy",
+     "spot": "healerW2",
+     "grace": 12,
+     "role": "healer",
+     "label": "Stay with the group and in range",
+     "tip": "Keep the tank in range as he walks, but never stand in a cloud to do it."
+    },
+    {
+     "id": "bomb",
+     "type": "continuous",
+     "metric": "injectionInRaid",
+     "role": "nontank",
+     "label": "Carry the Injection out of the raid",
+     "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+    },
+    {
+     "id": "clouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is high Nature damage every second. Nothing is worth standing in one."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A Slime Spray comes every 18 seconds on top of his swings. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Never let the tank be under half when Slime Spray is due."
+    },
+    {
+     "id": "regain2",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back the moment he turns",
+     "tip": "He is walking at the raid. Taunt, then keep walking the line."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Third Stretch",
+   "subtitle": "Keep moving",
+   "hpFrom": 0.62,
+   "hpTo": 0.48,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidW3",
+   "spots": {
+    "tank": "tankW3",
+    "boss": "bossW3",
+    "ranged": "rangedW3",
+    "healer": "healerW3",
+    "offtank": "otW3"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "slimeSpray",
+     "first": 6,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "slimeStream",
+     "first": 8,
+     "every": 5
+    },
+    {
+     "id": "injection",
+     "first": 12,
+     "every": 12,
+     "jitter": 1.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 29,
+     "every": 75,
+     "jitter": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "kite3",
+     "type": "bossAtSpot",
+     "spot": "bossW3",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Walk him to the next mark along the wall",
+     "tip": "Slowly, along the outer wall, with him facing away from the raid. Do not outpace him or Slime Stream hits everyone."
+    },
+    {
+     "id": "spray",
+     "type": "continuous",
+     "metric": "sprayOnRaid",
+     "role": "tanks",
+     "label": "Keep the Slime Spray off the raid",
+     "tip": "He sprays a cone in front of him. Only you are ever in it. Keep your back to the wall and his back to the raid."
+    },
+    {
+     "id": "stream",
+     "type": "continuous",
+     "metric": "slimeStreamTicks",
+     "role": "tanks",
+     "label": "Never leave melee range",
+     "tip": "If you get more than a step away from him, Slime Stream hits the whole raid for 900 a tick."
+    },
+    {
+     "id": "grabSlime3",
+     "type": "afterEvent",
+     "event": "falloutSlime",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Fallout Slime",
+     "tip": "Every Slime Spray drops one by the raid. Taunt it onto you before it starts ticking on the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Fallout Slime first, then him",
+     "tip": "Slimes first. Their poison aura hurts everyone near them."
+    },
+    {
+     "id": "meleeFront3",
+     "type": "onEvent",
+     "event": "slimeSpray",
+     "check": "notInFront",
+     "role": "melee",
+     "label": "Stay out of his front",
+     "tip": "Slime Spray is a cone in front of him. Melee stand behind him or beside him."
+    },
+    {
+     "id": "rangedSpot3",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW3",
+     "grace": 12,
+     "role": "ranged",
+     "label": "Keep up with the raid",
+     "tip": "Walk with the group as he moves along the wall. Stay clear of the cloud line."
+    },
+    {
+     "id": "healerSpot3",
+     "type": "playerAtSpotBy",
+     "spot": "healerW3",
+     "grace": 12,
+     "role": "healer",
+     "label": "Stay with the group and in range",
+     "tip": "Keep the tank in range as he walks, but never stand in a cloud to do it."
+    },
+    {
+     "id": "bomb",
+     "type": "continuous",
+     "metric": "injectionInRaid",
+     "role": "nontank",
+     "label": "Carry the Injection out of the raid",
+     "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+    },
+    {
+     "id": "clouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is high Nature damage every second. Nothing is worth standing in one."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A Slime Spray comes every 18 seconds on top of his swings. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Never let the tank be under half when Slime Spray is due."
+    },
+    {
+     "id": "regain3",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back the moment he turns",
+     "tip": "He is walking at the raid. Taunt, then keep walking the line."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Fourth Stretch",
+   "subtitle": "Clouds on the line",
+   "hpFrom": 0.48,
+   "hpTo": 0.38,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidW4",
+   "spots": {
+    "tank": "tankW4",
+    "boss": "bossW4",
+    "ranged": "rangedW4",
+    "healer": "healerW4",
+    "offtank": "otW4"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "slimeSpray",
+     "first": 6,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "slimeStream",
+     "first": 8,
+     "every": 5
+    },
+    {
+     "id": "injection",
+     "first": 12,
+     "every": 12,
+     "jitter": 1.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 30,
+     "every": 75,
+     "jitter": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "kite4",
+     "type": "bossAtSpot",
+     "spot": "bossW4",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Walk him to the next mark along the wall",
+     "tip": "Slowly, along the outer wall, with him facing away from the raid. Do not outpace him or Slime Stream hits everyone."
+    },
+    {
+     "id": "spray",
+     "type": "continuous",
+     "metric": "sprayOnRaid",
+     "role": "tanks",
+     "label": "Keep the Slime Spray off the raid",
+     "tip": "He sprays a cone in front of him. Only you are ever in it. Keep your back to the wall and his back to the raid."
+    },
+    {
+     "id": "stream",
+     "type": "continuous",
+     "metric": "slimeStreamTicks",
+     "role": "tanks",
+     "label": "Never leave melee range",
+     "tip": "If you get more than a step away from him, Slime Stream hits the whole raid for 900 a tick."
+    },
+    {
+     "id": "grabSlime4",
+     "type": "afterEvent",
+     "event": "falloutSlime",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Fallout Slime",
+     "tip": "Every Slime Spray drops one by the raid. Taunt it onto you before it starts ticking on the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Fallout Slime first, then him",
+     "tip": "Slimes first. Their poison aura hurts everyone near them."
+    },
+    {
+     "id": "meleeFront4",
+     "type": "onEvent",
+     "event": "slimeSpray",
+     "check": "notInFront",
+     "role": "melee",
+     "label": "Stay out of his front",
+     "tip": "Slime Spray is a cone in front of him. Melee stand behind him or beside him."
+    },
+    {
+     "id": "rangedSpot4",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW4",
+     "grace": 12,
+     "role": "ranged",
+     "label": "Keep up with the raid",
+     "tip": "Walk with the group as he moves along the wall. Stay clear of the cloud line."
+    },
+    {
+     "id": "healerSpot4",
+     "type": "playerAtSpotBy",
+     "spot": "healerW4",
+     "grace": 12,
+     "role": "healer",
+     "label": "Stay with the group and in range",
+     "tip": "Keep the tank in range as he walks, but never stand in a cloud to do it."
+    },
+    {
+     "id": "bomb",
+     "type": "continuous",
+     "metric": "injectionInRaid",
+     "role": "nontank",
+     "label": "Carry the Injection out of the raid",
+     "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+    },
+    {
+     "id": "clouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is high Nature damage every second. Nothing is worth standing in one."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A Slime Spray comes every 18 seconds on top of his swings. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Never let the tank be under half when Slime Spray is due."
+    },
+    {
+     "id": "regain4",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back the moment he turns",
+     "tip": "He is walking at the raid. Taunt, then keep walking the line."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Fifth Stretch",
+   "subtitle": "Injections are about to pick up",
+   "hpFrom": 0.38,
+   "hpTo": 0.3,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidW5",
+   "spots": {
+    "tank": "tankW5",
+    "boss": "bossW5",
+    "ranged": "rangedW5",
+    "healer": "healerW5",
+    "offtank": "otW5"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "slimeSpray",
+     "first": 6,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "slimeStream",
+     "first": 8,
+     "every": 5
+    },
+    {
+     "id": "injection",
+     "first": 12,
+     "every": 12,
+     "jitter": 1.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 31,
+     "every": 75,
+     "jitter": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "kite5",
+     "type": "bossAtSpot",
+     "spot": "bossW5",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Walk him to the next mark along the wall",
+     "tip": "Slowly, along the outer wall, with him facing away from the raid. Do not outpace him or Slime Stream hits everyone."
+    },
+    {
+     "id": "spray",
+     "type": "continuous",
+     "metric": "sprayOnRaid",
+     "role": "tanks",
+     "label": "Keep the Slime Spray off the raid",
+     "tip": "He sprays a cone in front of him. Only you are ever in it. Keep your back to the wall and his back to the raid."
+    },
+    {
+     "id": "stream",
+     "type": "continuous",
+     "metric": "slimeStreamTicks",
+     "role": "tanks",
+     "label": "Never leave melee range",
+     "tip": "If you get more than a step away from him, Slime Stream hits the whole raid for 900 a tick."
+    },
+    {
+     "id": "grabSlime5",
+     "type": "afterEvent",
+     "event": "falloutSlime",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Fallout Slime",
+     "tip": "Every Slime Spray drops one by the raid. Taunt it onto you before it starts ticking on the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Fallout Slime first, then him",
+     "tip": "Slimes first. Their poison aura hurts everyone near them."
+    },
+    {
+     "id": "meleeFront5",
+     "type": "onEvent",
+     "event": "slimeSpray",
+     "check": "notInFront",
+     "role": "melee",
+     "label": "Stay out of his front",
+     "tip": "Slime Spray is a cone in front of him. Melee stand behind him or beside him."
+    },
+    {
+     "id": "rangedSpot5",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW5",
+     "grace": 12,
+     "role": "ranged",
+     "label": "Keep up with the raid",
+     "tip": "Walk with the group as he moves along the wall. Stay clear of the cloud line."
+    },
+    {
+     "id": "healerSpot5",
+     "type": "playerAtSpotBy",
+     "spot": "healerW5",
+     "grace": 12,
+     "role": "healer",
+     "label": "Stay with the group and in range",
+     "tip": "Keep the tank in range as he walks, but never stand in a cloud to do it."
+    },
+    {
+     "id": "bomb",
+     "type": "continuous",
+     "metric": "injectionInRaid",
+     "role": "nontank",
+     "label": "Carry the Injection out of the raid",
+     "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+    },
+    {
+     "id": "clouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is high Nature damage every second. Nothing is worth standing in one."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A Slime Spray comes every 18 seconds on top of his swings. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Never let the tank be under half when Slime Spray is due."
+    },
+    {
+     "id": "regain5",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back the moment he turns",
+     "tip": "He is walking at the raid. Taunt, then keep walking the line."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Below 30%",
+   "subtitle": "Injections on two players",
+   "hpFrom": 0.3,
+   "hpTo": 0,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidW6",
+   "spots": {
+    "tank": "tankW6",
+    "boss": "bossW6",
+    "ranged": "rangedW6",
+    "healer": "healerW6",
+    "offtank": "otW6"
+   },
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 7,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "slimeSpray",
+     "first": 6,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "slimeStream",
+     "first": 8,
+     "every": 5
+    },
+    {
+     "id": "injection2",
+     "first": 8,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "aggroClimb",
+     "first": 32,
+     "every": 75,
+     "jitter": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "kite6",
+     "type": "bossAtSpot",
+     "spot": "bossW6",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Walk him to the next mark along the wall",
+     "tip": "Slowly, along the outer wall, with him facing away from the raid. Do not outpace him or Slime Stream hits everyone."
+    },
+    {
+     "id": "spray",
+     "type": "continuous",
+     "metric": "sprayOnRaid",
+     "role": "tanks",
+     "label": "Keep the Slime Spray off the raid",
+     "tip": "He sprays a cone in front of him. Only you are ever in it. Keep your back to the wall and his back to the raid."
+    },
+    {
+     "id": "stream",
+     "type": "continuous",
+     "metric": "slimeStreamTicks",
+     "role": "tanks",
+     "label": "Never leave melee range",
+     "tip": "If you get more than a step away from him, Slime Stream hits the whole raid for 900 a tick."
+    },
+    {
+     "id": "grabSlime6",
+     "type": "afterEvent",
+     "event": "falloutSlime",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Fallout Slime",
+     "tip": "Every Slime Spray drops one by the raid. Taunt it onto you before it starts ticking on the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Fallout Slime first, then him",
+     "tip": "Slimes first. Their poison aura hurts everyone near them."
+    },
+    {
+     "id": "meleeFront6",
+     "type": "onEvent",
+     "event": "slimeSpray",
+     "check": "notInFront",
+     "role": "melee",
+     "label": "Stay out of his front",
+     "tip": "Slime Spray is a cone in front of him. Melee stand behind him or beside him."
+    },
+    {
+     "id": "rangedSpot6",
+     "type": "afterEvent",
+     "event": "poisonCloud",
+     "check": "inRange",
+     "within": 8,
+     "grace": 6,
+     "role": "ranged",
+     "label": "Stay in casting range as he walks",
+     "tip": "Below 30% the Injections are constant. Carry yours out, then come straight back into range."
+    },
+    {
+     "id": "healerSpot6",
+     "type": "afterEvent",
+     "event": "poisonCloud",
+     "check": "inRange",
+     "within": 8,
+     "grace": 6,
+     "role": "healer",
+     "label": "Stay in range of him",
+     "tip": "Below 30% the Injections are constant. Carry yours out, then come straight back into range."
+    },
+    {
+     "id": "bomb",
+     "type": "continuous",
+     "metric": "injectionInRaid",
+     "role": "nontank",
+     "label": "Carry the Injection out of the raid",
+     "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+    },
+    {
+     "id": "clouds",
+     "type": "continuous",
+     "metric": "playerInHazard",
+     "label": "Stay out of the clouds",
+     "tip": "A Poison Cloud is high Nature damage every second. Nothing is worth standing in one."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A Slime Spray comes every 18 seconds on top of his swings. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Never let the tank be under half when Slime Spray is due."
+    },
+    {
+     "id": "regain6",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back the moment he turns",
+     "tip": "He is walking at the raid. Taunt, then keep walking the line."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "ranged"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 1.5,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 1.5,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "sprayOnRaid": {
+   "label": "Slime Sprays that hit the raid",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "tanks",
+   "tip": "Face him along the wall, away from the middle."
+  },
+  "sprayOnYou": {
+   "label": "Slime Sprays you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 2.5,
+   "severe": 2,
+   "roles": "nontank",
+   "tip": "Stay out of his front."
+  },
+  "slimeStreamTicks": {
+   "label": "Slime Stream ticks",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "tanks",
+   "tip": "Do not walk further ahead of him than he can follow."
+  },
+  "injectionInRaid": {
+   "label": "Injections that went off in the raid",
+   "unit": "count",
+   "penaltyPerUnit": 10,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "You have 10 seconds. Run out of the raid to the end of the cloud line behind him and drop it there, never ahead of the tank."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.25
+ },
+ "cues": {
+  "notes": "Taunt him back; run the Injection; heal after every Slime Spray; kill slimes.",
+  "windows": {
+   "perfect": 0.4
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Grobbulus turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "healSpray",
+    "ability": "heal",
+    "on": "event",
+    "event": "slimeSpray",
+    "offset": 0,
+    "early": 0,
+    "late": 3.5,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal after the Spray",
+    "tip": "He just took 2,200 and a swing is coming. Heal now."
+   },
+   {
+    "id": "grabSlimeCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "falloutSlime",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "SLIME",
+    "label": "Pick up the slime",
+    "tip": "Run to it or Taunt it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "hitSlime",
+    "ability": "attack",
+    "on": "event",
+    "event": "falloutSlime",
+    "offset": 2.5,
+    "early": 1.5,
+    "late": 9,
+    "role": "melee",
+    "short": "SLIME",
+    "label": "Kill the slime first",
+    "tip": "Turn to it and hit it. The boss can wait."
+   },
+   {
+    "id": "backOnBoss",
+    "ability": "attack",
+    "on": "event",
+    "event": "poisonCloud",
+    "offset": 2,
+    "early": 1,
+    "late": 6,
+    "role": "ranged",
+    "short": "DPS",
+    "label": "Keep your damage up",
+    "tip": "Clouds are for the kite. You keep hitting him."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "kiteDrill",
+   "name": "The slow walk",
+   "description": "Walk Grobbulus from mark to mark along the wall. Clouds appear under him every 15 seconds; keep them behind you and never break melee.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 75,
+   "loop": false,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "poisonCloud",
+     "first": 3,
+     "every": 15
+    },
+    {
+     "id": "slimeStream",
+     "first": 2,
+     "every": 5
+    }
+   ]
+  },
+  {
+   "id": "injectionDrill",
+   "name": "Carry it out",
+   "description": "An Injection every 12 seconds. Ten seconds to get out to the end of the cloud line behind him before it blows.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 38,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "injection",
+     "first": 2,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "slimeDrill",
+   "name": "Grab the slime",
+   "description": "A Fallout Slime drops into the raid every 12 seconds. Get to it before it reaches the healers.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 38,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "falloutSlime",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "sprayDrill",
+   "name": "Heal through the Spray",
+   "description": "A Slime Spray every 6 seconds on top of his swings. Stay ahead of it.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 38,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "slimeSpray",
+     "first": 3,
+     "every": 6
+    }
+   ]
+  }
+ ]
+}

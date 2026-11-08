@@ -1,0 +1,2183 @@
+{
+ "id": "noth",
+ "name": "Noth the Plaguebringer",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/noth.md: 1,492,487 HP (classicdb), balcony schedule from the wiki and DBM-Vanilla, whose balcony lengths after the first cycle are marked 'Unknown in Classic'. The HP clock is 90 s + 110 s + 150 s of ground time (the wiki's 80% / 50% / 0% benchmarks) with 73 s and 90 s balcony phases between them, 8:33 total; real kills are 7 to 9 minutes and he is expected to die before the third balcony, so the third balcony (two Guardian waves, 'unsurvivable') is not scripted. Room geometry is an estimate: a 36 yd round room, three bone piles NW / NE / SW per the wiki. CURSE OF THE PLAGUEBRINGER (the fight's real mechanic). Real: up to 20 players cursed at once, 10 s, Curse; if it expires it detonates Wrath of the Plaguebringer on everyone within 35 yd. Here: four curse copies land together on the raid (playerChance 0.35 on you), decursed one per GCD. Only Druids and Mages can decurse, so the healer and ranged roles have the button (`dispels` curse; the healer also has magic for Cripple) and the melee and tank roles do not, because the engine cannot have a ghost raider decurse. Each copy, if still up 9.9 s after landing, fires its own Wrath on the decurser player: a `conditional: debuff:curseN` debuff with 680/s for 10 s, the sum of 1,758 initial + 875 to 1,125 every 2 s. Several Wraths at once kill you, as the wiki says ('an instant wipe if several go off'), though the real one hits everyone within 35 yd and the engine's Wrath lands only on the player's decurser role, so melee and tank roles never see a Wrath and the player's own run is the only one that can fail. BLINK every ~25 s (wiki, WT; no DBM timer) teleports Noth about 20 yd to one of three spots (`teleportBossTo`), wipes threat (`threatWipe`) and casts Cripple on his target (Magic, 15 s, -50% move/attack speed/Strength; here `damageTakenMult` 1.25 because the engine cannot slow you). Cripple hits everyone within 20 yd of him; here only the tank's copy is modelled. The tank Taunts or runs back; the ghost tank re-taunts after a delay. WT's 'stop DPS until the MT has him' is modelled as a 2.2 s `shield` (the ghost tank's re-taunt delay) (`bossOnly`, no reflect, roles dps): attacks on him during it count as `attacksIntoShield`, a stand-in for the real risk of taking him off the tank. Real Blink does not apply a shield; that is the workaround for the engine having no threat-based penalty while the boss is loose. Cripple dispels the MT (Priest or Paladin) are on the healer's DISPEL note. SKELETONS: 3 Plagued Warriors every 30 s from three bone piles (`adds`, one per pile; first 12 s, jitter 3, inside DBM's 6.5 to 22.7 s window). The off-tank role holds the NW pile; another group takes NE and SW (`playerFrom`). Warriors are killable but not kill-first while Noth is up: the raid burns them over 22 s. BALCONY phases are `submerged` (Noth untargetable; 73 s and 90 s, wiki/DBM): wave 1 at +3 s, wave 2 at +33 s (DBM adds timer 3 s after arrival, then every 30 s), kill-first adds the raid must kill. Balcony 1 is two Champion waves, balcony 2 is Champions then Guardians (per wiki, Wowhead); per-wave counts are not in any fetched source, so one add per pile per wave is an estimate. Champions' Mortal Strike is a 6 s `healingMult` 0.5 debuff with 450/s on the add tank (values unknown in research, estimated); Guardian Arcane Explosion is a random `hazard` on melee and the off-tank, estimated at 3,000. On his return (`first: 0` one-shot `threatWipe` in the next ground phase, the wiki's 'threat is reset') the tank Taunts him immediately. Curse continues on the ground only; DBM's 10 s-after-return first cast is used. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Noth swings for 1,100 per 2 s on a 10,000 HP tank (real base 8,475 to 9,727, pre-mitigation), so with Cripple up (x1.25) the swing alone is more than the 140/s a healer player's ghost gets passively, and an idle healer loses the tank repeatedly. Skeleton, Champion and Guardian melee damage is not modelled in the engine (adds do not hit). Plagued Warrior cleave, Champion Shadow Shock, Shackle Undead, Guardian stun-lock and the third balcony are not modelled.",
+ "sources": [
+  "docs/research/naxxramas/noth.md",
+  "https://warcraft.wiki.gg/wiki/Noth_the_Plaguebringer_(Classic)",
+  "https://www.wowhead.com/classic/guide/noth-the-plaguebringer-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=29213/curse-of-the-plaguebringer",
+  "https://www.wowhead.com/classic/spell=29214/wrath-of-the-plaguebringer",
+  "https://www.wowhead.com/classic/spell=29212/cripple",
+  "https://www.wowhead.com/classic/spell=29237/summon-skeletons",
+  "https://classicdb.ch/?npc=15954",
+  "https://classicdb.ch/?npc=16984",
+  "https://classicdb.ch/?npc=16983",
+  "https://classicdb.ch/?npc=16981",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/PlagueQuarter/Noth.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Noth's Crypt",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      36,
+      0
+     ],
+     [
+      35.5,
+      6.3
+     ],
+     [
+      33.8,
+      12.3
+     ],
+     [
+      31.2,
+      18
+     ],
+     [
+      27.6,
+      23.1
+     ],
+     [
+      23.1,
+      27.6
+     ],
+     [
+      18,
+      31.2
+     ],
+     [
+      12.3,
+      33.8
+     ],
+     [
+      6.3,
+      35.5
+     ],
+     [
+      0,
+      36
+     ],
+     [
+      -6.3,
+      35.5
+     ],
+     [
+      -12.3,
+      33.8
+     ],
+     [
+      -18,
+      31.2
+     ],
+     [
+      -23.1,
+      27.6
+     ],
+     [
+      -27.6,
+      23.1
+     ],
+     [
+      -31.2,
+      18
+     ],
+     [
+      -33.8,
+      12.3
+     ],
+     [
+      -35.5,
+      6.3
+     ],
+     [
+      -36,
+      0
+     ],
+     [
+      -35.5,
+      -6.3
+     ],
+     [
+      -33.8,
+      -12.3
+     ],
+     [
+      -31.2,
+      -18
+     ],
+     [
+      -27.6,
+      -23.1
+     ],
+     [
+      -23.1,
+      -27.6
+     ],
+     [
+      -18,
+      -31.2
+     ],
+     [
+      -12.3,
+      -33.8
+     ],
+     [
+      -6.3,
+      -35.5
+     ],
+     [
+      0,
+      -36
+     ],
+     [
+      6.3,
+      -35.5
+     ],
+     [
+      12.3,
+      -33.8
+     ],
+     [
+      18,
+      -31.2
+     ],
+     [
+      23.1,
+      -27.6
+     ],
+     [
+      27.6,
+      -23.1
+     ],
+     [
+      31.2,
+      -18
+     ],
+     [
+      33.8,
+      -12.3
+     ],
+     [
+      35.5,
+      -6.3
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -32
+     ],
+     [
+      8,
+      -32
+     ],
+     [
+      8,
+      -58
+     ],
+     [
+      -8,
+      -58
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      8,
+      -35.1
+     ],
+     [
+      16.2,
+      -32.1
+     ],
+     [
+      23.5,
+      -27.3
+     ],
+     [
+      29.4,
+      -20.8
+     ],
+     [
+      33.5,
+      -13.2
+     ],
+     [
+      35.7,
+      -4.7
+     ],
+     [
+      35.8,
+      4
+     ],
+     [
+      33.8,
+      12.5
+     ],
+     [
+      29.7,
+      20.3
+     ],
+     [
+      24,
+      26.8
+     ],
+     [
+      16.8,
+      31.8
+     ],
+     [
+      8.7,
+      34.9
+     ],
+     [
+      0,
+      36
+     ],
+     [
+      -8.7,
+      34.9
+     ],
+     [
+      -16.8,
+      31.8
+     ],
+     [
+      -24,
+      26.8
+     ],
+     [
+      -29.7,
+      20.3
+     ],
+     [
+      -33.8,
+      12.5
+     ],
+     [
+      -35.8,
+      4
+     ],
+     [
+      -35.7,
+      -4.7
+     ],
+     [
+      -33.5,
+      -13.2
+     ],
+     [
+      -29.4,
+      -20.8
+     ],
+     [
+      -23.5,
+      -27.3
+     ],
+     [
+      -16.2,
+      -32.1
+     ],
+     [
+      -8,
+      -35.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -8,
+      -35.1
+     ],
+     [
+      -8,
+      -58
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      8,
+      -35.1
+     ],
+     [
+      8,
+      -58
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -52
+    ]
+   },
+   {
+    "text": "Noth",
+    "at": [
+     0,
+     4
+    ]
+   },
+   {
+    "text": "Bone pile NW",
+    "at": [
+     -27,
+     25
+    ]
+   },
+   {
+    "text": "Bone pile NE",
+    "at": [
+     27,
+     25
+    ]
+   },
+   {
+    "text": "Bone pile SW",
+    "at": [
+     -27,
+     -22
+    ]
+   },
+   {
+    "text": "Balcony",
+    "at": [
+     0,
+     33
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -52,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 8,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -40,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 11,
+   "tolerance": 4,
+   "label": "Tank: centre of the room"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 5,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 80,
+   "label": "Noth"
+  },
+  "raidCenter": {
+   "x": 0,
+   "y": -8,
+   "spread": 13,
+   "label": "Raid: centre"
+  },
+  "rangedSpot": {
+   "x": -6,
+   "y": -8,
+   "tolerance": 8,
+   "label": "Ranged: centre group"
+  },
+  "healerSpot": {
+   "x": 6,
+   "y": -8,
+   "tolerance": 8,
+   "label": "Healers: centre group"
+  },
+  "boneNW": {
+   "x": -25,
+   "y": 24,
+   "label": "NW bone pile"
+  },
+  "boneNE": {
+   "x": 25,
+   "y": 24,
+   "label": "NE bone pile"
+  },
+  "boneSW": {
+   "x": -25,
+   "y": -20,
+   "label": "SW bone pile"
+  },
+  "otHold": {
+   "x": -16,
+   "y": 16,
+   "tolerance": 6,
+   "label": "Off-tank: NW pile, facing away"
+  },
+  "ghostOfftankSpot": {
+   "x": 16,
+   "y": 16,
+   "label": "Other off-tanks: the rest of the piles"
+  },
+  "centreHold": {
+   "x": 0,
+   "y": 3,
+   "tolerance": 7,
+   "label": "Hold the centre"
+  },
+  "blinkA": {
+   "x": -16,
+   "y": -6,
+   "label": "Blink spot"
+  },
+  "blinkB": {
+   "x": 16,
+   "y": -6,
+   "label": "Blink spot"
+  },
+  "blinkC": {
+   "x": 0,
+   "y": 21,
+   "label": "Blink spot"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 900,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 900,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7.5,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 1100,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold Noth in the centre of the room. He Blinks about every 25 seconds, wipes all threat and Cripples you. Taunt him the moment he lands and walk him back. When he comes back down from the balcony threat is wiped again: Taunt at once.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Bone pile tank",
+   "short": "Off-tank",
+   "description": "You hold the NW bone pile. Plagued Warriors spawn there every 30 seconds, and on the balcony phases Champions and Guardians do too. Grab them before they reach a healer. Face them away from the raid.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Noth is the priority while he is on the ground. When he Blinks, stop attacking until the main tank has him again. When he goes up to the balcony, kill the adds with everyone else.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "You are a Decurser too. Every Curse of the Plaguebringer has to come off within 10 seconds or it blows up as Wrath on the raid. Press Decurse until there are none left, then go back to your target.",
+   "abilities": [
+    "attack",
+    "dispel"
+   ],
+   "attackRange": 30,
+   "dispels": [
+    "curse"
+   ]
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Keep the tank up, Decurse every Curse within 10 seconds, and dispel Cripple off the main tank. Your button stands for both your Druids (Curse) and your Priests (Cripple). On the balcony phases keep your add tank alive through Mortal Strike.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "curse",
+    "magic"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "curse",
+    "magic"
+   ],
+   "tip": "Remove a Curse (Druid, Mage) or Cripple (Priest, Paladin). One button stands in for all of them."
+  }
+ },
+ "actions": {
+  "curse1": {
+   "label": "Curse of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "dispel": "curse",
+   "duration": 10,
+   "playerChance": 0.35,
+   "warn": true,
+   "cue": "poison",
+   "icon": "curse",
+   "requires": "grounded",
+   "hidden": false,
+   "tip": "Up to twenty players are cursed. Decurse every one within 10 seconds or it blows up as Wrath of the Plaguebringer on the raid. Druids and mages only.",
+   "follow": [
+    {
+     "id": "wrath1",
+     "delay": 9.9
+    },
+    {
+     "id": "curse2",
+     "delay": 0
+    }
+   ]
+  },
+  "wrath1": {
+   "label": "Wrath of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "dispel": "none",
+   "duration": 10.05,
+   "tickDamage": 680,
+   "conditional": "debuff:curse1",
+   "playerMetric": "wraths",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "A Curse expired undecursed and went off on the raid. Several of these at once is a wipe."
+  },
+  "curse2": {
+   "label": "Curse of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "dispel": "curse",
+   "duration": 10,
+   "playerChance": 0.35,
+   "warn": false,
+   "cue": null,
+   "icon": "curse",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Up to twenty players are cursed. Decurse every one within 10 seconds or it blows up as Wrath of the Plaguebringer on the raid. Druids and mages only.",
+   "follow": [
+    {
+     "id": "wrath2",
+     "delay": 9.9
+    },
+    {
+     "id": "curse3",
+     "delay": 0
+    }
+   ]
+  },
+  "wrath2": {
+   "label": "Wrath of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "dispel": "none",
+   "duration": 10.05,
+   "tickDamage": 680,
+   "conditional": "debuff:curse2",
+   "playerMetric": "wraths",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "A Curse expired undecursed and went off on the raid. Several of these at once is a wipe."
+  },
+  "curse3": {
+   "label": "Curse of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "dispel": "curse",
+   "duration": 10,
+   "playerChance": 0.35,
+   "warn": false,
+   "cue": null,
+   "icon": "curse",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Up to twenty players are cursed. Decurse every one within 10 seconds or it blows up as Wrath of the Plaguebringer on the raid. Druids and mages only.",
+   "follow": [
+    {
+     "id": "wrath3",
+     "delay": 9.9
+    },
+    {
+     "id": "curse4",
+     "delay": 0
+    }
+   ]
+  },
+  "wrath3": {
+   "label": "Wrath of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "dispel": "none",
+   "duration": 10.05,
+   "tickDamage": 680,
+   "conditional": "debuff:curse3",
+   "playerMetric": "wraths",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "A Curse expired undecursed and went off on the raid. Several of these at once is a wipe."
+  },
+  "curse4": {
+   "label": "Curse of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "dispel": "curse",
+   "duration": 10,
+   "playerChance": 0.35,
+   "warn": false,
+   "cue": null,
+   "icon": "curse",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Up to twenty players are cursed. Decurse every one within 10 seconds or it blows up as Wrath of the Plaguebringer on the raid. Druids and mages only.",
+   "follow": [
+    {
+     "id": "wrath4",
+     "delay": 9.9
+    }
+   ]
+  },
+  "wrath4": {
+   "label": "Wrath of the Plaguebringer",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "dispel": "none",
+   "duration": 10.05,
+   "tickDamage": 680,
+   "conditional": "debuff:curse4",
+   "playerMetric": "wraths",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "A Curse expired undecursed and went off on the raid. Several of these at once is a wipe."
+  },
+  "blinkA": {
+   "label": "Blink",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "blinkA",
+   "toast": "Noth blinked: threat is wiped. Tank, Taunt him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He blinks across the room, drops his whole threat table and Cripples whoever he was hitting. Tanks: Taunt him back. DPS: stop until the tank has him.",
+   "follow": [
+    {
+     "id": "cripple",
+     "delay": 0
+    },
+    {
+     "id": "blinkHold",
+     "delay": 0
+    }
+   ]
+  },
+  "blinkB": {
+   "label": "Blink",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "blinkB",
+   "toast": "Noth blinked: threat is wiped. Tank, Taunt him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He blinks across the room, drops his whole threat table and Cripples whoever he was hitting. Tanks: Taunt him back. DPS: stop until the tank has him.",
+   "follow": [
+    {
+     "id": "cripple",
+     "delay": 0
+    },
+    {
+     "id": "blinkHold",
+     "delay": 0
+    }
+   ]
+  },
+  "blinkC": {
+   "label": "Blink",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "blinkC",
+   "toast": "Noth blinked: threat is wiped. Tank, Taunt him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He blinks across the room, drops his whole threat table and Cripples whoever he was hitting. Tanks: Taunt him back. DPS: stop until the tank has him.",
+   "follow": [
+    {
+     "id": "cripple",
+     "delay": 0
+    },
+    {
+     "id": "blinkHold",
+     "delay": 0
+    }
+   ]
+  },
+  "cripple": {
+   "label": "Cripple",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "magic",
+   "duration": 15,
+   "damageTakenMult": 1.25,
+   "warn": false,
+   "cue": null,
+   "icon": "curse",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Cripple halves the tank's run speed and attack rate. Dispel it off the main tank."
+  },
+  "blinkHold": {
+   "label": "Threat wiped",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 2.2,
+   "reflectDamage": 0,
+   "roles": "dps",
+   "bossOnly": true,
+   "toast": "He blinked. Stop until the tank has him.",
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "He dropped his whole threat table. Hit him now and he comes to you."
+  },
+  "skel": {
+   "label": "Plagued Warriors",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "boneNW",
+    "boneNE",
+    "boneSW"
+   ],
+   "playerFrom": [
+    "boneNW"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 22,
+   "heldLifetime": 26,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "Rise, my soldiers. Three Plagued Warriors from the bone piles every 30 seconds."
+  },
+  "skelAir": {
+   "label": "Plagued Warriors",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "boneNW",
+    "boneNE",
+    "boneSW"
+   ],
+   "playerFrom": [
+    "boneNW"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 18,
+   "heldLifetime": 26,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "hidden": true,
+   "tip": "They keep coming even while he is up on the balcony."
+  },
+  "champions1": {
+   "label": "Plagued Champions",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "boneNW",
+    "boneNE",
+    "boneSW"
+   ],
+   "playerFrom": [
+    "boneNW"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 30,
+   "heldLifetime": 40,
+   "killable": true,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "Off-tank: the NW spawn is yours. Grab it before it reaches a healer."
+  },
+  "champions2": {
+   "label": "Plagued Champions",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "boneNW",
+    "boneNE",
+    "boneSW"
+   ],
+   "playerFrom": [
+    "boneNW"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 30,
+   "heldLifetime": 40,
+   "killable": true,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "Off-tank: the NW spawn is yours. Grab it before it reaches a healer."
+  },
+  "guardians": {
+   "label": "Plagued Guardians",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "boneNW",
+    "boneNE",
+    "boneSW"
+   ],
+   "playerFrom": [
+    "boneNW"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 26,
+   "heldLifetime": 36,
+   "killable": true,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "Off-tank: the NW spawn is yours. Grab it before it reaches a healer."
+  },
+  "mortalStrike": {
+   "label": "Mortal Strike",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 6,
+   "tickDamage": 450,
+   "healingMult": 0.5,
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "any",
+   "hidden": true,
+   "tip": "A Champion's Mortal Strike halves the healing your add tank takes for 6 seconds. Bring big heals."
+  },
+  "arcaneBurst": {
+   "label": "Arcane Explosion",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.3,
+   "roles": [
+    "melee",
+    "offtank"
+   ],
+   "radius": 7,
+   "warning": 1.6,
+   "active": 0.4,
+   "damage": 3000,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "any",
+   "tip": "A Guardian is about to explode. Step out of the ring."
+  },
+  "wipeOnReturn": {
+   "label": "He has no threat table",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "He is back and has no threat. Tank, Taunt!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Coming down from the balcony wipes his whole table. Taunt the moment he lands."
+  },
+  "submerge": {
+   "label": "Noth teleports to the balcony",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He is gone for a while and his adds are not."
+  },
+  "emerge": {
+   "label": "Noth returns",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He lands with no threat: tank, Taunt him at once."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Ground",
+   "subtitle": "Skeletons, Curse, Blink",
+   "hpFrom": 1,
+   "hpTo": 0.8,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otHold"
+   },
+   "actions": [
+    {
+     "id": "skel",
+     "first": 12,
+     "every": 30,
+     "jitter": 3
+    },
+    {
+     "id": "curse1",
+     "first": 14,
+     "every": 59,
+     "jitter": 7
+    },
+    {
+     "id": "blinkA",
+     "first": 25,
+     "every": 75,
+     "jitter": 2
+    },
+    {
+     "id": "blinkB",
+     "first": 50,
+     "every": 75,
+     "jitter": 2
+    },
+    {
+     "id": "blinkC",
+     "first": 75,
+     "every": 75,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pick him up in the centre",
+     "tip": "Tank him in the middle of the room with the raid around him."
+    },
+    {
+     "id": "regain1",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Taunt him the moment he blinks",
+     "tip": "He has wiped threat and moved. Taunt him and walk him back."
+    },
+    {
+     "id": "grab1",
+     "type": "afterEvent",
+     "event": "skel",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up your bone pile skeleton",
+     "tip": "A Plagued Warrior spawns at the NW pile every 30 seconds. Get to it before it reaches the raid."
+    },
+    {
+     "id": "otPlace1",
+     "type": "playerAtSpotBy",
+     "spot": "otHold",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold skeletons by the NW pile",
+     "tip": "Face them away from the raid at your pile."
+    },
+    {
+     "id": "decurse1",
+     "type": "afterEvent",
+     "event": "curse1",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 2,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse every one within 10 seconds",
+     "tip": "Press Decurse until every Curse is gone. If even one expires it goes off on the raid as Wrath of the Plaguebringer."
+    },
+    {
+     "id": "crippleOff1",
+     "type": "afterEvent",
+     "event": "cripple",
+     "check": "noDispellable",
+     "within": 5,
+     "grace": 6,
+     "role": "healer",
+     "label": "Dispel Cripple off the tank",
+     "tip": "Cripple halves the main tank's speed and attack rate. Dispel it the moment he is Crippled."
+    },
+    {
+     "id": "rangedSpot1",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay with the middle group",
+     "tip": "Decursers stand centrally so nobody is out of range of a cleanse."
+    },
+    {
+     "id": "meleeRange1",
+     "type": "afterEvent",
+     "event": "skel",
+     "check": "inRange",
+     "within": 6,
+     "grace": 8,
+     "role": "melee",
+     "label": "Back on Noth between adds",
+     "tip": "Noth comes first while he is on the ground. Skeletons die to the others."
+    },
+    {
+     "id": "holdBlink1",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop when he blinks",
+     "tip": "When he blinks there is no threat on anyone. Stop until the tank has him, or you pull him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The main tank takes his swings and stays Crippled until you dispel it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep him above half: Blink means a few seconds with no tank at all."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Balcony",
+   "subtitle": "Two Champion waves",
+   "hpFrom": 0.8,
+   "hpTo": 0.8,
+   "duration": 73,
+   "bossState": "submerged",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "centreHold",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otHold"
+   },
+   "actions": [
+    {
+     "id": "champions1",
+     "first": 3
+    },
+    {
+     "id": "champions2",
+     "first": 33
+    },
+    {
+     "id": "skelAir",
+     "first": 15,
+     "every": 30,
+     "jitter": 3
+    },
+    {
+     "id": "mortalStrike",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "arcaneBurst",
+     "first": 40,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the adds before anything else",
+     "tip": "Noth is out of reach: the adds are your whole job until he comes back."
+    },
+    {
+     "id": "grabWave2",
+     "type": "afterEvent",
+     "event": "champions1",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Grab the wave from your pile",
+     "tip": "Champions and Guardians head for the raid. Be on yours first."
+    },
+    {
+     "id": "hold2",
+     "type": "playerAtSpotBy",
+     "spot": "centreHold",
+     "grace": 5,
+     "role": "tanks",
+     "label": "Hold the centre, ready for him",
+     "tip": "Stay close to the middle: he comes straight back down when this ends."
+    },
+    {
+     "id": "rangedHold2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay with the middle group",
+     "tip": "Decursers and healers stay centred."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mortal Strike halves the healing on your add tank. Stay ahead of it."
+    },
+    {
+     "id": "mortalHeal2",
+     "type": "afterEvent",
+     "event": "mortalStrike",
+     "check": "noDispellable",
+     "within": 3,
+     "grace": 6,
+     "role": "healer",
+     "label": "Heal through Mortal Strike",
+     "tip": "Your heals do half until it falls off: bring your biggest one."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Ground",
+   "subtitle": "Curse 10 s after he lands",
+   "hpFrom": 0.8,
+   "hpTo": 0.5,
+   "duration": 110,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otHold"
+   },
+   "actions": [
+    {
+     "id": "wipeOnReturn",
+     "first": 0
+    },
+    {
+     "id": "skel",
+     "first": 12,
+     "every": 30,
+     "jitter": 3
+    },
+    {
+     "id": "curse1",
+     "first": 10,
+     "every": 59,
+     "jitter": 7
+    },
+    {
+     "id": "blinkA",
+     "first": 25,
+     "every": 75,
+     "jitter": 2
+    },
+    {
+     "id": "blinkB",
+     "first": 50,
+     "every": 75,
+     "jitter": 2
+    },
+    {
+     "id": "blinkC",
+     "first": 75,
+     "every": 75,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "regain3",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Taunt him the moment he blinks",
+     "tip": "He has wiped threat and moved. Taunt him and walk him back."
+    },
+    {
+     "id": "grab3",
+     "type": "afterEvent",
+     "event": "skel",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up your bone pile skeleton",
+     "tip": "A Plagued Warrior spawns at the NW pile every 30 seconds. Get to it before it reaches the raid."
+    },
+    {
+     "id": "otPlace3",
+     "type": "playerAtSpotBy",
+     "spot": "otHold",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold skeletons by the NW pile",
+     "tip": "Face them away from the raid at your pile."
+    },
+    {
+     "id": "decurse3",
+     "type": "afterEvent",
+     "event": "curse1",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 2,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse every one within 10 seconds",
+     "tip": "Press Decurse until every Curse is gone. If even one expires it goes off on the raid as Wrath of the Plaguebringer."
+    },
+    {
+     "id": "crippleOff3",
+     "type": "afterEvent",
+     "event": "cripple",
+     "check": "noDispellable",
+     "within": 5,
+     "grace": 6,
+     "role": "healer",
+     "label": "Dispel Cripple off the tank",
+     "tip": "Cripple halves the main tank's speed and attack rate. Dispel it the moment he is Crippled."
+    },
+    {
+     "id": "rangedSpot3",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay with the middle group",
+     "tip": "Decursers stand centrally so nobody is out of range of a cleanse."
+    },
+    {
+     "id": "meleeRange3",
+     "type": "afterEvent",
+     "event": "skel",
+     "check": "inRange",
+     "within": 6,
+     "grace": 8,
+     "role": "melee",
+     "label": "Back on Noth between adds",
+     "tip": "Noth comes first while he is on the ground. Skeletons die to the others."
+    },
+    {
+     "id": "holdBlink3",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop when he blinks",
+     "tip": "When he blinks there is no threat on anyone. Stop until the tank has him, or you pull him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The main tank takes his swings and stays Crippled until you dispel it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep him above half: Blink means a few seconds with no tank at all."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Balcony",
+   "subtitle": "Champions, then Guardians",
+   "hpFrom": 0.5,
+   "hpTo": 0.5,
+   "duration": 90,
+   "bossState": "submerged",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "centreHold",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otHold"
+   },
+   "actions": [
+    {
+     "id": "champions1",
+     "first": 3
+    },
+    {
+     "id": "guardians",
+     "first": 33
+    },
+    {
+     "id": "skelAir",
+     "first": 15,
+     "every": 30,
+     "jitter": 3
+    },
+    {
+     "id": "mortalStrike",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "arcaneBurst",
+     "first": 40,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the adds before anything else",
+     "tip": "Noth is out of reach: the adds are your whole job until he comes back."
+    },
+    {
+     "id": "grabWave4",
+     "type": "afterEvent",
+     "event": "champions1",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Grab the wave from your pile",
+     "tip": "Champions and Guardians head for the raid. Be on yours first."
+    },
+    {
+     "id": "hold4",
+     "type": "playerAtSpotBy",
+     "spot": "centreHold",
+     "grace": 5,
+     "role": "tanks",
+     "label": "Hold the centre, ready for him",
+     "tip": "Stay close to the middle: he comes straight back down when this ends."
+    },
+    {
+     "id": "rangedHold4",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay with the middle group",
+     "tip": "Decursers and healers stay centred."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mortal Strike halves the healing on your add tank. Stay ahead of it."
+    },
+    {
+     "id": "mortalHeal4",
+     "type": "afterEvent",
+     "event": "mortalStrike",
+     "check": "noDispellable",
+     "within": 3,
+     "grace": 6,
+     "role": "healer",
+     "label": "Heal through Mortal Strike",
+     "tip": "Your heals do half until it falls off: bring your biggest one."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Ground",
+   "subtitle": "Kill him before the third balcony",
+   "hpFrom": 0.5,
+   "hpTo": 0,
+   "duration": 150,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otHold"
+   },
+   "actions": [
+    {
+     "id": "wipeOnReturn",
+     "first": 0
+    },
+    {
+     "id": "skel",
+     "first": 12,
+     "every": 30,
+     "jitter": 3
+    },
+    {
+     "id": "curse1",
+     "first": 10,
+     "every": 59,
+     "jitter": 7
+    },
+    {
+     "id": "blinkA",
+     "first": 25,
+     "every": 75,
+     "jitter": 2
+    },
+    {
+     "id": "blinkB",
+     "first": 50,
+     "every": 75,
+     "jitter": 2
+    },
+    {
+     "id": "blinkC",
+     "first": 75,
+     "every": 75,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "regain5",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Taunt him the moment he blinks",
+     "tip": "He has wiped threat and moved. Taunt him and walk him back."
+    },
+    {
+     "id": "grab5",
+     "type": "afterEvent",
+     "event": "skel",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up your bone pile skeleton",
+     "tip": "A Plagued Warrior spawns at the NW pile every 30 seconds. Get to it before it reaches the raid."
+    },
+    {
+     "id": "otPlace5",
+     "type": "playerAtSpotBy",
+     "spot": "otHold",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold skeletons by the NW pile",
+     "tip": "Face them away from the raid at your pile."
+    },
+    {
+     "id": "decurse5",
+     "type": "afterEvent",
+     "event": "curse1",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 2,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse every one within 10 seconds",
+     "tip": "Press Decurse until every Curse is gone. If even one expires it goes off on the raid as Wrath of the Plaguebringer."
+    },
+    {
+     "id": "crippleOff5",
+     "type": "afterEvent",
+     "event": "cripple",
+     "check": "noDispellable",
+     "within": 5,
+     "grace": 6,
+     "role": "healer",
+     "label": "Dispel Cripple off the tank",
+     "tip": "Cripple halves the main tank's speed and attack rate. Dispel it the moment he is Crippled."
+    },
+    {
+     "id": "rangedSpot5",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay with the middle group",
+     "tip": "Decursers stand centrally so nobody is out of range of a cleanse."
+    },
+    {
+     "id": "meleeRange5",
+     "type": "afterEvent",
+     "event": "skel",
+     "check": "inRange",
+     "within": 6,
+     "grace": 8,
+     "role": "melee",
+     "label": "Back on Noth between adds",
+     "tip": "Noth comes first while he is on the ground. Skeletons die to the others."
+    },
+    {
+     "id": "holdBlink5",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop when he blinks",
+     "tip": "When he blinks there is no threat on anyone. Stop until the tank has him, or you pull him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The main tank takes his swings and stays Crippled until you dispel it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Keep him above half: Blink means a few seconds with no tank at all."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.08,
+   "severe": 80,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "attacksIntoShield": {
+   "label": "Attacks on Noth with no threat table",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "When he blinks nobody has threat. Stop for a moment and let the tank get him."
+  },
+  "wraths": {
+   "label": "Wraths that went off",
+   "unit": "count",
+   "penaltyPerUnit": 12,
+   "severe": 1,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "tip": "Every Curse you let expire goes off on the raid."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Taunt him back after every Blink and after every return. Decurse every Curse. Grab your pile.",
+  "windows": {
+   "perfect": 1.2
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Noth turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelCurse",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 7,
+    "role": [
+     "healer",
+     "ranged"
+    ],
+    "short": "DECURSE",
+    "label": "Decurse it",
+    "tip": "Press Decurse until the last Curse is gone. One left and the raid eats a Wrath."
+   },
+   {
+    "id": "grabCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "skel",
+    "offset": 1,
+    "early": 1,
+    "late": 9,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Grab your skeleton",
+    "tip": "Run to the NW pile or Taunt it.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "blinkDrill",
+   "name": "Taunt back after every Blink",
+   "description": "He Blinks every 12 seconds and wipes threat every time. Taunt him the moment he lands.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "blinkA",
+     "first": 3,
+     "every": 24
+    },
+    {
+     "id": "blinkB",
+     "first": 15,
+     "every": 24
+    }
+   ]
+  },
+  {
+   "id": "curseDrill",
+   "name": "Decurse every Curse",
+   "description": "Curses land on the raid every 13 seconds. Press Decurse until they are all gone before the 10 s run out.",
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "curse1",
+     "first": 3,
+     "every": 13,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "pileDrill",
+   "name": "Hold your bone pile",
+   "description": "A skeleton every 12 seconds from the NW pile. Pick it up before it reaches the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "skel",
+     "first": 3,
+     "every": 12,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "blinkHoldDrill",
+   "name": "Stop when he Blinks",
+   "description": "He Blinks every 15 seconds. Stop attacking until the tank has him back.",
+   "roles": "melee",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "blinkA",
+     "first": 3,
+     "every": 30
+    },
+    {
+     "id": "blinkB",
+     "first": 18,
+     "every": 30
+    }
+   ]
+  },
+  {
+   "id": "balconyDrill",
+   "name": "Kill the wave first",
+   "description": "A balcony wave. Kill the adds and do not let them reach the healers.",
+   "roles": [
+    "melee",
+    "ranged"
+   ],
+   "startPhase": 2,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "champions1",
+     "first": 2,
+     "every": 30
+    }
+   ]
+  },
+  {
+   "id": "healBalcony",
+   "name": "Add tank through Mortal Strike",
+   "description": "A Mortal Strike every 7 seconds halves your heals on the add tank. Stay ahead of it.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 45,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "mortalStrike",
+     "first": 2,
+     "every": 7,
+     "jitter": 1
+    }
+   ]
+  }
+ ]
+}

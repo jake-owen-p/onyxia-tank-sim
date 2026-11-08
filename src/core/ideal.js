@@ -144,7 +144,7 @@ export function idealPlayerPos(state, script) {
   const w = state.world, b = w.boss;
   if (!state.phaseDef) return { x: w.player.x, y: w.player.y, reason: 'wait' };
   const bomb = w.hazards.find((h) => h.carried && h.state === 'warning' && h.runTo);
-  if (bomb) return { x: bomb.runTo.x, y: bomb.runTo.y, reason: 'runOut' };
+  if (bomb) return dodgeHazards(bomb.runTo.x, bomb.runTo.y, state, 'runOut');
   const castDef = b.cast && script.actions[b.cast.id];
   // Cover: for a cast you can hide from, or when a stacking debuff has reached the point where you drop it.
   const heavy = state.debuffs.find((d) => d.on === 'player' && d.shelterAt && d.stacks >= d.shelterAt && d.safeSpots);

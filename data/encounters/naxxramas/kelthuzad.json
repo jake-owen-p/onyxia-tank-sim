@@ -1,0 +1,2071 @@
+{
+ "id": "kelthuzad",
+ "name": "Kel'Thuzad",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/kelthuzad.md. The chamber is a 45 yd round room (estimate; the sources give no measurement). Phase 1 is 230 s, DBM's log-derived value (229 to 231 s, marked as following a July 2026 patch); the wiki and Warcraft Tavern say 5:10, unresolved. HP is a clock: P2 100% to 40% in 190 s, P3 40% to 0% in 130 s (classicdb 2.5M vs wiki 3.15M; no source gives kill times). Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Melee 850 per 2 s from 9,853 to 11,301 pre-mitigation, Frostbolt 5,000 on the tank (real 7,438 to 11,000, a one-shot risk), Volley 2,400 on raiders and 1,400 on the tank about every 24 s, jitter 8, so 16 to 32 s (the 15.7 to 63.1 s variable timer in DBM's Lua belongs to the Volley, spell 28479; the guides say about every 15 s and disagree with DBM; real damage 2,550 to 3,500 per the research; the tank's lower figure assumes frost resistance), so a healer who does nothing loses the tank inside 20 seconds of P2 and inside a minute of P1. PHASE 1: `bossState: submerged`, HP frozen at 100%, adds only: Soldiers (`killFirst` for the ranged team, about 115 in all), Soul Weavers (14, 7 waves of 2) and Abominations (about 14). The real wave accelerates towards the end: cmangos has a full table (an emulator table 'to be improved once Classic sniffs are available': Soldiers every 5 s for 65 s, 4 s for 60 s, 3 s for 54 s, 2 s for 54 s, 1 s for 47 s), here scaled to three stacking streams of 5 Soldiers (every 20 s from 6 s, every 16 s from 140 s, every 8 s from 190 s), mostly late. Soldiers walk to the middle (`holdSpot`) instead of exploding on contact: the engine cannot damage the raid from add contact, so `soldierBlast` (a raid-wide Dark Blast every 45 s, 2,000 scaled) stands for the occasional leak, not a Soldier's own touch; the 'two reaching the raid is a wipe' failure is therefore not simulated. Mortal Wound (-10% healing per stack on the Abomination tank) is a stacking `debuff` with `healingMult` 0.9 on whoever tanks, 150 per second per stack up to 4; the real taunt rotation for stack management is not modelled: the engine has no add taunt swap. Abominations, Soldiers and Weavers all burn on `lifetime`, because the engine has only one add health model. Soul Weaver's Wail of Souls and the Abominations' own swings are not separate actions; the swings are folded into Mortal Wound's tick (`mortalWoundOt` is the same stacking debuff on the off-tank role, which holds the Abominations itself). PHASE 2/3: Frostbolt (2 s, interruptible, `completedMetric` frostboltsLanded) is on an estimated 24 s cadence with no timer source (DBM has only a cast bar for the single-target Frostbolt; wiki 'often chain-cast'); in the tank, off-tank and healer roles nobody can press the interrupt so all land, which the real raid's kickers would mostly stop. Frost Blast is two actions: `frostBlastYou` (playerChance 0.1, about the real handful of victims and deliberately under the 0.25 used for reactions: the victim has no reaction to make, and at 0.25 a 5 s stun overlaps a one-shot Shadow Fissure often enough to kill a player who could not move, which validation showed on the off-tank and melee seats, 5 s stun, 1,700 per second, real 104% of max HP over 5 s on the player if unhealed; the engine's passive heal keeps a lone player alive) and `frostBlastGhost`, which `follow`s the same cast (the victim the healer role keeps alive is the ghost tank, 1,300 per second for 5 s, the real heal-within-4-s check: a healer who does nothing loses the tank). The chain to players within 10 yd is `frostBlastChain`: a carried `stayPut` bomb (`playerChance` 0.1 on ranged and healers, 9.5 yd, `raidMetric` frostBlastChained) with the raid in a 10 yd formation (`raidP2` `spacing`), standing for the real chain that a spread raid avoids (spell 27808, 10 yd). Detonate Mana is `carried` (raidMetric detonateCaught), radius 10, 5 s (research 4 to 5 s), mana and the burn itself are not modelled because the engine has no mana. Shadow Fissure is a telegraphed one-shot, 3 s warning, 20,000 scaled, about every 13 s (estimate; 10 s in the guides, DBM 10.9 to 42.1 s), `playerChance` 0.12 (real about one in 40, raised for rehearsal but kept low because the marker for a carried Detonate Mana holds you on its run-out spot and does not step you out of a Fissure that lands under you there, which is an engine gap). `detonateCaught` costs 4 rather than 8 because with the raid in a 10 yd formation a carrier cannot always reach 13 yd of clear floor inside 5 s. Chains is one event: `chains` `follow`s into `chainsWipe`, the threat reset on the MT (real: Chains on the MT + 4 others, threat wiped, off-tank takes over; he cannot be taunted so the tank's Taunt button stands for the threat race; the off-tank's seat cannot really take him over, the engine has no threat race among non-tanks), and `chains` stuns the player for 10 s (playerChance 0.1, about the real 5 of 40 per cast and under 0.25 for the same stun-into-Fissure reason; real 20 s; shortened because the engine cannot dispel a charm, and a stunned player can still be caught by a Fissure the marker cannot avoid). Charmed healers healing him and charmed DPS hitting the raid are not modelled. Frost Blast and Chains cannot land on the healer player or the tank player, because with one healer seat a stunned healer means the tank is not healed at all, which the real 12-healer raid never sees (the healer's real job is to answer a Frost Blast on someone else, not to be the victim). PHASE 3: from 40% five Guardians arrive one every 10 s (spell 28453, Summon Type D Periodic, triggers every 10 s and cmangos stops it after 55 s): the off-tank role picks up the first two (`playerFrom`), three are held by the ghost. Shackle duty for the three Priests is the healer role's Dispel button (`shackleFade`, a magic debuff on the raid every 17 s, three Priests times a 50 s Shackle, labelled Shackle Undead); Faerlina's Worshipper button uses the same stand-in. Blood Tap is a stacking `debuff` (`damageTakenMult` 1.05 up to 5 stacks; the real +15% per target switch or player death has no event to hang off) on the Guardian tank. Guardians are not killable: the raid kills him and they despawn with him. The slow on Frostbolt and Volley is not modelled: the engine has no movement debuff. Kel'Thuzad cannot be taunted (`looseHint` and the relabelled threat button).",
+ "sources": [
+  "docs/research/naxxramas/kelthuzad.md",
+  "https://warcraft.wiki.gg/wiki/Kel%27Thuzad_(Classic)",
+  "https://www.wowhead.com/classic/guide/kelthuzad-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28478/frostbolt",
+  "https://www.wowhead.com/classic/spell=28479/frostbolt",
+  "https://www.wowhead.com/classic/spell=28410/chains-of-kelthuzad",
+  "https://www.wowhead.com/classic/spell=27819/detonate-mana",
+  "https://www.wowhead.com/classic/spell=27810/shadow-fissure",
+  "https://www.wowhead.com/classic/spell=27808/frost-blast",
+  "https://www.wowhead.com/classic/spell=28457/dark-blast",
+  "https://www.wowhead.com/classic/spell=28459/wail-of-souls",
+  "https://www.wowhead.com/classic/spell=28470/blood-tap",
+  "https://www.wowhead.com/classic/spell=25646/mortal-wound",
+  "https://classicdb.ch/?npc=15990",
+  "https://classicdb.ch/?npc=16427",
+  "https://classicdb.ch/?npc=16428",
+  "https://classicdb.ch/?npc=16429",
+  "https://classicdb.ch/?npc=16441",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/FrostwyrmLair/Kel'Thuzad.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Kel'Thuzad's Chamber",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      45,
+      0
+     ],
+     [
+      44.3,
+      7.8
+     ],
+     [
+      42.3,
+      15.4
+     ],
+     [
+      39,
+      22.5
+     ],
+     [
+      34.5,
+      28.9
+     ],
+     [
+      28.9,
+      34.5
+     ],
+     [
+      22.5,
+      39
+     ],
+     [
+      15.4,
+      42.3
+     ],
+     [
+      7.8,
+      44.3
+     ],
+     [
+      0,
+      45
+     ],
+     [
+      -7.8,
+      44.3
+     ],
+     [
+      -15.4,
+      42.3
+     ],
+     [
+      -22.5,
+      39
+     ],
+     [
+      -28.9,
+      34.5
+     ],
+     [
+      -34.5,
+      28.9
+     ],
+     [
+      -39,
+      22.5
+     ],
+     [
+      -42.3,
+      15.4
+     ],
+     [
+      -44.3,
+      7.8
+     ],
+     [
+      -45,
+      0
+     ],
+     [
+      -44.3,
+      -7.8
+     ],
+     [
+      -42.3,
+      -15.4
+     ],
+     [
+      -39,
+      -22.5
+     ],
+     [
+      -34.5,
+      -28.9
+     ],
+     [
+      -28.9,
+      -34.5
+     ],
+     [
+      -22.5,
+      -39
+     ],
+     [
+      -15.4,
+      -42.3
+     ],
+     [
+      -7.8,
+      -44.3
+     ],
+     [
+      0,
+      -45
+     ],
+     [
+      7.8,
+      -44.3
+     ],
+     [
+      15.4,
+      -42.3
+     ],
+     [
+      22.5,
+      -39
+     ],
+     [
+      28.9,
+      -34.5
+     ],
+     [
+      34.5,
+      -28.9
+     ],
+     [
+      39,
+      -22.5
+     ],
+     [
+      42.3,
+      -15.4
+     ],
+     [
+      44.3,
+      -7.8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -41
+     ],
+     [
+      8,
+      -41
+     ],
+     [
+      8,
+      -65
+     ],
+     [
+      -8,
+      -65
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      8,
+      -44.3
+     ],
+     [
+      18.6,
+      -41
+     ],
+     [
+      28,
+      -35.2
+     ],
+     [
+      35.8,
+      -27.3
+     ],
+     [
+      41.4,
+      -17.7
+     ],
+     [
+      44.4,
+      -7.1
+     ],
+     [
+      44.8,
+      4
+     ],
+     [
+      42.5,
+      14.8
+     ],
+     [
+      37.6,
+      24.8
+     ],
+     [
+      30.4,
+      33.2
+     ],
+     [
+      21.3,
+      39.6
+     ],
+     [
+      11,
+      43.6
+     ],
+     [
+      0,
+      45
+     ],
+     [
+      -11,
+      43.6
+     ],
+     [
+      -21.3,
+      39.6
+     ],
+     [
+      -30.4,
+      33.2
+     ],
+     [
+      -37.6,
+      24.8
+     ],
+     [
+      -42.5,
+      14.8
+     ],
+     [
+      -44.8,
+      4
+     ],
+     [
+      -44.4,
+      -7.1
+     ],
+     [
+      -41.4,
+      -17.7
+     ],
+     [
+      -35.8,
+      -27.3
+     ],
+     [
+      -28,
+      -35.2
+     ],
+     [
+      -18.6,
+      -41
+     ],
+     [
+      -8,
+      -44.3
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -8,
+      -44.3
+     ],
+     [
+      -8,
+      -65
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      8,
+      -44.3
+     ],
+     [
+      8,
+      -65
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -59
+    ]
+   },
+   {
+    "text": "Kel'Thuzad",
+    "at": [
+     0,
+     26
+    ]
+   },
+   {
+    "text": "Melee diamond",
+    "at": [
+     -8,
+     4
+    ]
+   },
+   {
+    "text": "Ranged circle",
+    "at": [
+     28,
+     -22
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 12,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -44,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 19,
+   "tolerance": 4,
+   "label": "Main tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 13,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 90,
+   "label": "Kel'Thuzad"
+  },
+  "raidP1": {
+   "x": 0,
+   "y": -2,
+   "spread": 12,
+   "label": "Raid: stacked in the middle"
+  },
+  "raidP2": {
+   "x": 0,
+   "y": -4,
+   "spacing": 10,
+   "label": "Raid: spread around the room"
+  },
+  "tankP1": {
+   "x": 0,
+   "y": 8,
+   "tolerance": 5,
+   "label": "Tanks: middle, facing out"
+  },
+  "offtankP1": {
+   "x": -8,
+   "y": 2,
+   "tolerance": 8,
+   "label": "Off-tank: middle"
+  },
+  "offtankP2": {
+   "x": -9,
+   "y": 12,
+   "tolerance": 7,
+   "label": "Off-tank: beside the main tank"
+  },
+  "offtankP3": {
+   "x": 24,
+   "y": 22,
+   "tolerance": 8,
+   "label": "Off-tank: Guardians away from the raid"
+  },
+  "meleeP1": {
+   "x": -4,
+   "y": 4,
+   "tolerance": 14,
+   "label": "Melee: Abominations in the middle"
+  },
+  "meleeSpot": {
+   "x": 7,
+   "y": 8,
+   "tolerance": 4,
+   "label": "Melee: his flank"
+  },
+  "rangedP1": {
+   "x": 6,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Ranged: in the middle"
+  },
+  "rangedSpot": {
+   "x": 20,
+   "y": -8,
+   "tolerance": 5,
+   "label": "Ranged: circle around the room"
+  },
+  "healerP1": {
+   "x": -2,
+   "y": -4,
+   "tolerance": 7,
+   "label": "Healers: in the middle"
+  },
+  "healerSpot": {
+   "x": -20,
+   "y": -6,
+   "tolerance": 7,
+   "label": "Healers: spread, in range of the tank"
+  },
+  "addHold": {
+   "x": 2,
+   "y": 2,
+   "label": "Adds held in the middle"
+  },
+  "guardianHold": {
+   "x": 22,
+   "y": 20,
+   "label": "Guardians held"
+  },
+  "guardianShackle": {
+   "x": -30,
+   "y": 28,
+   "label": "Shackled Guardians"
+  },
+  "portalN": {
+   "x": 0,
+   "y": 38,
+   "label": "Portal"
+  },
+  "portalNE": {
+   "x": 29.7,
+   "y": 23.7,
+   "label": "Portal"
+  },
+  "portalE": {
+   "x": 37.1,
+   "y": -8.4,
+   "label": "Portal"
+  },
+  "portalSE": {
+   "x": 16.5,
+   "y": -34.2,
+   "label": "Portal"
+  },
+  "portalSW": {
+   "x": -16.4,
+   "y": -34.3,
+   "label": "Portal"
+  },
+  "portalW": {
+   "x": -37,
+   "y": -8.5,
+   "label": "Portal"
+  },
+  "portalNW": {
+   "x": -29.8,
+   "y": 23.6,
+   "label": "Portal"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1500,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 2300,
+  "healPerSecondWithPlayerHealer": 250,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 7,
+  "whelpContactRange": 6,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 6.5,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 850,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.5,
+  "pullDeadline": 40,
+  "looseHint": "He cannot be taunted. Burst threat to get him back"
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.55
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "You tank Kel'Thuzad himself in phase 2 and 3. In phase 1 you hold Abominations in the middle. He cannot be taunted. Chains takes you for 20 seconds in the real fight and wipes your threat. Here the button stands for the tanks' race to get him back: press it the moment it lands. Call every Frostbolt for your interrupters.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Off-tank",
+   "short": "Off-tank",
+   "description": "Pick up the Abominations in phase 1 and keep them on you; the Mortal Wound stacks are yours to carry. In Phase 2 stay in melee on him: when Chains takes the main tank you are next in line. In phase 3 take the two free Guardians away from the raid and hold them.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Phase 1: kill the Abominations in the middle; the ranged team has the Soldiers and Soul Weavers. Phase 2: 8-yard melee diamond, interrupt his single Frostbolt, step out of every Fissure.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 6
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Phase 1: you are on the Soldiers and Soul Weavers: kill them before they reach the middle. Phase 2: spread 10 yards from everyone so Frost Blast cannot chain, run out of the raid with Detonate Mana, and step out of Fissures.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Phase 1 is Mortal Wound on the Abomination tanks. Phase 2: Volley every 16 to 32 seconds, the tank after every landed Frostbolt, and above all the Frost Blast victims, who die in 4 seconds if you are late. Phase 3: your Dispel button also stands for the raid's Priests keeping three Guardians shackled; press it when a Shackle fades.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "magic"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Threat burst",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Kel'Thuzad cannot be taunted. This button stands for the threat burst that takes him back after Chains, and in phase 1 it picks up Abominations in range."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 110,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 3000,
+   "threat": 5,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 30,
+   "icon": "interrupt",
+   "tip": "Stops an interruptible cast. One button here covers Kick, Pummel, Shield Bash, Earth Shock and Counterspell, so the range is generous."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Shackle Undead",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic"
+   ],
+   "tip": "Stands for the raid's three Priests re-applying Shackle Undead on the Guardians. Press it when a Shackle fades."
+  }
+ },
+ "actions": {
+  "soldiers": {
+   "label": "Soldiers of the Frozen Wastes",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalNE",
+    "portalE",
+    "portalSE",
+    "portalSW",
+    "portalNW"
+   ],
+   "speed": 6,
+   "lifetime": 9,
+   "killable": true,
+   "killFirst": true,
+   "killFirstRoles": "ranged",
+   "pickup": "none",
+   "holdSpot": "addHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Soldiers walk in from every portal. Kill them before they reach the raid: one more on top of the raid is one Dark Blast too many."
+  },
+  "weavers": {
+   "label": "Soul Weaver",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalN",
+    "portalW"
+   ],
+   "speed": 5,
+   "lifetime": 16,
+   "killable": true,
+   "pickup": "none",
+   "holdSpot": "addHold",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Soul Weavers walk in slowly and knock raiders back with Wail of Souls. Ranged kill them on the way in."
+  },
+  "abomination": {
+   "label": "Unstoppable Abomination",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalN"
+   ],
+   "speed": 7,
+   "aggroRange": 16,
+   "lifetime": 22,
+   "heldLifetime": 26,
+   "killable": true,
+   "pickup": [
+    "tanks",
+    "offtank"
+   ],
+   "holdSpot": "addHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "An Abomination lumbers in from the portals. Tanks taunt it the moment it is in range and hold it in the middle. Melee kill it there."
+  },
+  "mortalWoundOt": {
+   "label": "Mortal Wound",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "offtank",
+   "dispel": "none",
+   "duration": 16,
+   "tickDamage": 110,
+   "maxStacks": 4,
+   "healingMult": 0.9,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "submerged",
+   "tip": "The Abominations you hold keep stacking Mortal Wound on you: 10% less healing per stack."
+  },
+  "mortalWound": {
+   "label": "Mortal Wound",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "tanks",
+   "dispel": "none",
+   "duration": 16,
+   "tickDamage": 150,
+   "maxStacks": 4,
+   "healingMult": 0.9,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "submerged",
+   "tip": "Each hit stacks Mortal Wound: 10% less healing per stack. Healers, stay ahead of the falling healing."
+  },
+  "soldierBlast": {
+   "label": "A Soldier got through: Dark Blast",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 2000,
+   "tankDamage": 800,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "submerged",
+   "tip": "One of the raid's Soldiers got through. Everyone took a Dark Blast; heal back up."
+  },
+  "frostbolt": {
+   "label": "Frostbolt",
+   "kind": "debuff",
+   "cast": 2,
+   "target": "tank",
+   "roles": "tanks",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 5000,
+   "interruptible": true,
+   "completedMetric": "frostboltsLanded",
+   "warn": true,
+   "cue": "roar",
+   "icon": "interrupt",
+   "requires": "grounded",
+   "tip": "A 2 second single-target Frostbolt on the tank. It must be kicked: Frostbolts landing is how raids lose main tanks here."
+  },
+  "volley": {
+   "label": "Frostbolt Volley",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 2400,
+   "tankDamage": 1400,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Every 16 to 32 seconds, everyone. Heal the raid back up before the next."
+  },
+  "detonateMana": {
+   "label": "Detonate Mana",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.34,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "carried": true,
+   "radius": 10,
+   "warning": 5,
+   "active": 0.4,
+   "damage": 0,
+   "raidMetric": "detonateCaught",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Your mana is unstable. Run out of the raid before it goes off: 10 yards from anybody."
+  },
+  "shadowFissure": {
+   "label": "Shadow Fissure",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.12,
+   "radius": 5.5,
+   "warning": 3,
+   "active": 0.5,
+   "damage": 20000,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A red circle under your feet. Three seconds to step out or you are dead."
+  },
+  "frostBlastYou": {
+   "label": "Frost Blast",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.1,
+   "roles": [
+    "offtank",
+    "melee",
+    "ranged"
+   ],
+   "dispel": "none",
+   "duration": 5.2,
+   "tickDamage": 1700,
+   "stun": 5,
+   "follow": [
+    {
+     "id": "frostBlastGhost",
+     "delay": 0.05
+    },
+    {
+     "id": "frostBlastChain",
+     "delay": 0.05
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "You're frozen with everyone within 10 yards. 104% of your health over 5 seconds: the healers have 4 seconds."
+  },
+  "frostBlastChain": {
+   "label": "Frost Blast",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "carried": true,
+   "stayPut": true,
+   "radius": 9.5,
+   "warning": 2,
+   "active": 0.4,
+   "damage": 0,
+   "raidMetric": "frostBlastChained",
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Frost Blast jumps to anyone within 10 yards of a victim. Keep your spacing."
+  },
+  "frostBlastGhost": {
+   "label": "Frost Blast",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "healer",
+   "dispel": "none",
+   "duration": 5.2,
+   "tickDamage": 1300,
+   "warn": true,
+   "cue": "roar",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": false,
+   "tip": "Frost Blast. Whoever it hit dies in 4 seconds unless you land a big heal on them now."
+  },
+  "chains": {
+   "label": "Chains of Kel'Thuzad",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.1,
+   "roles": [
+    "offtank",
+    "melee",
+    "ranged"
+   ],
+   "dispel": "none",
+   "duration": 10,
+   "stun": 10,
+   "follow": [
+    {
+     "id": "chainsWipe",
+     "delay": 0.05
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Chains takes five raiders. For 20 seconds they fight for him. If it is you, you cannot act. Otherwise stop DPS and CC whoever he charmed."
+  },
+  "chainsWipe": {
+   "label": "Chains: main tank taken",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "Chains took the main tank: threat wiped!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Chains took the main tank and his threat is gone. Off-tanks burst threat right now."
+  },
+  "guardian1": {
+   "label": "Guardian of Icecrown",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalE"
+   ],
+   "playerFrom": [
+    "portalE"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 999,
+   "heldLifetime": 999,
+   "pickup": "offtank",
+   "holdSpot": "guardianHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A free Guardian of Icecrown arrives: catch it at once and walk it away from the raid."
+  },
+  "guardian2": {
+   "label": "Guardian of Icecrown",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalNE"
+   ],
+   "playerFrom": [
+    "portalNE"
+   ],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 999,
+   "heldLifetime": 999,
+   "pickup": "offtank",
+   "holdSpot": "guardianHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A free Guardian of Icecrown arrives: catch it at once and walk it away from the raid."
+  },
+  "guardian3": {
+   "label": "Guardian of Icecrown",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalN"
+   ],
+   "playerFrom": [],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 999,
+   "heldLifetime": 999,
+   "pickup": "offtank",
+   "holdSpot": "guardianHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Another Guardian of Icecrown arrives and is shackled by the raid's Priests."
+  },
+  "guardian4": {
+   "label": "Guardian of Icecrown",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalNW"
+   ],
+   "playerFrom": [],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 999,
+   "heldLifetime": 999,
+   "pickup": "offtank",
+   "holdSpot": "guardianHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Another Guardian of Icecrown arrives and is shackled by the raid's Priests."
+  },
+  "guardian5": {
+   "label": "Guardian of Icecrown",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "portalW"
+   ],
+   "playerFrom": [],
+   "speed": 6,
+   "aggroRange": 16,
+   "lifetime": 999,
+   "heldLifetime": 999,
+   "pickup": "offtank",
+   "holdSpot": "guardianHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Another Guardian of Icecrown arrives and is shackled by the raid's Priests."
+  },
+  "shackleFade": {
+   "label": "Shackle Undead fades",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0,
+   "dispel": "magic",
+   "duration": 6,
+   "warn": false,
+   "cue": null,
+   "icon": "poison",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "A Shackle Undead on a Guardian is fading. The Priests re-apply it now."
+  },
+  "bloodTap": {
+   "label": "Blood Tap",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "offtank",
+   "dispel": "none",
+   "duration": 30,
+   "damageTakenMult": 1.05,
+   "tickDamage": 130,
+   "maxStacks": 5,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Each Guardian that switches target or watches someone die hits 15% harder. Hold them still and do not let them switch."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Phase 1: the Adds",
+   "subtitle": "Hold the middle, kill everything that walks in",
+   "hpFrom": 1,
+   "hpTo": 1,
+   "duration": 230,
+   "bossState": "submerged",
+   "raidSpot": "raidP1",
+   "spots": {
+    "tank": "tankP1",
+    "boss": "bossSpot",
+    "ranged": "rangedP1",
+    "healer": "healerP1",
+    "melee": "meleeP1",
+    "offtank": "offtankP1"
+   },
+   "actions": [
+    {
+     "id": "soldiers",
+     "first": 6,
+     "every": 20
+    },
+    {
+     "id": "soldiers",
+     "first": 140,
+     "every": 16
+    },
+    {
+     "id": "soldiers",
+     "first": 190,
+     "every": 8
+    },
+    {
+     "id": "weavers",
+     "first": 10,
+     "every": 32
+    },
+    {
+     "id": "abomination",
+     "first": 8,
+     "every": 16
+    },
+    {
+     "id": "mortalWound",
+     "first": 11,
+     "every": 5
+    },
+    {
+     "id": "mortalWoundOt",
+     "first": 13,
+     "every": 6
+    },
+    {
+     "id": "soldierBlast",
+     "first": 40,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grabAbom",
+     "type": "afterEvent",
+     "event": "abomination",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": [
+      "tanks",
+      "offtank"
+     ],
+     "label": "Pick up every Abomination",
+     "tip": "Be in the middle and taunt each one as it comes in range. Never let one reach the healers."
+    },
+    {
+     "id": "tankP1",
+     "type": "playerAtSpotBy",
+     "spot": "tankP1",
+     "grace": 6,
+     "role": "tanks",
+     "label": "Hold the middle",
+     "tip": "Stand in the middle so Abominations come to you first."
+    },
+    {
+     "id": "offtankP1",
+     "type": "playerAtSpotBy",
+     "spot": "offtankP1",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold the middle",
+     "tip": "Stand in the middle so Abominations come to you first."
+    },
+    {
+     "id": "meleeP1Stay",
+     "type": "playerAtSpotBy",
+     "spot": "meleeP1",
+     "grace": 8,
+     "role": "melee",
+     "label": "Back in the middle",
+     "tip": "Melee on Abominations in the middle, not chasing to the portals."
+    },
+    {
+     "id": "rangedP1Stay",
+     "type": "playerAtSpotBy",
+     "spot": "rangedP1",
+     "grace": 6,
+     "role": "ranged",
+     "label": "Stay in the middle",
+     "tip": "Soldiers walk in, you kill them before they get here. Do not wander."
+    },
+    {
+     "id": "healerP1Stay",
+     "type": "playerAtSpotBy",
+     "spot": "healerP1",
+     "grace": 6,
+     "role": "healer",
+     "label": "Stay in the middle",
+     "tip": "Stay close to the tanks with Mortal Wound on them."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mortal Wound is coming on your tank faster than your heals land. Stay ahead."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Healing is falling off with each stack. Do not let them get low."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Phase 2: Kel'Thuzad",
+   "subtitle": "Kick the Frostbolt, leave the Fissure, heal the Frost Blast",
+   "hpFrom": 1,
+   "hpTo": 0.4,
+   "duration": 190,
+   "bossState": "grounded",
+   "raidSpot": "raidP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeSpot",
+    "offtank": "offtankP2"
+   },
+   "actions": [
+    {
+     "id": "frostbolt",
+     "first": 16,
+     "every": 24,
+     "jitter": 6
+    },
+    {
+     "id": "volley",
+     "first": 15,
+     "every": 24,
+     "jitter": 8
+    },
+    {
+     "id": "detonateMana",
+     "first": 24,
+     "every": 22,
+     "jitter": 5
+    },
+    {
+     "id": "shadowFissure",
+     "first": 11,
+     "every": 13,
+     "jitter": 3
+    },
+    {
+     "id": "frostBlastYou",
+     "first": 32,
+     "every": 34,
+     "jitter": 6
+    },
+    {
+     "id": "chains",
+     "first": 60,
+     "every": 70,
+     "jitter": 10
+    }
+   ],
+   "expectations": [
+    {
+     "id": "spotP2",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 22,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him in the middle",
+     "tip": "Walk to the tank spot and keep him where the melee can reach him for kicks."
+    },
+    {
+     "id": "chainsBack",
+     "type": "afterEvent",
+     "event": "chainsWipe",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Burst threat the moment Chains hits",
+     "tip": "Chains took the main tank: threat is gone. Get him back immediately or he kills a healer."
+    },
+    {
+     "id": "fissure2",
+     "type": "afterEvent",
+     "event": "shadowFissure",
+     "check": "outsideHazard",
+     "within": 2.8,
+     "grace": 1.5,
+     "notBefore": 1.9,
+     "role": [
+      "melee",
+      "offtank"
+     ],
+     "label": "Step out of the Fissure",
+     "tip": "A red circle under your feet. Three seconds to get out or you are dead."
+    },
+    {
+     "id": "rangedP2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 8,
+     "role": "ranged",
+     "label": "Hold your spot in the circle",
+     "tip": "Spread 8 to 10 yards from everyone. Detonate Mana and Frost Blast both punish standing together."
+    },
+    {
+     "id": "healerP2",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 8,
+     "role": "healer",
+     "label": "Hold your spot",
+     "tip": "Spread, in range of the tank."
+    },
+    {
+     "id": "offtankP2",
+     "type": "playerAtSpotBy",
+     "spot": "offtankP2",
+     "grace": 8,
+     "role": "offtank",
+     "label": "Stay beside the main tank",
+     "tip": "You take over when Chains takes him. Keep up in threat beside him."
+    },
+    {
+     "id": "otChains",
+     "type": "onEvent",
+     "event": "chainsWipe",
+     "check": "inRange",
+     "role": "offtank",
+     "label": "Be on him when Chains lands",
+     "tip": "Chains takes the main tank and wipes threat. You are next."
+    },
+    {
+     "id": "chainSpace",
+     "type": "continuous",
+     "metric": "frostBlastChained",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Keep your 10 yards: Frost Blast chains",
+     "tip": "Frost Blast jumps to anyone within 10 yards of a victim. Hold your spot in the formation."
+    },
+    {
+     "id": "detonateMetric",
+     "type": "continuous",
+     "metric": "detonateCaught",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Run out with Detonate Mana",
+     "tip": "When it is on you, you have 4 to 5 seconds. Run away from everyone until it goes off."
+    },
+    {
+     "id": "kickMetric",
+     "type": "continuous",
+     "metric": "frostboltsLanded",
+     "role": "dps",
+     "label": "Every Frostbolt gets kicked",
+     "tip": "Interrupt rotation, every cast. A landed one is 9,000 on the main tank."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Volley, Frostbolt and Frost Blast all land on him. Priority one is the Frost Blast victims."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Heal him hard after every Frostbolt that lands."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Phase 3: Guardians",
+   "subtitle": "Five Guardians at 40%",
+   "hpFrom": 0.4,
+   "hpTo": 0,
+   "duration": 130,
+   "bossState": "grounded",
+   "raidSpot": "raidP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeSpot",
+    "offtank": "offtankP3"
+   },
+   "actions": [
+    {
+     "id": "frostbolt",
+     "first": 16,
+     "every": 24,
+     "jitter": 6
+    },
+    {
+     "id": "volley",
+     "first": 15,
+     "every": 24,
+     "jitter": 8
+    },
+    {
+     "id": "detonateMana",
+     "first": 24,
+     "every": 22,
+     "jitter": 5
+    },
+    {
+     "id": "shadowFissure",
+     "first": 11,
+     "every": 13,
+     "jitter": 3
+    },
+    {
+     "id": "frostBlastYou",
+     "first": 32,
+     "every": 34,
+     "jitter": 6
+    },
+    {
+     "id": "chains",
+     "first": 60,
+     "every": 70,
+     "jitter": 10
+    },
+    {
+     "id": "guardian1",
+     "first": 3
+    },
+    {
+     "id": "guardian2",
+     "first": 13
+    },
+    {
+     "id": "guardian3",
+     "first": 23
+    },
+    {
+     "id": "guardian4",
+     "first": 33
+    },
+    {
+     "id": "guardian5",
+     "first": 43
+    },
+    {
+     "id": "bloodTap",
+     "first": 15,
+     "every": 12
+    },
+    {
+     "id": "shackleFade",
+     "first": 20,
+     "every": 17,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "chainsBack3",
+     "type": "afterEvent",
+     "event": "chainsWipe",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Burst threat the moment Chains hits",
+     "tip": "He is on the raid after Chains. Get him back."
+    },
+    {
+     "id": "grabGuardians",
+     "type": "afterEvent",
+     "event": "guardian1",
+     "check": "whelpsPicked",
+     "within": 11,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Catch the first free Guardian",
+     "tip": "It runs straight at the raid. Pick it up and walk it away. Taunt it if it gets ahead."
+    },
+    {
+     "id": "grabGuardians2",
+     "type": "afterEvent",
+     "event": "guardian2",
+     "check": "whelpsPicked",
+     "within": 11,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Catch the second free Guardian",
+     "tip": "Ten seconds after the first, the second one comes. Pick it up and walk it away."
+    },
+    {
+     "id": "shackleKeep",
+     "type": "afterEvent",
+     "event": "shackleFade",
+     "check": "noDispellable",
+     "within": 5,
+     "grace": 4,
+     "role": "healer",
+     "label": "Re-Shackle the Guardian",
+     "tip": "A Shackle Undead is fading on a Guardian. Press your button before it breaks free."
+    },
+    {
+     "id": "chainSpace3",
+     "type": "continuous",
+     "metric": "frostBlastChained",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Keep your 10 yards: Frost Blast chains",
+     "tip": "Same as phase 2: 10 yards from anyone."
+    },
+    {
+     "id": "guardWall",
+     "type": "playerAtSpotBy",
+     "spot": "offtankP3",
+     "grace": 8,
+     "role": "offtank",
+     "label": "Hold the Guardians at the east wall",
+     "tip": "Far from the raid. Every target switch is a Blood Tap stack and you do not want them looking at anybody else."
+    },
+    {
+     "id": "fissure3",
+     "type": "afterEvent",
+     "event": "shadowFissure",
+     "check": "outsideHazard",
+     "within": 2.8,
+     "grace": 1.5,
+     "notBefore": 1.9,
+     "role": [
+      "melee",
+      "offtank"
+     ],
+     "label": "Step out of the Fissure",
+     "tip": "A red circle under your feet. Three seconds to get out or you are dead."
+    },
+    {
+     "id": "detonateMetric3",
+     "type": "continuous",
+     "metric": "detonateCaught",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Run out with Detonate Mana",
+     "tip": "Same as phase 2."
+    },
+    {
+     "id": "kickMetric3",
+     "type": "continuous",
+     "metric": "frostboltsLanded",
+     "role": "dps",
+     "label": "Every Frostbolt gets kicked",
+     "tip": "Do not forget the rotation just because Guardians are out."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Same as phase 2, now with Blood Tap on the off-tanks. Do not lose the main tank to a landed Frostbolt."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of it, this is the last 40%."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "detonateCaught": {
+   "label": "Detonate Mana went off in the raid",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "Run out before it goes off, 10 yards from anyone."
+  },
+  "frostboltsLanded": {
+   "label": "Frostbolts that landed",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 1,
+   "roles": "dps",
+   "tip": "Every Frostbolt has to be kicked. A landed one is a dead tank."
+  },
+  "frostBlastChained": {
+   "label": "Frost Blast chains into the raid",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "Frost Blast jumps to anyone within 10 yards of a victim. Keep your spacing."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Pick up every Abomination; kick every Frostbolt; heal Frost Blast victims in time; burst threat after Chains.",
+  "windows": {
+   "perfect": 0.4
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 5,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Kel'Thuzad turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "kickFrostbolt",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:frostbolt",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 2.2,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Interrupt his Frostbolt",
+    "tip": "Two seconds. Kick it.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "grabAbomCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "abomination",
+    "offset": 3,
+    "early": 3,
+    "late": 8,
+    "role": [
+     "tanks",
+     "offtank"
+    ],
+    "short": "GRAB",
+    "label": "Taunt the Abomination",
+    "tip": "Run to it or Taunt from range.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabGuardianCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "guardian1",
+    "offset": 3,
+    "early": 3,
+    "late": 9,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Taunt the free Guardian",
+    "tip": "Run to it or Taunt from range.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabGuardian2Cue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "guardian2",
+    "offset": 3,
+    "early": 3,
+    "late": 9,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Taunt the second free Guardian",
+    "tip": "Run to it or Taunt from range.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "killSoldiers",
+    "ability": "attack",
+    "on": "event",
+    "event": "soldiers",
+    "offset": 4,
+    "early": 3,
+    "late": 6,
+    "role": "ranged",
+    "short": "KILL",
+    "label": "Kill the Soldiers",
+    "tip": "They explode if they reach the raid. Kill them on the way in."
+   },
+   {
+    "id": "healBlast",
+    "ability": "heal",
+    "on": "event",
+    "event": "frostBlastGhost",
+    "offset": 1,
+    "early": 0.5,
+    "late": 3.5,
+    "role": "healer",
+    "short": "BLAST",
+    "label": "Frost Blast: heal now",
+    "tip": "They die in 4 seconds. This heal saves them."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "chainsDrill",
+   "name": "Chains threat race",
+   "description": "Chains wipes your threat every 12 seconds. Burst it back at once.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "chainsWipe",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "abomDrill",
+   "name": "Pick up the Abominations",
+   "description": "An Abomination every 8 seconds from the portals. Catch them all in the middle.",
+   "roles": [
+    "tanks",
+    "offtank"
+   ],
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "abomination",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "mortalWound",
+     "first": 6,
+     "every": 5
+    },
+    {
+     "id": "mortalWoundOt",
+     "first": 7,
+     "every": 6
+    }
+   ]
+  },
+  {
+   "id": "kickDrill",
+   "name": "Kick the Frostbolt",
+   "description": "His Frostbolt every 11 seconds, with Fissures under the raid. Press interrupt inside the 2 second cast and step out of red.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frostbolt",
+     "first": 3,
+     "every": 11
+    },
+    {
+     "id": "shadowFissure",
+     "first": 5,
+     "every": 9
+    }
+   ]
+  },
+  {
+   "id": "detonateDrill",
+   "name": "Carry Detonate Mana out",
+   "description": "It goes off in 5 seconds. Run out of the raid every time it lands on you.",
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "startPhase": 2,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "detonateMana",
+     "first": 3,
+     "every": 11
+    }
+   ]
+  },
+  {
+   "id": "blastDrill",
+   "name": "Heal the Frost Blast",
+   "description": "The tank is hit by Frost Blast every 12 seconds and a Volley lands every 15. Be already healing when it happens.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frostBlastGhost",
+     "first": 3,
+     "every": 12
+    },
+    {
+     "id": "volley",
+     "first": 5,
+     "every": 15
+    }
+   ]
+  }
+ ]
+}

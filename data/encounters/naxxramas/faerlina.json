@@ -1,0 +1,1170 @@
+{
+ "id": "faerlina",
+ "name": "Grand Widow Faerlina",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/faerlina.md (1,312,027 HP classicdb; the wiki gives no HP). HP is a clock over 270 s (estimate; Warcraft Tavern says under 4:00, the wiki's soft limit is about 4:45). The cathedral layout, every coordinate and the Follower and Worshipper positions are estimates from the guides' prose. ENRAGE on its real timer: DBM-Vanilla's first Enrage at about 56 s and then a 56 to 76 s variable timer; guides say every 60 s. In DBM's Lua an Embrace on an enraged boss restarts that timer, and an early Embrace only stops the bar. Here it is a FIXED 60 s cycle (first at 56 s, no jitter) so the 30 s Poison Bolt Volley silence after each Embrace can line up with it; a variable timer would need the engine to re-time actions after a removal. The real Enrage is +75% attack speed and +150 damage per the tooltip (effect data says 150%, research open question), which is roughly +200 to +350% DPS on the tank. THE WORSHIPPER SACRIFICE IS THE REMOVAL JOB. It is the healer role's Dispel button, standing in for the Mind Controlling Priest's Widow's Embrace: Enrage is a `debuff` on the tank (`dispel: enrage`, `damageTakenMult` 1.5, 55 s until the next one) that only the healer's `dispels` list can remove. Press Dispel the moment it lands. A healer who ignores it loses the tank, because the ghost's passive healing with a player healer is 140 per second. Faerlina's real counter is the Worshipper count: four, one per Enrage. The script's clock ends after four Enrages at 236 s, before a fifth is due, so the fifth Enrage (which would stay on her permanently) is not simulated. Two real rules are missing: an Embrace before Enrage only delays it 30 s (wiki), and a Worshipper must be within 15 yd of her and the Mind Control can be resisted (the main wipe cause in Method's recollection). The player cannot get these wrong here; the job is timing the press after the Enrage toast. The boss's own damage increase is a `kind: enrage` with an 8 s duration (`enrageMultiplier` 1.6 on melee) for every role, representing the seconds before the Embrace lands; it fires alongside the debuff. Followers are `killFirst` adds, 98,238 HP each, lifetimes 25 and 30 s (estimate of raid DPS); their AoE Silence and Charge are not modelled (no add abilities in the engine); the off-tank picks one up at the pull. Worshippers are four non-killable adds parked in the corner for display; in the real fight an off-tank holds them and the raid never touches them. The player cannot attack them here (`killable` false), so the real rule 'do not hit a Worshipper' is not scored. POISON BOLT VOLLEY: `debuff` 300 per second for 10 s (real 413 to 587 per 2 s), playerChance 0.25 (real: about 10 of 40 raiders); the initial 1,313 hit is folded into the DoT because a debuff has no direct damage. Poison dispel. Cadence every 12 s is an estimate; only Wrath-era Ten Ton Hammer says 15 s; Classic sources give no timer. Widow's Embrace silences her Nature school for 30 s, modelled by scheduling no Volley in the 30 s after each Enrage (fixed windows, because the engine cannot pause an action when a debuff is removed). RAIN OF FIRE: telegraphed 10 yd zone (spell radius), 2 s warning (a reaction time; the real one has no telegraph but the zone appears on cast), 6 s, 1,000 per second (real 1,850 to 2,150 per 2 s), cadence every 14 s estimated ('frequent'); a second copy on the tank's position every 42 s so the tank has to drag her out of it. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Her melee is 1,300 per 2 s (classicdb 8,475 to 9,727 pre-mitigation, swing estimated 2 s): with no healing and no Enrage removal the tank dies in about 20 s, and an Enrage that is not removed multiplies it again. Non-healer roles have a generous passive heal (1,900 per second) so the Enrage debuff that nobody can remove in those roles does not kill the ghost.",
+ "sources": [
+  "docs/research/naxxramas/faerlina.md",
+  "https://warcraft.wiki.gg/wiki/Grand_Widow_Faerlina_(Classic)",
+  "https://www.wowhead.com/classic/guide/grand-widow-faerlina-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=25991/poison-bolt-volley",
+  "https://www.wowhead.com/classic/spell=28794/rain-of-fire",
+  "https://www.wowhead.com/classic/spell=28798/enrage",
+  "https://www.wowhead.com/classic/spell=28732/widows-embrace",
+  "https://classicdb.ch/?npc=15953",
+  "https://classicdb.ch/?npc=16506",
+  "https://classicdb.ch/?npc=16505",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/ArachnidQuarter/Faerlina.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/",
+  "https://www.method.gg/wormie-s-classic-vanilla-naxxramas-proper"
+ ],
+ "arena": {
+  "name": "The Grand Widow's Cathedral",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -38,
+      -32
+     ],
+     [
+      38,
+      -32
+     ],
+     [
+      38,
+      32
+     ],
+     [
+      -38,
+      32
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -54
+     ],
+     [
+      9,
+      -54
+     ],
+     [
+      9,
+      -28
+     ],
+     [
+      -9,
+      -28
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -9,
+      -32
+     ],
+     [
+      -38,
+      -32
+     ],
+     [
+      -38,
+      32
+     ],
+     [
+      38,
+      32
+     ],
+     [
+      38,
+      -32
+     ],
+     [
+      9,
+      -32
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -32
+     ],
+     [
+      -9,
+      -54
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -32
+     ],
+     [
+      9,
+      -54
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -48
+    ]
+   },
+   {
+    "text": "Grand Widow Faerlina",
+    "at": [
+     -12,
+     19
+    ]
+   },
+   {
+    "text": "Worshipper corner",
+    "at": [
+     29,
+     26
+    ]
+   },
+   {
+    "text": "Followers die here",
+    "at": [
+     6,
+     19
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -48,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 24,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -30,
+   "spread": 9
+  },
+  "tankSpot": {
+   "x": -21,
+   "y": 13,
+   "tolerance": 4,
+   "label": "Tank: west side"
+  },
+  "bossSpot": {
+   "x": -14,
+   "y": 13,
+   "heading": 180,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Faerlina"
+  },
+  "raidCenter": {
+   "x": 2,
+   "y": -2,
+   "spacing": 9,
+   "spread": 14,
+   "label": "Raid: spread out for the fire"
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": 0,
+   "tolerance": 8,
+   "label": "Ranged: spread"
+  },
+  "healerSpot": {
+   "x": -6,
+   "y": -8,
+   "tolerance": 8,
+   "label": "Healers: spread, in range of the tank"
+  },
+  "f1Spawn": {
+   "x": -6,
+   "y": 28
+  },
+  "f2Spawn": {
+   "x": 0,
+   "y": 28
+  },
+  "followerHold": {
+   "x": 6,
+   "y": 20
+  },
+  "otFollower": {
+   "x": 8,
+   "y": 22,
+   "tolerance": 7,
+   "label": "Off-tank: hold the Followers here"
+  },
+  "otCorner": {
+   "x": 26,
+   "y": 22,
+   "tolerance": 8,
+   "label": "Off-tank: Worshipper corner"
+  },
+  "w1": {
+   "x": 30,
+   "y": 28
+  },
+  "w2": {
+   "x": 26,
+   "y": 28
+  },
+  "w3": {
+   "x": 30,
+   "y": 24
+  },
+  "w4": {
+   "x": 26,
+   "y": 24
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1200,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1900,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 1300,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.6
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull Faerlina away from the adds to the west side. Keep her there, move her out of any Rain of Fire she stands in, and be ready for a huge spike every time she Enrages until the Priests sacrifice a Worshipper.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Add tank",
+   "short": "Off-tank",
+   "description": "Grab a Follower on the pull and hold it near the raid so the DPS can kill it. When the Followers are dead, go and stand with the Worshipper corner and keep the Worshippers on you, far from everyone, for the whole fight.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the Followers first, then stand behind her. Step out of Rain of Fire instantly: it hits for over 2,000 a tick.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Followers first, then Faerlina. Spread out so a Rain of Fire only hits a few people, and step out of any fire under you.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Clean Poison Bolt Volley off the raid as it lands. Your button also stands in for the raid's Priests sacrificing a Worshipper: when she Enrages, press Dispel straight away, because the tank cannot survive long.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "poison",
+    "enrage"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel / Embrace",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Cures Poison Bolt Volley, and when she Enrages, it stands in for the Priest's Mind Control and Widow's Embrace: press it to remove the Enrage. Removes the oldest removable debuff, so clear poisons as they land to keep Enrage on top."
+  }
+ },
+ "actions": {
+  "followerOne": {
+   "label": "Naxxramas Follower",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "f1Spawn"
+   ],
+   "playerFrom": [
+    "f1Spawn"
+   ],
+   "speed": 7,
+   "aggroRange": 13,
+   "lifetime": 25,
+   "heldLifetime": 40,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "followerHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Followers die first. The off-tank takes one and holds it near the raid."
+  },
+  "followerTwo": {
+   "label": "Naxxramas Follower",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "f2Spawn"
+   ],
+   "playerFrom": [],
+   "speed": 7,
+   "aggroRange": 13,
+   "lifetime": 30,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "followerHold",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Followers die first."
+  },
+  "worshippers": {
+   "label": "Naxxramas Worshippers",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "w1",
+    "w2",
+    "w3",
+    "w4"
+   ],
+   "playerFrom": [],
+   "speed": 3,
+   "lifetime": 400,
+   "pickup": "nobody",
+   "holdSpot": "w1",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Four Worshippers in the corner. Never attack them: each one is a removal of her Enrage."
+  },
+  "poisonBolt": {
+   "label": "Poison Bolt Volley",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.25,
+   "dispel": "poison",
+   "duration": 10,
+   "tickDamage": 300,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "poison",
+   "requires": "grounded",
+   "tip": "Poison on about a quarter of the raid. Healers clean it, everyone else keeps their health up."
+  },
+  "rainFire": {
+   "label": "Rain of Fire",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.35,
+   "roles": "nontank",
+   "radius": 10,
+   "warning": 2,
+   "active": 6,
+   "damage": 1000,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Fire on the ground. Step out at once."
+  },
+  "rainOnTank": {
+   "label": "Rain of Fire on her",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "tank",
+   "radius": 9,
+   "warning": 2,
+   "active": 6,
+   "damage": 1000,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Rain of Fire on the melee. Drag her clear of it straight away."
+  },
+  "enrageBoss": {
+   "label": "Enrage",
+   "kind": "enrage",
+   "cast": 0,
+   "duration": 8,
+   "toast": "Faerlina enrages!",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "hidden": true,
+   "requires": "grounded",
+   "tip": "She is enraged. Sacrifice a Worshipper now."
+  },
+  "enrageDeb": {
+   "label": "Enrage",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "nontank",
+   "dispel": "enrage",
+   "duration": 55,
+   "damageTakenMult": 1.5,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "enrageBoss",
+     "delay": 0
+    }
+   ],
+   "tip": "Enrage on the tank! Press Dispel to sacrifice a Worshipper and remove it now."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Followers",
+   "subtitle": "Kill the Followers first",
+   "hpFrom": 1,
+   "hpTo": 0.9,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otFollower"
+   },
+   "actions": [
+    {
+     "id": "worshippers",
+     "first": 0.2
+    },
+    {
+     "id": "followerOne",
+     "first": 5.5
+    },
+    {
+     "id": "followerTwo",
+     "first": 6.5
+    },
+    {
+     "id": "rainFire",
+     "first": 12,
+     "every": 14,
+     "jitter": 3
+    },
+    {
+     "id": "poisonBolt",
+     "first": 10
+    },
+    {
+     "id": "poisonBolt",
+     "first": 22
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 8,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pull her to the west side",
+     "tip": "Drag her away from the Followers and Worshippers before the DPS arrive."
+    },
+    {
+     "id": "grabFollower",
+     "type": "afterEvent",
+     "event": "followerOne",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 7,
+     "role": "offtank",
+     "label": "Pick up a Follower",
+     "tip": "Run to it or Taunt it before it gets to the raid."
+    },
+    {
+     "id": "otPosition",
+     "type": "playerAtSpotBy",
+     "spot": "otFollower",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold the Follower near the raid",
+     "tip": "Keep it next to where the DPS can reach it, away from the healers."
+    },
+    {
+     "id": "rainDodge",
+     "type": "afterEvent",
+     "event": "rainFire",
+     "check": "outsideHazard",
+     "within": 2.6,
+     "grace": 2,
+     "notBefore": 2,
+     "role": "nontank",
+     "label": "Step out of Rain of Fire",
+     "tip": "Every tick is more than 2,000 on cloth. Step out the moment you see fire under you."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Followers first",
+     "tip": "Every attack on her before the Followers are dead is wasted."
+    },
+    {
+     "id": "rangedSpread",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Spread out",
+     "tip": "Keep the gaps so a single Rain of Fire only catches one or two people."
+    },
+    {
+     "id": "healerPlace",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay in range of the tank, spread out",
+     "tip": "Stay inside 40 yards of the tank at the west side."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "She hits hard even before she enrages, so keep the tank topped."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "If she enrages with the tank low the tank dies."
+    },
+    {
+     "id": "cleanPoison",
+     "type": "continuous",
+     "metric": "debuffSeconds",
+     "role": "healer",
+     "label": "Clean Poison Bolt Volley fast",
+     "tip": "Cleanse, Cure Poison, Poison Cleansing Totem. It ticks for ten seconds on everyone it hits."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Faerlina",
+   "subtitle": "Enrage every 60 s",
+   "hpFrom": 0.9,
+   "hpTo": 0,
+   "duration": 240,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCorner"
+   },
+   "actions": [
+    {
+     "id": "enrageDeb",
+     "first": 26,
+     "every": 60
+    },
+    {
+     "id": "rainFire",
+     "first": 8,
+     "every": 14,
+     "jitter": 3
+    },
+    {
+     "id": "rainOnTank",
+     "first": 40,
+     "every": 42,
+     "jitter": 6
+    },
+    {
+     "id": "poisonBolt",
+     "first": 6
+    },
+    {
+     "id": "poisonBolt",
+     "first": 18
+    },
+    {
+     "id": "poisonBolt",
+     "first": 60
+    },
+    {
+     "id": "poisonBolt",
+     "first": 72
+    },
+    {
+     "id": "poisonBolt",
+     "first": 84
+    },
+    {
+     "id": "poisonBolt",
+     "first": 120
+    },
+    {
+     "id": "poisonBolt",
+     "first": 132
+    },
+    {
+     "id": "poisonBolt",
+     "first": 144
+    },
+    {
+     "id": "poisonBolt",
+     "first": 180
+    },
+    {
+     "id": "poisonBolt",
+     "first": 192
+    },
+    {
+     "id": "poisonBolt",
+     "first": 204
+    }
+   ],
+   "expectations": [
+    {
+     "id": "hold",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Keep her on the west side",
+     "tip": "Leave her where she is unless Rain of Fire forces a step."
+    },
+    {
+     "id": "tankRain",
+     "type": "afterEvent",
+     "event": "rainOnTank",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 2,
+     "role": "tanks",
+     "label": "Drag her out of the fire",
+     "tip": "Melee and you stand in it if she does. Take her a few steps clear."
+    },
+    {
+     "id": "otCornerStay",
+     "type": "playerAtSpotBy",
+     "spot": "otCorner",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold the Worshippers in the corner",
+     "tip": "They must stay alive and far from everyone."
+    },
+    {
+     "id": "rainDodge",
+     "type": "afterEvent",
+     "event": "rainFire",
+     "check": "outsideHazard",
+     "within": 2.6,
+     "grace": 2,
+     "notBefore": 2,
+     "role": "nontank",
+     "label": "Step out of Rain of Fire",
+     "tip": "Every tick is more than 2,000 on cloth. Step out the moment you see fire under you."
+    },
+    {
+     "id": "embrace",
+     "type": "afterEvent",
+     "event": "enrageDeb",
+     "check": "noDispellable",
+     "within": 3,
+     "grace": 5,
+     "role": "healer",
+     "label": "Sacrifice a Worshipper on Enrage",
+     "tip": "She Enrages about once a minute. Press Dispel to sacrifice a Worshipper the moment it happens; keep poison off the list first."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "She hits hard even before she enrages, so keep the tank topped."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "If she enrages with the tank low the tank dies."
+    },
+    {
+     "id": "cleanPoison",
+     "type": "continuous",
+     "metric": "debuffSeconds",
+     "role": "healer",
+     "label": "Clean Poison Bolt Volley fast",
+     "tip": "Cleanse, Cure Poison, Poison Cleansing Totem. It ticks for ten seconds on everyone it hits."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 1.5,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.25,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 0.6,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Dispel poison and Enrage; pick up the Follower; heal the Enrage spike.",
+  "windows": {
+   "perfect": 0.5
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Faerlina turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   },
+   {
+    "id": "grabFollowerCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "followerOne",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Pick up the Follower",
+    "tip": "Run to it or Taunt it.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "rainTankDrill",
+   "name": "Drag her out of the fire",
+   "description": "Rain of Fire lands under her every 14 seconds. Step her clear each time.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "rainOnTank",
+     "first": 3,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "rainDpsDrill",
+   "name": "Step out of the fire",
+   "description": "Rain of Fire under you or next to you every 8 seconds. Step out and keep going.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 45,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "rainFire",
+     "first": 3,
+     "every": 8
+    }
+   ]
+  },
+  {
+   "id": "embraceDrill",
+   "name": "Enrage and the sacrifice",
+   "description": "She Enrages every 22 seconds and poison lands on the raid. Press Dispel on every Enrage straight away, then clean the poison.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "enrageDeb",
+     "first": 4,
+     "every": 22
+    },
+    {
+     "id": "poisonBolt",
+     "first": 8,
+     "every": 11
+    }
+   ]
+  },
+  {
+   "id": "followerDrill",
+   "name": "Pick up the Follower",
+   "description": "A Follower appears every 20 seconds. Get it on you and drag it to your spot.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 28,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "followerOne",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  }
+ ]
+}

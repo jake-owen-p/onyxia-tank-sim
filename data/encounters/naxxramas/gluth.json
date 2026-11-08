@@ -1,0 +1,1653 @@
+{
+ "id": "gluth",
+ "name": "Gluth",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/gluth.md. HP is a clock: 1,466,075 HP over 305 s. The third Decimate lands about 5:15; the Enrage follows (wiki 10 to 20 s later, BigWigs 6:00, cmangos 6:30). A run that finishes at 5:05 is comfortably inside it; the Enrage itself is a wipe and is not simulated. The room is an estimate from prose. BOSS STATIONARY: a real raid drags him to the far corner by the exit door frame at the start and never moves him again (Wowhead, Warcraft Tavern). The engine has no way to turn a tank-swap target switch off for the boss's movement, so he is placed in the corner at the pull and `boss.stationary`: the drag across the room is not rehearsed. MORTAL WOUND: `debuff` on the tank, `healingMult` 0.9 per stack, 30 s, stacking (cap 5, the guides swap at 4 to 5, Warcraft Tavern), applied every 6 s while the boss is on the tank (`conditional: onPlayer`; cmangos has 10 s; 6 s here keeps five stacks inside the 34 s window before the first swap). Gluth is taunt-immune and the real swap is by out-threating (wiki, Wowhead); like Huhuran, Fankriss and Kurinnaxx this is a scripted `restWindow` plus `targetSwitch`: about every 64 s the player tank is told to press nothing for 30 s while the stacks fall off, and Taunt then stands in for building threat back. A ghost tank in the other roles carries a stack count capped at the swap point as a stand-in for 'whoever is on him right now' and never actually swaps, so a player healer rehearses healing a tank at up to five stacks of Mortal Wound the whole fight rather than alternating two tanks (this is the second-largest gap).  DECIMATE: an `aoe` with `setHpFraction` 0.05, as the real spell: every player and the ghost tank is left at 5% of maximum health however full they were, and it can never kill (cmangos: damage equals current HP minus 5% of max). At 5% a single swing would kill the tank, so the warning arms `decimateWall`, a 5.1 s, -75% damage-taken debuff on the tank that stands for the defensive cooldowns the guides demand (Wowhead: 'Tanks need to be prepared to use defensive cooldowns right as this goes off'); the swing timer cannot be paused, so without it a real 5% tank would die to whichever swing lands first. The healer's job is entirely after the hit (wiki: 'Once Gluth casts decimate, top off the MT'). The timer is real (~105 s, wiki and Warcraft Tavern, Wowhead ~100 s, DBM's disabled ~96 s), with a `decimateWarn` 6 s before (DBM counts) to give a press window, cast 0 as the real spell has none. ZOMBIE CHOW: one every ~10 s from one of three grates (wiki, Wowhead), `killable` adds on a long `lifetime` (real 52,000 HP, classicdb); `pickup: offtank` with the player off-tank as a kiter who runs them down and holds them far from the boss; a ghost group otherwise. The real rule that a zombie reaching Gluth is eaten for +5% HP is not modelled (no add-boss contact event). Spell 28216 is 'Periodically trigger spell... 1 every 6 seconds', which implies at least one per 6 s, and the guide value of one per 10 s is kept. DPS do not stop for them. After each Decimate six zombies at 5% (`decimatedZombies`, `killFirst`, 7 s `lifetime`, the real 5% of 52,000 is about 2,600 HP) charge from the grates to a spot next to him: ranged and melee must switch onto them, and hitting the boss while they live is scored; that is the fight's real DPS decision (Wowhead: ranged AoE the zombies). The real existing kited zombies are not reset by the spell, because the engine has no way to touch a live add; only a fresh wave is shown. FRENZY: `debuff` on the tank (`dispel: enrage`), removed by the ranged role's Tranquilizing Shot (`roles.ranged.dispels`), cadence every 10 s (DBM 8.1 to 11.4 s after a 9.6 to 11.3 s first cast), real 8 s duration shortened to 4 s here because nobody else Tranqs in the sim for the other roles; the x1.5 is a scaled +100% attack speed and +50% damage (spell 28371). Terrifying Roar: `debuff` with `fear: 5` (5 s, the spell), `roles: melee` only (the tanks wear Fear Ward, which the engine cannot show), `safeSpots` door frame with a 1.8 s cast standing in for the DBM timer so the marker walks melee into the frame; the real spell is instant and a 20 yd radius, and ranged at their distance are out of it, and the `debuff` is scored by `playerMetric` when it lands. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Melee 1,000 per 2 s (the real 6,101 to 7,002 before armor is not on the wiki per-swing; this is the estimate), and against 200 passive heal with a player healer: a healer who does nothing loses the tank within about 30 seconds, faster after a Decimate. The Toxic Tunnel the raid crosses to reach him (periodic Nature damage) is not modelled.",
+ "sources": [
+  "docs/research/naxxramas/gluth.md",
+  "https://warcraft.wiki.gg/wiki/Gluth_(Classic)",
+  "https://www.wowhead.com/classic/guide/gluth-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=25646/mortal-wound",
+  "https://www.wowhead.com/classic/spell=28375/decimate",
+  "https://www.wowhead.com/classic/spell=19451/frenzy",
+  "https://www.wowhead.com/classic/spell=29685/terrifying-roar",
+  "https://www.wowhead.com/classic/spell=29307/infected-wound",
+  "https://www.wowhead.com/classic/spell=28217/summon-zombie-chow",
+  "https://www.wowhead.com/classic/spell=29682/call-all-zombie-chow",
+  "https://www.wowhead.com/classic/spell=26662/berserk",
+  "https://classicdb.ch/?npc=15932",
+  "https://classicdb.ch/?npc=16360",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/ConstructQuarter/Gluth.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Gluth's Pit",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -34,
+      -28
+     ],
+     [
+      34,
+      -28
+     ],
+     [
+      34,
+      28
+     ],
+     [
+      -34,
+      28
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -46
+     ],
+     [
+      8,
+      -46
+     ],
+     [
+      8,
+      -24
+     ],
+     [
+      -8,
+      -24
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -8,
+      -28
+     ],
+     [
+      -34,
+      -28
+     ],
+     [
+      -34,
+      28
+     ],
+     [
+      34,
+      28
+     ],
+     [
+      34,
+      -28
+     ],
+     [
+      8,
+      -28
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -8,
+      -28
+     ],
+     [
+      -8,
+      -46
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      8,
+      -28
+     ],
+     [
+      8,
+      -46
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -40
+    ]
+   },
+   {
+    "text": "Gluth",
+    "at": [
+     22,
+     24
+    ]
+   },
+   {
+    "text": "Exit door frame",
+    "at": [
+     30,
+     6
+    ]
+   },
+   {
+    "text": "Grates",
+    "at": [
+     0,
+     -22
+    ]
+   },
+   {
+    "text": "Pipe exit",
+    "at": [
+     8,
+     -18
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -44,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 22,
+   "y": 18,
+   "heading": 0
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -34,
+   "spread": 9
+  },
+  "tankSpot": {
+   "x": 28,
+   "y": 18,
+   "tolerance": 5,
+   "label": "Tank in the door corner"
+  },
+  "bossSpot": {
+   "x": 22,
+   "y": 18,
+   "heading": 0,
+   "tolerance": 8,
+   "headingTolerance": 75,
+   "label": "Gluth"
+  },
+  "raidCenter": {
+   "x": 10,
+   "y": -14,
+   "spread": 10,
+   "label": "Raid under the pipe"
+  },
+  "rangedSpot": {
+   "x": 14,
+   "y": -12,
+   "tolerance": 4,
+   "label": "Ranged: under the pipe"
+  },
+  "healerSpot": {
+   "x": 11,
+   "y": -8,
+   "tolerance": 8,
+   "label": "Healers: under the pipe, in range"
+  },
+  "meleeSpot": {
+   "x": 22,
+   "y": 10,
+   "tolerance": 2,
+   "label": "Melee: his south side"
+  },
+  "doorFrame": {
+   "x": 30,
+   "y": 8,
+   "tolerance": 4.5,
+   "label": "Door frame"
+  },
+  "grateA": {
+   "x": -18,
+   "y": -24,
+   "label": "Grate"
+  },
+  "grateB": {
+   "x": 0,
+   "y": -26,
+   "label": "Grate"
+  },
+  "grateC": {
+   "x": 18,
+   "y": -24,
+   "label": "Grate"
+  },
+  "ghostOfftankSpot": {
+   "x": -26,
+   "y": -14,
+   "label": "Kited zombies"
+  },
+  "chargeSpot": {
+   "x": 21,
+   "y": 8,
+   "label": "Zombies charging him"
+  },
+  "kiteSpot": {
+   "x": -6,
+   "y": -20,
+   "tolerance": 8,
+   "label": "Kiters by the grates"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1300,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1400,
+  "healPerSecondWithPlayerHealer": 200,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "looseHint": "The boss is on someone else. Build threat",
+  "radius": 5,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 1000,
+  "meleeInterval": 2,
+  "cones": {},
+  "stationary": true,
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him in the door corner and take the Mortal Wound stacks. Around four or five stacks the other tank takes over: press nothing for 30 seconds while they fall off, then build threat and take him back. Decimate takes you down hard, so have your cooldowns ready the moment it lands.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Zombie kiter",
+   "short": "Off-tank",
+   "description": "Zombies climb out of the grates every 10 seconds and go for the nearest raider. Pick each one up and keep them at the far side of the room until Decimate. A zombie that reaches him heals him 5%.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "At his south flank. On the timer step into the door frame so Terrifying Roar cannot fear you, then get straight back on him. After every Decimate kill the zombies that charge him.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Tranquilizing Shot every Frenzy, inside three seconds. Stay under the pipe exit at max range and, the moment Decimate lands, switch to the zombies that charge him.",
+   "abilities": [
+    "attack",
+    "dispel"
+   ],
+   "attackRange": 30,
+   "dispels": [
+    "enrage"
+   ]
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Mortal Wound cuts every heal you land on the tank. Decimate drops him to 5% no matter how full he is, so land your biggest heal the moment it hits.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 20,
+   "icon": "taunt",
+   "tip": "Gluth is taunt-immune in the real fight, so read this as building threat back. Use it only after your stacks have fallen off."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2800,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Tranquilizing Shot",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "enrage"
+   ],
+   "tip": "Hunters: Tranquilizing Shot removes his Frenzy. The moment he frenzies, shoot it."
+  }
+ },
+ "actions": {
+  "mortalWound": {
+   "label": "Mortal Wound",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 30,
+   "healingMult": 0.9,
+   "maxStacks": 5,
+   "conditional": "onPlayer",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Each stack cuts healing on the tank by 10 percent for 30 seconds. The other tank takes him at four or five."
+  },
+  "frenzy": {
+   "label": "Frenzy",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "enrage",
+   "duration": 4,
+   "damageTakenMult": 1.5,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He frenzies. Hunters, Tranquilizing Shot right now."
+  },
+  "terrifyingRoar": {
+   "label": "Terrifying Roar",
+   "kind": "debuff",
+   "cast": 1.8,
+   "target": "all",
+   "roles": [
+    "melee"
+   ],
+   "dispel": "none",
+   "duration": 5,
+   "fear": 5,
+   "safeSpots": [
+    "doorFrame"
+   ],
+   "safeRadius": 4.5,
+   "safeRoles": [
+    "melee"
+   ],
+   "playerMetric": "roarFears",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Terrifying Roar comes every 20 seconds. Melee step into the door frame before it lands."
+  },
+  "zombieA": {
+   "label": "Zombie Chow",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "grateA"
+   ],
+   "speed": 5,
+   "aggroRange": 12,
+   "lifetime": 95,
+   "heldLifetime": 115,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%."
+  },
+  "zombieB": {
+   "label": "Zombie Chow",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "grateB"
+   ],
+   "speed": 5,
+   "aggroRange": 12,
+   "lifetime": 95,
+   "heldLifetime": 115,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%."
+  },
+  "zombieC": {
+   "label": "Zombie Chow",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "grateC"
+   ],
+   "speed": 5,
+   "aggroRange": 12,
+   "lifetime": 95,
+   "heldLifetime": 115,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "ghostOfftankSpot",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%."
+  },
+  "restWindow": {
+   "label": "Waiting: your stacks are falling",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "tanks",
+   "dispel": "none",
+   "duration": 30.5,
+   "forbidAbilities": true,
+   "breakMetric": "tauntedTooSoon",
+   "follow": [
+    {
+     "id": "swapOut",
+     "delay": 0.05
+    }
+   ],
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "The other tank has him. Press nothing for 30 seconds while your Mortal Wound falls off."
+  },
+  "swapOut": {
+   "label": "Tank swap",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 0.05,
+   "toast": "Tank swap: the other tank has him now. Let your stacks fall.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Around five stacks the next tank takes over."
+  },
+  "decimateWarn": {
+   "label": "Decimate soon",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "follow": [
+    {
+     "id": "decimateWall",
+     "delay": 5.9
+    },
+    {
+     "id": "decimate",
+     "delay": 6
+    }
+   ],
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Decimate in six seconds. Topping him first does not help: it sets everyone to 5%. Time your biggest heal for the moment it lands."
+  },
+  "decimateWall": {
+   "label": "Tank cooldown for Decimate",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 5.1,
+   "damageTakenMult": 0.25,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "The tank has their defensive cooldown up for the moment Decimate lands."
+  },
+  "decimate": {
+   "label": "Decimate",
+   "kind": "aoe",
+   "cast": 0,
+   "setHpFraction": 0.05,
+   "follow": [
+    {
+     "id": "decimatedZombies",
+     "delay": 0.2
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Decimate drops everyone to 5% of their health no matter how full they are, zombies included. Heal hard the moment it lands; ranged kill the zombies charging him."
+  },
+  "decimatedZombies": {
+   "label": "Zombies at 5%",
+   "kind": "adds",
+   "cast": 0,
+   "count": 2,
+   "from": [
+    "grateA",
+    "grateB",
+    "grateC"
+   ],
+   "speed": 12,
+   "aggroRange": 6,
+   "lifetime": 7,
+   "heldLifetime": 7,
+   "killFirst": true,
+   "pickup": "none",
+   "holdSpot": "chargeSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Every zombie left in the room just dropped to 5% and is running straight for him. Kill them now."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "First Decimate",
+   "subtitle": "Mortal Wound, Frenzy, Roar, zombies",
+   "hpFrom": 1,
+   "hpTo": 0.66,
+   "duration": 105,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "kiteSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "mortalWound",
+     "first": 5,
+     "every": 6
+    },
+    {
+     "id": "frenzy",
+     "first": 10,
+     "every": 10,
+     "jitter": 1.5
+    },
+    {
+     "id": "terrifyingRoar",
+     "first": 18,
+     "every": 20,
+     "jitter": 2.5
+    },
+    {
+     "id": "zombieA",
+     "first": 8,
+     "every": 30
+    },
+    {
+     "id": "zombieB",
+     "first": 18,
+     "every": 30
+    },
+    {
+     "id": "zombieC",
+     "first": 28,
+     "every": 30
+    },
+    {
+     "id": "restWindow",
+     "first": 34,
+     "every": 64
+    },
+    {
+     "id": "decimateWarn",
+     "first": 99
+    }
+   ],
+   "expectations": [
+    {
+     "id": "holdCorner1",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 8,
+     "role": "tanks",
+     "label": "Hold him in the door corner",
+     "tip": "He stays in the far corner so the zombies have the whole room to walk and never reach him."
+    },
+    {
+     "id": "swapBack1",
+     "type": "afterEvent",
+     "event": "swapOut",
+     "check": "hasAggro",
+     "within": 36,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Take him back when your stacks are gone",
+     "tip": "Press nothing for 30 seconds while the other tank has him, then build threat and take him back."
+    },
+    {
+     "id": "kiteZombieA1",
+     "type": "afterEvent",
+     "event": "zombieA",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteZombieB1",
+     "type": "afterEvent",
+     "event": "zombieB",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteZombieC1",
+     "type": "afterEvent",
+     "event": "zombieC",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteLoose1",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "No zombie on the raid",
+     "tip": "A zombie walking into the raid has to be picked up, kited, and kept far from the boss."
+    },
+    {
+     "id": "tranq1",
+     "type": "afterEvent",
+     "event": "frenzy",
+     "check": "noDispellable",
+     "within": 2.6,
+     "grace": 1.2,
+     "role": "ranged",
+     "label": "Tranq the Frenzy",
+     "tip": "Tranquilizing Shot the moment he frenzies. Every second it stays up the tank takes faster hits."
+    },
+    {
+     "id": "roarDodge1",
+     "type": "continuous",
+     "metric": "roarFears",
+     "role": "melee",
+     "label": "Hide in the door frame for the Roar",
+     "tip": "Step into the door frame on the timer and he cannot fear you. Fear out in the open and you lose five seconds of damage."
+    },
+    {
+     "id": "meleeBack1",
+     "type": "afterEvent",
+     "event": "terrifyingRoar",
+     "check": "inRange",
+     "within": 3,
+     "grace": 5,
+     "role": "melee",
+     "label": "Back on him after the Roar",
+     "tip": "Out of the door frame and straight back to hitting him."
+    },
+    {
+     "id": "rangedPipe1",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay under the pipe exit at range",
+     "tip": "Far from him, close to where the zombies come out so you can AoE them after every Decimate."
+    },
+    {
+     "id": "healerRange1",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay in range of the corner",
+     "tip": "Under the pipe exit with the ranged, but close enough that the tank is always in range."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Zombies after a Decimate, then him",
+     "tip": "They are at 5% and running straight to him. Hit them before they eat."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mortal Wound makes every heal smaller and Frenzy makes him hit faster. Decimate does the rest."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Decimate leaves him at 5% however full he was. Heal hard the moment it lands."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Second Decimate",
+   "subtitle": "Do it all again",
+   "hpFrom": 0.66,
+   "hpTo": 0.33,
+   "duration": 105,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "kiteSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "mortalWound",
+     "first": 5,
+     "every": 6
+    },
+    {
+     "id": "frenzy",
+     "first": 10,
+     "every": 10,
+     "jitter": 1.5
+    },
+    {
+     "id": "terrifyingRoar",
+     "first": 18,
+     "every": 20,
+     "jitter": 2.5
+    },
+    {
+     "id": "zombieA",
+     "first": 8,
+     "every": 30
+    },
+    {
+     "id": "zombieB",
+     "first": 18,
+     "every": 30
+    },
+    {
+     "id": "zombieC",
+     "first": 28,
+     "every": 30
+    },
+    {
+     "id": "restWindow",
+     "first": 34,
+     "every": 64
+    },
+    {
+     "id": "decimateWarn",
+     "first": 99
+    }
+   ],
+   "expectations": [
+    {
+     "id": "holdCorner2",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 8,
+     "role": "tanks",
+     "label": "Hold him in the door corner",
+     "tip": "He stays in the far corner so the zombies have the whole room to walk and never reach him."
+    },
+    {
+     "id": "swapBack2",
+     "type": "afterEvent",
+     "event": "swapOut",
+     "check": "hasAggro",
+     "within": 36,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Take him back when your stacks are gone",
+     "tip": "Press nothing for 30 seconds while the other tank has him, then build threat and take him back."
+    },
+    {
+     "id": "kiteZombieA2",
+     "type": "afterEvent",
+     "event": "zombieA",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteZombieB2",
+     "type": "afterEvent",
+     "event": "zombieB",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteZombieC2",
+     "type": "afterEvent",
+     "event": "zombieC",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteLoose2",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "No zombie on the raid",
+     "tip": "A zombie walking into the raid has to be picked up, kited, and kept far from the boss."
+    },
+    {
+     "id": "tranq2",
+     "type": "afterEvent",
+     "event": "frenzy",
+     "check": "noDispellable",
+     "within": 2.6,
+     "grace": 1.2,
+     "role": "ranged",
+     "label": "Tranq the Frenzy",
+     "tip": "Tranquilizing Shot the moment he frenzies. Every second it stays up the tank takes faster hits."
+    },
+    {
+     "id": "roarDodge2",
+     "type": "continuous",
+     "metric": "roarFears",
+     "role": "melee",
+     "label": "Hide in the door frame for the Roar",
+     "tip": "Step into the door frame on the timer and he cannot fear you. Fear out in the open and you lose five seconds of damage."
+    },
+    {
+     "id": "meleeBack2",
+     "type": "afterEvent",
+     "event": "terrifyingRoar",
+     "check": "inRange",
+     "within": 3,
+     "grace": 5,
+     "role": "melee",
+     "label": "Back on him after the Roar",
+     "tip": "Out of the door frame and straight back to hitting him."
+    },
+    {
+     "id": "rangedPipe2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay under the pipe exit at range",
+     "tip": "Far from him, close to where the zombies come out so you can AoE them after every Decimate."
+    },
+    {
+     "id": "healerRange2",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay in range of the corner",
+     "tip": "Under the pipe exit with the ranged, but close enough that the tank is always in range."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Zombies after a Decimate, then him",
+     "tip": "They are at 5% and running straight to him. Hit them before they eat."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mortal Wound makes every heal smaller and Frenzy makes him hit faster. Decimate does the rest."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Decimate leaves him at 5% however full he was. Heal hard the moment it lands."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "The Last Cycle",
+   "subtitle": "Kill him before the Enrage",
+   "hpFrom": 0.33,
+   "hpTo": 0,
+   "duration": 95,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "kiteSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "mortalWound",
+     "first": 5,
+     "every": 6
+    },
+    {
+     "id": "frenzy",
+     "first": 10,
+     "every": 10,
+     "jitter": 1.5
+    },
+    {
+     "id": "terrifyingRoar",
+     "first": 18,
+     "every": 20,
+     "jitter": 2.5
+    },
+    {
+     "id": "zombieA",
+     "first": 8,
+     "every": 30
+    },
+    {
+     "id": "zombieB",
+     "first": 18,
+     "every": 30
+    },
+    {
+     "id": "zombieC",
+     "first": 28,
+     "every": 30
+    },
+    {
+     "id": "restWindow",
+     "first": 34,
+     "every": 64
+    }
+   ],
+   "expectations": [
+    {
+     "id": "holdCorner3",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 8,
+     "role": "tanks",
+     "label": "Hold him in the door corner",
+     "tip": "He stays in the far corner so the zombies have the whole room to walk and never reach him."
+    },
+    {
+     "id": "swapBack3",
+     "type": "afterEvent",
+     "event": "swapOut",
+     "check": "hasAggro",
+     "within": 36,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Take him back when your stacks are gone",
+     "tip": "Press nothing for 30 seconds while the other tank has him, then build threat and take him back."
+    },
+    {
+     "id": "kiteZombieA3",
+     "type": "afterEvent",
+     "event": "zombieA",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteZombieB3",
+     "type": "afterEvent",
+     "event": "zombieB",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteZombieC3",
+     "type": "afterEvent",
+     "event": "zombieC",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the zombie",
+     "tip": "One from the grates every 10 seconds. Run it down and keep it away from Gluth."
+    },
+    {
+     "id": "kiteLoose3",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "No zombie on the raid",
+     "tip": "A zombie walking into the raid has to be picked up, kited, and kept far from the boss."
+    },
+    {
+     "id": "tranq3",
+     "type": "afterEvent",
+     "event": "frenzy",
+     "check": "noDispellable",
+     "within": 2.6,
+     "grace": 1.2,
+     "role": "ranged",
+     "label": "Tranq the Frenzy",
+     "tip": "Tranquilizing Shot the moment he frenzies. Every second it stays up the tank takes faster hits."
+    },
+    {
+     "id": "roarDodge3",
+     "type": "continuous",
+     "metric": "roarFears",
+     "role": "melee",
+     "label": "Hide in the door frame for the Roar",
+     "tip": "Step into the door frame on the timer and he cannot fear you. Fear out in the open and you lose five seconds of damage."
+    },
+    {
+     "id": "meleeBack3",
+     "type": "afterEvent",
+     "event": "terrifyingRoar",
+     "check": "inRange",
+     "within": 3,
+     "grace": 5,
+     "role": "melee",
+     "label": "Back on him after the Roar",
+     "tip": "Out of the door frame and straight back to hitting him."
+    },
+    {
+     "id": "rangedPipe3",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay under the pipe exit at range",
+     "tip": "Far from him, close to where the zombies come out so you can AoE them after every Decimate."
+    },
+    {
+     "id": "healerRange3",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay in range of the corner",
+     "tip": "Under the pipe exit with the ranged, but close enough that the tank is always in range."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Zombies after a Decimate, then him",
+     "tip": "They are at 5% and running straight to him. Hit them before they eat."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mortal Wound makes every heal smaller and Frenzy makes him hit faster. Decimate does the rest."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Decimate leaves him at 5% however full he was. Heal hard the moment it lands."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds Frenzy stayed up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "ranged",
+   "tip": "Tranq the moment he Frenzies."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "roarFears": {
+   "label": "Times feared by Terrifying Roar",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 2,
+   "roles": "melee",
+   "tip": "Get into the door frame before it lands."
+  },
+  "tauntedTooSoon": {
+   "label": "Pressed something during your rest window",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 1,
+   "roles": "tanks",
+   "tip": "While your stacks fall off, press nothing. The other tank has him."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.45
+ },
+ "cues": {
+  "notes": "Tranq on Frenzy; heal after Decimate; kill the 5% zombies; take him back after the swap.",
+  "windows": {
+   "perfect": 0.4
+  },
+  "list": [
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "buildBack",
+    "ability": "taunt",
+    "on": "event",
+    "event": "swapOut",
+    "offset": 30.5,
+    "early": 0.6,
+    "late": 5,
+    "role": "tanks",
+    "short": "TAKE BACK",
+    "label": "Build threat and take him back",
+    "tip": "Your stacks are gone. Take him now."
+   },
+   {
+    "id": "tranqNote",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 2.6,
+    "role": "ranged",
+    "short": "TRANQ",
+    "label": "Tranquilizing Shot",
+    "tip": "The moment he frenzies."
+   },
+   {
+    "id": "hitZombies",
+    "ability": "attack",
+    "on": "event",
+    "event": "decimatedZombies",
+    "offset": 0.5,
+    "early": 0.3,
+    "late": 5,
+    "role": "dps",
+    "short": "ZOMBIES",
+    "label": "Kill the zombies",
+    "tip": "They are at 5% and charging him. Turn and hit them."
+   },
+   {
+    "id": "meleeBackCue",
+    "ability": "attack",
+    "on": "event",
+    "event": "terrifyingRoar",
+    "offset": 0.4,
+    "early": 0.3,
+    "late": 3.5,
+    "role": "melee",
+    "short": "BACK ON",
+    "label": "Back on him",
+    "tip": "Out of the door frame and straight back on him."
+   },
+   {
+    "id": "healPostDecimate",
+    "ability": "heal",
+    "on": "event",
+    "event": "decimate",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal him now",
+    "tip": "He has a sliver of health. Land your biggest heal this second."
+   },
+   {
+    "id": "grabZombieA",
+    "ability": "taunt",
+    "on": "event",
+    "event": "zombieA",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "ZOMBIE",
+    "label": "Pick up the zombie",
+    "tip": "Run to it or Taunt it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabZombieB",
+    "ability": "taunt",
+    "on": "event",
+    "event": "zombieB",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "ZOMBIE",
+    "label": "Pick up the zombie",
+    "tip": "Run to it or Taunt it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabZombieC",
+    "ability": "taunt",
+    "on": "event",
+    "event": "zombieC",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "ZOMBIE",
+    "label": "Pick up the zombie",
+    "tip": "Run to it or Taunt it.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "swapDrill",
+   "name": "The tank swap",
+   "description": "Mortal Wound stacks up, then the other tank takes over. Press nothing for 30 seconds, then take him back.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 75,
+   "loop": false,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "mortalWound",
+     "first": 2,
+     "every": 4
+    },
+    {
+     "id": "restWindow",
+     "first": 18,
+     "every": 64
+    }
+   ]
+  },
+  {
+   "id": "tranqDrill",
+   "name": "Tranq the Frenzy",
+   "description": "He frenzies every 8 seconds. Tranquilizing Shot inside two and a half.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 48,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frenzy",
+     "first": 2,
+     "every": 8
+    }
+   ]
+  },
+  {
+   "id": "roarDrill",
+   "name": "Hide from the Roar",
+   "description": "Terrifying Roar every 12 seconds. Step into the door frame before it lands, then back on him.",
+   "roles": "melee",
+   "startPhase": 1,
+   "duration": 48,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "terrifyingRoar",
+     "first": 4,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "decimateDrill",
+   "name": "Heal after Decimate",
+   "description": "Decimate every 30 seconds. Land your biggest heal the moment it lands.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "mortalWound",
+     "first": 2,
+     "every": 6
+    },
+    {
+     "id": "decimateWarn",
+     "first": 3,
+     "every": 30
+    }
+   ]
+  },
+  {
+   "id": "zombieDrill",
+   "name": "Pick up the zombies",
+   "description": "A zombie every 10 seconds. Run it down and keep it away from him.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "zombieA",
+     "first": 2,
+     "every": 10
+    }
+   ]
+  }
+ ]
+}

@@ -902,7 +902,7 @@ export function createSim(script, options = {}) {
     const set = (label, kind) => { state.nextExpected = { label, kind }; };
     // Urgent corrections first, then a near deadline, then hints, then far deadlines.
     if (ideal.reason === 'runOut') return set('Run out of the raid before it goes off', 'fix');
-    if (ideal.reason === 'los') return set('Get behind cover', 'fix');
+    if (ideal.reason === 'los') return set('Get to the safe spot', 'fix');
     if (ideal.reason === 'moveOut') return set(`Get out of range: ${b.cast ? b.cast.label : 'move'}`, 'fix');
     if (!tankRole && shieldBlocksAttacks()) return set('Shield up: stop attacking', 'fix');
     if (!tankRole && ideal.reason === 'whelps') return set('Pick up the adds', 'fix');

@@ -1,0 +1,3136 @@
+{
+ "id": "thaddius",
+ "name": "Thaddius",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/thaddius.md. HP is a clock: phase 1 (the wights, about 126 s) then phase 2 (306 s, Thaddius 6.5M, DBM's 300 s Berserk) with a 14 s jump in between (real 11.3 to 16.3 s, DBM). The room, platforms and camp positions are estimates from prose. PHASE 1, ONE ENTITY FOR TWO WIGHTS: Stalagg and Feugen sit on two platforms joined by Tesla Coils and are tanked apart; the engine has one boss, so the two wights are drawn as one target at one spot and share one HP bar. The tank spot alternates west and east of it, and Magnetic Pull (every 21 s, DBM; 6 phases of 21 s) is a real `teleportTankTo` plus `threatWipe`: you are thrown across, your new wight has an empty table, and you Taunt. Everything about the balance between the two (ranged on Stalagg, melee on Feugen, both must die within 5 s or the first resurrects, stop on the side that is ahead) cannot be modelled and is not scored; the shared bar means they always die together. This is the largest gap in the fight. Tesla Chain and the coil overload are not modelled because the single stationary entity cannot leave a coil (real: 4,375 to 5,625 Nature per second if a wight is dragged too far). Static Field (30 yd radius, 6 s, 500 mana plus equal Shadow, Feugen only) is an `aoe` of 400 around that one entity limited to mana users (`roles: [ranged, healer]`), who stand outside it and are scored on `staticHits`. War Stomp (`knockback`, radial, 15 yd, 900 scaled from 1,313, cadence unknown so every 14 s is an estimate) and Power Surge (`debuff` on the tank, `damageTakenMult` 1.6 for 10 s, about every 42 s, real +200% attack speed, cadence unknown) round it out. After each Magnetic Pull a 3 s `shield` with `roles: dps` scores attacks while the new tank rebuilds threat (`attacksIntoShield`): the real instruction is that DPS eases off for a moment (Warcraft Tavern), this is an engine stand-in with the exact length a guess. POLARITY SHIFT is scored movement. Phase 2 is one short phase per shift (first at 11.3 s, then every 30 s; DBM 25.9 to 35.7 s). Each shift is a 3 s cast placed at the end of the phase before it, so the charge lands on the phase boundary, together with the phase's marker and side expectations, and the player cannot see the new side before they carry the new charge (the first shift, 11 s into phase 8, stays where it is, because Thaddius is not yet awake in phase 7). It applies a `Negative Charge` or `Positive Charge` debuff (one debuff each, duration 26 s so the old charge is gone before the next one lands, instead of the real 60 s refreshed every shift). The two sides are camps at spots (`negCamp`, `posCamp`, `safeRadius` 15): `shockPos` and `shockNeg` are whole-room `aoe` pulses (1,800 every 5 s scaled from 2,000, first pulse 5 s after the charge lands, which is 8 s after the shift cast starts, honouring the real 5 s grace; the first shift's charge lands 3 s after its cast, then the pulses start 5 s later), each `conditional` on its own charge debuff and `safeSpots` on its own camp. Stand on the matching side and the pulse is out of line of sight and misses; stand on the other side and it hits for 1,800 and scores `wrongSide`. Every role's phase spots point to the matching camp and `playerAtSpotBy` checks you are there at the end, so the marker and the score both move you. The player's charge follows one fixed pseudo-random chart, identical on every seed (about half the shifts flip your side), rather than a per-seed coin flip: the engine has no way to make two debuff outcomes mutually exclusive from one random roll, and a fixed chart is also what lets the phase spots and expectations know the right side. The +10% damage per same-charge ally stacking that makes the real fight winnable is not modelled (no damage model for stacks of nearby players); nor is standing near the opposite charge dealing damage to others around you. The tank flips sides too and is scored the same way, running straight through him as the guides say. CHAIN LIGHTNING: a `debuff` random-target hit on the player (`playerChance` 0.35, 15 of 40 hit by the real spell, 1,900 scaled from 1,850 to 2,000) plus a separate tank-only tick of 1,400 every 7.5 s (real 5 to 10 s). BALL LIGHTNING: `aoe` 7,000 (the spell), 1 s cast, `conditional: meleeEmpty`, so any time the tank is not in melee range it fires: real behaviour. Thaddius is `boss.stationary` as the real one stands on his dais, and the tank must simply never leave melee, including when switching sides. Thaddius does not have a real enrage modelled mid-fight; BERSERK (+150% movement speed and +500% physical damage, DBM 300 s) is a `debuff` on the tank at 5:00 of phase 2 (`damageTakenMult` 1.3, 8 s listed) with the kill 6 seconds later: the real thing is a wipe and would make the validator's bot lose the tank, so it is shown but softened. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Boss melee 1,000 per 2 s (the wiki's ~2,000 normal and 3,300 crush halved to the scale) plus Chain Lightning 1,400 every 7.5 s is about 690 damage per second on the tank in phase 2, against 200 passive healing with a player healer, so a healer who does nothing loses the tank in about 20 seconds. Two `aggroClimb` events in phase 2 are estimates for a stacked raid out-threating its tank (the wiki says warrior threat is shaky against ten-stacked DPS).",
+ "sources": [
+  "docs/research/naxxramas/thaddius.md",
+  "https://warcraft.wiki.gg/wiki/Thaddius_(Classic)",
+  "https://www.wowhead.com/classic/guide/thaddius-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28089/polarity-shift",
+  "https://www.wowhead.com/classic/spell=28167/chain-lightning",
+  "https://www.wowhead.com/classic/spell=28299/ball-lightning",
+  "https://www.wowhead.com/classic/spell=28337/magnetic-pull",
+  "https://www.wowhead.com/classic/spell=28125/war-stomp",
+  "https://www.wowhead.com/classic/spell=28134/power-surge",
+  "https://www.wowhead.com/classic/spell=28135/static-field",
+  "https://classicdb.ch/?npc=15928",
+  "https://classicdb.ch/?npc=15929",
+  "https://classicdb.ch/?npc=15930",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/ConstructQuarter/Thaddius.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Thaddius's Hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -42,
+      -34
+     ],
+     [
+      42,
+      -34
+     ],
+     [
+      42,
+      34
+     ],
+     [
+      -42,
+      34
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -52
+     ],
+     [
+      8,
+      -52
+     ],
+     [
+      8,
+      -30
+     ],
+     [
+      -8,
+      -30
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -8,
+      -34
+     ],
+     [
+      -42,
+      -34
+     ],
+     [
+      -42,
+      34
+     ],
+     [
+      42,
+      34
+     ],
+     [
+      42,
+      -34
+     ],
+     [
+      8,
+      -34
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -8,
+      -34
+     ],
+     [
+      -8,
+      -52
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      8,
+      -34
+     ],
+     [
+      8,
+      -52
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -46
+    ]
+   },
+   {
+    "text": "Stalagg and Feugen (phase 1)",
+    "at": [
+     0,
+     2
+    ]
+   },
+   {
+    "text": "Thaddius (phase 2)",
+    "at": [
+     0,
+     28
+    ]
+   },
+   {
+    "text": "Negative",
+    "at": [
+     -30,
+     18
+    ]
+   },
+   {
+    "text": "Positive",
+    "at": [
+     30,
+     18
+    ]
+   },
+   {
+    "text": "Tesla coils",
+    "at": [
+     0,
+     -8
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -50,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 8,
+   "heading": 90
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -38,
+   "spread": 9
+  },
+  "tankSpot": {
+   "x": -9,
+   "y": 8,
+   "tolerance": 4,
+   "label": "Tank: west side"
+  },
+  "tankEast": {
+   "x": 9,
+   "y": 8,
+   "tolerance": 4,
+   "label": "Tank: east side"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 8,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 180,
+   "label": "Stalagg and Feugen"
+  },
+  "raidP1": {
+   "x": 0,
+   "y": -18,
+   "spread": 11,
+   "label": "Raid"
+  },
+  "rangedP1": {
+   "x": -6,
+   "y": -30,
+   "tolerance": 8,
+   "label": "Ranged, outside Static Field"
+  },
+  "healerP1": {
+   "x": 0,
+   "y": -27.5,
+   "tolerance": 7,
+   "label": "Healers, outside Static Field"
+  },
+  "thaddiusSpot": {
+   "x": 0,
+   "y": 22,
+   "heading": 270,
+   "tolerance": 8,
+   "headingTolerance": 180,
+   "label": "Thaddius"
+  },
+  "tankNeg": {
+   "x": -7.5,
+   "y": 23,
+   "tolerance": 3.5,
+   "label": "Tank: Negative side"
+  },
+  "tankPos": {
+   "x": 7.5,
+   "y": 23,
+   "tolerance": 3.5,
+   "label": "Tank: Positive side"
+  },
+  "meleeNeg": {
+   "x": -9,
+   "y": 20,
+   "tolerance": 3.5,
+   "label": "Melee: Negative side"
+  },
+  "meleePos": {
+   "x": 9,
+   "y": 20,
+   "tolerance": 3.5,
+   "label": "Melee: Positive side"
+  },
+  "rangedNeg": {
+   "x": -22,
+   "y": 6,
+   "tolerance": 6,
+   "label": "Ranged: Negative side"
+  },
+  "rangedPos": {
+   "x": 22,
+   "y": 6,
+   "tolerance": 6,
+   "label": "Ranged: Positive side"
+  },
+  "healerNeg": {
+   "x": -18,
+   "y": 4,
+   "tolerance": 6,
+   "label": "Healers: Negative side"
+  },
+  "healerPos": {
+   "x": 18,
+   "y": 4,
+   "tolerance": 6,
+   "label": "Healers: Positive side"
+  },
+  "negCamp": {
+   "x": -16,
+   "y": 18,
+   "tolerance": 15,
+   "label": "Negative side"
+  },
+  "posCamp": {
+   "x": 16,
+   "y": 18,
+   "tolerance": 15,
+   "label": "Positive side"
+  },
+  "raidNeg": {
+   "x": -18,
+   "y": 8,
+   "spread": 11,
+   "label": "Raid: Negative"
+  },
+  "raidPos": {
+   "x": 18,
+   "y": 8,
+   "spread": 11,
+   "label": "Raid: Positive"
+  },
+  "raidCenter": {
+   "x": 0,
+   "y": 8,
+   "spread": 9,
+   "label": "Raid"
+  },
+  "centerPlat": {
+   "x": 0,
+   "y": 12,
+   "tolerance": 26,
+   "label": "Central platform"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1100,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1500,
+  "healPerSecondWithPlayerHealer": 200,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 1000,
+  "meleeInterval": 2,
+  "cones": {},
+  "stationary": true
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Phase 1: hold your wight; every 21 seconds Magnetic Pull throws you across and wipes threat, so Taunt the moment you land. Phase 2: keep Thaddius in melee on your charge side and run through him when your charge flips. If nobody is in melee he nukes the raid.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Phase 1: hold your damage for a moment after every Magnetic Pull, then back on. Phase 2: stand on the side that matches your charge. If it flips, run through him, not around.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Phase 1: stay out of Static Field range and hold for a moment after every Magnetic Pull. Phase 2: your charge says which side you stand on. Check it every shift and move in time.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 36
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Phase 1: stay at max range, out of Static Field, and heal the tank through Power Surge. Phase 2: your charge says which side you stand on, same as everyone. The tank never stops taking hits.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "pullW": {
+   "label": "Magnetic Pull",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportTankTo": "tankSpot",
+   "toast": "Magnetic Pull! You were thrown across. Taunt the wight!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Magnetic Pull throws the tanks to the other platform and wipes threat. Taunt the wight you land next to."
+  },
+  "pullE": {
+   "label": "Magnetic Pull",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportTankTo": "tankEast",
+   "toast": "Magnetic Pull! You were thrown across. Taunt the wight!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Magnetic Pull throws the tanks to the other platform and wipes threat. Taunt the wight you land next to."
+  },
+  "pullHold": {
+   "label": "Hold your damage",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 3,
+   "reflectDamage": 0,
+   "roles": "dps",
+   "toast": "Magnetic Pull: DPS hold for three seconds while the new tank gets a hit in.",
+   "warn": false,
+   "cue": null,
+   "icon": "shield",
+   "requires": "grounded",
+   "tip": "Three seconds while the new tank rebuilds threat on the wight."
+  },
+  "warStomp": {
+   "label": "War Stomp",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 6,
+   "knockbackRange": 15,
+   "damage": 900,
+   "radial": true,
+   "warn": false,
+   "cue": "knockback",
+   "icon": "knockback",
+   "requires": "grounded",
+   "tip": "War Stomp hits everyone within 15 yards and knocks them back. Stay away from the platform edge."
+  },
+  "staticField": {
+   "label": "Static Field",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 30,
+   "damage": 400,
+   "tankDamage": 0,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "playerMetric": "staticHits",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Static Field burns the mana of everyone within 30 yards of Feugen and deals that much damage, every 6 seconds."
+  },
+  "powerSurge": {
+   "label": "Power Surge",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 10,
+   "damageTakenMult": 1.6,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Stalagg attacks three times as fast for 10 seconds. Tank cooldowns and heal early."
+  },
+  "aggroClimb": {
+   "label": "A DPS pulls off the tank",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Someone passed the tank on threat. Taunt."
+  },
+  "relocate": {
+   "label": "Thaddius wakes",
+   "kind": "transition",
+   "cast": 0,
+   "teleportBossTo": "thaddiusSpot",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "submerged",
+   "tip": "Both wights are dead. The coils overload."
+  },
+  "shiftNeg": {
+   "label": "Polarity Shift",
+   "kind": "transition",
+   "cast": 3,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Polarity Shift gave you a Negative Charge. Stand with the Negative side: opposite charges standing near each other take 2,000 Nature every 5 seconds.",
+   "follow": [
+    {
+     "id": "chargeNeg",
+     "delay": 0
+    }
+   ]
+  },
+  "shiftPos": {
+   "label": "Polarity Shift",
+   "kind": "transition",
+   "cast": 3,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Polarity Shift gave you a Positive Charge. Stand with the Positive side: opposite charges standing near each other take 2,000 Nature every 5 seconds.",
+   "follow": [
+    {
+     "id": "chargePos",
+     "delay": 0
+    }
+   ]
+  },
+  "chargeNeg": {
+   "label": "Negative Charge",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 26,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Polarity Shift gave you a Negative Charge. Stand with the Negative side: opposite charges standing near each other take 2,000 Nature every 5 seconds."
+  },
+  "chargePos": {
+   "label": "Positive Charge",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 26,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Polarity Shift gave you a Positive Charge. Stand with the Positive side: opposite charges standing near each other take 2,000 Nature every 5 seconds."
+  },
+  "shockNeg": {
+   "label": "Polarity shock",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 1800,
+   "tankDamage": 0,
+   "conditional": "debuff:chargeNeg",
+   "safeSpots": [
+    "negCamp"
+   ],
+   "safeRadius": 15,
+   "playerMetric": "wrongSide",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "You are standing with the wrong side. Run to your own charge."
+  },
+  "shockPos": {
+   "label": "Polarity shock",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 1800,
+   "tankDamage": 0,
+   "conditional": "debuff:chargePos",
+   "safeSpots": [
+    "posCamp"
+   ],
+   "safeRadius": 15,
+   "playerMetric": "wrongSide",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "You are standing with the wrong side. Run to your own charge."
+  },
+  "chainLightning": {
+   "label": "Chain Lightning",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.35,
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 1900,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Arcs through up to 15 of the raid. Spread only across your own stack."
+  },
+  "chainTank": {
+   "label": "Chain Lightning",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 1400,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Chain Lightning hits the tank too."
+  },
+  "ballLightning": {
+   "label": "Ball Lightning",
+   "kind": "aoe",
+   "cast": 1,
+   "conditional": "meleeEmpty",
+   "damage": 7000,
+   "tankDamage": 7000,
+   "playerMetric": "ballHits",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Thaddius with nobody in melee range nukes the raid for 7,000. Stay on him at every moment, even when your charge flips."
+  },
+  "berserk": {
+   "label": "Berserk",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 8,
+   "damageTakenMult": 1.3,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Five minutes in. This is the end whether he is dead or not."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The Wights",
+   "subtitle": "West side",
+   "hpFrom": 1,
+   "hpTo": 0.95,
+   "duration": 21,
+   "bossState": "grounded",
+   "raidSpot": "raidP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedP1",
+    "healer": "healerP1"
+   },
+   "actions": [
+    {
+     "id": "warStomp",
+     "first": 7,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "staticField",
+     "first": 3,
+     "every": 6
+    },
+    {
+     "id": "powerSurge",
+     "first": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pullFirst",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 8,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pick up your wight on the platform",
+     "tip": "Tank it beside its coil. If a wight is dragged off the coil the raid dies."
+    },
+    {
+     "id": "hold",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Hold your damage for three seconds after every Magnetic Pull",
+     "tip": "The new tank has nothing on the table. Give them a moment before you open up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "rangedP1Spot0",
+     "type": "playerAtSpotBy",
+     "spot": "rangedP1",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay outside Static Field",
+     "tip": "Thirty yards from the wight or Static Field burns your mana and hits you for what it burned."
+    },
+    {
+     "id": "healerP1Spot0",
+     "type": "playerAtSpotBy",
+     "spot": "healerP1",
+     "grace": 5,
+     "role": "healer",
+     "label": "Healers stay at max range",
+     "tip": "Static Field reaches 30 yards. Stay beyond it and still in range of the tank."
+    },
+    {
+     "id": "static",
+     "type": "continuous",
+     "metric": "staticHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay out of Static Field",
+     "tip": "Thirty yards around Feugen. Stand further out."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Magnetic Pull wipes threat and the wight can hit whoever it wants for a moment. Be ready for the swap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Power Surge makes the tank fold. Heal ahead of it."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Magnetic Pull 1",
+   "subtitle": "East side",
+   "hpFrom": 0.95,
+   "hpTo": 0.8999999999999999,
+   "duration": 21,
+   "bossState": "grounded",
+   "raidSpot": "raidP1",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossSpot",
+    "ranged": "rangedP1",
+    "healer": "healerP1"
+   },
+   "actions": [
+    {
+     "id": "pullE",
+     "first": 0.3
+    },
+    {
+     "id": "pullHold",
+     "first": 0.4
+    },
+    {
+     "id": "warStomp",
+     "first": 10,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "staticField",
+     "first": 3,
+     "every": 6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pullTaunt1",
+     "type": "afterEvent",
+     "event": "pullE",
+     "check": "hasAggro",
+     "within": 2.5,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt the wight the moment you land",
+     "tip": "Magnetic Pull wiped your threat and threw you across. Taunt as you land."
+    },
+    {
+     "id": "hold",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Hold your damage for three seconds after every Magnetic Pull",
+     "tip": "The new tank has nothing on the table. Give them a moment before you open up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "rangedP1Spot1",
+     "type": "playerAtSpotBy",
+     "spot": "rangedP1",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay outside Static Field",
+     "tip": "Thirty yards from the wight or Static Field burns your mana and hits you for what it burned."
+    },
+    {
+     "id": "healerP1Spot1",
+     "type": "playerAtSpotBy",
+     "spot": "healerP1",
+     "grace": 5,
+     "role": "healer",
+     "label": "Healers stay at max range",
+     "tip": "Static Field reaches 30 yards. Stay beyond it and still in range of the tank."
+    },
+    {
+     "id": "static",
+     "type": "continuous",
+     "metric": "staticHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay out of Static Field",
+     "tip": "Thirty yards around Feugen. Stand further out."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Magnetic Pull wipes threat and the wight can hit whoever it wants for a moment. Be ready for the swap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Power Surge makes the tank fold. Heal ahead of it."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Magnetic Pull 2",
+   "subtitle": "West side",
+   "hpFrom": 0.9,
+   "hpTo": 0.85,
+   "duration": 21,
+   "bossState": "grounded",
+   "raidSpot": "raidP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedP1",
+    "healer": "healerP1"
+   },
+   "actions": [
+    {
+     "id": "pullW",
+     "first": 0.3
+    },
+    {
+     "id": "pullHold",
+     "first": 0.4
+    },
+    {
+     "id": "warStomp",
+     "first": 13,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "staticField",
+     "first": 3,
+     "every": 6
+    },
+    {
+     "id": "powerSurge",
+     "first": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pullTaunt2",
+     "type": "afterEvent",
+     "event": "pullW",
+     "check": "hasAggro",
+     "within": 2.5,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt the wight the moment you land",
+     "tip": "Magnetic Pull wiped your threat and threw you across. Taunt as you land."
+    },
+    {
+     "id": "hold",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Hold your damage for three seconds after every Magnetic Pull",
+     "tip": "The new tank has nothing on the table. Give them a moment before you open up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "rangedP1Spot2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedP1",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay outside Static Field",
+     "tip": "Thirty yards from the wight or Static Field burns your mana and hits you for what it burned."
+    },
+    {
+     "id": "healerP1Spot2",
+     "type": "playerAtSpotBy",
+     "spot": "healerP1",
+     "grace": 5,
+     "role": "healer",
+     "label": "Healers stay at max range",
+     "tip": "Static Field reaches 30 yards. Stay beyond it and still in range of the tank."
+    },
+    {
+     "id": "static",
+     "type": "continuous",
+     "metric": "staticHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay out of Static Field",
+     "tip": "Thirty yards around Feugen. Stand further out."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Magnetic Pull wipes threat and the wight can hit whoever it wants for a moment. Be ready for the swap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Power Surge makes the tank fold. Heal ahead of it."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Magnetic Pull 3",
+   "subtitle": "East side",
+   "hpFrom": 0.85,
+   "hpTo": 0.7999999999999999,
+   "duration": 21,
+   "bossState": "grounded",
+   "raidSpot": "raidP1",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossSpot",
+    "ranged": "rangedP1",
+    "healer": "healerP1"
+   },
+   "actions": [
+    {
+     "id": "pullE",
+     "first": 0.3
+    },
+    {
+     "id": "pullHold",
+     "first": 0.4
+    },
+    {
+     "id": "warStomp",
+     "first": 7,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "staticField",
+     "first": 3,
+     "every": 6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pullTaunt3",
+     "type": "afterEvent",
+     "event": "pullE",
+     "check": "hasAggro",
+     "within": 2.5,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt the wight the moment you land",
+     "tip": "Magnetic Pull wiped your threat and threw you across. Taunt as you land."
+    },
+    {
+     "id": "hold",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Hold your damage for three seconds after every Magnetic Pull",
+     "tip": "The new tank has nothing on the table. Give them a moment before you open up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "rangedP1Spot3",
+     "type": "playerAtSpotBy",
+     "spot": "rangedP1",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay outside Static Field",
+     "tip": "Thirty yards from the wight or Static Field burns your mana and hits you for what it burned."
+    },
+    {
+     "id": "healerP1Spot3",
+     "type": "playerAtSpotBy",
+     "spot": "healerP1",
+     "grace": 5,
+     "role": "healer",
+     "label": "Healers stay at max range",
+     "tip": "Static Field reaches 30 yards. Stay beyond it and still in range of the tank."
+    },
+    {
+     "id": "static",
+     "type": "continuous",
+     "metric": "staticHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay out of Static Field",
+     "tip": "Thirty yards around Feugen. Stand further out."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Magnetic Pull wipes threat and the wight can hit whoever it wants for a moment. Be ready for the swap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Power Surge makes the tank fold. Heal ahead of it."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Magnetic Pull 4",
+   "subtitle": "West side",
+   "hpFrom": 0.8,
+   "hpTo": 0.75,
+   "duration": 21,
+   "bossState": "grounded",
+   "raidSpot": "raidP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedP1",
+    "healer": "healerP1"
+   },
+   "actions": [
+    {
+     "id": "pullW",
+     "first": 0.3
+    },
+    {
+     "id": "pullHold",
+     "first": 0.4
+    },
+    {
+     "id": "warStomp",
+     "first": 10,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "staticField",
+     "first": 3,
+     "every": 6
+    },
+    {
+     "id": "powerSurge",
+     "first": 8
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pullTaunt4",
+     "type": "afterEvent",
+     "event": "pullW",
+     "check": "hasAggro",
+     "within": 2.5,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt the wight the moment you land",
+     "tip": "Magnetic Pull wiped your threat and threw you across. Taunt as you land."
+    },
+    {
+     "id": "hold",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Hold your damage for three seconds after every Magnetic Pull",
+     "tip": "The new tank has nothing on the table. Give them a moment before you open up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "rangedP1Spot4",
+     "type": "playerAtSpotBy",
+     "spot": "rangedP1",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay outside Static Field",
+     "tip": "Thirty yards from the wight or Static Field burns your mana and hits you for what it burned."
+    },
+    {
+     "id": "healerP1Spot4",
+     "type": "playerAtSpotBy",
+     "spot": "healerP1",
+     "grace": 5,
+     "role": "healer",
+     "label": "Healers stay at max range",
+     "tip": "Static Field reaches 30 yards. Stay beyond it and still in range of the tank."
+    },
+    {
+     "id": "static",
+     "type": "continuous",
+     "metric": "staticHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay out of Static Field",
+     "tip": "Thirty yards around Feugen. Stand further out."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Magnetic Pull wipes threat and the wight can hit whoever it wants for a moment. Be ready for the swap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Power Surge makes the tank fold. Heal ahead of it."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Magnetic Pull 5",
+   "subtitle": "East side",
+   "hpFrom": 0.75,
+   "hpTo": 0.7,
+   "duration": 21,
+   "bossState": "grounded",
+   "raidSpot": "raidP1",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossSpot",
+    "ranged": "rangedP1",
+    "healer": "healerP1"
+   },
+   "actions": [
+    {
+     "id": "pullE",
+     "first": 0.3
+    },
+    {
+     "id": "pullHold",
+     "first": 0.4
+    },
+    {
+     "id": "warStomp",
+     "first": 13,
+     "every": 14,
+     "jitter": 2
+    },
+    {
+     "id": "staticField",
+     "first": 3,
+     "every": 6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pullTaunt5",
+     "type": "afterEvent",
+     "event": "pullE",
+     "check": "hasAggro",
+     "within": 2.5,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt the wight the moment you land",
+     "tip": "Magnetic Pull wiped your threat and threw you across. Taunt as you land."
+    },
+    {
+     "id": "hold",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Hold your damage for three seconds after every Magnetic Pull",
+     "tip": "The new tank has nothing on the table. Give them a moment before you open up."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "rangedP1Spot5",
+     "type": "playerAtSpotBy",
+     "spot": "rangedP1",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay outside Static Field",
+     "tip": "Thirty yards from the wight or Static Field burns your mana and hits you for what it burned."
+    },
+    {
+     "id": "healerP1Spot5",
+     "type": "playerAtSpotBy",
+     "spot": "healerP1",
+     "grace": 5,
+     "role": "healer",
+     "label": "Healers stay at max range",
+     "tip": "Static Field reaches 30 yards. Stay beyond it and still in range of the tank."
+    },
+    {
+     "id": "static",
+     "type": "continuous",
+     "metric": "staticHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Stay out of Static Field",
+     "tip": "Thirty yards around Feugen. Stand further out."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Magnetic Pull wipes threat and the wight can hit whoever it wants for a moment. Be ready for the swap."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Power Surge makes the tank fold. Heal ahead of it."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Thaddius wakes",
+   "subtitle": "Get to the central platform",
+   "hpFrom": 0.7,
+   "hpTo": 0.7,
+   "duration": 14,
+   "bossState": "submerged",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankNeg",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedNeg",
+    "healer": "healerNeg",
+    "melee": "meleeNeg"
+   },
+   "skipActivity": true,
+   "actions": [
+    {
+     "id": "relocate",
+     "first": 0.3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "jumpTank",
+     "type": "playerAtSpotBy",
+     "spot": "tankNeg",
+     "grace": 2,
+     "role": "tanks",
+     "label": "Run to his dais and be on your side",
+     "tip": "As soon as the wights are dead, get to the central platform before Thaddius wakes."
+    },
+    {
+     "id": "jumpRaid",
+     "type": "playerAtSpotBy",
+     "spot": "centerPlat",
+     "grace": 2,
+     "role": "nontank",
+     "label": "Jump down to the central platform",
+     "tip": "Fifteen seconds to get down from your platform. Do not miss the jump."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Polarity Shift 1",
+   "subtitle": "Negative side",
+   "hpFrom": 0.7,
+   "hpTo": 0.63,
+   "duration": 41,
+   "bossState": "grounded",
+   "raidSpot": "raidNeg",
+   "spots": {
+    "tank": "tankNeg",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedNeg",
+    "healer": "healerNeg",
+    "melee": "meleeNeg"
+   },
+   "actions": [
+    {
+     "id": "shiftNeg",
+     "first": 11
+    },
+    {
+     "id": "shiftPos",
+     "first": 38
+    },
+    {
+     "id": "shockPos",
+     "first": 19,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 19,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 15,
+     "every": 3.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank0",
+     "type": "playerAtSpotBy",
+     "spot": "tankNeg",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Negative side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee0",
+     "type": "playerAtSpotBy",
+     "spot": "meleeNeg",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Negative side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged0",
+     "type": "playerAtSpotBy",
+     "spot": "rangedNeg",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Negative side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer0",
+     "type": "playerAtSpotBy",
+     "spot": "healerNeg",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Negative side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro0",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Polarity Shift 2",
+   "subtitle": "Positive side",
+   "hpFrom": 0.63,
+   "hpTo": 0.5599999999999999,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidPos",
+   "spots": {
+    "tank": "tankPos",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedPos",
+    "healer": "healerPos",
+    "melee": "meleePos"
+   },
+   "actions": [
+    {
+     "id": "shiftPos",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank1",
+     "type": "playerAtSpotBy",
+     "spot": "tankPos",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Positive side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee1",
+     "type": "playerAtSpotBy",
+     "spot": "meleePos",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Positive side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged1",
+     "type": "playerAtSpotBy",
+     "spot": "rangedPos",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Positive side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer1",
+     "type": "playerAtSpotBy",
+     "spot": "healerPos",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Positive side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro1",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Polarity Shift 3",
+   "subtitle": "Positive side",
+   "hpFrom": 0.5599999999999999,
+   "hpTo": 0.49,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidPos",
+   "spots": {
+    "tank": "tankPos",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedPos",
+    "healer": "healerPos",
+    "melee": "meleePos"
+   },
+   "actions": [
+    {
+     "id": "shiftNeg",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 16
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank2",
+     "type": "playerAtSpotBy",
+     "spot": "tankPos",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Positive side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee2",
+     "type": "playerAtSpotBy",
+     "spot": "meleePos",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Positive side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedPos",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Positive side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer2",
+     "type": "playerAtSpotBy",
+     "spot": "healerPos",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Positive side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro2",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "name": "Polarity Shift 4",
+   "subtitle": "Negative side",
+   "hpFrom": 0.49,
+   "hpTo": 0.42,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidNeg",
+   "spots": {
+    "tank": "tankNeg",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedNeg",
+    "healer": "healerNeg",
+    "melee": "meleeNeg"
+   },
+   "actions": [
+    {
+     "id": "shiftPos",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank3",
+     "type": "playerAtSpotBy",
+     "spot": "tankNeg",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Negative side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee3",
+     "type": "playerAtSpotBy",
+     "spot": "meleeNeg",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Negative side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged3",
+     "type": "playerAtSpotBy",
+     "spot": "rangedNeg",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Negative side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer3",
+     "type": "playerAtSpotBy",
+     "spot": "healerNeg",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Negative side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro3",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "name": "Polarity Shift 5",
+   "subtitle": "Positive side",
+   "hpFrom": 0.42,
+   "hpTo": 0.35,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidPos",
+   "spots": {
+    "tank": "tankPos",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedPos",
+    "healer": "healerPos",
+    "melee": "meleePos"
+   },
+   "actions": [
+    {
+     "id": "shiftNeg",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank4",
+     "type": "playerAtSpotBy",
+     "spot": "tankPos",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Positive side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee4",
+     "type": "playerAtSpotBy",
+     "spot": "meleePos",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Positive side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged4",
+     "type": "playerAtSpotBy",
+     "spot": "rangedPos",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Positive side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer4",
+     "type": "playerAtSpotBy",
+     "spot": "healerPos",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Positive side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro4",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "name": "Polarity Shift 6",
+   "subtitle": "Negative side",
+   "hpFrom": 0.35,
+   "hpTo": 0.28,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidNeg",
+   "spots": {
+    "tank": "tankNeg",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedNeg",
+    "healer": "healerNeg",
+    "melee": "meleeNeg"
+   },
+   "actions": [
+    {
+     "id": "shiftNeg",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank5",
+     "type": "playerAtSpotBy",
+     "spot": "tankNeg",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Negative side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee5",
+     "type": "playerAtSpotBy",
+     "spot": "meleeNeg",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Negative side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged5",
+     "type": "playerAtSpotBy",
+     "spot": "rangedNeg",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Negative side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer5",
+     "type": "playerAtSpotBy",
+     "spot": "healerNeg",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Negative side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro5",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "name": "Polarity Shift 7",
+   "subtitle": "Negative side",
+   "hpFrom": 0.28,
+   "hpTo": 0.21000000000000002,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidNeg",
+   "spots": {
+    "tank": "tankNeg",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedNeg",
+    "healer": "healerNeg",
+    "melee": "meleeNeg"
+   },
+   "actions": [
+    {
+     "id": "shiftPos",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    },
+    {
+     "id": "aggroClimb",
+     "first": 16
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank6",
+     "type": "playerAtSpotBy",
+     "spot": "tankNeg",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Negative side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee6",
+     "type": "playerAtSpotBy",
+     "spot": "meleeNeg",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Negative side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged6",
+     "type": "playerAtSpotBy",
+     "spot": "rangedNeg",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Negative side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer6",
+     "type": "playerAtSpotBy",
+     "spot": "healerNeg",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Negative side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro6",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "name": "Polarity Shift 8",
+   "subtitle": "Positive side",
+   "hpFrom": 0.21000000000000002,
+   "hpTo": 0.14,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidPos",
+   "spots": {
+    "tank": "tankPos",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedPos",
+    "healer": "healerPos",
+    "melee": "meleePos"
+   },
+   "actions": [
+    {
+     "id": "shiftNeg",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank7",
+     "type": "playerAtSpotBy",
+     "spot": "tankPos",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Positive side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee7",
+     "type": "playerAtSpotBy",
+     "spot": "meleePos",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Positive side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged7",
+     "type": "playerAtSpotBy",
+     "spot": "rangedPos",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Positive side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer7",
+     "type": "playerAtSpotBy",
+     "spot": "healerPos",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Positive side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro7",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "name": "Polarity Shift 9",
+   "subtitle": "Negative side",
+   "hpFrom": 0.14,
+   "hpTo": 0.06999999999999995,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidNeg",
+   "spots": {
+    "tank": "tankNeg",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedNeg",
+    "healer": "healerNeg",
+    "melee": "meleeNeg"
+   },
+   "actions": [
+    {
+     "id": "shiftPos",
+     "first": 27
+    },
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank8",
+     "type": "playerAtSpotBy",
+     "spot": "tankNeg",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Negative side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee8",
+     "type": "playerAtSpotBy",
+     "spot": "meleeNeg",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Negative side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged8",
+     "type": "playerAtSpotBy",
+     "spot": "rangedNeg",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Negative side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer8",
+     "type": "playerAtSpotBy",
+     "spot": "healerNeg",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Negative side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro8",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "name": "Polarity Shift 10",
+   "subtitle": "Positive side",
+   "hpFrom": 0.06999999999999995,
+   "hpTo": 0,
+   "duration": 25,
+   "bossState": "grounded",
+   "raidSpot": "raidPos",
+   "spots": {
+    "tank": "tankPos",
+    "boss": "thaddiusSpot",
+    "ranged": "rangedPos",
+    "healer": "healerPos",
+    "melee": "meleePos"
+   },
+   "actions": [
+    {
+     "id": "shockPos",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "shockNeg",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "chainLightning",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "chainTank",
+     "first": 5,
+     "every": 7.5,
+     "jitter": 2
+    },
+    {
+     "id": "ballLightning",
+     "first": 5,
+     "every": 3.5
+    },
+    {
+     "id": "berserk",
+     "first": 19
+    }
+   ],
+   "expectations": [
+    {
+     "id": "sideTank9",
+     "type": "playerAtSpotBy",
+     "spot": "tankPos",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tank on the Positive side",
+     "tip": "Move through him when your charge flips, never around, and never leave melee."
+    },
+    {
+     "id": "sideMelee9",
+     "type": "playerAtSpotBy",
+     "spot": "meleePos",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee on the Positive side",
+     "tip": "Read your debuff after the cast. If it changed, run straight through him to the other side."
+    },
+    {
+     "id": "sideRanged9",
+     "type": "playerAtSpotBy",
+     "spot": "rangedPos",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged on the Positive side",
+     "tip": "Check your charge after the cast. Stand with your own side and stack up."
+    },
+    {
+     "id": "sideHealer9",
+     "type": "playerAtSpotBy",
+     "spot": "healerPos",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers on the Positive side",
+     "tip": "You charge like everyone else. Stay with your side."
+    },
+    {
+     "id": "wrong",
+     "type": "continuous",
+     "metric": "wrongSide",
+     "label": "Stand with your own charge",
+     "tip": "You have five seconds after Polarity Shift. If your side changed, run through him now."
+    },
+    {
+     "id": "aggro9",
+     "type": "afterEvent",
+     "event": "threatLost",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back at once",
+     "tip": "A stacked raid out-threats a tank fast. Taunt."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Chain Lightning lands on the tank every few seconds on top of his swings."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the swing and the Chain Lightning, every shift."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "wrongSide": {
+   "label": "Polarity pulses on the wrong side",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 2,
+   "tip": "Five seconds to get to your own side. Read the debuff the moment the cast ends."
+  },
+  "staticHits": {
+   "label": "Static Fields you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 3,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "Stand more than 30 yards from Feugen."
+  },
+  "attacksIntoShield": {
+   "label": "Attacks right after a Magnetic Pull",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "Three seconds while the new tank gets a hit in. Then go."
+  },
+  "ballHits": {
+   "label": "Ball Lightnings",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 1,
+   "roles": "tanks",
+   "tip": "Stay in melee range. Always."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Taunt after every Magnetic Pull; DPS back on the boss after a pull; run to your charge after every Polarity Shift; heal through Chain Lightning and Power Surge.",
+  "windows": {
+   "perfect": 0.4
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Thaddius turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "backOnpullE",
+    "ability": "attack",
+    "on": "event",
+    "event": "pullE",
+    "offset": 3.3,
+    "early": 0.3,
+    "late": 4,
+    "role": "dps",
+    "short": "BACK ON",
+    "label": "Back on him after the pull",
+    "tip": "Three seconds for the new tank, then all of your damage."
+   },
+   {
+    "id": "backOnpullW",
+    "ability": "attack",
+    "on": "event",
+    "event": "pullW",
+    "offset": 3.3,
+    "early": 0.3,
+    "late": 4,
+    "role": "dps",
+    "short": "BACK ON",
+    "label": "Back on him after the pull",
+    "tip": "Three seconds for the new tank, then all of your damage."
+   },
+   {
+    "id": "healSurge",
+    "ability": "heal",
+    "on": "event",
+    "event": "powerSurge",
+    "offset": 0.4,
+    "early": 0.4,
+    "late": 4,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal through Power Surge",
+    "tip": "Stalagg attacks three times as fast for 10 seconds. Keep him up."
+   },
+   {
+    "id": "healChain",
+    "ability": "heal",
+    "on": "event",
+    "event": "chainTank",
+    "offset": 1.2,
+    "early": 1,
+    "late": 3.5,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal after Chain Lightning",
+    "tip": "The tank just took it on top of a swing. Top him up."
+   },
+   {
+    "id": "backOnshiftNeg",
+    "ability": "attack",
+    "on": "event",
+    "event": "shiftNeg",
+    "offset": 6,
+    "early": 1,
+    "late": 7,
+    "role": "dps",
+    "short": "DPS",
+    "label": "Move, then back on him",
+    "tip": "Five seconds to get to your side. Then damage."
+   },
+   {
+    "id": "backOnshiftPos",
+    "ability": "attack",
+    "on": "event",
+    "event": "shiftPos",
+    "offset": 6,
+    "early": 1,
+    "late": 7,
+    "role": "dps",
+    "short": "DPS",
+    "label": "Move, then back on him",
+    "tip": "Five seconds to get to your side. Then damage."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "pullDrill",
+   "name": "Magnetic Pull",
+   "description": "Every 12 seconds you are thrown across and the wight has an empty table. Taunt the moment you land.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 58,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "pullE",
+     "first": 6,
+     "every": 24
+    },
+    {
+     "id": "pullW",
+     "first": 18,
+     "every": 24
+    }
+   ]
+  },
+  {
+   "id": "flipDrill",
+   "name": "Polarity Shift",
+   "description": "Shifts come every 15 seconds. Run to your charge's side the moment the cast ends: you have five seconds before the first pulse.",
+   "roles": "nontank",
+   "startPhase": 8,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "shiftNeg",
+     "first": 4
+    },
+    {
+     "id": "shiftPos",
+     "first": 19
+    },
+    {
+     "id": "shiftNeg",
+     "first": 34
+    },
+    {
+     "id": "shockNeg",
+     "first": 6,
+     "every": 5
+    },
+    {
+     "id": "shockPos",
+     "first": 6,
+     "every": 5
+    }
+   ]
+  },
+  {
+   "id": "flipDrillTank",
+   "name": "Run through him",
+   "description": "Your charge flips every 15 seconds. Move to your side, stay in melee.",
+   "roles": "tanks",
+   "startPhase": 8,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "shiftNeg",
+     "first": 4
+    },
+    {
+     "id": "shiftPos",
+     "first": 19
+    },
+    {
+     "id": "shiftNeg",
+     "first": 34
+    },
+    {
+     "id": "shockNeg",
+     "first": 6,
+     "every": 5
+    },
+    {
+     "id": "shockPos",
+     "first": 6,
+     "every": 5
+    },
+    {
+     "id": "ballLightning",
+     "first": 8,
+     "every": 3.5
+    }
+   ]
+  },
+  {
+   "id": "healChainDrill",
+   "name": "Heal through Chain Lightning",
+   "description": "Chain Lightning hits the tank every 6 seconds. Keep him up.",
+   "roles": "healer",
+   "startPhase": 8,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "chainTank",
+     "first": 3,
+     "every": 6
+    }
+   ]
+  }
+ ]
+}

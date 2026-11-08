@@ -1,0 +1,3217 @@
+{
+ "id": "heigan",
+ "name": "Heigan the Unclean",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/heigan.md. HP clock: 90 s fight, 45 s dance, 90 s fight, 45 s dance, then 60 s to finish, 5:30 total on 1.78M HP (about 5.4k raid DPS, an estimate; the real kill depends only on uptime and no source gives a typical length, the wiki's level-70 note says about 20% before the first dance). THE DANCE (the fight): the floor is drawn as four side-by-side sections of width 12 yd with section 1 on the left facing the platform, exact trap geometry is not published (TrinityCore counts 15/25/23/13 tiles; research gives no coordinates) so four equal strips are an estimate. Each eruption is a `spots` hazard laid as two circles per erupting section (radius 7.2 at y 3.5 and 10.5, the smallest circle whose 20-sided polygon still covers a section's corners, spilling 1.2 yd into each neighbouring section and leaving a safe inner lane about 9.6 yd wide; a 0.5 yd grid confirms every floor point is hit by some eruption except on the platform, and a player on the seam between two erupting sections can still take two hits, a small artefact) plus six circles down the corridor so nobody can wait out the dance at the door. The safe section is the one circle left out: 1, 2, 3, 4, 3, 2, 1, 2 for the 8 slow eruptions per fight phase, and 1, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 2, 1, 2 for the 14 fast eruptions in the dance (TrinityCore and DBM). Each eruption is a two-step `follow` chain: the hazard, then a `cast` that names the safe section on the cast bar and sends the ideal marker to it, so the player truly walks platform to platform. The telegraph is generous on purpose: the fast cadence is real (every 3 s, DBM first 4.6 s after the teleport, 14 eruptions in 45 s) but the warning ring shows 2.6 s before it goes off (3.0 s in the slow phase), where the real floor only warns with the previous eruption and a boss-mod counter. The fight's slow cadence is 10 s, DBM's first eruption 16.5 s after the pull and TrinityCore's 15 s after a dance. The tank role walks Heigan with the safe section as in the real fight: the marker goes to each safe section when the bar starts, the boss follows, and the tank walks back. The ghost tank that holds him in the other roles cannot walk section to section, because the engine moves the ghost by phase spot only. So in every non-tank role he stands on the section 2/3 line and melee run out to the safe section; for the eruptions where the safe section is 1 or 4 they leave melee range, losing some uptime the real melee keep. `grading.fullActivity` is lowered to 0.5 for that. Dance phase: Heigan is `submerged` while he stands on his platform channelling Plague Cloud, because the engine cannot pin a grounded boss on a spot for 45 s and still let the raid dance (a non-offBoss 45 s channel would take the single cast slot the eruption marker needs). So no melee, no threat and nothing to hit, while WT says ranged can still shoot him: that uptime is not modelled, and his body vanishes from the map. Plague Cloud itself is a 45 s `tick` hazard over the platform so anyone staying up there is hit hard (1,500/s, an estimate; the wiki only says heavy disease damage; first tick about 3 s after he teleports), so the marker and every role's phase spot walk off the platform immediately at the start of the dance and the expectations score it. Decrepit Fever (DBM timers: 11.3 to 25.9 s first, then 21 to 34 s) on the tank and a random melee (`playerChance` 0.35), Disease, 21 s, 500 per 3 s as `tickDamage` 167/s. The real -50% maximum health cannot be expressed; `damageTakenMult` 1.5 per stack stands in for it, and every Fever is on the healer's DISPEL note. Mana Burn: the engine has no mana, so the 2,313 mana burn plus equal Shadow damage is a one-tick 2,300 Shadow hit (`duration` 1.05, 2,300 tick) on the mana users, `playerChance` none needed because the real radius hits everyone near him; its 25 yd radius is the platform shelter via `safeSpots` on the platform centre (radius 11), so a caster standing on the platform in the fight phase is safe, and one who wanders is hit and scored. Cadence: first 17 s then every 15 s (spell cooldown; TrinityCore's 11 s is under the spell's own 15 s cooldown). Tanks and melee are excluded because the engine cannot give them their real 'no mana, no damage' outcome and they would otherwise be punished for standing in melee. Teleport to the Eye Stalk tunnel is not modelled (no engine feature teleports the player, and its cadence and target count are unknown beyond three players per the wiki); Eye Stalks, maggots and Mind Flay are omitted. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Heigan swings for 950 per 2 s on a 10,000 HP tank (real melee 8,475 to 9,727 pre-mitigation; the scaling is an estimate) and the passive rate with a player healer is 140/s, so an idle healer loses the tank to melee plus Fever within about 30 seconds.",
+ "sources": [
+  "docs/research/naxxramas/heigan.md",
+  "https://warcraft.wiki.gg/wiki/Heigan_the_Unclean_(Classic)",
+  "https://trinitycore.net/d3/d91/boss__heigan_8cpp_source",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/PlagueQuarter/Heigan.lua",
+  "https://www.wowhead.com/classic/guide/heigan-the-unclean-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=29371/eruption",
+  "https://www.wowhead.com/classic/spell=29998/decrepit-fever",
+  "https://www.wowhead.com/classic/spell=29310/mana-burn",
+  "https://classicdb.ch/?npc=15936",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/",
+  "https://www.tentonhammer.com/guides/3-2-heigan-the-unclean-naxxramas"
+ ],
+ "arena": {
+  "name": "Heigan's Plague Hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "dance",
+    "poly": [
+     [
+      -24,
+      0
+     ],
+     [
+      24,
+      0
+     ],
+     [
+      24,
+      14
+     ],
+     [
+      -24,
+      14
+     ]
+    ]
+   },
+   {
+    "id": "platform",
+    "poly": [
+     [
+      -10,
+      13
+     ],
+     [
+      10,
+      13
+     ],
+     [
+      10,
+      30
+     ],
+     [
+      -10,
+      30
+     ]
+    ]
+   },
+   {
+    "id": "door",
+    "poly": [
+     [
+      -7,
+      -24
+     ],
+     [
+      7,
+      -24
+     ],
+     [
+      7,
+      2
+     ],
+     [
+      -7,
+      2
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "outline",
+    "points": [
+     [
+      7,
+      0
+     ],
+     [
+      24,
+      0
+     ],
+     [
+      24,
+      14
+     ],
+     [
+      10,
+      14
+     ],
+     [
+      10,
+      30
+     ],
+     [
+      -10,
+      30
+     ],
+     [
+      -10,
+      14
+     ],
+     [
+      -24,
+      14
+     ],
+     [
+      -24,
+      0
+     ],
+     [
+      -7,
+      0
+     ]
+    ]
+   },
+   {
+    "id": "doorW",
+    "points": [
+     [
+      -7,
+      0
+     ],
+     [
+      -7,
+      -24
+     ]
+    ]
+   },
+   {
+    "id": "doorE",
+    "points": [
+     [
+      7,
+      0
+     ],
+     [
+      7,
+      -24
+     ]
+    ]
+   },
+   {
+    "id": "doorEnd",
+    "points": [
+     [
+      -7,
+      -24
+     ],
+     [
+      7,
+      -24
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Section 1",
+    "at": [
+     -18,
+     12.5
+    ]
+   },
+   {
+    "text": "Section 2",
+    "at": [
+     -6,
+     12.5
+    ]
+   },
+   {
+    "text": "Section 3",
+    "at": [
+     6,
+     12.5
+    ]
+   },
+   {
+    "text": "Section 4",
+    "at": [
+     18,
+     12.5
+    ]
+   },
+   {
+    "text": "Heigan's platform",
+    "at": [
+     0,
+     27
+    ]
+   },
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -20
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -21,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 23,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -14,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 2.5,
+   "tolerance": 4,
+   "label": "Tank: the floor, in front of him"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 8.5,
+   "heading": 270,
+   "tolerance": 7,
+   "headingTolerance": 80,
+   "label": "Heigan: on the floor, off the platform"
+  },
+  "zone1": {
+   "x": -18,
+   "y": 7,
+   "tolerance": 5,
+   "label": "Section 1"
+  },
+  "zone2": {
+   "x": -6,
+   "y": 7,
+   "tolerance": 5,
+   "label": "Section 2"
+  },
+  "zone3": {
+   "x": 6,
+   "y": 7,
+   "tolerance": 5,
+   "label": "Section 3"
+  },
+  "zone4": {
+   "x": 18,
+   "y": 7,
+   "tolerance": 5,
+   "label": "Section 4"
+  },
+  "zone1a": {
+   "x": -18,
+   "y": 3.5
+  },
+  "zone1b": {
+   "x": -18,
+   "y": 10.5
+  },
+  "zone2a": {
+   "x": -6,
+   "y": 3.5
+  },
+  "zone2b": {
+   "x": -6,
+   "y": 10.5
+  },
+  "zone3a": {
+   "x": 6,
+   "y": 3.5
+  },
+  "zone3b": {
+   "x": 6,
+   "y": 10.5
+  },
+  "zone4a": {
+   "x": 18,
+   "y": 3.5
+  },
+  "zone4b": {
+   "x": 18,
+   "y": 10.5
+  },
+  "corrA1": {
+   "x": -3.5,
+   "y": -4
+  },
+  "corrA2": {
+   "x": 3.5,
+   "y": -4
+  },
+  "corrB1": {
+   "x": -3.5,
+   "y": -13
+  },
+  "corrB2": {
+   "x": 3.5,
+   "y": -13
+  },
+  "corrC1": {
+   "x": -3.5,
+   "y": -22
+  },
+  "corrC2": {
+   "x": 3.5,
+   "y": -22
+  },
+  "platR": {
+   "x": -5,
+   "y": 24,
+   "tolerance": 5,
+   "label": "Casters: on the platform"
+  },
+  "platH": {
+   "x": 5,
+   "y": 24,
+   "tolerance": 5,
+   "label": "Healers: on the platform"
+  },
+  "platformCentre": {
+   "x": 0,
+   "y": 22,
+   "label": "Platform"
+  },
+  "cloudCentre": {
+   "x": 0,
+   "y": 24
+  },
+  "raidPlatform": {
+   "x": 0,
+   "y": 22,
+   "spread": 9,
+   "label": "Raid: on the platform"
+  },
+  "raidDance": {
+   "x": 0,
+   "y": 7,
+   "spread": 18,
+   "label": "Raid: dancing"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 800,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 900,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 950,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Drag him off the platform and into the middle of the floor. In the fight phase the safe section moves every 10 seconds, and you walk him into it each time so the melee stay safe. When he teleports up, dance with everyone else.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Hit him while you can, but your first job is to be standing in the safe section for every eruption. The fight phase is slow, the dance phase is one step every 3 seconds. Decrepit Fever is the healers' problem; you can only stand where you are told.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "In the fight phase you stand on the platform: the floor cannot reach you and his Mana Burn does not. The moment he teleports up, get down off the platform and dance with everyone else.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "You stand on the platform in the fight phase and cleanse Decrepit Fever. The moment he teleports up, get down and dance: the platform kills you and every section is about to go off but one.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "disease"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "disease"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. One button here stands in for Dispel Magic, Cleanse, Decurse and Cure Poison."
+  }
+ },
+ "actions": {
+  "slow1": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark1",
+     "delay": 0
+    },
+    {
+     "id": "slow2",
+     "delay": 10
+    }
+   ]
+  },
+  "slowMark1": {
+   "label": "Eruption: Section 1 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone1"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "slow2": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark2",
+     "delay": 0
+    },
+    {
+     "id": "slow3",
+     "delay": 10
+    }
+   ]
+  },
+  "slowMark2": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "slow3": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark3",
+     "delay": 0
+    },
+    {
+     "id": "slow4",
+     "delay": 10
+    }
+   ]
+  },
+  "slowMark3": {
+   "label": "Eruption: Section 3 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone3"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "slow4": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark4",
+     "delay": 0
+    },
+    {
+     "id": "slow5",
+     "delay": 10
+    }
+   ]
+  },
+  "slowMark4": {
+   "label": "Eruption: Section 4 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone4"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "slow5": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark5",
+     "delay": 0
+    },
+    {
+     "id": "slow6",
+     "delay": 10
+    }
+   ]
+  },
+  "slowMark5": {
+   "label": "Eruption: Section 3 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone3"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "slow6": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark6",
+     "delay": 0
+    },
+    {
+     "id": "slow7",
+     "delay": 10
+    }
+   ]
+  },
+  "slowMark6": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "slow7": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark7",
+     "delay": 0
+    },
+    {
+     "id": "slow8",
+     "delay": 10
+    }
+   ]
+  },
+  "slowMark7": {
+   "label": "Eruption: Section 1 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone1"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "slow8": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 3,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "slowMark8",
+     "delay": 0
+    }
+   ]
+  },
+  "slowMark8": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3.4,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "safeRoles": [
+    "tanks",
+    "melee"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast1": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark1",
+     "delay": 0
+    },
+    {
+     "id": "fast2",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark1": {
+   "label": "Eruption: Section 1 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone1"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast2": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark2",
+     "delay": 0
+    },
+    {
+     "id": "fast3",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark2": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast3": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark3",
+     "delay": 0
+    },
+    {
+     "id": "fast4",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark3": {
+   "label": "Eruption: Section 3 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone3"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast4": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark4",
+     "delay": 0
+    },
+    {
+     "id": "fast5",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark4": {
+   "label": "Eruption: Section 4 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone4"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast5": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark5",
+     "delay": 0
+    },
+    {
+     "id": "fast6",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark5": {
+   "label": "Eruption: Section 3 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone3"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast6": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark6",
+     "delay": 0
+    },
+    {
+     "id": "fast7",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark6": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast7": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark7",
+     "delay": 0
+    },
+    {
+     "id": "fast8",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark7": {
+   "label": "Eruption: Section 1 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone1"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast8": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark8",
+     "delay": 0
+    },
+    {
+     "id": "fast9",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark8": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast9": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark9",
+     "delay": 0
+    },
+    {
+     "id": "fast10",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark9": {
+   "label": "Eruption: Section 3 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone3"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast10": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark10",
+     "delay": 0
+    },
+    {
+     "id": "fast11",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark10": {
+   "label": "Eruption: Section 4 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone4"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast11": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone2a",
+    "zone2b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark11",
+     "delay": 0
+    },
+    {
+     "id": "fast12",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark11": {
+   "label": "Eruption: Section 3 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone3"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast12": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark12",
+     "delay": 0
+    },
+    {
+     "id": "fast13",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark12": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast13": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone2a",
+    "zone2b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark13",
+     "delay": 0
+    },
+    {
+     "id": "fast14",
+     "delay": 3
+    }
+   ]
+  },
+  "fastMark13": {
+   "label": "Eruption: Section 1 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone1"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "fast14": {
+   "label": "Eruption",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "zone1a",
+    "zone1b",
+    "zone3a",
+    "zone3b",
+    "zone4a",
+    "zone4b",
+    "corrA1",
+    "corrA2",
+    "corrB1",
+    "corrB2",
+    "corrC1",
+    "corrC2"
+   ],
+   "radius": 7.2,
+   "warning": 2.6,
+   "active": 0.4,
+   "damage": 3500,
+   "requires": "any",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off.",
+   "follow": [
+    {
+     "id": "fastMark14",
+     "delay": 0
+    }
+   ]
+  },
+  "fastMark14": {
+   "label": "Eruption: Section 2 is safe",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "offBoss": true,
+   "safeSpots": [
+    "zone2"
+   ],
+   "requires": "any",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "tip": "The floor erupts in every section except one. The safe section walks 1, 2, 3, 4, 3, 2, 1 and back: stand in it when the section you are in goes off."
+  },
+  "plagueCloud": {
+   "label": "Plague Cloud",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "cloudCentre"
+   ],
+   "radius": 14.5,
+   "warning": 3,
+   "active": 42,
+   "damage": 1500,
+   "tick": true,
+   "requires": "any",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "poison",
+   "tip": "He has teleported to the platform and is channelling Plague Cloud. Get off the platform now. It is lethal."
+  },
+  "feverTank": {
+   "label": "Decrepit Fever",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "disease",
+   "duration": 21,
+   "tickDamage": 167,
+   "damageTakenMult": 1.5,
+   "warn": false,
+   "cue": "poison",
+   "icon": "poison",
+   "requires": "grounded",
+   "tip": "A disease on whoever is near Heigan: 500 Nature every 3 seconds and half your max health for 21 seconds. Cleanse it fast.",
+   "target": "tank"
+  },
+  "feverMelee": {
+   "label": "Decrepit Fever",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "disease",
+   "duration": 21,
+   "tickDamage": 167,
+   "damageTakenMult": 1.5,
+   "warn": false,
+   "cue": "poison",
+   "icon": "poison",
+   "requires": "grounded",
+   "tip": "A disease on whoever is near Heigan: 500 Nature every 3 seconds and half your max health for 21 seconds. Cleanse it fast.",
+   "target": "random",
+   "roles": "melee",
+   "playerChance": 0.35
+  },
+  "manaBurn": {
+   "label": "Mana Burn",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 2300,
+   "safeSpots": [
+    "platformCentre"
+   ],
+   "safeRadius": 11.5,
+   "playerMetric": "manaBurns",
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He burns 2,313 mana and does that much Shadow damage to every caster near him. Stay on the platform and it cannot reach you."
+  },
+  "submerge": {
+   "label": "Heigan teleports to the platform",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "\"The end is upon you.\" Off the platform, into Section 1."
+  },
+  "emerge": {
+   "label": "Heigan returns",
+   "kind": "transition",
+   "cast": 0,
+   "warn": false,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He lands where he was. No aggro reset, so back to work."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Fight",
+   "subtitle": "Eruption every 10 s",
+   "hpFrom": 1,
+   "hpTo": 0.7,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidPlatform",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "platR",
+    "healer": "platH"
+   },
+   "actions": [
+    {
+     "id": "slow1",
+     "first": 13.5
+    },
+    {
+     "id": "feverTank",
+     "first": 11,
+     "every": 27,
+     "jitter": 6
+    },
+    {
+     "id": "feverMelee",
+     "first": 13,
+     "every": 27,
+     "jitter": 6
+    },
+    {
+     "id": "manaBurn",
+     "first": 17,
+     "every": 15,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 22,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Drag him off the platform",
+     "tip": "Pull him down to the middle of the floor at once, so his Mana Burn cannot reach the casters."
+    },
+    {
+     "id": "slowDodge1",
+     "type": "afterEvent",
+     "event": "slow1",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge2",
+     "type": "afterEvent",
+     "event": "slow2",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge3",
+     "type": "afterEvent",
+     "event": "slow3",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge4",
+     "type": "afterEvent",
+     "event": "slow4",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge5",
+     "type": "afterEvent",
+     "event": "slow5",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge6",
+     "type": "afterEvent",
+     "event": "slow6",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge7",
+     "type": "afterEvent",
+     "event": "slow7",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge8",
+     "type": "afterEvent",
+     "event": "slow8",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "platStay1",
+     "type": "playerAtSpotBy",
+     "spot": "platR",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the platform in the fight phase",
+     "tip": "Casters stand on the platform: the eruptions cannot reach you and his Mana Burn is out of range."
+    },
+    {
+     "id": "platStayH1",
+     "type": "playerAtSpotBy",
+     "spot": "platH",
+     "grace": 4,
+     "role": "healer",
+     "label": "Stay on the platform and cleanse",
+     "tip": "Healers stand on the platform. Cleanse Decrepit Fever from up there."
+    },
+    {
+     "id": "feverCleanse1",
+     "type": "afterEvent",
+     "event": "feverTank",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cleanse Decrepit Fever",
+     "tip": "Every Fever on a raider is 500 damage every 3 seconds and half their health. Cleanse it fast, tank first."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank is taking Heigan's swings and Fever. Stay ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Fever halves the tank's health. Top him up after every cleanse."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "The Dance",
+   "subtitle": "Eruption every 3 s",
+   "hpFrom": 0.7,
+   "hpTo": 0.7,
+   "duration": 45,
+   "bossState": "submerged",
+   "raidSpot": "raidDance",
+   "spots": {
+    "tank": "zone1",
+    "boss": "bossSpot",
+    "ranged": "zone1",
+    "healer": "zone1",
+    "melee": "zone1"
+   },
+   "skipActivity": true,
+   "actions": [
+    {
+     "id": "plagueCloud",
+     "first": 0.1
+    },
+    {
+     "id": "fast1",
+     "first": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "fastDodge1",
+     "type": "afterEvent",
+     "event": "fast1",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge2",
+     "type": "afterEvent",
+     "event": "fast2",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge3",
+     "type": "afterEvent",
+     "event": "fast3",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge4",
+     "type": "afterEvent",
+     "event": "fast4",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge5",
+     "type": "afterEvent",
+     "event": "fast5",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge6",
+     "type": "afterEvent",
+     "event": "fast6",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge7",
+     "type": "afterEvent",
+     "event": "fast7",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge8",
+     "type": "afterEvent",
+     "event": "fast8",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge9",
+     "type": "afterEvent",
+     "event": "fast9",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge10",
+     "type": "afterEvent",
+     "event": "fast10",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge11",
+     "type": "afterEvent",
+     "event": "fast11",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge12",
+     "type": "afterEvent",
+     "event": "fast12",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge13",
+     "type": "afterEvent",
+     "event": "fast13",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge14",
+     "type": "afterEvent",
+     "event": "fast14",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "offPlatform2",
+     "type": "afterEvent",
+     "event": "plagueCloud",
+     "check": "outsideHazard",
+     "within": 4,
+     "grace": 1.5,
+     "role": null,
+     "label": "Off the platform before the Plague Cloud",
+     "tip": "The moment he teleports up, get off the platform and into Section 1. The platform is lethal for 45 seconds."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Fight",
+   "subtitle": "Eruption every 10 s",
+   "hpFrom": 0.7,
+   "hpTo": 0.36,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidPlatform",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "platR",
+    "healer": "platH"
+   },
+   "actions": [
+    {
+     "id": "slow1",
+     "first": 12
+    },
+    {
+     "id": "feverTank",
+     "first": 11,
+     "every": 27,
+     "jitter": 6
+    },
+    {
+     "id": "feverMelee",
+     "first": 13,
+     "every": 27,
+     "jitter": 6
+    },
+    {
+     "id": "manaBurn",
+     "first": 17,
+     "every": 15,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "slowDodge1",
+     "type": "afterEvent",
+     "event": "slow1",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge2",
+     "type": "afterEvent",
+     "event": "slow2",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge3",
+     "type": "afterEvent",
+     "event": "slow3",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge4",
+     "type": "afterEvent",
+     "event": "slow4",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge5",
+     "type": "afterEvent",
+     "event": "slow5",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge6",
+     "type": "afterEvent",
+     "event": "slow6",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge7",
+     "type": "afterEvent",
+     "event": "slow7",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge8",
+     "type": "afterEvent",
+     "event": "slow8",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "platStay3",
+     "type": "playerAtSpotBy",
+     "spot": "platR",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the platform in the fight phase",
+     "tip": "Casters stand on the platform: the eruptions cannot reach you and his Mana Burn is out of range."
+    },
+    {
+     "id": "platStayH3",
+     "type": "playerAtSpotBy",
+     "spot": "platH",
+     "grace": 4,
+     "role": "healer",
+     "label": "Stay on the platform and cleanse",
+     "tip": "Healers stand on the platform. Cleanse Decrepit Fever from up there."
+    },
+    {
+     "id": "feverCleanse3",
+     "type": "afterEvent",
+     "event": "feverTank",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cleanse Decrepit Fever",
+     "tip": "Every Fever on a raider is 500 damage every 3 seconds and half their health. Cleanse it fast, tank first."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank is taking Heigan's swings and Fever. Stay ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Fever halves the tank's health. Top him up after every cleanse."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "The Dance",
+   "subtitle": "Eruption every 3 s",
+   "hpFrom": 0.36,
+   "hpTo": 0.36,
+   "duration": 45,
+   "bossState": "submerged",
+   "raidSpot": "raidDance",
+   "spots": {
+    "tank": "zone1",
+    "boss": "bossSpot",
+    "ranged": "zone1",
+    "healer": "zone1",
+    "melee": "zone1"
+   },
+   "skipActivity": true,
+   "actions": [
+    {
+     "id": "plagueCloud",
+     "first": 0.1
+    },
+    {
+     "id": "fast1",
+     "first": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "fastDodge1",
+     "type": "afterEvent",
+     "event": "fast1",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge2",
+     "type": "afterEvent",
+     "event": "fast2",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge3",
+     "type": "afterEvent",
+     "event": "fast3",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge4",
+     "type": "afterEvent",
+     "event": "fast4",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge5",
+     "type": "afterEvent",
+     "event": "fast5",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge6",
+     "type": "afterEvent",
+     "event": "fast6",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge7",
+     "type": "afterEvent",
+     "event": "fast7",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge8",
+     "type": "afterEvent",
+     "event": "fast8",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge9",
+     "type": "afterEvent",
+     "event": "fast9",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge10",
+     "type": "afterEvent",
+     "event": "fast10",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge11",
+     "type": "afterEvent",
+     "event": "fast11",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge12",
+     "type": "afterEvent",
+     "event": "fast12",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge13",
+     "type": "afterEvent",
+     "event": "fast13",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "fastDodge14",
+     "type": "afterEvent",
+     "event": "fast14",
+     "check": "outsideHazard",
+     "within": 2.95,
+     "grace": 0.25,
+     "notBefore": 2.5500000000000003,
+     "role": null,
+     "label": "Dance: be in the safe section on every beat",
+     "tip": "Section 1, then 2, 3, 4, then back. Move one section at a time, only as far as you must, the moment the last eruption ends."
+    },
+    {
+     "id": "offPlatform4",
+     "type": "afterEvent",
+     "event": "plagueCloud",
+     "check": "outsideHazard",
+     "within": 4,
+     "grace": 1.5,
+     "role": null,
+     "label": "Off the platform before the Plague Cloud",
+     "tip": "The moment he teleports up, get off the platform and into Section 1. The platform is lethal for 45 seconds."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Fight",
+   "subtitle": "Eruption every 10 s",
+   "hpFrom": 0.36,
+   "hpTo": 0,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidPlatform",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "platR",
+    "healer": "platH"
+   },
+   "actions": [
+    {
+     "id": "slow1",
+     "first": 12
+    },
+    {
+     "id": "feverTank",
+     "first": 11,
+     "every": 27,
+     "jitter": 6
+    },
+    {
+     "id": "feverMelee",
+     "first": 13,
+     "every": 27,
+     "jitter": 6
+    },
+    {
+     "id": "manaBurn",
+     "first": 17,
+     "every": 15,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "slowDodge1",
+     "type": "afterEvent",
+     "event": "slow1",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge2",
+     "type": "afterEvent",
+     "event": "slow2",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge3",
+     "type": "afterEvent",
+     "event": "slow3",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge4",
+     "type": "afterEvent",
+     "event": "slow4",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge5",
+     "type": "afterEvent",
+     "event": "slow5",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge6",
+     "type": "afterEvent",
+     "event": "slow6",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge7",
+     "type": "afterEvent",
+     "event": "slow7",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "slowDodge8",
+     "type": "afterEvent",
+     "event": "slow8",
+     "check": "outsideHazard",
+     "within": 3.35,
+     "grace": 0.25,
+     "notBefore": 2.95,
+     "role": [
+      "tanks",
+      "melee"
+     ],
+     "label": "Stand in the safe section for every eruption",
+     "tip": "Watch the bar: it names the section that is safe. Walk there, stand in it, and go back to work."
+    },
+    {
+     "id": "platStay5",
+     "type": "playerAtSpotBy",
+     "spot": "platR",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the platform in the fight phase",
+     "tip": "Casters stand on the platform: the eruptions cannot reach you and his Mana Burn is out of range."
+    },
+    {
+     "id": "platStayH5",
+     "type": "playerAtSpotBy",
+     "spot": "platH",
+     "grace": 4,
+     "role": "healer",
+     "label": "Stay on the platform and cleanse",
+     "tip": "Healers stand on the platform. Cleanse Decrepit Fever from up there."
+    },
+    {
+     "id": "feverCleanse5",
+     "type": "afterEvent",
+     "event": "feverTank",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 4,
+     "role": "healer",
+     "label": "Cleanse Decrepit Fever",
+     "tip": "Every Fever on a raider is 500 damage every 3 seconds and half their health. Cleanse it fast, tank first."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank is taking Heigan's swings and Fever. Stay ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Fever halves the tank's health. Top him up after every cleanse."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds in an eruption or the cloud",
+   "unit": "s",
+   "penaltyPerSecond": 10,
+   "severe": 0.3,
+   "tip": "Every section goes off but one. You have until the bar empties."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "manaBurns": {
+   "label": "Mana Burns taken",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "He Mana Burns everyone near him. Stay on the platform during the fight phase."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "The dance has no button. Healers cleanse Fever and heal; everyone else lives by position.",
+  "windows": {
+   "perfect": 0.4
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Heigan turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "slowDance",
+   "name": "Tank the slow eruption",
+   "description": "A slow eruption every 10 seconds. Walk him into the safe section each time.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "slow1",
+     "first": 2
+    }
+   ]
+  },
+  {
+   "id": "meleeSlow",
+   "name": "Melee dance",
+   "description": "Eruptions every 10 seconds. Keep hitting him and step to the safe section when the bar starts.",
+   "roles": "melee",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "slow1",
+     "first": 2
+    }
+   ]
+  },
+  {
+   "id": "fastDance",
+   "name": "The Dance: 1, 2, 3, 4, 3, 2, 1",
+   "description": "The fast dance from the start. One step every 3 seconds. Follow the bar and the marker and do not run too far.",
+   "roles": [
+    "tank",
+    "melee",
+    "ranged",
+    "healer"
+   ],
+   "startPhase": 2,
+   "duration": 44,
+   "loop": true,
+   "start": "entrance",
+   "actions": [
+    {
+     "id": "plagueCloud",
+     "first": 0.1
+    },
+    {
+     "id": "fast1",
+     "first": 2
+    }
+   ]
+  },
+  {
+   "id": "feverDrill",
+   "name": "Cleanse Decrepit Fever",
+   "description": "Fevers land on the tank and the melee. Cleanse them fast and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "feverTank",
+     "first": 3,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "feverMelee",
+     "first": 5,
+     "every": 9,
+     "jitter": 2
+    }
+   ]
+  }
+ ]
+}

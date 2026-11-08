@@ -1,0 +1,1080 @@
+{
+ "id": "razuvious",
+ "name": "Instructor Razuvious",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/razuvious.md. Room layout (a training floor, a stairway, a gallery at the top of the stairs) is an estimate from the guides' prose; the engine has no line of sight, so 'out of his sight' is a named cover spot and nothing else. HOW THE TANK ROLE MAPS ONTO THE UNDERSTUDY: the real tank of this fight is a Mind Controlled Deathknight Understudy driven by a Priest. In this script the `tank` role is that driver: the player IS the Understudy on the boss (10,000 HP stands for its 92,235, Shield Wall already folded into the numbers), the ghost tank in the other roles is the same Understudy, and Taunt stands for the next Understudy's Shield Wall plus Taunt (the real ones are 20 s Taunt, 60 s cooldown per Understudy, cycled through three or four of them, so a Taunt is always available every 20 s or so; the 10 s button cooldown is the abstraction). The boss turns off the active Understudy every 20 s (estimate from the wiki's 20 s Taunt and rotation) as a `targetSwitch` with a 0.5 s ghost taunt delay, and the tank player has 3 s to press Taunt. Taunt resists (20 s Taunt can be resisted), Mind Exhaustion (60 s), Mind Control breaks and the Priest's actual MC cast are not modelled. The real fallback (a warrior taunts and Shield Walls in a gap) is the same Taunt press here. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Razuvious swings for 26,693 to 30,638 before armor (classicdb; the wiki says he one-shots anyone) and a Shield Walled Understudy takes about 25% of that. Scaled to a 10k bar: 1,000 per 2 s swing (a 2 s swing timer is a guess, no source gives it), and Unbalancing Strike (350% weapon damage) as a 2,500 hit every 12 s (cadence unknown, no DBM timer: the 12 s is an estimate). A healer who does nothing loses the tank inside about 20 s (the passive 200/s cannot carry 710 DPS). Unbalancing Strike's -100 Defense (6 s) is a `damageTakenMult` 1.25 for 6 s on the tank. Real effect is guaranteed crushing blows on a player tank, which is why Understudies tank him; the 1.25 is a stand-in. Disrupting Shout: real cadence 25.9 s (DBM), instant. Here it has a 4 s bar (`offBoss`, boss keeps swinging) to carry DBM's 5 s warning, because the engine's cover marker only walks on a cast; the bar is not real. It is a `debuff` on casters only (ranged and healer roles): 8,000 damage (the wiki's 2x mana burned; 4,050 to 4,950 mana x 2 = 8,100 to 9,900) plus a 3 s stun (duration a guess; the stun comes from guide text only, the spell page lists just Power Burn). Melee and tanks are not hit because the melee role here is assumed rogue or warrior (no mana): Enhancement, Ret and druids would be hit, which the engine cannot split, and the melee role has no decision to make about it. The Shout's mana burn does not exist in the engine. Line of sight: cover is `safeSpots` 7 yd around the railing spots (`coverW`, `coverE`). Ranged stand on the stairs to cast and step back behind the railing during the 4 s bar, as the guides say. Healers live behind the railing the entire fight. Ranged attacks do not need line of sight in the engine, so cover's only cost is the walk. Understudies other than the active one (Off-tanks hold them at the top of the stairs, never damaged, no Sunder) are the off-tank role: non-killable adds with `pickup: offtank`: two at 8 s and two more every 45 s (an estimate: the real room has four Understudies in total, and the repeat waves stand for the ones released from Mind Control and handed back to the off-tanks). They do not attack in the engine, so the off-tank's cost is positional (reach them before they reach the raid, keep them at the top of the stairs). Hopeless (Understudies die when he dies) is not modelled. Mana burn on the Understudy and Priest mana economy are not modelled. Pull and the kill clock: HP drains over 240 s, within the 3 to 5 minute range the guides give (no enrage documented, so none modelled). Taunt resists and player threat (DPS climbing past the Understudy) use the shared threat bar: `holdAttack` is the red band.",
+ "sources": [
+  "docs/research/naxxramas/razuvious.md",
+  "https://warcraft.wiki.gg/wiki/Instructor_Razuvious_(Classic)",
+  "https://www.wowhead.com/classic/guide/instructor-razuvious-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=26613/unbalancing-strike",
+  "https://www.wowhead.com/classic/spell=29107/disrupting-shout",
+  "https://www.wowhead.com/classic/spell=29060/taunt",
+  "https://www.wowhead.com/classic/spell=29061/shield-wall",
+  "https://classicdb.ch/?npc=16061",
+  "https://classicdb.ch/?npc=16803",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/MilitaryQuarter/Razuvious.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Razuvious's Training Grounds",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "training",
+    "poly": [
+     [
+      -36,
+      -8
+     ],
+     [
+      36,
+      -8
+     ],
+     [
+      36,
+      46
+     ],
+     [
+      -36,
+      46
+     ]
+    ]
+   },
+   {
+    "id": "stairs",
+    "poly": [
+     [
+      -11,
+      -30
+     ],
+     [
+      11,
+      -30
+     ],
+     [
+      11,
+      -2
+     ],
+     [
+      -11,
+      -2
+     ]
+    ]
+   },
+   {
+    "id": "gallery",
+    "poly": [
+     [
+      -32,
+      -54
+     ],
+     [
+      32,
+      -54
+     ],
+     [
+      32,
+      -26
+     ],
+     [
+      -32,
+      -26
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -80
+     ],
+     [
+      8,
+      -80
+     ],
+     [
+      8,
+      -50
+     ],
+     [
+      -8,
+      -50
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "trainingWall",
+    "points": [
+     [
+      -11,
+      -8
+     ],
+     [
+      -36,
+      -8
+     ],
+     [
+      -36,
+      46
+     ],
+     [
+      36,
+      46
+     ],
+     [
+      36,
+      -8
+     ],
+     [
+      11,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "stairsWest",
+    "points": [
+     [
+      -11,
+      -8
+     ],
+     [
+      -11,
+      -26
+     ]
+    ]
+   },
+   {
+    "id": "stairsEast",
+    "points": [
+     [
+      11,
+      -8
+     ],
+     [
+      11,
+      -26
+     ]
+    ]
+   },
+   {
+    "id": "galleryWall",
+    "points": [
+     [
+      -11,
+      -26
+     ],
+     [
+      -32,
+      -26
+     ],
+     [
+      -32,
+      -54
+     ],
+     [
+      -8,
+      -54
+     ]
+    ]
+   },
+   {
+    "id": "galleryWallE",
+    "points": [
+     [
+      11,
+      -26
+     ],
+     [
+      32,
+      -26
+     ],
+     [
+      32,
+      -54
+     ],
+     [
+      8,
+      -54
+     ]
+    ]
+   },
+   {
+    "id": "entranceW",
+    "points": [
+     [
+      -8,
+      -54
+     ],
+     [
+      -8,
+      -80
+     ]
+    ]
+   },
+   {
+    "id": "entranceE",
+    "points": [
+     [
+      8,
+      -54
+     ],
+     [
+      8,
+      -80
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -74
+    ]
+   },
+   {
+    "text": "Top of the stairs: out of his sight",
+    "at": [
+     0,
+     -48
+    ]
+   },
+   {
+    "text": "Railing (cover)",
+    "at": [
+     -24,
+     -30
+    ]
+   },
+   {
+    "text": "Railing (cover)",
+    "at": [
+     24,
+     -30
+    ]
+   },
+   {
+    "text": "Stairway",
+    "at": [
+     0,
+     -16
+    ]
+   },
+   {
+    "text": "Razuvious",
+    "at": [
+     0,
+     22
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -72,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 26,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -60,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 4,
+   "label": "The Understudy, at the bottom of the stairs"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 6,
+   "heading": 270,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Razuvious"
+  },
+  "raidCenter": {
+   "x": 0,
+   "y": -40,
+   "spread": 11,
+   "label": "Raid: top of the stairs"
+  },
+  "rangedSpot": {
+   "x": -5,
+   "y": -20,
+   "tolerance": 6,
+   "label": "Ranged: on the stairs, in sight of him"
+  },
+  "healerSpot": {
+   "x": -18,
+   "y": -32,
+   "tolerance": 7,
+   "label": "Healers: behind the railing, out of his sight"
+  },
+  "coverW": {
+   "x": -22,
+   "y": -32,
+   "tolerance": 7,
+   "label": "Behind the railing"
+  },
+  "coverE": {
+   "x": 22,
+   "y": -32,
+   "tolerance": 7,
+   "label": "Behind the railing"
+  },
+  "otSpot": {
+   "x": 0,
+   "y": -42,
+   "tolerance": 5,
+   "label": "Off-tank: top of the stairs, back to the boss"
+  },
+  "understudyW": {
+   "x": -18,
+   "y": 26,
+   "label": "Understudy"
+  },
+  "understudyE": {
+   "x": 18,
+   "y": 26,
+   "label": "Understudy"
+  },
+  "understudyHold": {
+   "x": 0,
+   "y": -44,
+   "label": "Free Understudies held"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 900,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1300,
+  "healPerSecondWithPlayerHealer": 200,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 7,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 1000,
+  "meleeInterval": 2,
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "You are the Mind Controlled Understudy: Razuvious only ever swings at you. His Taunt lasts 20 seconds, so every 20 seconds he turns and the next Understudy has to Taunt him back: press Taunt the moment he turns, every time.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Understudy tank",
+   "short": "Off-tank",
+   "description": "You hold the free Understudies at the top of the stairs. Pick up each one as it comes, walk it to the top of the stairs and keep your back to the boss. Never Sunder them, never touch them with damage.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stand behind Razuvious and hit him. Warriors and rogues have no mana, so his Shout does nothing to you. Your only threat is the Understudy's own damage: stop before the red band.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Cast from the stairs in sight of him, then step behind the railing before every Disrupting Shout, and come straight back. Getting Shouted with mana up is a dead caster.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Stay behind the railing the whole fight and heal the tanking Understudy down the stairs. If you ever stand in his line of sight when he Shouts, you take 8,000 and lose 3 seconds of heals.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Understudy: Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "The next Understudy's Taunt, with Shield Wall alongside. Razuvious hits so hard that this is the only safe way to hold him."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "understudySwap": {
+   "label": "Understudy Taunt fades",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 0.5,
+   "toast": "The Taunt has run out: next Understudy, Taunt him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Every 20 seconds the active Understudy's Taunt runs out. Press Taunt now."
+  },
+  "unbalancingStrike": {
+   "label": "Unbalancing Strike",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 2500,
+   "follow": [
+    {
+     "id": "unbalancingMark",
+     "delay": 0
+    }
+   ],
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "350% weapon damage on whoever he is hitting. It also drops their defense for 6 seconds, so the next swings hurt more."
+  },
+  "unbalancingMark": {
+   "label": "Unbalanced",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 6,
+   "damageTakenMult": 1.25,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Defense down for 6 seconds."
+  },
+  "disruptingShout": {
+   "label": "Disrupting Shout",
+   "kind": "debuff",
+   "cast": 4,
+   "offBoss": true,
+   "target": "all",
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 8000,
+   "stun": 3,
+   "safeSpots": [
+    "coverW",
+    "coverE",
+    "healerSpot"
+   ],
+   "safeRadius": 7,
+   "safeRoles": [
+    "ranged",
+    "healer"
+   ],
+   "playerMetric": "shoutHits",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He Shouts everyone in his line of sight: anyone with mana takes a big hit and is stunned. Step behind the railing before it lands."
+  },
+  "understudyFree": {
+   "label": "Free Understudy",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "understudyW",
+    "understudyE"
+   ],
+   "speed": 5,
+   "aggroRange": 8,
+   "lifetime": 45,
+   "heldLifetime": 45,
+   "pickup": "offtank",
+   "holdSpot": "understudyHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A free Understudy. Pick it up and walk it to the top of the stairs. Do not damage it."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Understudy Rotation",
+   "subtitle": "Taunt every 20 seconds, cover every 25",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 240,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "understudySwap",
+     "first": 20,
+     "every": 20,
+     "jitter": 1
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 9,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "disruptingShout",
+     "first": 25.9,
+     "every": 25.9,
+     "jitter": 0.7
+    },
+    {
+     "id": "understudyFree",
+     "first": 8,
+     "every": 45,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Drag him to the bottom of the stairs",
+     "tip": "Pull him down to the foot of the stairs so the ranged can reach him from the top."
+    },
+    {
+     "id": "handoff",
+     "type": "afterEvent",
+     "event": "understudySwap",
+     "check": "hasAggro",
+     "within": 3,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt the instant he turns",
+     "tip": "Every 20 seconds his target changes. Taunt now: if you are late he is on the raid and he one-shots anyone he hits."
+    },
+    {
+     "id": "grabIt",
+     "type": "afterEvent",
+     "event": "understudyFree",
+     "check": "whelpsPicked",
+     "within": 12,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Pick up every free Understudy",
+     "tip": "Get to it before it reaches the raid. Understudies hit for over 4,000."
+    },
+    {
+     "id": "otTop",
+     "type": "playerAtSpotBy",
+     "spot": "otSpot",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold them at the top of the stairs",
+     "tip": "Your back to the boss, away from where the ranged stand."
+    },
+    {
+     "id": "shoutOut",
+     "type": "continuous",
+     "metric": "shoutHits",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Never be in sight when he Shouts",
+     "tip": "The Shout does 8,000 and stuns. Behind the railing before the bar ends, every time."
+    },
+    {
+     "id": "stairsRanged",
+     "type": "afterEvent",
+     "event": "disruptingShout",
+     "check": "inRange",
+     "within": 5,
+     "grace": 6,
+     "role": "ranged",
+     "label": "Come straight back and cast",
+     "tip": "As soon as the Shout has gone off, step back onto the stairs and keep casting."
+    },
+    {
+     "id": "meleeOn",
+     "type": "afterEvent",
+     "event": "understudySwap",
+     "check": "inRange",
+     "within": 2,
+     "grace": 6,
+     "role": "melee",
+     "label": "Stay on him through the handoffs",
+     "tip": "Stand behind him and keep hitting. The Taunt swaps do not move him."
+    },
+    {
+     "id": "redHold",
+     "type": "continuous",
+     "metric": "attacksInRed",
+     "role": "dps",
+     "label": "Stop at the red band",
+     "tip": "The Understudy's threat is good but it is not infinite. Hold when the bar is red."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "healCover",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 6,
+     "role": "healer",
+     "label": "Heal from behind the railing",
+     "tip": "Your heals reach the Understudy at the bottom of the stairs from here. Razuvious cannot see you."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The Understudy takes the whole boss. If it dies, a player has to take him, and he one-shots players."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Unbalancing Strike hits hard and drops defense. Stay ahead of it."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.2,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.6,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "shoutHits": {
+   "label": "Disrupting Shouts you took",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "Be behind the railing before the bar ends."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Taunt every handoff; pre-heal the Strike; ranged step back to cast after every Shout.",
+  "windows": {
+   "perfect": 0.4
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3.5,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Razuvious turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "understudyFree",
+    "offset": 3,
+    "early": 3,
+    "late": 9,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Pick up the Understudy",
+    "tip": "Walk into it or Taunt it. Do not hit it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "healStrike",
+    "ability": "heal",
+    "on": "event",
+    "event": "unbalancingStrike",
+    "offset": 1.2,
+    "early": 0.9,
+    "late": 2.4,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal after the Strike",
+    "tip": "The Strike landed and the next swings hit harder for 6 seconds. Heal now."
+   },
+   {
+    "id": "backToCast",
+    "ability": "attack",
+    "on": "event",
+    "event": "disruptingShout",
+    "offset": 3.4,
+    "early": 0.8,
+    "late": 3.5,
+    "role": "ranged",
+    "short": "CAST",
+    "label": "Back to the stairs and cast",
+    "tip": "The Shout is gone. Step out and get casts off before the next one."
+   },
+   {
+    "id": "keepHitting",
+    "ability": "attack",
+    "on": "event",
+    "event": "understudySwap",
+    "offset": 1,
+    "early": 0.9,
+    "late": 3.5,
+    "role": "melee",
+    "short": "HIT",
+    "label": "Keep hitting through the swap",
+    "tip": "He does not move on a Taunt swap. Do not stop for it."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "tauntDrill",
+   "name": "Taunt the handoff",
+   "description": "Every 10 seconds his target turns away. Press Taunt within 3 seconds, every time.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "understudySwap",
+     "first": 3,
+     "every": 10,
+     "jitter": 1.5
+    }
+   ]
+  },
+  {
+   "id": "grabDrill",
+   "name": "Collect the Understudies",
+   "description": "A free Understudy appears every 20 seconds. Pick it up and walk it to the top of the stairs.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "understudyFree",
+     "first": 3,
+     "every": 20,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "shoutDrill",
+   "name": "Step behind the railing",
+   "description": "A Shout every 15 seconds. Get behind the railing during the bar, then get back on the stairs.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "disruptingShout",
+     "first": 4,
+     "every": 15,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "healStrikeDrill",
+   "name": "Heal the Understudy",
+   "description": "Unbalancing Strike every 8 seconds while he swings. Stay behind the railing and keep the Understudy up.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "unbalancingStrike",
+     "first": 3,
+     "every": 8,
+     "jitter": 1
+    },
+    {
+     "id": "disruptingShout",
+     "first": 10,
+     "every": 22,
+     "jitter": 1
+    }
+   ]
+  }
+ ]
+}

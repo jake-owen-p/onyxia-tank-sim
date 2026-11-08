@@ -25,8 +25,10 @@ and plays it with a bot for each role.
   dependencies.
 * Two views of the same simulation: a top-down placement map and a
   third-person over-the-shoulder view that matches WoW's default camera.
-* Fully scripted encounter in `data/encounters/onyxia.json`. Every timing,
-  range and threat number is a placeholder you can tune.
+* 62 scripted encounters across all seven Classic raids: Onyxia's Lair, Molten
+  Core, Blackwing Lair, Zul'Gurub, Ruins of Ahn'Qiraj, Temple of Ahn'Qiraj and
+  Naxxramas. Fight timings come from boss mods, emulators and guides. Numbers
+  that nobody has measured in game are marked as placeholders in each script.
 * Pure simulation core with unit tests, kept free of DOM, Canvas and audio so
   it can later be ported to Lua for an in-game addon.
 
@@ -51,7 +53,8 @@ Opening `index.html` straight from `file://` works in Firefox and Safari. Chrome
 blocks `fetch()` of the encounter JSON from `file://`, so Chrome users need a
 local server (the page shows a message explaining this if it happens).
 
-Audio starts after your first click or key press, which browsers require.
+Audio starts after your first click or key press, which browsers require. It
+starts muted on localhost so development stays quiet; unmute it in Settings.
 
 ### Controls
 
@@ -267,7 +270,8 @@ through the seeded RNG, so a run can be replayed from its seed and inputs.
 
 ## The script format
 
-`data/encounters/onyxia.json` describes the whole encounter. Units are yards
+Each script describes one whole encounter; `data/encounters/onyxia.json` is a
+worked example and `docs/ENCOUNTER_FORMAT.md` is the full schema. Units are yards
 and seconds. Headings are degrees with 0 = east and 90 = north (toward the
 back wall); the core converts to radians. There is no logic in the file: it
 names checks, metrics and cues that the code implements.
@@ -416,29 +420,30 @@ metricUnchanged}`, `expectation {id}` (resolved on time or late), `wait
 
 ## Adding a boss
 
-1. Copy `data/encounters/onyxia.json` to `data/encounters/<boss>.json`.
+1. Copy a similar boss to `data/encounters/<raid>/<boss>.json`.
 2. Draw the room: `arena.floor` polygons for every walkable area (they must
    overlap where they connect), `arena.walls` polylines for what the POV view
    draws, and `arena.backWall` for the "against the wall" check. Keep +y as
    "away from the entrance" so the top-down map reads naturally.
-3. Set `positions`. The core reads the named spots directly, so keep the names
-   (`tankSpot`, `bossSpot`, `pickupSpot`, `landSpot`, ...) even if a boss does
-   not use a mechanic; unused spots can sit anywhere sensible.
-4. Define `actions` using the existing ids, then `phases` with their timers
-   and `expectations` built from the existing checks.
+3. Set `positions`. Keep the names the core reads (`tankSpot`, `bossSpot`, ...)
+   even if a boss does not use a mechanic.
+4. Define `actions` with the kinds listed in `docs/ENCOUNTER_FORMAT.md`, then
+   `phases` with their timers and `expectations` built from the existing checks.
+   Give each role in `roles` the buttons and spots that make sense for it.
 5. If the boss needs a genuinely new mechanic: add its resolution as a `case`
    in `resolveAction` in `src/core/sim.js`, add any new check as an exported
    function in `src/core/expectations.js` and register it in `CHECKS`, and add
    a metric to `continuousMetrics`. Add a test in `tests/` for each.
-6. Point `src/main.js` at the new script (it fetches
-   `./data/encounters/onyxia.json` at boot) or add it to the encounter list
-   there.
-7. Run `npm test`, then walk the tutorial and each drill in both views.
+6. Add the boss to its raid in `data/encounters/index.json` with
+   `status: 'ready'`; the menu builds its tabs and chips from that file.
+7. Run `npm test` and `node tools/validate.mjs <raid>/<boss>`, then play each
+   role and drill in both views.
 
 ## Known placeholder values to tune against the live fight
 
-Nothing in the script was measured on a live server. These are the numbers
-most worth checking, with what to log in game:
+Nothing in any script was measured on a live server. These are the Onyxia
+numbers most worth checking, with what to log in game. Every other boss lists
+its own placeholders in the script `notes` and in `docs/research/<raid>/`:
 
 | Value | Current | Where | What to measure |
 |---|---|---|---|

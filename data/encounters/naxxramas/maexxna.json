@@ -1,0 +1,1355 @@
+{
+ "id": "maexxna",
+ "name": "Maexxna",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/maexxna.md (1,453,127 HP classicdb, 267 s clock estimated from the 15 to 20% per 40 s cycle the guides quote; 30% Enrage). The room is a 42 yd circle; the real web room layout (web wall, Web Wrap landing spots) is reduced to named spots, and every coordinate is an estimate. The raid stands behind her toward the entrance; cocoons land on the north-east web wall. The 40 second cycle is DBM-Vanilla's: Web Wrap at 20 s then every 40.5 s (real first 18.2 to 20.1), Spiderlings at 30.7 s then every 40.5 s, Web Spray at 40.5 s then every 40.5 s. The kill clock spans five Sprays in phase 1 and one more enraged cycle in phase 2. WEB SPRAY is a whole-room `aoe`, `stun` 10 s (spell 29484 data: 10 s, guides say 8 s, no combat log reached to confirm), 2,000 Nature (1,750 to 2,250 real), so the healer is really locked out for ten seconds and the tank has to be full before it lands. The engine stuns even Web Wrapped players; the real raid's wrapped players are immune to it. WEB WRAP: a `debuff` on 3 raiders with `playerChance` 0.3 per the guidance; `stun` 8 s, 375 per second, 8 s (real: until the cocoon dies, 657 to 843 per 2 s); the knockback to the wall and the fall damage are not modelled. Ghost raiders wrapped do nothing in the engine. COCOONS are three `killFirst` adds at the web wall (lifetime 7 s, standing in for 6,100 HP killed by the assigned ranged). Cocoons are the ranged team's job, as in the real assignment (`killFirstRoles: ranged`): attacks on her while a cocoon lives are scored (`attacksOffPriority`) for ranged only, and melee are scored on the spiderlings. The cocoon's HP is not otherwise tracked and players killing it does not free a ghost. POISON SHOCK is the 15 yd frontal `cone` (90 degree estimate) every 11 s (estimate, only Wrath-era Ten Ton Hammer gives a number), 1,750 real, scaled to 1,200 on the tank; the raid must stay out of her front. NECROTIC POISON is a `debuff` on the tank, `healingMult` 0.1 (real -90%), poison dispel, 30 s, reapplied every 18 s (cadence estimated: 'applied during the fight'), `maxStacks` 1 so a re-application refreshes it instead of multiplying the cut, which is how the engine would otherwise stack two copies. The tank role is excluded (`roles: nontank`) because an un-dispellable 90% healing cut on the player tank has no answer in the engine; it stands for the raid's dispellers keeping it off the real tank. The healer role has to clean it within seconds or the ghost's healing collapses. A Web Spray lands the moment this is on, so the healer's job really is 'dispel it before the Spray'. The Spiderling's Necrotic Poison is not separately modelled. SPIDERLINGS are 10 `killFirst` adds under her, picked up by the off-tank role (real: warriors' Demoralizing Shout and paladins' Consecration while mages Frost Nova, then AoE); lifetime 9 s so they die before the next Spray as the guides demand (real HP 3,815). Web Wrap's knockback, the Flask of Petrification trick, Vanish and Ice Block to skip the Spray, cleanse timing before the Spray and the backup Enrage tank are not modelled; the off-tank role here is the spiderling tank. ENRAGE at 30% is `enrage` (+50% attack speed, +100 damage per the tooltip or +100% per the effect data, an open question), `enrageMultiplier` 1.5. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Her melee is 700 per 2 s (classicdb 8,475 to 9,727 pre-mitigation, swing estimated), Poison Shock 1,200, Web Spray 1,200 on the tank (1,750 to 2,250 real, not mitigated for the tank here), all chosen so the 10 s Web Spray stun, with the healer locked out, costs a topped tank about half their health and kills one that was not topped. A healer locked out for 10 s cannot stop a topped tank dipping under half, so the `tankLowSeconds` penalty is halved here (0.5 per second) and `cleanNecrotic` has an 11 s window, longer than the stun. A healer who does nothing loses the tank in under a minute even before the stun. The ghost tank's passive healing when nobody plays healer is 9,000 per second, a number with no meaning except that it survives a 90% Necrotic Poison cut in the roles that have no dispel button (Necrotic Poison can land on the ghost tank in every role because the engine's role filter only applies when the debuff lands on the player).",
+ "sources": [
+  "docs/research/naxxramas/maexxna.md",
+  "https://warcraft.wiki.gg/wiki/Maexxna_(Classic)",
+  "https://www.wowhead.com/classic/guide/maexxna-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28622/web-wrap",
+  "https://www.wowhead.com/classic/spell=29484/web-spray",
+  "https://www.wowhead.com/classic/spell=28741/poison-shock",
+  "https://www.wowhead.com/classic/spell=28776/necrotic-poison",
+  "https://www.wowhead.com/classic/spell=29434/summon-maexxna-spiderling",
+  "https://www.wowhead.com/classic/spell=28747/enrage",
+  "https://www.wowhead.com/classic/npc=16486/web-wrap",
+  "https://classicdb.ch/?npc=15952",
+  "https://classicdb.ch/?npc=17055",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/ArachnidQuarter/Maexxna.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Maexxna's Web",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      42,
+      0
+     ],
+     [
+      41.4,
+      7.3
+     ],
+     [
+      39.5,
+      14.4
+     ],
+     [
+      36.4,
+      21
+     ],
+     [
+      32.2,
+      27
+     ],
+     [
+      27,
+      32.2
+     ],
+     [
+      21,
+      36.4
+     ],
+     [
+      14.4,
+      39.5
+     ],
+     [
+      7.3,
+      41.4
+     ],
+     [
+      0,
+      42
+     ],
+     [
+      -7.3,
+      41.4
+     ],
+     [
+      -14.4,
+      39.5
+     ],
+     [
+      -21,
+      36.4
+     ],
+     [
+      -27,
+      32.2
+     ],
+     [
+      -32.2,
+      27
+     ],
+     [
+      -36.4,
+      21
+     ],
+     [
+      -39.5,
+      14.4
+     ],
+     [
+      -41.4,
+      7.3
+     ],
+     [
+      -42,
+      0
+     ],
+     [
+      -41.4,
+      -7.3
+     ],
+     [
+      -39.5,
+      -14.4
+     ],
+     [
+      -36.4,
+      -21
+     ],
+     [
+      -32.2,
+      -27
+     ],
+     [
+      -27,
+      -32.2
+     ],
+     [
+      -21,
+      -36.4
+     ],
+     [
+      -14.4,
+      -39.5
+     ],
+     [
+      -7.3,
+      -41.4
+     ],
+     [
+      0,
+      -42
+     ],
+     [
+      7.3,
+      -41.4
+     ],
+     [
+      14.4,
+      -39.5
+     ],
+     [
+      21,
+      -36.4
+     ],
+     [
+      27,
+      -32.2
+     ],
+     [
+      32.2,
+      -27
+     ],
+     [
+      36.4,
+      -21
+     ],
+     [
+      39.5,
+      -14.4
+     ],
+     [
+      41.4,
+      -7.3
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -38
+     ],
+     [
+      10,
+      -38
+     ],
+     [
+      10,
+      -64
+     ],
+     [
+      -10,
+      -64
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      10,
+      -40.8
+     ],
+     [
+      19.5,
+      -37.2
+     ],
+     [
+      27.8,
+      -31.5
+     ],
+     [
+      34.5,
+      -23.9
+     ],
+     [
+      39.3,
+      -14.9
+     ],
+     [
+      41.7,
+      -5.1
+     ],
+     [
+      41.7,
+      5
+     ],
+     [
+      39.3,
+      14.9
+     ],
+     [
+      34.6,
+      23.8
+     ],
+     [
+      27.9,
+      31.4
+     ],
+     [
+      19.5,
+      37.2
+     ],
+     [
+      10.1,
+      40.8
+     ],
+     [
+      0,
+      42
+     ],
+     [
+      -10.1,
+      40.8
+     ],
+     [
+      -19.5,
+      37.2
+     ],
+     [
+      -27.9,
+      31.4
+     ],
+     [
+      -34.6,
+      23.8
+     ],
+     [
+      -39.3,
+      14.9
+     ],
+     [
+      -41.7,
+      5
+     ],
+     [
+      -41.7,
+      -5.1
+     ],
+     [
+      -39.3,
+      -14.9
+     ],
+     [
+      -34.5,
+      -23.9
+     ],
+     [
+      -27.8,
+      -31.5
+     ],
+     [
+      -19.5,
+      -37.2
+     ],
+     [
+      -10,
+      -40.8
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -40.8
+     ],
+     [
+      -10,
+      -64
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -40.8
+     ],
+     [
+      10,
+      -64
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -58
+    ]
+   },
+   {
+    "text": "Maexxna",
+    "at": [
+     0,
+     24
+    ]
+   },
+   {
+    "text": "Web wall: cocoons land here",
+    "at": [
+     27,
+     30
+    ]
+   },
+   {
+    "text": "Raid behind her",
+    "at": [
+     4,
+     2
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -46,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 26,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -22,
+   "spread": 10
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 30,
+   "tolerance": 4,
+   "label": "Tank: centre of the web"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 23,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Maexxna"
+  },
+  "raidCenter": {
+   "x": 3,
+   "y": 2,
+   "spread": 11,
+   "label": "Raid: behind her"
+  },
+  "rangedSpot": {
+   "x": 9,
+   "y": 6,
+   "tolerance": 8,
+   "label": "Ranged: reach the wall and her"
+  },
+  "healerSpot": {
+   "x": -6,
+   "y": 4,
+   "tolerance": 8,
+   "label": "Healers: behind the raid"
+  },
+  "otSpot": {
+   "x": -8,
+   "y": 18,
+   "tolerance": 7,
+   "label": "Off-tank: scoop the spiderlings"
+  },
+  "spiderSpot": {
+   "x": 0,
+   "y": 23
+  },
+  "cocoon1": {
+   "x": 22,
+   "y": 30
+  },
+  "cocoon2": {
+   "x": 27,
+   "y": 25
+  },
+  "cocoon3": {
+   "x": 30,
+   "y": 19
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1000,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 9000,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 700,
+  "meleeInterval": 2,
+  "cones": {
+   "poisonShock": {
+    "angle": 90,
+    "range": 15,
+    "label": "Poison Shock",
+    "facing": "front",
+    "style": "cleave"
+   }
+  },
+  "facingCone": "poisonShock",
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Drag her to the centre of her web and hold her with her face turned away from the raid. Poison Shock is a frontal cone and Web Spray stuns everybody for ten seconds, you included, so be full when it lands. Your healers cannot help you during it.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Spiderling tank",
+   "short": "Off-tank",
+   "description": "Ten spiderlings spawn under her every 40 seconds, ten seconds before each Web Spray. Be close when they appear and grab them all, so they die on you instead of on the healers.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stand behind her and hit her. Spiderlings come first; the cocoons are the ranged team's job. Web Spray will stun you: do not waste a cooldown into it.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "You are on web duty: when Web Wrap throws someone to the wall, kill their cocoon before anything else. Then the spiderlings. Then her. Stay in range of the wall and of her.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Clean Necrotic Poison off the tank the moment it lands. Get the tank full before every Web Spray: you are stunned for ten seconds and cannot do anything to stop her.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "poison"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Cure Poison",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse",
+    "poison",
+    "disease"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. One button here stands in for Dispel Magic, Cleanse, Decurse and Cure Poison."
+  }
+ },
+ "actions": {
+  "webWrap": {
+   "label": "Web Wrap",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 8,
+   "tickDamage": 375,
+   "stun": 8,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "cocoons",
+     "delay": 0.2
+    }
+   ],
+   "tip": "She flings three people to the wall and wraps them in webs. Ranged kill the cocoons; if it is you, wait."
+  },
+  "cocoons": {
+   "label": "Web Wrap cocoons",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "cocoon1",
+    "cocoon2",
+    "cocoon3"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "lifetime": 7,
+   "killFirst": true,
+   "killFirstRoles": "ranged",
+   "pickup": "nobody",
+   "holdSpot": "cocoon1",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "A cocoon on the wall. Ranged team: kill it first."
+  },
+  "spiderlings": {
+   "label": "Spiderlings",
+   "kind": "adds",
+   "cast": 0,
+   "count": 10,
+   "from": [
+    "spiderSpot"
+   ],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 9,
+   "heldLifetime": 12,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "otSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Ten spiderlings under her, ten seconds before Web Spray. Kill them before they eat the healers."
+  },
+  "webSpray": {
+   "label": "Web Spray",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 2000,
+   "tankDamage": 1200,
+   "stun": 10,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Every 40 seconds the whole raid is webbed for ten seconds and takes about 2,000 Nature. Nobody can heal in that window. The tank must be full and the poison must be off her before it lands."
+  },
+  "poisonShock": {
+   "label": "Poison Shock",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "poisonShock",
+   "damage": 1200,
+   "hitsMelee": false,
+   "raidMetric": "raidPoisonShock",
+   "raidToast": "Poison Shock hit the raid. Turn her away.",
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A frontal cone that goes wherever she faces. Keep her face turned away from the raid."
+  },
+  "necroticPoison": {
+   "label": "Necrotic Poison",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "nontank",
+   "dispel": "poison",
+   "duration": 30,
+   "healingMult": 0.1,
+   "maxStacks": 1,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "poison",
+   "requires": "grounded",
+   "tip": "Healing on the tank is cut by 90% for 30 seconds. Dispel it right now."
+  },
+  "enrage30": {
+   "label": "Enrage",
+   "kind": "enrage",
+   "cast": 0,
+   "duration": 400,
+   "toast": "Maexxna enrages at 30%!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "+50% attack speed, +100 damage from here to the end. Shield Wall on the first enraged Web Spray."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The Cycle",
+   "subtitle": "Wrap, Spiderlings, Spray",
+   "hpFrom": 1,
+   "hpTo": 0.3,
+   "duration": 205,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "webWrap",
+     "first": 20,
+     "every": 40.5
+    },
+    {
+     "id": "spiderlings",
+     "first": 30.7,
+     "every": 40.5
+    },
+    {
+     "id": "webSpray",
+     "first": 40.5,
+     "every": 40.5
+    },
+    {
+     "id": "poisonShock",
+     "first": 7,
+     "every": 11,
+     "jitter": 1.5
+    },
+    {
+     "id": "necroticPoison",
+     "first": 11,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 8,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pull her to the centre of the web",
+     "tip": "Back into the middle of the web with her face turned north, away from the raid."
+    },
+    {
+     "id": "facing",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tanks",
+     "label": "Keep her face away from the raid",
+     "tip": "Poison Shock is a frontal cone. If the raid can see her front, somebody eats it."
+    },
+    {
+     "id": "grabSpiders",
+     "type": "afterEvent",
+     "event": "spiderlings",
+     "check": "whelpsPicked",
+     "within": 6,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Grab the spiderlings as they spawn",
+     "tip": "Stand by her and get all of them on you before they reach the raid."
+    },
+    {
+     "id": "noWrapDodge",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 6,
+     "role": "ranged",
+     "label": "Stand where you can reach the wall and her",
+     "tip": "If you cannot reach the cocoons you are not on web duty."
+    },
+    {
+     "id": "healPlace",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 6,
+     "role": "healer",
+     "label": "Stay behind her, in range of the tank",
+     "tip": "Keep your eyes on the tank. Web Spray is about to tell you to go."
+    },
+    {
+     "id": "cocoon1",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "ranged",
+     "label": "Kill the cocoons first",
+     "tip": "A wrapped raider ticks until the cocoon is dead. Ranged team: on the cocoons, spiderlings next, then her."
+    },
+    {
+     "id": "spiders1",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Spiderlings first",
+     "tip": "Kill the spiderlings before you go back on her. The cocoons are the ranged team's job."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cleanNecrotic1",
+     "type": "afterEvent",
+     "event": "necroticPoison",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 7,
+     "role": "healer",
+     "label": "Cleanse Necrotic Poison at once",
+     "tip": "Healing on the tank is cut by 90% until it is off. Do it now, not after the next heal."
+    },
+    {
+     "id": "sprayRecover1",
+     "type": "afterEvent",
+     "event": "webSpray",
+     "check": "noDispellable",
+     "within": 12,
+     "grace": 6,
+     "role": "healer",
+     "label": "Clean anything that landed during the Spray",
+     "tip": "You were stunned for ten seconds. Clean what you could not."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The tank must be full before every Web Spray: you have 40 seconds between them."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Below half with a Web Spray due is how tanks die here."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Enrage",
+   "subtitle": "30% to the end",
+   "hpFrom": 0.3,
+   "hpTo": 0,
+   "duration": 62,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "enrage30",
+     "first": 0.5
+    },
+    {
+     "id": "webWrap",
+     "first": 17.5,
+     "every": 40.5
+    },
+    {
+     "id": "spiderlings",
+     "first": 28.2,
+     "every": 40.5
+    },
+    {
+     "id": "webSpray",
+     "first": 38,
+     "every": 40.5
+    },
+    {
+     "id": "poisonShock",
+     "first": 4,
+     "every": 11,
+     "jitter": 1.5
+    },
+    {
+     "id": "necroticPoison",
+     "first": 8,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "hold",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 16,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Keep her in the centre",
+     "tip": "She hits harder now. Shield Wall and Last Stand for the Web Sprays."
+    },
+    {
+     "id": "grabSpiders2",
+     "type": "afterEvent",
+     "event": "spiderlings",
+     "check": "whelpsPicked",
+     "within": 6,
+     "grace": 5,
+     "role": "offtank",
+     "label": "Grab the spiderlings",
+     "tip": "Same job. Do not let them reach the stunned healers."
+    },
+    {
+     "id": "cocoon2",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "ranged",
+     "label": "Kill the cocoons first",
+     "tip": "A wrapped raider ticks until the cocoon is dead. Ranged team: on the cocoons, spiderlings next, then her."
+    },
+    {
+     "id": "spiders2",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "melee",
+     "label": "Spiderlings first",
+     "tip": "Kill the spiderlings before you go back on her. The cocoons are the ranged team's job."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cleanNecrotic2",
+     "type": "afterEvent",
+     "event": "necroticPoison",
+     "check": "noDispellable",
+     "within": 4,
+     "grace": 7,
+     "role": "healer",
+     "label": "Cleanse Necrotic Poison at once",
+     "tip": "Healing on the tank is cut by 90% until it is off. Do it now, not after the next heal."
+    },
+    {
+     "id": "sprayRecover2",
+     "type": "afterEvent",
+     "event": "webSpray",
+     "check": "noDispellable",
+     "within": 12,
+     "grace": 6,
+     "role": "healer",
+     "label": "Clean anything that landed during the Spray",
+     "tip": "You were stunned for ten seconds. Clean what you could not."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "She hits harder from 30%. Pre-heal every swing."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Below half with a Web Spray due is how tanks die here."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 1.5,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 0.6,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "raidPoisonShock": {
+   "label": "Poison Shocks that hit the raid",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": "tanks",
+   "tip": "Her front must never face the raid."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Cleanse the Poison, heal the tank, grab the spiderlings.",
+  "windows": {
+   "perfect": 0.5
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Maexxna turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 9,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 5,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   },
+   {
+    "id": "healSpray",
+    "ability": "heal",
+    "on": "event",
+    "event": "webSpray",
+    "offset": 10.2,
+    "early": 0.2,
+    "late": 4,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal the tank as the Spray ends",
+    "tip": "You have just been unlocked. The tank has taken ten seconds of hits with no healing."
+   },
+   {
+    "id": "grabSpidersCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "spiderlings",
+    "offset": 1,
+    "early": 1,
+    "late": 6,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Grab the spiderlings",
+    "tip": "Stand on them or Taunt them.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "faceDrill",
+   "name": "Her face away from the raid",
+   "description": "Poison Shock every 6 seconds. Keep her turned so it never touches the raid.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 45,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "poisonShock",
+     "first": 3,
+     "every": 6
+    }
+   ]
+  },
+  {
+   "id": "spiderDrill",
+   "name": "Grab them all",
+   "description": "Spiderlings spawn every 14 seconds. Off-tank: get every one on you before they reach the raid. Melee: kill them before you go back on her.",
+   "roles": [
+    "offtank",
+    "melee"
+   ],
+   "startPhase": 1,
+   "duration": 56,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "spiderlings",
+     "first": 3,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "cocoonDrill",
+   "name": "Kill the cocoons",
+   "description": "Web Wrap lands every 12 seconds. Kill the cocoons before they tick anyone down.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 48,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "webWrap",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "sprayDrill",
+   "name": "Spray and poison",
+   "description": "Web Spray every 18 seconds, Necrotic Poison every 8. Clean it instantly and have the tank full before every Spray.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "webSpray",
+     "first": 8,
+     "every": 18
+    },
+    {
+     "id": "necroticPoison",
+     "first": 3,
+     "every": 8
+    }
+   ]
+  }
+ ]
+}

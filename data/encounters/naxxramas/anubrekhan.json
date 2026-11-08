@@ -1,0 +1,2219 @@
+{
+ "id": "anubrekhan",
+ "name": "Anub'Rekhan",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/anubrekhan.md. HP 1,665,500 (wiki; classicdb says 1,500,000) is a clock over 313 s, which is an estimate of a typical kill; Classic has no documented enrage. The room is a 60 yd circle sized so a 104 yd straight kite outruns a slowed boss; the real room has an acid moat and a narrow outer ledge, here the kite is a straight run from the north gate to the south alcove and back, because the engine's phase spots give one destination and the boss chases in a straight line anyway. Every coordinate is an estimate. LOCUST SWARM is its own phase, so the movement is real and scored: 3 s cast (spell data), then the boss walks at 60% speed (`bossSpeedMult` 0.6, boss base speed 5 yd/s estimated, 3 yd/s while slowed; real run speed unknown) for 20 s while ticks land every 2 s on anyone within 30 yd of his edge. The first tick is 2 s after the aura lands, per the 2 s periodic trigger. Cadence is DBM-Vanilla's: first swarm at 90 s in the 77 to 109 s window, then every 90 s cast to cast. The tick is 1,000 (875 to 1,125 real); the per-stack growth (`stacks indefinitely`) and Silence + Pacify are NOT modelled: the engine has no silence, a `stun` would root you inside the swarm, which is the opposite of the real danger. A stack that kept hitting you for the full kite in the real game would kill you outright; here it costs HP and points, and the melee and tank who run still eat 1 or 2 ticks as they leave, which is realistic. Impale, Web and scarabs do not stop during the kite in the real fight; the script stops Impale for the kite (the boss is moving, so a fixed lane would be nonsense). IMPALE (3,938 physical, 1 s cast, spell data) is a telegraphed 5 yd wide lane (`placement: lanes`) from the boss toward the raid, 1.2 s warning, 3,900 damage. Lanes are fixed lines from the boss's two tanking spots through the raid body, the ranged position and through melee behind him, so the lesson is to never stand in a line with him and another player. Lane hazards have no `playerChance`, so the aim list does the job: seven lanes, two of them through the ranged spot, put a given Impale through that spot about 29% of the time. The healer spots are 36 yd out to the west, clear of every lane, as the sources ask (healers stay more than 30 yd from him, behind the tank's line). The cadence (every 18 s) is an estimate: no Classic source gives one. The real random target cannot dodge its own lane; the engine cannot make that distinction, so it is represented only as the Impale tank spike on the ghost (Warcraft Tavern: the tank is often in the line), which a healer must cover. Fall damage is folded into the lane hit. CRYPT GUARDS are `killFirst` adds: two at the pull (wiki, Wowhead; here they appear 5.5 s after the pull rather than already standing there, to give the opening raid hold a target-free window) and one new one on every Swarm at the north gate, pulled west to the raid's swarm side (`holdSpot`), as the wiki says. Lifetimes 45, 70 and 20 s stand in for ~204,000 HP each at realistic raid DPS. Cleave, Web (10 s root, Free Action Potion) and Enrage below 50% are not modelled: the engine has no add melee or add debuffs, so only pickup and kill order are scored; Acid Spit is a stacking undispellable debuff on the off-tank (`maxStacks` 6, 125 per second per stack, real 250 per 2 s). CORPSE SCARABS are not tied to the corpse (the engine has no on-death trigger): scheduled `killFirst` waves of 10 appear at the corpse spots at the time each Guard's lifetime ends, standing in for the real 10-per-corpse summon; a player corpse's 5 scarabs are not modelled. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. His melee is 1,100 per 2 s (classicdb 5,930 to 6,807 pre-mitigation, estimated swing 2 s); a healer who does nothing loses the tank in about 25 s. The passive ghost healing while nobody plays healer is 650 per second. Impale on the tank (spike 3,900, every 30 s, estimate) is the healer's other reason to stay ahead. Mechanics deliberately simplified: the scarabs' aggro on healers (Wowhead), the real ledge path, Aspect of the Pack (the engine's speeds are fixed), Free Action Potion. Corpse scarab counts 5 per player corpse are out because deaths do not happen in a clean run. The kite direction on each swarm is alternating north/south in the script; the real fight usually returns to the opposite alcove the same way.",
+ "sources": [
+  "docs/research/naxxramas/anubrekhan.md",
+  "https://warcraft.wiki.gg/wiki/Anub%27Rekhan_(Classic)",
+  "https://www.wowhead.com/classic/guide/anubrekhan-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28785/locust-swarm",
+  "https://www.wowhead.com/classic/spell=28786/locust-swarm",
+  "https://www.wowhead.com/classic/spell=28783/impale",
+  "https://www.wowhead.com/classic/spell=28969/acid-spit",
+  "https://www.wowhead.com/classic/spell=28991/web",
+  "https://classicdb.ch/?npc=15956",
+  "https://classicdb.ch/?npc=16573",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/",
+  "https://www.method.gg/wormie-s-classic-vanilla-naxxramas-proper",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/ArachnidQuarter/Anub'Rekhan.lua"
+ ],
+ "arena": {
+  "name": "Anub'Rekhan's Chamber",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      60,
+      0
+     ],
+     [
+      59.1,
+      10.4
+     ],
+     [
+      56.4,
+      20.5
+     ],
+     [
+      52,
+      30
+     ],
+     [
+      46,
+      38.6
+     ],
+     [
+      38.6,
+      46
+     ],
+     [
+      30,
+      52
+     ],
+     [
+      20.5,
+      56.4
+     ],
+     [
+      10.4,
+      59.1
+     ],
+     [
+      0,
+      60
+     ],
+     [
+      -10.4,
+      59.1
+     ],
+     [
+      -20.5,
+      56.4
+     ],
+     [
+      -30,
+      52
+     ],
+     [
+      -38.6,
+      46
+     ],
+     [
+      -46,
+      38.6
+     ],
+     [
+      -52,
+      30
+     ],
+     [
+      -56.4,
+      20.5
+     ],
+     [
+      -59.1,
+      10.4
+     ],
+     [
+      -60,
+      0
+     ],
+     [
+      -59.1,
+      -10.4
+     ],
+     [
+      -56.4,
+      -20.5
+     ],
+     [
+      -52,
+      -30
+     ],
+     [
+      -46,
+      -38.6
+     ],
+     [
+      -38.6,
+      -46
+     ],
+     [
+      -30,
+      -52
+     ],
+     [
+      -20.5,
+      -56.4
+     ],
+     [
+      -10.4,
+      -59.1
+     ],
+     [
+      0,
+      -60
+     ],
+     [
+      10.4,
+      -59.1
+     ],
+     [
+      20.5,
+      -56.4
+     ],
+     [
+      30,
+      -52
+     ],
+     [
+      38.6,
+      -46
+     ],
+     [
+      46,
+      -38.6
+     ],
+     [
+      52,
+      -30
+     ],
+     [
+      56.4,
+      -20.5
+     ],
+     [
+      59.1,
+      -10.4
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -11,
+      -56
+     ],
+     [
+      11,
+      -56
+     ],
+     [
+      11,
+      -82
+     ],
+     [
+      -11,
+      -82
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      11,
+      -59
+     ],
+     [
+      25.1,
+      -54.5
+     ],
+     [
+      37.6,
+      -46.8
+     ],
+     [
+      47.9,
+      -36.2
+     ],
+     [
+      55.2,
+      -23.4
+     ],
+     [
+      59.3,
+      -9.2
+     ],
+     [
+      59.7,
+      5.5
+     ],
+     [
+      56.6,
+      19.9
+     ],
+     [
+      50,
+      33.1
+     ],
+     [
+      40.4,
+      44.3
+     ],
+     [
+      28.4,
+      52.9
+     ],
+     [
+      14.6,
+      58.2
+     ],
+     [
+      0,
+      60
+     ],
+     [
+      -14.6,
+      58.2
+     ],
+     [
+      -28.4,
+      52.9
+     ],
+     [
+      -40.4,
+      44.3
+     ],
+     [
+      -50,
+      33.1
+     ],
+     [
+      -56.6,
+      19.9
+     ],
+     [
+      -59.7,
+      5.5
+     ],
+     [
+      -59.3,
+      -9.2
+     ],
+     [
+      -55.2,
+      -23.4
+     ],
+     [
+      -47.9,
+      -36.2
+     ],
+     [
+      -37.6,
+      -46.8
+     ],
+     [
+      -25.1,
+      -54.5
+     ],
+     [
+      -11,
+      -59
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -11,
+      -59
+     ],
+     [
+      -11,
+      -82
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      11,
+      -59
+     ],
+     [
+      11,
+      -82
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -76
+    ]
+   },
+   {
+    "text": "Anub'Rekhan",
+    "at": [
+     0,
+     43
+    ]
+   },
+   {
+    "text": "Back gate",
+    "at": [
+     0,
+     57
+    ]
+   },
+   {
+    "text": "South alcove",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Raid goes west on the swarm",
+    "at": [
+     -50,
+     2
+    ]
+   }
+  ]
+ },
+ "impaleN": [
+  {
+   "id": "n0",
+   "from": [
+    0,
+    45
+   ],
+   "to": [
+    -26,
+    12
+   ]
+  },
+  {
+   "id": "n1",
+   "from": [
+    0,
+    45
+   ],
+   "to": [
+    -9,
+    12
+   ]
+  },
+  {
+   "id": "n2",
+   "from": [
+    0,
+    45
+   ],
+   "to": [
+    -7,
+    12
+   ]
+  },
+  {
+   "id": "n3",
+   "from": [
+    0,
+    45
+   ],
+   "to": [
+    0,
+    12
+   ]
+  },
+  {
+   "id": "n4",
+   "from": [
+    0,
+    45
+   ],
+   "to": [
+    8,
+    12
+   ]
+  },
+  {
+   "id": "n5",
+   "from": [
+    0,
+    45
+   ],
+   "to": [
+    12,
+    12
+   ]
+  },
+  {
+   "id": "n6",
+   "from": [
+    0,
+    45
+   ],
+   "to": [
+    24,
+    12
+   ]
+  }
+ ],
+ "impaleS": [
+  {
+   "id": "s0",
+   "from": [
+    0,
+    -45
+   ],
+   "to": [
+    -26,
+    -12
+   ]
+  },
+  {
+   "id": "s1",
+   "from": [
+    0,
+    -45
+   ],
+   "to": [
+    -9,
+    -12
+   ]
+  },
+  {
+   "id": "s2",
+   "from": [
+    0,
+    -45
+   ],
+   "to": [
+    -7,
+    -12
+   ]
+  },
+  {
+   "id": "s3",
+   "from": [
+    0,
+    -45
+   ],
+   "to": [
+    0,
+    -12
+   ]
+  },
+  {
+   "id": "s4",
+   "from": [
+    0,
+    -45
+   ],
+   "to": [
+    8,
+    -12
+   ]
+  },
+  {
+   "id": "s5",
+   "from": [
+    0,
+    -45
+   ],
+   "to": [
+    12,
+    -12
+   ]
+  },
+  {
+   "id": "s6",
+   "from": [
+    0,
+    -45
+   ],
+   "to": [
+    24,
+    -12
+   ]
+  }
+ ],
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -30,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 45,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -20,
+   "spread": 10
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 52,
+   "tolerance": 4,
+   "label": "Tank: back gate"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 45,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Anub'Rekhan"
+  },
+  "tankSouth": {
+   "x": 0,
+   "y": -52,
+   "tolerance": 4,
+   "label": "Tank: south alcove"
+  },
+  "bossSouth": {
+   "x": 0,
+   "y": -45,
+   "heading": 270,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Anub'Rekhan, alcove"
+  },
+  "raidN": {
+   "x": 0,
+   "y": 16,
+   "spread": 12,
+   "label": "Raid"
+  },
+  "raidS": {
+   "x": 0,
+   "y": -16,
+   "spread": 12,
+   "label": "Raid"
+  },
+  "raidWest": {
+   "x": -46,
+   "y": 0,
+   "spread": 7,
+   "tolerance": 8,
+   "label": "Raid: west side on the swarm"
+  },
+  "rangedSpot": {
+   "x": -8,
+   "y": 19,
+   "tolerance": 9,
+   "label": "Ranged: spread, in range"
+  },
+  "healerSpot": {
+   "x": -35,
+   "y": 35,
+   "tolerance": 9,
+   "label": "Healers: spread, out of the line"
+  },
+  "rangedSouth": {
+   "x": -8,
+   "y": -19,
+   "tolerance": 9,
+   "label": "Ranged: spread, in range"
+  },
+  "healerSouth": {
+   "x": -35,
+   "y": -35,
+   "tolerance": 9,
+   "label": "Healers: spread, out of the line"
+  },
+  "meleeWest": {
+   "x": -38,
+   "y": 8,
+   "tolerance": 8,
+   "label": "Melee: out and west"
+  },
+  "healerKite": {
+   "x": -32,
+   "y": -40,
+   "tolerance": 8,
+   "label": "Healers: follow the kite"
+  },
+  "healerKiteN": {
+   "x": -32,
+   "y": 40,
+   "tolerance": 8,
+   "label": "Healers: follow the kite"
+  },
+  "otNorth": {
+   "x": -20,
+   "y": 28,
+   "tolerance": 7,
+   "label": "Off-tank: west Guard, north side"
+  },
+  "otSouth": {
+   "x": -20,
+   "y": -28,
+   "tolerance": 7,
+   "label": "Off-tank: south side"
+  },
+  "otWest": {
+   "x": -38,
+   "y": 18,
+   "tolerance": 8,
+   "label": "Off-tank: west with the new Guard"
+  },
+  "guardWestSpawn": {
+   "x": -18,
+   "y": 38
+  },
+  "guardEastSpawn": {
+   "x": 18,
+   "y": 38
+  },
+  "guardNewSpawn": {
+   "x": -6,
+   "y": 40
+  },
+  "guardWestHold": {
+   "x": -18,
+   "y": 27
+  },
+  "guardEastHold": {
+   "x": 18,
+   "y": 27
+  },
+  "guardNewHold": {
+   "x": -42,
+   "y": 14
+  },
+  "corpseWest": {
+   "x": -18,
+   "y": 27
+  },
+  "corpseEast": {
+   "x": 18,
+   "y": 27
+  },
+  "corpseNew": {
+   "x": -42,
+   "y": 14
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1000,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 650,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 5,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 1100,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "You hold Anub'Rekhan against the back gate. When his tail lifts and the Locust Swarm cast bar appears, run him across the room to the far alcove and keep him 30 yards behind you the whole time.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Guard tank",
+   "short": "Off-tank",
+   "description": "You hold a Crypt Guard at the pull, then pick up the new one that appears on every Locust Swarm. Take them away from the raid, face them away, and stay out of the swarm.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Crypt Guards and their scarabs first, then his back. When the tail lifts and the cast bar starts, walk out and west at once. Do not stand in a line with him and a friend.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Spread out and kill the Crypt Guards first, then the scarabs, then him. Impale travels in a line from him through his target: never stand in a line with him and another player. Run west the moment the tail lifts.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "His tank takes heavy swings and Impale. Stay at maximum range, out of his lines, and out of 30 yards when the tail lifts. Silenced healers cannot heal the kite.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "impaleN": {
+   "label": "Impale",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "impaleN",
+   "laneWidth": 5,
+   "warning": 1.2,
+   "active": 0.5,
+   "damage": 3900,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Impale runs in a straight line from him through whoever he picked and everyone standing in that line gets thrown in the air. Stay out of line with him and your neighbours."
+  },
+  "impaleS": {
+   "label": "Impale",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "impaleS",
+   "laneWidth": 5,
+   "warning": 1.2,
+   "active": 0.5,
+   "damage": 3900,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Impale runs in a straight line from him through whoever he picked and everyone standing in that line gets thrown in the air. Stay out of line with him and your neighbours."
+  },
+  "impaleTank": {
+   "label": "Impale on the tank",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 3900,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Impale often clips the tank too. Heal through it."
+  },
+  "locustSwarm": {
+   "label": "Locust Swarm",
+   "kind": "aoe",
+   "cast": 3,
+   "damage": 0,
+   "tankDamage": 0,
+   "radius": 30,
+   "bossSpeedMult": 0.6,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Tail up, cast bar running: he locks on for 3 seconds and then Locust Swarm hits everyone within 30 yards every 2 seconds for 20 seconds. Everybody except the tank runs west at once. The tank runs him to the far alcove."
+  },
+  "locustTick": {
+   "label": "Locust Swarm",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 1000,
+   "tankDamage": 0,
+   "radius": 30,
+   "playerMetric": "locustHits",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Every 2 seconds to anyone within 30 yards of him. Get out."
+  },
+  "locustFade": {
+   "label": "Locust Swarm fades",
+   "kind": "transition",
+   "bossSpeedMult": 1,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The swarm is over. He walks at full speed again."
+  },
+  "guardWest": {
+   "label": "Crypt Guard",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardWestSpawn"
+   ],
+   "playerFrom": [
+    "guardWestSpawn"
+   ],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 45,
+   "heldLifetime": 70,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "guardWestHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Crypt Guard. The off-tank takes it and faces it away from the raid; everyone else kills it before going back on him."
+  },
+  "guardEast": {
+   "label": "Crypt Guard",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardEastSpawn"
+   ],
+   "playerFrom": [],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 70,
+   "heldLifetime": 95,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "guardEastHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Crypt Guard. The off-tank takes it and faces it away from the raid; everyone else kills it before going back on him."
+  },
+  "cryptGuardNew": {
+   "label": "Crypt Guard",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardNewSpawn"
+   ],
+   "playerFrom": [
+    "guardNewSpawn"
+   ],
+   "speed": 7,
+   "aggroRange": 12,
+   "lifetime": 20,
+   "heldLifetime": 45,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "guardNewHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Crypt Guard. The off-tank takes it and faces it away from the raid; everyone else kills it before going back on him."
+  },
+  "scarabsWest": {
+   "label": "Corpse Scarabs",
+   "kind": "adds",
+   "cast": 0,
+   "count": 10,
+   "from": [
+    "corpseWest"
+   ],
+   "playerFrom": [],
+   "speed": 8,
+   "aggroRange": 10,
+   "lifetime": 9,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "corpseWest",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Ten scarabs from the corpse. Kill them on the corpse before they reach a healer."
+  },
+  "scarabsEast": {
+   "label": "Corpse Scarabs",
+   "kind": "adds",
+   "cast": 0,
+   "count": 10,
+   "from": [
+    "corpseEast"
+   ],
+   "playerFrom": [],
+   "speed": 8,
+   "aggroRange": 10,
+   "lifetime": 9,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "corpseEast",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Ten scarabs from the corpse. Kill them on the corpse before they reach a healer."
+  },
+  "scarabsNew": {
+   "label": "Corpse Scarabs",
+   "kind": "adds",
+   "cast": 0,
+   "count": 10,
+   "from": [
+    "corpseNew"
+   ],
+   "playerFrom": [],
+   "speed": 8,
+   "aggroRange": 10,
+   "lifetime": 5,
+   "killFirst": true,
+   "pickup": "nobody",
+   "holdSpot": "corpseNew",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Ten scarabs from the corpse. Kill them on the corpse before they reach a healer."
+  },
+  "acidSpit": {
+   "label": "Acid Spit",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "offtank",
+   "dispel": "none",
+   "duration": 10,
+   "tickDamage": 125,
+   "maxStacks": 6,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "The Guard stacks Acid Spit on you. It cannot be dispelled: kill the Guard."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Back gate",
+   "subtitle": "Crypt Guards first",
+   "hpFrom": 1,
+   "hpTo": 0.7,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidN",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otNorth"
+   },
+   "actions": [
+    {
+     "id": "impaleN",
+     "first": 8,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "impaleTank",
+     "first": 14,
+     "every": 30,
+     "jitter": 4
+    },
+    {
+     "id": "guardWest",
+     "first": 5.5
+    },
+    {
+     "id": "guardEast",
+     "first": 6.5
+    },
+    {
+     "id": "scarabsWest",
+     "first": 46
+    },
+    {
+     "id": "scarabsEast",
+     "first": 72
+    },
+    {
+     "id": "acidSpit",
+     "first": 6
+    },
+    {
+     "id": "acidSpit",
+     "first": 12
+    },
+    {
+     "id": "acidSpit",
+     "first": 18
+    },
+    {
+     "id": "acidSpit",
+     "first": 24
+    },
+    {
+     "id": "acidSpit",
+     "first": 30
+    },
+    {
+     "id": "acidSpit",
+     "first": 36
+    },
+    {
+     "id": "acidSpit",
+     "first": 42
+    }
+   ],
+   "expectations": [
+    {
+     "id": "dodgeLane1",
+     "type": "onEvent",
+     "event": "deepBreath",
+     "check": "outsideLane",
+     "role": "nontank",
+     "label": "Stay out of line with him and the raid",
+     "tip": "Impale runs in a straight line from him through whoever he picked and everyone standing in that line gets thrown in the air. Stay out of line with him and your neighbours."
+    },
+    {
+     "id": "bossSpot1",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 10,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Pull him to the back gate",
+     "tip": "Take him to the wall and hold him there until the next tail lift."
+    },
+    {
+     "id": "grabWest",
+     "type": "afterEvent",
+     "event": "guardWest",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Pick up the west Guard",
+     "tip": "Run to it and stand on it, or Taunt it. It runs for the raid the moment it spawns."
+    },
+    {
+     "id": "holdGuard",
+     "type": "playerAtSpotBy",
+     "spot": "otNorth",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold your Guard on the north side, facing away",
+     "tip": "Its Cleave hits up to three people. Keep it away from the melee."
+    },
+    {
+     "id": "rangeSpotrangedSpot",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Ranged: spread, in range",
+     "tip": "Keep to your spot and spread out. Nobody stands in a line between him and someone else."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Guards and scarabs first",
+     "tip": "Never put damage on him while a Crypt Guard or scarab is up: they go down first, every time."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "healSpothealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay spread at maximum range",
+     "tip": "Far enough back that an Impale line through you is rare, and more than 30 yards from him when the tail goes up."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He hits hard and Impale spikes land on top. Do not let the tank get low."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the next Impale."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Locust Swarm",
+   "subtitle": "Locust Swarm: run, run, run",
+   "hpFrom": 0.7,
+   "hpTo": 0.67,
+   "duration": 23,
+   "bossState": "grounded",
+   "raidSpot": "raidWest",
+   "skipActivity": "dps",
+   "spots": {
+    "tank": "tankSouth",
+    "boss": "bossSouth",
+    "melee": "meleeWest",
+    "ranged": "raidWest",
+    "healer": "healerKite",
+    "offtank": "otWest"
+   },
+   "actions": [
+    {
+     "id": "locustSwarm",
+     "first": 0.2
+    },
+    {
+     "id": "locustTick",
+     "first": 5.2,
+     "every": 2
+    },
+    {
+     "id": "locustFade",
+     "first": 22.6
+    },
+    {
+     "id": "cryptGuardNew",
+     "first": 1
+    },
+    {
+     "id": "scarabsNew",
+     "first": 20.6
+    },
+    {
+     "id": "acidSpit",
+     "first": 5
+    },
+    {
+     "id": "acidSpit",
+     "first": 11
+    },
+    {
+     "id": "acidSpit",
+     "first": 17
+    }
+   ],
+   "expectations": [
+    {
+     "id": "swarmTank2",
+     "type": "playerAtSpotBy",
+     "spot": "tankSouth",
+     "grace": 3,
+     "role": "tanks",
+     "label": "Run him to the far side",
+     "tip": "The instant the tail lifts, run. He follows at 60% speed and the swarm only reaches 30 yards, so keep him at least that far behind you."
+    },
+    {
+     "id": "swarmOut2",
+     "type": "continuous",
+     "metric": "locustHits",
+     "label": "Stay out of the swarm",
+     "tip": "Tail up, cast bar running: he locks on for 3 seconds and then Locust Swarm hits everyone within 30 yards every 2 seconds for 20 seconds. Everybody except the tank runs west at once. The tank runs him to the far alcove."
+    },
+    {
+     "id": "swarmMelee2",
+     "type": "playerAtSpotBy",
+     "spot": "meleeWest",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee: out and west when the tail lifts",
+     "tip": "Do not wait for the first tick. Walk out as soon as you see the cast bar."
+    },
+    {
+     "id": "swarmRanged2",
+     "type": "playerAtSpotBy",
+     "spot": "raidWest",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged: west side, away from the kite",
+     "tip": "Keep more than 30 yards from him while he walks."
+    },
+    {
+     "id": "swarmHeal2",
+     "type": "playerAtSpotBy",
+     "spot": "healerKite",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers: stay out of 30 yards and in range of the far alcove",
+     "tip": "Follow the tank at maximum range. Silenced healers cannot heal."
+    },
+    {
+     "id": "grabNew2",
+     "type": "afterEvent",
+     "event": "cryptGuardNew",
+     "check": "whelpsPicked",
+     "within": 12,
+     "grace": 7,
+     "role": "offtank",
+     "label": "Pick up the new Guard",
+     "tip": "A new Crypt Guard appears at the gate on every swarm. Take it to the west side with the raid."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "The new Guard, then him",
+     "tip": "He is out of reach during the kite. Kill the new Crypt Guard."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "South alcove",
+   "subtitle": "The new Guard, then him",
+   "hpFrom": 0.67,
+   "hpTo": 0.4,
+   "duration": 67,
+   "bossState": "grounded",
+   "raidSpot": "raidS",
+   "spots": {
+    "tank": "tankSouth",
+    "boss": "bossSouth",
+    "ranged": "rangedSouth",
+    "healer": "healerSouth",
+    "offtank": "otSouth"
+   },
+   "actions": [
+    {
+     "id": "impaleS",
+     "first": 8,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "impaleTank",
+     "first": 14,
+     "every": 30,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "dodgeLane3",
+     "type": "onEvent",
+     "event": "deepBreath",
+     "check": "outsideLane",
+     "role": "nontank",
+     "label": "Stay out of line with him and the raid",
+     "tip": "Impale runs in a straight line from him through whoever he picked and everyone standing in that line gets thrown in the air. Stay out of line with him and your neighbours."
+    },
+    {
+     "id": "bossSpot3",
+     "type": "bossAtSpot",
+     "spot": "bossSouth",
+     "within": 18,
+     "grace": 10,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him in the south alcove",
+     "tip": "Take him to the wall and hold him there until the next tail lift."
+    },
+    {
+     "id": "holdS",
+     "type": "playerAtSpotBy",
+     "spot": "otSouth",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold the Guard away from the raid",
+     "tip": "Back to your spot once the Guard is dead."
+    },
+    {
+     "id": "rangeSpotrangedSouth",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSouth",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Ranged: spread, in range",
+     "tip": "Keep to your spot and spread out. Nobody stands in a line between him and someone else."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Guards and scarabs first",
+     "tip": "Never put damage on him while a Crypt Guard or scarab is up: they go down first, every time."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "healSpothealerSouth",
+     "type": "playerAtSpotBy",
+     "spot": "healerSouth",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay spread at maximum range",
+     "tip": "Far enough back that an Impale line through you is rare, and more than 30 yards from him when the tail goes up."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He hits hard and Impale spikes land on top. Do not let the tank get low."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the next Impale."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Locust Swarm",
+   "subtitle": "Locust Swarm: run, run, run",
+   "hpFrom": 0.4,
+   "hpTo": 0.37,
+   "duration": 23,
+   "bossState": "grounded",
+   "raidSpot": "raidWest",
+   "skipActivity": "dps",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": "meleeWest",
+    "ranged": "raidWest",
+    "healer": "healerKiteN",
+    "offtank": "otWest"
+   },
+   "actions": [
+    {
+     "id": "locustSwarm",
+     "first": 0.2
+    },
+    {
+     "id": "locustTick",
+     "first": 5.2,
+     "every": 2
+    },
+    {
+     "id": "locustFade",
+     "first": 22.6
+    },
+    {
+     "id": "cryptGuardNew",
+     "first": 1
+    },
+    {
+     "id": "scarabsNew",
+     "first": 20.6
+    },
+    {
+     "id": "acidSpit",
+     "first": 5
+    },
+    {
+     "id": "acidSpit",
+     "first": 11
+    },
+    {
+     "id": "acidSpit",
+     "first": 17
+    }
+   ],
+   "expectations": [
+    {
+     "id": "swarmTank4",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 3,
+     "role": "tanks",
+     "label": "Run him to the far side",
+     "tip": "The instant the tail lifts, run. He follows at 60% speed and the swarm only reaches 30 yards, so keep him at least that far behind you."
+    },
+    {
+     "id": "swarmOut4",
+     "type": "continuous",
+     "metric": "locustHits",
+     "label": "Stay out of the swarm",
+     "tip": "Tail up, cast bar running: he locks on for 3 seconds and then Locust Swarm hits everyone within 30 yards every 2 seconds for 20 seconds. Everybody except the tank runs west at once. The tank runs him to the far alcove."
+    },
+    {
+     "id": "swarmMelee4",
+     "type": "playerAtSpotBy",
+     "spot": "meleeWest",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee: out and west when the tail lifts",
+     "tip": "Do not wait for the first tick. Walk out as soon as you see the cast bar."
+    },
+    {
+     "id": "swarmRanged4",
+     "type": "playerAtSpotBy",
+     "spot": "raidWest",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged: west side, away from the kite",
+     "tip": "Keep more than 30 yards from him while he walks."
+    },
+    {
+     "id": "swarmHeal4",
+     "type": "playerAtSpotBy",
+     "spot": "healerKiteN",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers: stay out of 30 yards and in range of the far alcove",
+     "tip": "Follow the tank at maximum range. Silenced healers cannot heal."
+    },
+    {
+     "id": "grabNew4",
+     "type": "afterEvent",
+     "event": "cryptGuardNew",
+     "check": "whelpsPicked",
+     "within": 12,
+     "grace": 7,
+     "role": "offtank",
+     "label": "Pick up the new Guard",
+     "tip": "A new Crypt Guard appears at the gate on every swarm. Take it to the west side with the raid."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "The new Guard, then him",
+     "tip": "He is out of reach during the kite. Kill the new Crypt Guard."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "North gate",
+   "subtitle": "Back the other way",
+   "hpFrom": 0.37,
+   "hpTo": 0.1,
+   "duration": 67,
+   "bossState": "grounded",
+   "raidSpot": "raidN",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otNorth"
+   },
+   "actions": [
+    {
+     "id": "impaleN",
+     "first": 8,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "impaleTank",
+     "first": 14,
+     "every": 30,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "dodgeLane5",
+     "type": "onEvent",
+     "event": "deepBreath",
+     "check": "outsideLane",
+     "role": "nontank",
+     "label": "Stay out of line with him and the raid",
+     "tip": "Impale runs in a straight line from him through whoever he picked and everyone standing in that line gets thrown in the air. Stay out of line with him and your neighbours."
+    },
+    {
+     "id": "bossSpot5",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 10,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him at the north gate",
+     "tip": "Take him to the wall and hold him there until the next tail lift."
+    },
+    {
+     "id": "holdN",
+     "type": "playerAtSpotBy",
+     "spot": "otNorth",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Hold the Guard away from the raid",
+     "tip": "Back to your spot once the Guard is dead."
+    },
+    {
+     "id": "rangeSpotrangedSpot",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Ranged: spread, in range",
+     "tip": "Keep to your spot and spread out. Nobody stands in a line between him and someone else."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Guards and scarabs first",
+     "tip": "Never put damage on him while a Crypt Guard or scarab is up: they go down first, every time."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "healSpothealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay spread at maximum range",
+     "tip": "Far enough back that an Impale line through you is rare, and more than 30 yards from him when the tail goes up."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He hits hard and Impale spikes land on top. Do not let the tank get low."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the next Impale."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Locust Swarm",
+   "subtitle": "Locust Swarm: run, run, run",
+   "hpFrom": 0.1,
+   "hpTo": 0.07,
+   "duration": 23,
+   "bossState": "grounded",
+   "raidSpot": "raidWest",
+   "skipActivity": "dps",
+   "spots": {
+    "tank": "tankSouth",
+    "boss": "bossSouth",
+    "melee": "meleeWest",
+    "ranged": "raidWest",
+    "healer": "healerKite",
+    "offtank": "otWest"
+   },
+   "actions": [
+    {
+     "id": "locustSwarm",
+     "first": 0.2
+    },
+    {
+     "id": "locustTick",
+     "first": 5.2,
+     "every": 2
+    },
+    {
+     "id": "locustFade",
+     "first": 22.6
+    }
+   ],
+   "expectations": [
+    {
+     "id": "swarmTank6",
+     "type": "playerAtSpotBy",
+     "spot": "tankSouth",
+     "grace": 3,
+     "role": "tanks",
+     "label": "Run him to the far side",
+     "tip": "The instant the tail lifts, run. He follows at 60% speed and the swarm only reaches 30 yards, so keep him at least that far behind you."
+    },
+    {
+     "id": "swarmOut6",
+     "type": "continuous",
+     "metric": "locustHits",
+     "label": "Stay out of the swarm",
+     "tip": "Tail up, cast bar running: he locks on for 3 seconds and then Locust Swarm hits everyone within 30 yards every 2 seconds for 20 seconds. Everybody except the tank runs west at once. The tank runs him to the far alcove."
+    },
+    {
+     "id": "swarmMelee6",
+     "type": "playerAtSpotBy",
+     "spot": "meleeWest",
+     "grace": 4,
+     "role": "melee",
+     "label": "Melee: out and west when the tail lifts",
+     "tip": "Do not wait for the first tick. Walk out as soon as you see the cast bar."
+    },
+    {
+     "id": "swarmRanged6",
+     "type": "playerAtSpotBy",
+     "spot": "raidWest",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Ranged: west side, away from the kite",
+     "tip": "Keep more than 30 yards from him while he walks."
+    },
+    {
+     "id": "swarmHeal6",
+     "type": "playerAtSpotBy",
+     "spot": "healerKite",
+     "grace": 4,
+     "role": "healer",
+     "label": "Healers: stay out of 30 yards and in range of the far alcove",
+     "tip": "Follow the tank at maximum range. Silenced healers cannot heal."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "The new Guard, then him",
+     "tip": "He is out of reach during the kite. Kill the new Crypt Guard."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Finish",
+   "subtitle": "Burn him down",
+   "hpFrom": 0.07,
+   "hpTo": 0,
+   "duration": 20,
+   "bossState": "grounded",
+   "raidSpot": "raidS",
+   "spots": {
+    "tank": "tankSouth",
+    "boss": "bossSouth",
+    "ranged": "rangedSouth",
+    "healer": "healerSouth",
+    "offtank": "otSouth"
+   },
+   "actions": [
+    {
+     "id": "impaleS",
+     "first": 8,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "impaleTank",
+     "first": 14,
+     "every": 30,
+     "jitter": 4
+    }
+   ],
+   "expectations": [
+    {
+     "id": "dodgeLane7",
+     "type": "onEvent",
+     "event": "deepBreath",
+     "check": "outsideLane",
+     "role": "nontank",
+     "label": "Stay out of line with him and the raid",
+     "tip": "Impale runs in a straight line from him through whoever he picked and everyone standing in that line gets thrown in the air. Stay out of line with him and your neighbours."
+    },
+    {
+     "id": "bossSpot7",
+     "type": "bossAtSpot",
+     "spot": "bossSouth",
+     "within": 18,
+     "grace": 10,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him through the end",
+     "tip": "Take him to the wall and hold him there until the next tail lift."
+    },
+    {
+     "id": "rangeSpotrangedSouth",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSouth",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Ranged: spread, in range",
+     "tip": "Keep to your spot and spread out. Nobody stands in a line between him and someone else."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Guards and scarabs first",
+     "tip": "Never put damage on him while a Crypt Guard or scarab is up: they go down first, every time."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "healSpothealerSouth",
+     "type": "playerAtSpotBy",
+     "spot": "healerSouth",
+     "grace": 5,
+     "role": "healer",
+     "label": "Stay spread at maximum range",
+     "tip": "Far enough back that an Impale line through you is rare, and more than 30 yards from him when the tail goes up."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He hits hard and Impale spikes land on top. Do not let the tank get low."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stay ahead of the next Impale."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "locustHits": {
+   "label": "Locust Swarm ticks you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 1.2,
+   "severe": 4,
+   "tip": "Tail up, cast bar running: he locks on for 3 seconds and then Locust Swarm hits everyone within 30 yards every 2 seconds for 20 seconds. Everybody except the tank runs west at once. The tank runs him to the far alcove."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Heal the Impale spike, pick up every Guard, run from the swarm.",
+  "windows": {
+   "perfect": 0.5
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Anub'Rekhan turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabWestCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "guardWest",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "GUARD",
+    "label": "Pick up the Crypt Guard",
+    "tip": "Run to it, stand on it or Taunt it, then drag it to your spot facing away from the raid.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabNewCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "cryptGuardNew",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "GUARD",
+    "label": "Pick up the Crypt Guard",
+    "tip": "Run to it, stand on it or Taunt it, then drag it to your spot facing away from the raid.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "healImpale",
+    "ability": "heal",
+    "on": "event",
+    "event": "impaleTank",
+    "offset": 1.1,
+    "early": 1,
+    "late": 3,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal the Impale spike",
+    "tip": "Impale just landed on the tank. Refill them before his next swing."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "kiteDrill",
+   "name": "The Locust Swarm kite",
+   "description": "The tail goes up. Run him to the far alcove and keep him 30 yards behind you.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 22,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "locustSwarm",
+     "first": 0.5
+    },
+    {
+     "id": "locustTick",
+     "first": 5.5,
+     "every": 2
+    },
+    {
+     "id": "locustFade",
+     "first": 22
+    }
+   ]
+  },
+  {
+   "id": "meleeSwarmDrill",
+   "name": "Out before the first tick",
+   "description": "Walk out and west the moment the cast bar starts. Stay out until it fades.",
+   "roles": "melee",
+   "startPhase": 2,
+   "duration": 22,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "locustSwarm",
+     "first": 0.5
+    },
+    {
+     "id": "locustTick",
+     "first": 5.5,
+     "every": 2
+    },
+    {
+     "id": "locustFade",
+     "first": 22
+    }
+   ]
+  },
+  {
+   "id": "impaleDrill",
+   "name": "Out of the line",
+   "description": "Impale lines every 7 seconds. Keep out of line with him and the raid.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "impaleN",
+     "first": 3,
+     "every": 7,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "guardDrill",
+   "name": "Pick up the Guard",
+   "description": "A Crypt Guard appears every 18 seconds. Get to it before it reaches the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "guardWest",
+     "first": 3,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "healDrill",
+   "name": "Heal the spikes",
+   "description": "Impale lands on the tank every 8 seconds. Refill them between spikes.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "impaleTank",
+     "first": 3,
+     "every": 8
+    }
+   ]
+  }
+ ]
+}

@@ -328,7 +328,98 @@
       "id": "naxxramas",
       "name": "Naxxramas",
       "size": 40,
-      "bosses": []
+      "bosses": [
+        {
+          "id": "anubrekhan",
+          "name": "Anub'Rekhan",
+          "file": "anubrekhan.json",
+          "status": "ready"
+        },
+        {
+          "id": "faerlina",
+          "name": "Grand Widow Faerlina",
+          "file": "faerlina.json",
+          "status": "ready"
+        },
+        {
+          "id": "maexxna",
+          "name": "Maexxna",
+          "file": "maexxna.json",
+          "status": "ready"
+        },
+        {
+          "id": "noth",
+          "name": "Noth the Plaguebringer",
+          "file": "noth.json",
+          "status": "ready"
+        },
+        {
+          "id": "heigan",
+          "name": "Heigan the Unclean",
+          "file": "heigan.json",
+          "status": "ready"
+        },
+        {
+          "id": "loatheb",
+          "name": "Loatheb",
+          "file": "loatheb.json",
+          "status": "ready"
+        },
+        {
+          "id": "razuvious",
+          "name": "Instructor Razuvious",
+          "file": "razuvious.json",
+          "status": "ready"
+        },
+        {
+          "id": "gothik",
+          "name": "Gothik the Harvester",
+          "file": "gothik.json",
+          "status": "ready"
+        },
+        {
+          "id": "four-horsemen",
+          "name": "The Four Horsemen",
+          "file": "four-horsemen.json",
+          "status": "ready"
+        },
+        {
+          "id": "patchwerk",
+          "name": "Patchwerk",
+          "file": "patchwerk.json",
+          "status": "ready"
+        },
+        {
+          "id": "grobbulus",
+          "name": "Grobbulus",
+          "file": "grobbulus.json",
+          "status": "ready"
+        },
+        {
+          "id": "gluth",
+          "name": "Gluth",
+          "file": "gluth.json",
+          "status": "ready"
+        },
+        {
+          "id": "thaddius",
+          "name": "Thaddius",
+          "file": "thaddius.json",
+          "status": "ready"
+        },
+        {
+          "id": "sapphiron",
+          "name": "Sapphiron",
+          "file": "sapphiron.json",
+          "status": "ready"
+        },
+        {
+          "id": "kelthuzad",
+          "name": "Kel'Thuzad",
+          "file": "kelthuzad.json",
+          "status": "ready"
+        }
+      ]
     }
   ]
 }

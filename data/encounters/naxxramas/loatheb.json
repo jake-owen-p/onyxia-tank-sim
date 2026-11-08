@@ -1,0 +1,1320 @@
+{
+ "id": "loatheb",
+ "name": "Loatheb",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/loatheb.md: 5,200,000 HP (classicdb), DBM-Vanilla's Doom and Spore timers, Corrupted Mind from the wiki and spell data. The HP clock is 340 s (5:40, about 15.3k raid DPS on 5.2M HP), a little past the wiki's 5:15 to 5:40 window where Doom becomes fatal, because the point of the fight is the Doom schedule accelerating; a real kill aims for before 5:15. Room geometry is an estimate (38 yd round room, spores in the far corner). CORRUPTED MIND (the fight's real constraint): every heal (and every cure) puts that healer on a 60 s lockout. The healer role has one heal button on a 60 s cooldown (amount 8,000, large because the player stands for one seat of the real rotation of 8 healers, each landing one max heal per minute on the tank). The engine cannot tie the dispel button to the same lockout, so the healer role has no dispel, and Cure Poison, Abolish, Cleanse (which the real debuff also locks out) cannot be rehearsed. The passive tank healing (`healPerSecondWithPlayerHealer` 380) stands for the other healers' rotation and the tank's own consumables; it is deliberately below his damage so the player's one heal per minute is what closes the gap. The healer's decision is not to waste that heal: `overheals` is scored and a heal pressed with the tank nearly full is a wasted minute. A press cue fires each minute so a healer who never heals is scored. CORRUPTED MIND on everyone else: the raid cannot heal you either. `corruptedMind` is a `debuff` on the non-tank player (`healingMult` 0.12, so passive regen 720/s becomes 86/s, standing for healthstones, bandages, potions and Shadow Protection on the wiki's schedule). The engine has no personal consumable button, so that schedule is folded into the passive regen, which is an approximation, and a player who plays well or badly on their consumables is not distinguished. The tank role keeps full regen, because the tank's real healing is the healers' rotation and the engine has no separate way to heal the player-as-tank; his damage intake is below it (900 per 2 s plus Doom and Poison Aura). INEVITABLE DOOM follows DBM's schedule exactly: first at 2:00, then alternating 29.1 / 32.4 s, and from the 7th (5:05) at 9.7 then alternating 19.4 / 11.3 s, spell data 2,550 Shadow 10 s after it lands. It is a 10 s `debuff` for display (undispellable) plus a `follow` `aoe` that does the 2,550 to everyone, including 1,000 on the ghost tank (a partial amount because the other healers are assumed to cover a share of the raid's Doom damage). 'The Doom at 5:15 finishes off low players' follows from the regen figure; the 5:40 Doom would be the 9th, whose hit lands after the HP clock ends. SPORES: one Spore every 12.9 s on the far side (DBM, first 11.3 s) drawn as non-killable adds other groups handle; every fourth is 'your group's' (`mySpore`, every 51.6 s, the player's group takes its turn roughly once a minute) and is `killFirst`, so melee run to it and ranged turn and shoot it (3 attacks, `addDamage` 0.34 for its 1,400 HP). The Fungal Bloom buff the real spore gives (+50% crit, no threat) cannot be expressed: there is no on-kill buff in the engine, so only the job of killing it is scored, and the reward is not; Doom pressure and the Spore job are therefore the DPS role's real decisions. Spore rotation assumes eight groups of 5 (research). Poison Aura: `aoe` 200 every 6 s within 6 yd (spell data 196 per 6 s, radius 5 to 10 yd) on the tank and melee, undispellable here because the real poison is cleansed only by totems the engine cannot place. Remove Curse (warlocks reapply) is not modelled. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Loatheb swings for 900 per 2 s on a 10,000 HP tank (real base 8,475 to 9,727, pre-mitigation; the swing timer is an estimate), and the healer's ghost gets only 380/s passive, so an idle healer loses the tank well before the second minute (about 1:33 after the pull) and repeatedly after that, while a healer who lands the one heal a minute keeps it alive.",
+ "sources": [
+  "docs/research/naxxramas/loatheb.md",
+  "https://warcraft.wiki.gg/wiki/Loatheb_(Classic)",
+  "https://www.wowhead.com/classic/guide/loatheb-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=29185/corrupted-mind",
+  "https://www.wowhead.com/classic/spell=29184/corrupted-mind",
+  "https://www.wowhead.com/classic/spell=29204/inevitable-doom",
+  "https://www.wowhead.com/classic/spell=29232/fungal-bloom",
+  "https://www.wowhead.com/classic/spell=29234/summon-spore",
+  "https://www.wowhead.com/classic/spell=29865/poison-aura",
+  "https://classicdb.ch/?npc=16011",
+  "https://classicdb.ch/?npc=16286",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/PlagueQuarter/Loatheb.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Loatheb's Bog",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      38,
+      0
+     ],
+     [
+      37.4,
+      6.6
+     ],
+     [
+      35.7,
+      13
+     ],
+     [
+      32.9,
+      19
+     ],
+     [
+      29.1,
+      24.4
+     ],
+     [
+      24.4,
+      29.1
+     ],
+     [
+      19,
+      32.9
+     ],
+     [
+      13,
+      35.7
+     ],
+     [
+      6.6,
+      37.4
+     ],
+     [
+      0,
+      38
+     ],
+     [
+      -6.6,
+      37.4
+     ],
+     [
+      -13,
+      35.7
+     ],
+     [
+      -19,
+      32.9
+     ],
+     [
+      -24.4,
+      29.1
+     ],
+     [
+      -29.1,
+      24.4
+     ],
+     [
+      -32.9,
+      19
+     ],
+     [
+      -35.7,
+      13
+     ],
+     [
+      -37.4,
+      6.6
+     ],
+     [
+      -38,
+      0
+     ],
+     [
+      -37.4,
+      -6.6
+     ],
+     [
+      -35.7,
+      -13
+     ],
+     [
+      -32.9,
+      -19
+     ],
+     [
+      -29.1,
+      -24.4
+     ],
+     [
+      -24.4,
+      -29.1
+     ],
+     [
+      -19,
+      -32.9
+     ],
+     [
+      -13,
+      -35.7
+     ],
+     [
+      -6.6,
+      -37.4
+     ],
+     [
+      0,
+      -38
+     ],
+     [
+      6.6,
+      -37.4
+     ],
+     [
+      13,
+      -35.7
+     ],
+     [
+      19,
+      -32.9
+     ],
+     [
+      24.4,
+      -29.1
+     ],
+     [
+      29.1,
+      -24.4
+     ],
+     [
+      32.9,
+      -19
+     ],
+     [
+      35.7,
+      -13
+     ],
+     [
+      37.4,
+      -6.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -34
+     ],
+     [
+      8,
+      -34
+     ],
+     [
+      8,
+      -60
+     ],
+     [
+      -8,
+      -60
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      8,
+      -37.1
+     ],
+     [
+      16.7,
+      -34.1
+     ],
+     [
+      24.5,
+      -29.1
+     ],
+     [
+      30.8,
+      -22.3
+     ],
+     [
+      35.3,
+      -14.2
+     ],
+     [
+      37.6,
+      -5.2
+     ],
+     [
+      37.8,
+      4
+     ],
+     [
+      35.7,
+      13
+     ],
+     [
+      31.5,
+      21.3
+     ],
+     [
+      25.4,
+      28.3
+     ],
+     [
+      17.8,
+      33.6
+     ],
+     [
+      9.2,
+      36.9
+     ],
+     [
+      0,
+      38
+     ],
+     [
+      -9.2,
+      36.9
+     ],
+     [
+      -17.8,
+      33.6
+     ],
+     [
+      -25.4,
+      28.3
+     ],
+     [
+      -31.5,
+      21.3
+     ],
+     [
+      -35.7,
+      13
+     ],
+     [
+      -37.8,
+      4
+     ],
+     [
+      -37.6,
+      -5.2
+     ],
+     [
+      -35.3,
+      -14.2
+     ],
+     [
+      -30.8,
+      -22.3
+     ],
+     [
+      -24.5,
+      -29.1
+     ],
+     [
+      -16.7,
+      -34.1
+     ],
+     [
+      -8,
+      -37.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -8,
+      -37.1
+     ],
+     [
+      -8,
+      -60
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      8,
+      -37.1
+     ],
+     [
+      8,
+      -60
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -54
+    ]
+   },
+   {
+    "text": "Loatheb",
+    "at": [
+     0,
+     16
+    ]
+   },
+   {
+    "text": "Spores spawn here",
+    "at": [
+     -24,
+     -24
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -54,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 18,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -40,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 25,
+   "tolerance": 4,
+   "label": "Tank: hold him here"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 19,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 80,
+   "label": "Loatheb"
+  },
+  "raidCenter": {
+   "x": 0,
+   "y": 2,
+   "spread": 13,
+   "label": "Raid"
+  },
+  "rangedSpot": {
+   "x": -8,
+   "y": 0,
+   "tolerance": 8,
+   "label": "Ranged: in range of the spores"
+  },
+  "healerSpot": {
+   "x": 8,
+   "y": 2,
+   "tolerance": 8,
+   "label": "Healers: in range of the tank"
+  },
+  "sporeSpot": {
+   "x": -20,
+   "y": -12,
+   "label": "Your group's spore"
+  },
+  "sporeHold": {
+   "x": -20,
+   "y": -12,
+   "label": "Spore"
+  },
+  "sporeFar": {
+   "x": -28,
+   "y": -20,
+   "label": "Spore"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 720,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 900,
+  "healPerSecondWithPlayerHealer": 380,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 30,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 6,
+  "speed": 5,
+  "turnRate": 180,
+  "meleeRange": 7,
+  "meleeDamage": 900,
+  "meleeInterval": 2,
+  "cones": {},
+  "enrageMultiplier": 1
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pick Loatheb up and hold him in place, away from the spores. There is nothing to Taunt: the fight is whether the healers can keep you up on one heal a minute each. Stay in melee, build a threat lead in the first 30 seconds, and survive.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Hit him, and run to your group's spore when it spawns. Inevitable Doom hits the whole raid from the 2:00 mark and speeds up at 5:00: this is a race. Nobody can heal you: bandages and healthstones are your only friends.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand where you can shoot both Loatheb and the spores. When your group's spore spawns, kill it, then back to him. Doom hits you too, and the healers cannot heal you.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "You have one heal every 60 seconds, then nothing. Spend it on the tank when it matters, not at full health, and do not press anything else: every spell that heals or cures burns the 60 seconds. Hold it for the moments the tank is low.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0.34
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 60,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 8000,
+   "threat": 25,
+   "tip": "Your one heal of the minute. It goes on a 60 second lockout the moment you press it, so do not waste it on a tank at full health."
+  }
+ },
+ "actions": {
+  "corruptedMind": {
+   "label": "Corrupted Mind",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 900,
+   "healingMult": 0.12,
+   "warn": true,
+   "cue": "roar",
+   "icon": "curse",
+   "requires": "grounded",
+   "tip": "One healing or curing spell per minute for everyone. Nobody is going to heal you here. Bandages and healthstones are your job."
+  },
+  "doom": {
+   "label": "Inevitable Doom",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 10,
+   "warn": true,
+   "cue": "roar",
+   "icon": "eruption",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "doomHit",
+     "delay": 10
+    }
+   ],
+   "tip": "Every Doom does 2,550 Shadow to the whole raid 10 seconds after it lands. Be above that when it goes off. From 2:00 every 30 seconds, from 5:00 every 15."
+  },
+  "doomHit": {
+   "label": "Doom goes off",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 2550,
+   "tankDamage": 1000,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "The Doom just went off. 2,550 on everyone."
+  },
+  "threatCheck": {
+   "label": "Threat check",
+   "kind": "transition",
+   "cast": 0,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Thirty seconds in: the tank should have a clear threat lead."
+  },
+  "poisonAura": {
+   "label": "Poison Aura",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 6,
+   "damage": 200,
+   "tankDamage": 200,
+   "warn": false,
+   "cue": null,
+   "icon": "poison",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Melee range only, constant. You can step out to bandage, but no further."
+  },
+  "spore": {
+   "label": "Spore",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "sporeFar"
+   ],
+   "speed": 1,
+   "lifetime": 12,
+   "killable": false,
+   "pickup": "offtank",
+   "holdSpot": "sporeFar",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Another group's spore. Leave it."
+  },
+  "mySpore": {
+   "label": "Your group's Spore",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "sporeSpot"
+   ],
+   "speed": 1,
+   "lifetime": 16,
+   "killable": true,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "sporeHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "This spore is your group's. Run over, kill it, come straight back."
+  },
+  "healBeat": {
+   "label": "Your heal is up",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "heal",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "A new minute. You have one heal this minute: use it when it counts."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The First Two Minutes",
+   "subtitle": "Corrupted Mind and spores",
+   "hpFrom": 1,
+   "hpTo": 0.65,
+   "duration": 120,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "corruptedMind",
+     "first": 0.1
+    },
+    {
+     "id": "threatCheck",
+     "first": 30
+    },
+    {
+     "id": "poisonAura",
+     "first": 3,
+     "every": 6,
+     "jitter": 0
+    },
+    {
+     "id": "spore",
+     "first": 11.3,
+     "every": 12.9,
+     "jitter": 0
+    },
+    {
+     "id": "mySpore",
+     "first": 50,
+     "every": 51.6,
+     "jitter": 0
+    },
+    {
+     "id": "healBeat",
+     "first": 20,
+     "every": 60,
+     "jitter": 0
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Hold him in place, away from the spores",
+     "tip": "Hold him here so he cannot wander toward the spores."
+    },
+    {
+     "id": "threatLead30",
+     "type": "afterEvent",
+     "event": "threatCheck",
+     "check": "threatLead",
+     "within": 1,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Build a threat lead in the first 30 seconds",
+     "tip": "The raid opens up once you have a lead. Stay on him for the first 30 seconds so the threat bar is safe by the time the DPS are at full speed."
+    },
+    {
+     "id": "stayOn1",
+     "type": "afterEvent",
+     "event": "poisonAura",
+     "check": "onTank",
+     "within": 1,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Stay on him the whole time",
+     "tip": "There is nothing to Taunt. Just do not lose him."
+    },
+    {
+     "id": "rangedSpot1",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay where you can shoot both Loatheb and the spores",
+     "tip": "You should reach the spore corner without moving."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill your group's spore first",
+     "tip": "When your spore spawns it is the only thing that matters until it is dead. It only takes a few seconds."
+    },
+    {
+     "id": "meleeRange1",
+     "type": "afterEvent",
+     "event": "poisonAura",
+     "check": "inRange",
+     "within": 8,
+     "grace": 6,
+     "role": "melee",
+     "label": "Back on the boss between spores",
+     "tip": "Run to your spore, kill it, run back."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "You have one heal a minute. A tank that dies in the first two minutes means nobody got to heal him when it mattered."
+    },
+    {
+     "id": "noWaste1",
+     "type": "continuous",
+     "metric": "overheals",
+     "role": "healer",
+     "label": "Never waste your heal",
+     "tip": "A heal on a tank that is nearly full is a wasted minute. Wait until he actually needs it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Hold your heal for a real dip, then cast it. Nothing else can heal him."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Inevitable Doom",
+   "subtitle": "Doom every 30 s",
+   "hpFrom": 0.65,
+   "hpTo": 0.16,
+   "duration": 180,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "doom",
+     "first": 0.1
+    },
+    {
+     "id": "doom",
+     "first": 29.1
+    },
+    {
+     "id": "doom",
+     "first": 61.5
+    },
+    {
+     "id": "doom",
+     "first": 90.6
+    },
+    {
+     "id": "doom",
+     "first": 123
+    },
+    {
+     "id": "doom",
+     "first": 152.1
+    },
+    {
+     "id": "poisonAura",
+     "first": 3,
+     "every": 6,
+     "jitter": 0
+    },
+    {
+     "id": "spore",
+     "first": 7.4,
+     "every": 12.9,
+     "jitter": 0
+    },
+    {
+     "id": "mySpore",
+     "first": 33.2,
+     "every": 51.6,
+     "jitter": 0
+    },
+    {
+     "id": "healBeat",
+     "first": 20,
+     "every": 60,
+     "jitter": 0
+    }
+   ],
+   "expectations": [
+    {
+     "id": "stayOn2",
+     "type": "afterEvent",
+     "event": "doom",
+     "check": "onTank",
+     "within": 1,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Keep him on you",
+     "tip": "Dooms land on everyone, but he has to stay on you."
+    },
+    {
+     "id": "rangedSpot2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Hold your spot",
+     "tip": "Be ready to shoot your spore the moment it spawns."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill your group's spore first",
+     "tip": "Every spore is a raid crit buff for 90 seconds: you lose your share the moment yours lives."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Dooms land on him too. One heal a minute has to be enough, so make it count."
+    },
+    {
+     "id": "noWaste2",
+     "type": "continuous",
+     "metric": "overheals",
+     "role": "healer",
+     "label": "Never waste your heal",
+     "tip": "He will be low soon. Hold your minute for that."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Below half with a Doom coming is where you must already have spent your heal."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Doom Every 15 Seconds",
+   "subtitle": "The race",
+   "hpFrom": 0.16,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "doom",
+     "first": 4.5
+    },
+    {
+     "id": "doom",
+     "first": 14.2
+    },
+    {
+     "id": "doom",
+     "first": 33.6
+    },
+    {
+     "id": "poisonAura",
+     "first": 3,
+     "every": 6,
+     "jitter": 0
+    },
+    {
+     "id": "spore",
+     "first": 8,
+     "every": 12.9,
+     "jitter": 0
+    },
+    {
+     "id": "mySpore",
+     "first": 8,
+     "every": 51.6,
+     "jitter": 0
+    },
+    {
+     "id": "healBeat",
+     "first": 8,
+     "every": 60,
+     "jitter": 0
+    }
+   ],
+   "expectations": [
+    {
+     "id": "stayOn3",
+     "type": "afterEvent",
+     "event": "doom",
+     "check": "onTank",
+     "within": 1,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Hold him to the end",
+     "tip": "Dooms are landing every 15 seconds. Just do not lose him."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Last spore first, then all on him",
+     "tip": "A kill now is worth more than a crit buff: if yours is up, finish it, then burn him down."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The last 40 seconds. Spend your heal now if you are holding it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Every heal counts now."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.2,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.45
+ },
+ "cues": {
+  "notes": "One heal a minute: use it, but not at full health. DPS kill your spore.",
+  "windows": {
+   "perfect": 1
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Loatheb turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "healMinute",
+    "ability": "heal",
+    "on": "event",
+    "event": "healBeat",
+    "offset": 0,
+    "early": 0,
+    "late": 55,
+    "role": "healer",
+    "short": "YOUR HEAL",
+    "label": "Your heal this minute",
+    "tip": "You have one heal a minute. Cast it on the tank when he needs it, before the Doom is the good time."
+   },
+   {
+    "id": "sporeJob",
+    "ability": "attack",
+    "on": "event",
+    "event": "mySpore",
+    "offset": 1,
+    "early": 1,
+    "late": 12,
+    "role": "dps",
+    "short": "SPORE",
+    "label": "Kill your group's spore",
+    "tip": "It is on your group. Run over and kill it."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "tankDrill",
+   "name": "Stay on him, one heal a minute",
+   "description": "Poison Aura and Doom land on you. There is nothing to press except staying alive and keeping him. Practice holding him in place.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 50,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "corruptedMind",
+     "first": 0.1
+    },
+    {
+     "id": "poisonAura",
+     "first": 2,
+     "every": 6
+    },
+    {
+     "id": "doom",
+     "first": 4,
+     "every": 20
+    }
+   ]
+  },
+  {
+   "id": "sporeDrill",
+   "name": "Kill your spore, get back",
+   "description": "Your group's spore spawns every 16 seconds. Run over, kill it in three hits, get back on Loatheb.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "corruptedMind",
+     "first": 0.1
+    },
+    {
+     "id": "mySpore",
+     "first": 3,
+     "every": 16
+    }
+   ]
+  },
+  {
+   "id": "healMinuteDrill",
+   "name": "One heal a minute",
+   "description": "Doom every 18 seconds, one heal a minute. Do not waste it: tank low, press it, wait for the next minute.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 65,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "doom",
+     "first": 3,
+     "every": 18
+    },
+    {
+     "id": "healBeat",
+     "first": 2,
+     "every": 60
+    }
+   ]
+  }
+ ]
+}

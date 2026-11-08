@@ -5,7 +5,7 @@ import { roundRect, drawIcon, drawTick, drawCross } from './shapes.js';
 import { withAlpha, actionColor } from './palette.js';
 
 const SHORT_LABEL = { taunt: 'Taunt', attack: 'Attack', heal: 'Heal', dispel: 'Dispel', interrupt: 'Kick' };
-const abilityOrder = (view) => (view.abilities && view.abilities.list && view.abilities.list.length ? view.abilities.list : ['taunt']);
+const abilityOrder = (view) => (view.abilities && view.abilities.list ? view.abilities.list : ['taunt']);
 
 function font(ctx, pal, px, weight = 600, display = false) {
   ctx.font = `${weight} ${Math.round(px)}px ${display ? pal.fontDisplay : pal.font}`;
@@ -204,7 +204,8 @@ function drawWarnings(ctx, view, script, settings, pal, u, w, h, t, now) {
   // Just-happened flashes: hazards that went active, landing, takeoff.
   for (const hz of view.world.hazards) {
     if (hz.state === 'active' && t - hz.activeAt < 1.5) {
-      const label = hz.kind === 'lane' ? 'DEEP BREATH' : 'ERUPTION';
+      if (hz.applies) continue;                                 // a beneficial cloud is not an alarm
+      const label = (hz.label || 'Hazard').toUpperCase();
       if (!list.some((l) => l.label === label)) list.unshift({ label, color: pal.hazardActive, icon: hz.kind === 'lane' ? 'deepbreath' : 'eruption', flash: 1 - (t - hz.activeAt) / 1.5 });
     }
   }

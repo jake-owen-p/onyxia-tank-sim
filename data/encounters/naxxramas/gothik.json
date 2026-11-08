@@ -1,0 +1,2292 @@
+{
+ "id": "gothik",
+ "name": "Gothik the Harvester",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/gothik.md. Two rooms joined by the gate; dimensions are estimates. THE GATE: the engine's floor is fixed for the whole fight, so the real closed gate (P1 and P2) cannot physically stop anyone: the gate strip is always walkable and being on your side is scored through expectations and `spots` instead. The opening at 30% is the last phase. The raid's dots share one anchor, so the raid is drawn across the gate rather than as two real groups. PHASE 1 is the real DBM wave table at 270 s: Trainees (3 at each wave) at 27, 47, 67, 87, 107, 127, 147, 167, 187, 207, 227; Deathknights (2) at 77, 102, 127, 152, 177, 202, 227; Riders (1) at 137, 167, 197, 227. Living adds spawn on the three altars (Trainees all three, Deathknights the two side altars, Riders the centre) as `killable` adds the ghost raid burns down. The spectral copies on the undead side (Spectral Trainee, Deathknight, Rider) are the same table at the SAME moments: the real ones appear when the living add dies, on a timing the engine cannot derive (no add-death hook spawns another add), so the sim keeps them synchronous, which keeps both sides busy for the DPS bot. Five bone piles are named spots; the flying spirit that shows which pile is not modelled (no telegraph to draw). Kill priority (live: Rider > Deathknight > Trainee; undead: Spectral Trainee > Rider > Deathknight > Horse) is not scored: `killFirst` only compares adds against the boss, not adds against adds, so while Gothik is untargetable nothing forces the order. Riders are flagged `killFirst` so `killTarget` prefers them when it can; the real kill-pace warning (too fast floods the undead side) cannot exist because spectral spawns are scripted, not driven by kills. Spectral Horses are folded into the Rider wave. CC (Shackle, Polymorph, Frost Nova, stuns) is not modelled. ROLE SPLIT: ranged and the player tank stay on the living side; melee and the off-tank are on the undead side; healers work from the gate strip where they can reach both tanks (the real healers split by side: the engine has one healer role, so the gate is the honest compromise). PHASE 2 is the boss on the floor: Gothik teleports between sides every 20 s (DBM 19.4 to 21 s), starting on the living side at 270 s. Four 20 s side phases run 100% down to 30% (the boss's real 150,000 HP dies far faster; the 4 swaps are an estimate, because the HP clock must be a fixed phase length). Each swap is a `threatWipe` plus `teleportBossTo`, because his table really does reset each time he lands; the real tank on each side picks him up instantly. ENGINE LIMIT: `spots.tank` is one spot for both the ghost tank and the player tank, so the player tank role follows him through the gate and picks him up on both sides, where a real raid has one tank per side. The tank who does not have him (the other side) is not simulated. `stationary` boss: he only moves by teleporting. HARVEST SOUL (28679): -10% all stats, stacking, 1 min, every 17 s (wiki 15 to 20 s; DBM has no timer for it), unremovable, is a stacking debuff with `damageTakenMult` 1.12 per stack on the player (`target: all`) and on the ghost (`target: tank`), so a late kill at 5 to 6 stacks hurts about 70% more. It is on the player as a stand-in; the real effect also cuts max HP, which the engine cannot do. SHADOW BOLT (Gothik's main damage, 2,070 to 2,750 per second on his primary and a random raider) is modelled as his 'melee' at 500 per 1 s swing on whoever tanks him (scaled: 500 DPS instead of the real ~2,400, because a 10k tank in the engine has one healer), plus a random-raider bolt debuff (1,500 scaled, playerChance 0.25) every 4 s. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. A healer who does nothing loses the tank in about 25 s in Phase 2 and repeatedly in Phase 1. ADD DAMAGE: adds in the engine do not hit anyone, so the tank's damage in Phase 1 is a `debuff` on the tank every 3 s (1,100 scaled: the cost of living with the wave table) and Unholy Aura (real 450 Shadow every 2 s within 45 yd of a Rider) is a raid-wide 300 pulse every 4 s from the first Rider onward, which is a placeholder for the real aura's uptime. Shadow Mark / Whirlwind (Deathknight, real 1,900 to 2,800 in 8 yd) is a personal `hazard` on the living side (ranged and healer roles, playerChance 0.3) from the first Deathknight onward. Spectral melee's Cleave and Whirlwind (real ~2,500) is a `hazard` on the undead-side melee role, playerChance 0.3. Spectral Rider Drain Life (real 4,000 over 5 s, interruptible, on its target) is a `debuff` on the tank with a real interrupt, cast 3 s instead of 5 (an estimate so the interrupt window is finite), `offBoss` because the Rider casts it, and only the melee role has Kick (`completedMetric` scores it). Trainees' Eagle Claw and Knockdown and the Riders' Shadow Bolt Volley on Shadow-Marked players are not modelled. Not modelled: 'adds do not despawn after Gothik dies' (the fight ends with him, as the engine has one boss HP and the validator requires a kill), mana (Mana Burn, Harvest Soul's mana half), and the real kill speed (150,000 HP in about a minute of the side phases, which the HP clock replaces). The Phase 2 start is the DBM 270 s (Wowhead 4:30, wiki 4:34).",
+ "sources": [
+  "docs/research/naxxramas/gothik.md",
+  "https://warcraft.wiki.gg/wiki/Gothik_the_Harvester_(Classic)",
+  "https://www.wowhead.com/classic/guide/gothik-the-harvester-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28679/harvest-soul",
+  "https://www.wowhead.com/classic/spell=29317/shadow-bolt",
+  "https://www.wowhead.com/classic/spell=27825/shadow-mark",
+  "https://www.wowhead.com/classic/spell=17467/unholy-aura",
+  "https://www.wowhead.com/classic/spell=26084/whirlwind",
+  "https://classicdb.ch/?npc=16060",
+  "https://classicdb.ch/?npc=16124",
+  "https://classicdb.ch/?npc=16125",
+  "https://classicdb.ch/?npc=16126",
+  "https://classicdb.ch/?npc=16127",
+  "https://classicdb.ch/?npc=16148",
+  "https://classicdb.ch/?npc=16150",
+  "https://classicdb.ch/?npc=16149",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/MilitaryQuarter/Gothik.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Gothik's Harvest",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "living",
+    "poly": [
+     [
+      -60,
+      -26
+     ],
+     [
+      -6,
+      -26
+     ],
+     [
+      -6,
+      36
+     ],
+     [
+      -60,
+      36
+     ]
+    ]
+   },
+   {
+    "id": "undead",
+    "poly": [
+     [
+      6,
+      -26
+     ],
+     [
+      60,
+      -26
+     ],
+     [
+      60,
+      36
+     ],
+     [
+      6,
+      36
+     ]
+    ]
+   },
+   {
+    "id": "gate",
+    "poly": [
+     [
+      -8,
+      -5
+     ],
+     [
+      8,
+      -5
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      -8,
+      9
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -40,
+      -56
+     ],
+     [
+      -28,
+      -56
+     ],
+     [
+      -28,
+      -22
+     ],
+     [
+      -40,
+      -22
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "livingWall",
+    "points": [
+     [
+      -6,
+      -5
+     ],
+     [
+      -6,
+      -26
+     ],
+     [
+      -28,
+      -26
+     ]
+    ]
+   },
+   {
+    "id": "livingWall2",
+    "points": [
+     [
+      -40,
+      -26
+     ],
+     [
+      -60,
+      -26
+     ],
+     [
+      -60,
+      36
+     ],
+     [
+      -6,
+      36
+     ],
+     [
+      -6,
+      9
+     ]
+    ]
+   },
+   {
+    "id": "undeadWall",
+    "points": [
+     [
+      6,
+      -5
+     ],
+     [
+      6,
+      -26
+     ],
+     [
+      60,
+      -26
+     ],
+     [
+      60,
+      36
+     ],
+     [
+      6,
+      36
+     ],
+     [
+      6,
+      9
+     ]
+    ]
+   },
+   {
+    "id": "gateS",
+    "points": [
+     [
+      -8,
+      -5
+     ],
+     [
+      8,
+      -5
+     ]
+    ]
+   },
+   {
+    "id": "gateN",
+    "points": [
+     [
+      -8,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ]
+   },
+   {
+    "id": "entranceW",
+    "points": [
+     [
+      -40,
+      -26
+     ],
+     [
+      -40,
+      -56
+     ]
+    ]
+   },
+   {
+    "id": "entranceE",
+    "points": [
+     [
+      -28,
+      -26
+     ],
+     [
+      -28,
+      -56
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Living side",
+    "at": [
+     -32,
+     -18
+    ]
+   },
+   {
+    "text": "Undead side",
+    "at": [
+     32,
+     -18
+    ]
+   },
+   {
+    "text": "The gate (shut until 30%)",
+    "at": [
+     0,
+     12
+    ]
+   },
+   {
+    "text": "Altar",
+    "at": [
+     -48,
+     30
+    ]
+   },
+   {
+    "text": "Altar",
+    "at": [
+     -30,
+     30
+    ]
+   },
+   {
+    "text": "Altar",
+    "at": [
+     -12,
+     30
+    ]
+   },
+   {
+    "text": "Entrance",
+    "at": [
+     -34,
+     -50
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": -34,
+   "y": -50,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 2,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": -34,
+   "y": -40,
+   "spread": 6
+  },
+  "tankSpot": {
+   "x": -44,
+   "y": 22,
+   "tolerance": 6,
+   "label": "Living side tank: west altar"
+  },
+  "bossSpot": {
+   "x": -30,
+   "y": 12,
+   "heading": 270,
+   "tolerance": 8,
+   "headingTolerance": 180,
+   "label": "Gothik: living side"
+  },
+  "tankW": {
+   "x": -30,
+   "y": 5,
+   "tolerance": 5,
+   "label": "Tank: living side"
+  },
+  "gothikW": {
+   "x": -30,
+   "y": 12,
+   "heading": 270,
+   "tolerance": 8,
+   "label": "Gothik"
+  },
+  "tankE": {
+   "x": 30,
+   "y": 5,
+   "tolerance": 5,
+   "label": "Tank: undead side"
+  },
+  "gothikE": {
+   "x": 30,
+   "y": 12,
+   "heading": 270,
+   "tolerance": 8,
+   "label": "Gothik"
+  },
+  "tankGate": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 5,
+   "label": "Tank: at the gate"
+  },
+  "gothikGate": {
+   "x": 0,
+   "y": 3,
+   "heading": 270,
+   "tolerance": 8,
+   "label": "Gothik"
+  },
+  "altarW": {
+   "x": -48,
+   "y": 30,
+   "label": "Altar"
+  },
+  "altarC": {
+   "x": -30,
+   "y": 30,
+   "label": "Altar"
+  },
+  "altarE": {
+   "x": -12,
+   "y": 30,
+   "label": "Altar"
+  },
+  "pile1": {
+   "x": 18,
+   "y": 28,
+   "label": "Bone pile"
+  },
+  "pile2": {
+   "x": 40,
+   "y": 30,
+   "label": "Bone pile"
+  },
+  "pile3": {
+   "x": 54,
+   "y": 16,
+   "label": "Bone pile"
+  },
+  "pile4": {
+   "x": 50,
+   "y": -14,
+   "label": "Bone pile"
+  },
+  "pile5": {
+   "x": 22,
+   "y": -16,
+   "label": "Bone pile"
+  },
+  "westHold": {
+   "x": -30,
+   "y": 12,
+   "label": "Living adds held"
+  },
+  "eastHold": {
+   "x": 30,
+   "y": 6,
+   "label": "Spectral adds held"
+  },
+  "raidGate": {
+   "x": 0,
+   "y": 2,
+   "spread": 34,
+   "label": "Raid: both sides of the gate"
+  },
+  "rangedW": {
+   "x": -30,
+   "y": 2,
+   "tolerance": 7,
+   "label": "Ranged: living side"
+  },
+  "healerGate": {
+   "x": 0,
+   "y": 2,
+   "tolerance": 6,
+   "label": "Healers: at the gate"
+  },
+  "healerW": {
+   "x": -36,
+   "y": 4,
+   "tolerance": 7,
+   "label": "Healers: living side"
+  },
+  "meleeE": {
+   "x": 30,
+   "y": 8,
+   "tolerance": 3.5,
+   "label": "Melee: undead side"
+  },
+  "otE": {
+   "x": 28,
+   "y": 3,
+   "tolerance": 7,
+   "label": "Off-tank: undead side"
+  },
+  "rangedGate": {
+   "x": -8,
+   "y": -3,
+   "tolerance": 7,
+   "label": "Ranged: at the gate"
+  },
+  "meleeGate": {
+   "x": 3.5,
+   "y": -1.5,
+   "tolerance": 3.5,
+   "label": "Melee: at the gate"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1100,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1500,
+  "healPerSecondWithPlayerHealer": 200,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 6,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 3,
+  "speed": 7,
+  "turnRate": 360,
+  "meleeRange": 6,
+  "meleeDamage": 500,
+  "meleeInterval": 1,
+  "stationary": true,
+  "looseHint": "He just landed. Taunt him.",
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 700,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 150,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Phase 1: stand at the west altar and pick up every wave the moment it spawns. Phase 2: he teleports between the two sides every 20 seconds and his threat table is empty each time he lands: walk through the gate and Taunt him within 3 seconds of being in range. At 30% the gate opens and it all happens at once.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Undead side tank",
+   "short": "Off-tank",
+   "description": "You are on the undead side. When a living add dies, a stronger spectral copy appears on the bone piles: run to it, pick it up and hold it on your spot, away from the melee. Five piles, one of you, so keep moving.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "You are on the undead side. Kill the spectral adds as they appear and kick Spectral Rider's Drain Life. When Gothik lands, hit him only on your side.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "You are on the living side. Kill the living adds: Riders first, then Deathknights, then Trainees. In Phase 2 burn Gothik only while he stands on your side.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Heal the tank from the gate strip: the adds give it constant work in Phase 1, and in Phase 2 Shadow Bolts hit the tank every second with Harvest Soul stacking on top.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0.08
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 30,
+   "icon": "interrupt",
+   "tip": "Stops an interruptible cast. One button here covers Kick, Pummel, Shield Bash, Earth Shock and Counterspell, so the range is generous."
+  }
+ },
+ "actions": {
+  "trainees": {
+   "label": "Living Trainees",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "altarW",
+    "altarC",
+    "altarE"
+   ],
+   "playerFrom": [
+    "altarW"
+   ],
+   "speed": 6,
+   "aggroRange": 14,
+   "lifetime": 14,
+   "heldLifetime": 14,
+   "pickup": "tanks",
+   "holdSpot": "westHold",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Three Trainees: one at each altar. Pick yours up; ranged burn them last."
+  },
+  "deathknights": {
+   "label": "Living Deathknights",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "altarW",
+    "altarE"
+   ],
+   "playerFrom": [
+    "altarW"
+   ],
+   "speed": 6,
+   "aggroRange": 14,
+   "lifetime": 18,
+   "heldLifetime": 18,
+   "pickup": "tanks",
+   "holdSpot": "westHold",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Two Deathknights from the side altars. Stay out of 8 yards of them: Shadow Mark whirlwinds hit everyone close."
+  },
+  "riders": {
+   "label": "Unrelenting Rider",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "altarC"
+   ],
+   "playerFrom": [],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 22,
+   "killFirst": true,
+   "pickup": "tanks",
+   "holdSpot": "westHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "A Rider: kill it first. Its Unholy Aura pulses until it dies."
+  },
+  "spectralTrainees": {
+   "label": "Spectral Trainees",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "pile1",
+    "pile2",
+    "pile3"
+   ],
+   "playerFrom": [
+    "pile1"
+   ],
+   "speed": 6,
+   "aggroRange": 14,
+   "lifetime": 20,
+   "heldLifetime": 20,
+   "pickup": "offtank",
+   "holdSpot": "eastHold",
+   "killable": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "The Trainees are reborn on the bone piles. Off-tanks grab them, melee kill them."
+  },
+  "spectralDeathknights": {
+   "label": "Spectral Deathknights",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "pile4",
+    "pile5"
+   ],
+   "playerFrom": [
+    "pile4"
+   ],
+   "speed": 6,
+   "aggroRange": 14,
+   "lifetime": 20,
+   "heldLifetime": 20,
+   "pickup": "offtank",
+   "holdSpot": "eastHold",
+   "killable": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Spectral Deathknights cleave. Off-tanks face them away from the melee."
+  },
+  "spectralRiders": {
+   "label": "Spectral Rider",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "pile3"
+   ],
+   "playerFrom": [
+    "pile3"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 20,
+   "heldLifetime": 20,
+   "pickup": "offtank",
+   "holdSpot": "eastHold",
+   "killable": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "The Rider is reborn with its horse. Kick its Drain Life."
+  },
+  "addPressure": {
+   "label": "The adds on the tanks",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 1100,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "submerged",
+   "tip": "The wave is on the tanks."
+  },
+  "unholyAura": {
+   "label": "Unholy Aura",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 300,
+   "tankDamage": 300,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "submerged",
+   "tip": "A Rider's aura hits everyone nearby until it dies."
+  },
+  "shadowMark": {
+   "label": "Shadow Mark",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "playerChance": 0.3,
+   "radius": 8,
+   "warning": 1.6,
+   "active": 2,
+   "damage": 2400,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "submerged",
+   "tip": "A Deathknight whirlwinds. Step out of the ring."
+  },
+  "spectralCleave": {
+   "label": "Spectral Whirlwind",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "roles": "melee",
+   "playerChance": 0.3,
+   "radius": 7,
+   "warning": 1.4,
+   "active": 1.5,
+   "damage": 2500,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "submerged",
+   "tip": "A Spectral Deathknight whirlwinds. Step out of the ring."
+  },
+  "drainLife": {
+   "label": "Spectral Rider: Drain Life",
+   "kind": "debuff",
+   "cast": 3,
+   "offBoss": true,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 5.05,
+   "tickDamage": 800,
+   "interruptible": true,
+   "completedMetric": "drainLifeDone",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "interrupt",
+   "requires": "submerged",
+   "tip": "Kick it. If it finishes, it pours 4,000 health out of the tank over 5 seconds."
+  },
+  "landWest": {
+   "label": "Gothik lands: living side",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "gothikW",
+   "toast": "Gothik lands on the living side: Taunt him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Living side. His table is empty: Taunt as soon as he is in range."
+  },
+  "landEast": {
+   "label": "Gothik teleports: undead side",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "gothikE",
+   "toast": "Gothik teleports to the undead side!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Undead side. Tank: through the gate and Taunt."
+  },
+  "landGate": {
+   "label": "The gate opens",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "gothikGate",
+   "toast": "The gate opens at 30%!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "At 30% he stops swapping. Everyone converges on the gate and burns him."
+  },
+  "harvestSoul": {
+   "label": "Harvest Soul",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 60,
+   "maxStacks": 8,
+   "damageTakenMult": 1.12,
+   "warn": false,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Every 17 seconds. The stacks never come off, so the fight gets harder the longer it runs."
+  },
+  "harvestSoulGhost": {
+   "label": "Harvest Soul",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 60,
+   "maxStacks": 8,
+   "damageTakenMult": 1.12,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The tank has it too."
+  },
+  "shadowBolt": {
+   "label": "Shadow Bolt",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.25,
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 1500,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A bolt at a random raider. Keep your health up, you cannot dodge it."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The Gauntlet",
+   "subtitle": "Four and a half minutes of waves",
+   "hpFrom": 1,
+   "hpTo": 1,
+   "duration": 270,
+   "bossState": "submerged",
+   "raidSpot": "raidGate",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedW",
+    "healer": "healerW",
+    "melee": "meleeE",
+    "offtank": "otE"
+   },
+   "actions": [
+    {
+     "id": "trainees",
+     "first": 27
+    },
+    {
+     "id": "trainees",
+     "first": 47
+    },
+    {
+     "id": "trainees",
+     "first": 67
+    },
+    {
+     "id": "trainees",
+     "first": 87
+    },
+    {
+     "id": "trainees",
+     "first": 107
+    },
+    {
+     "id": "trainees",
+     "first": 127
+    },
+    {
+     "id": "trainees",
+     "first": 147
+    },
+    {
+     "id": "trainees",
+     "first": 167
+    },
+    {
+     "id": "trainees",
+     "first": 187
+    },
+    {
+     "id": "trainees",
+     "first": 207
+    },
+    {
+     "id": "trainees",
+     "first": 227
+    },
+    {
+     "id": "deathknights",
+     "first": 77
+    },
+    {
+     "id": "deathknights",
+     "first": 102
+    },
+    {
+     "id": "deathknights",
+     "first": 127
+    },
+    {
+     "id": "deathknights",
+     "first": 152
+    },
+    {
+     "id": "deathknights",
+     "first": 177
+    },
+    {
+     "id": "deathknights",
+     "first": 202
+    },
+    {
+     "id": "deathknights",
+     "first": 227
+    },
+    {
+     "id": "riders",
+     "first": 137
+    },
+    {
+     "id": "riders",
+     "first": 167
+    },
+    {
+     "id": "riders",
+     "first": 197
+    },
+    {
+     "id": "riders",
+     "first": 227
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 27
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 47
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 67
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 87
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 107
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 127
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 147
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 167
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 187
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 207
+    },
+    {
+     "id": "spectralTrainees",
+     "first": 227
+    },
+    {
+     "id": "spectralDeathknights",
+     "first": 77
+    },
+    {
+     "id": "spectralDeathknights",
+     "first": 102
+    },
+    {
+     "id": "spectralDeathknights",
+     "first": 127
+    },
+    {
+     "id": "spectralDeathknights",
+     "first": 152
+    },
+    {
+     "id": "spectralDeathknights",
+     "first": 177
+    },
+    {
+     "id": "spectralDeathknights",
+     "first": 202
+    },
+    {
+     "id": "spectralDeathknights",
+     "first": 227
+    },
+    {
+     "id": "spectralRiders",
+     "first": 137
+    },
+    {
+     "id": "spectralRiders",
+     "first": 167
+    },
+    {
+     "id": "spectralRiders",
+     "first": 197
+    },
+    {
+     "id": "spectralRiders",
+     "first": 227
+    },
+    {
+     "id": "addPressure",
+     "first": 30,
+     "every": 3
+    },
+    {
+     "id": "unholyAura",
+     "first": 139,
+     "every": 4,
+     "jitter": 0.5
+    },
+    {
+     "id": "shadowMark",
+     "first": 82,
+     "every": 19,
+     "jitter": 3
+    },
+    {
+     "id": "spectralCleave",
+     "first": 85,
+     "every": 22,
+     "jitter": 3
+    },
+    {
+     "id": "drainLife",
+     "first": 147
+    },
+    {
+     "id": "drainLife",
+     "first": 177
+    },
+    {
+     "id": "drainLife",
+     "first": 207
+    },
+    {
+     "id": "drainLife",
+     "first": 237
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grabTrainees",
+     "type": "afterEvent",
+     "event": "trainees",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 8,
+     "role": "tank",
+     "label": "Pick up your altar every wave",
+     "tip": "The casters rip anything you do not catch immediately. Be standing on the altar when they spawn."
+    },
+    {
+     "id": "grabDKs",
+     "type": "afterEvent",
+     "event": "deathknights",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 8,
+     "role": "tank",
+     "label": "Pick up the Deathknights",
+     "tip": "They Intercept the casters if you do not get them first."
+    },
+    {
+     "id": "altarSpot",
+     "type": "playerAtSpotBy",
+     "spot": "tankSpot",
+     "grace": 6,
+     "role": "tank",
+     "label": "Hold your altar",
+     "tip": "Stay on the west altar until he lands."
+    },
+    {
+     "id": "grabSpectral",
+     "type": "afterEvent",
+     "event": "spectralTrainees",
+     "check": "whelpsPicked",
+     "within": 12,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Run to the pile as they appear",
+     "tip": "A spectral add appears on a bone pile. Get there and pick it up before it reaches the melee."
+    },
+    {
+     "id": "grabSpectralDK",
+     "type": "afterEvent",
+     "event": "spectralDeathknights",
+     "check": "whelpsPicked",
+     "within": 12,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Pick up the Spectral Deathknights",
+     "tip": "Face them away from the melee. Their Cleave hits ten people."
+    },
+    {
+     "id": "otSpotE",
+     "type": "playerAtSpotBy",
+     "spot": "otE",
+     "grace": 8,
+     "role": "offtank",
+     "label": "Stay on the undead side",
+     "tip": "The gate is shut. Your side is the east room."
+    },
+    {
+     "id": "markOut",
+     "type": "afterEvent",
+     "event": "shadowMark",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 1.2,
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Step out of Shadow Mark",
+     "tip": "A ring means a Deathknight whirlwind. Step out before it starts."
+    },
+    {
+     "id": "cleaveOut",
+     "type": "afterEvent",
+     "event": "spectralCleave",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 1,
+     "role": "melee",
+     "label": "Step out of the Spectral Whirlwind",
+     "tip": "A ring means a whirlwind. Step out, then back in."
+    },
+    {
+     "id": "rangedPos",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW",
+     "grace": 8,
+     "role": "ranged",
+     "label": "Stay on the living side",
+     "tip": "The gate is shut. Your job is the three altars."
+    },
+    {
+     "id": "meleePos",
+     "type": "playerAtSpotBy",
+     "spot": "meleeE",
+     "grace": 10,
+     "role": "melee",
+     "label": "Stay on the undead side",
+     "tip": "Spectral adds appear on the five piles. Stay on your side and move between them."
+    },
+    {
+     "id": "healPos",
+     "type": "playerAtSpotBy",
+     "spot": "healerW",
+     "grace": 8,
+     "role": "healer",
+     "label": "Heal your tanks",
+     "tip": "Stay in range of the altars. The adds hit your tanks constantly."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The waves never stop. Tanks pick up everything, and everything hits them."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "When a Rider or a Deathknight wave joins the Trainees, the tank spikes. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Living side",
+   "subtitle": "Harvest Soul, Shadow Bolts",
+   "hpFrom": 1,
+   "hpTo": 0.82,
+   "duration": 20,
+   "bossState": "grounded",
+   "raidSpot": "raidGate",
+   "spots": {
+    "tank": "tankW",
+    "boss": "gothikW",
+    "ranged": "rangedW",
+    "healer": "healerGate",
+    "melee": "meleeE",
+    "offtank": "otE"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "landWest",
+     "first": 0
+    },
+    {
+     "id": "harvestSoul",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "harvestSoulGhost",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 4,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "land2",
+     "type": "afterEvent",
+     "event": "landWest",
+     "check": "hasAggro",
+     "within": 11,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt him the moment he lands on the living side",
+     "tip": "His threat table is empty every time he lands. Be through the gate and in Taunt range before anyone else has hit him."
+    },
+    {
+     "id": "dpsSide2",
+     "type": "afterEvent",
+     "event": "landWest",
+     "check": "inRange",
+     "within": 10,
+     "grace": 6,
+     "role": "ranged",
+     "label": "Living side: he is yours now",
+     "tip": "Only the side he stands on can hit him. Burn him while he is here."
+    },
+    {
+     "id": "otHold2",
+     "type": "playerAtSpotBy",
+     "spot": "otE",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Keep the undead side clear",
+     "tip": "Hold what is left of the spectral adds on your spot, away from the melee."
+    },
+    {
+     "id": "rangedHold2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay on the living side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "meleeHold2",
+     "type": "playerAtSpotBy",
+     "spot": "meleeE",
+     "grace": 5,
+     "role": "melee",
+     "label": "Stay on the undead side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Bolts every second on whoever holds him. Harvest Soul makes every one of them hit harder. Heal ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The stacks do not come off. The longer this runs, the harder the bolts hit."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Undead side",
+   "subtitle": "Harvest Soul, Shadow Bolts",
+   "hpFrom": 0.82,
+   "hpTo": 0.64,
+   "duration": 20,
+   "bossState": "grounded",
+   "raidSpot": "raidGate",
+   "spots": {
+    "tank": "tankE",
+    "boss": "gothikE",
+    "ranged": "rangedW",
+    "healer": "healerGate",
+    "melee": "meleeE",
+    "offtank": "otE"
+   },
+   "skipActivity": "ranged",
+   "actions": [
+    {
+     "id": "landEast",
+     "first": 0
+    },
+    {
+     "id": "harvestSoul",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "harvestSoulGhost",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 4,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "land3",
+     "type": "afterEvent",
+     "event": "landEast",
+     "check": "hasAggro",
+     "within": 11,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt him the moment he lands on the undead side",
+     "tip": "His threat table is empty every time he lands. Be through the gate and in Taunt range before anyone else has hit him."
+    },
+    {
+     "id": "dpsSide3",
+     "type": "afterEvent",
+     "event": "landEast",
+     "check": "inRange",
+     "within": 10,
+     "grace": 6,
+     "role": "melee",
+     "label": "Undead side: he is yours now",
+     "tip": "Only the side he stands on can hit him. Burn him while he is here."
+    },
+    {
+     "id": "otHold3",
+     "type": "playerAtSpotBy",
+     "spot": "otE",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Keep the undead side clear",
+     "tip": "Hold what is left of the spectral adds on your spot, away from the melee."
+    },
+    {
+     "id": "rangedHold3",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay on the living side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "meleeHold3",
+     "type": "playerAtSpotBy",
+     "spot": "meleeE",
+     "grace": 5,
+     "role": "melee",
+     "label": "Stay on the undead side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Bolts every second on whoever holds him. Harvest Soul makes every one of them hit harder. Heal ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The stacks do not come off. The longer this runs, the harder the bolts hit."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Living side",
+   "subtitle": "Harvest Soul, Shadow Bolts",
+   "hpFrom": 0.64,
+   "hpTo": 0.46,
+   "duration": 20,
+   "bossState": "grounded",
+   "raidSpot": "raidGate",
+   "spots": {
+    "tank": "tankW",
+    "boss": "gothikW",
+    "ranged": "rangedW",
+    "healer": "healerGate",
+    "melee": "meleeE",
+    "offtank": "otE"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "landWest",
+     "first": 0
+    },
+    {
+     "id": "harvestSoul",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "harvestSoulGhost",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 4,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "land4",
+     "type": "afterEvent",
+     "event": "landWest",
+     "check": "hasAggro",
+     "within": 11,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt him the moment he lands on the living side",
+     "tip": "His threat table is empty every time he lands. Be through the gate and in Taunt range before anyone else has hit him."
+    },
+    {
+     "id": "dpsSide4",
+     "type": "afterEvent",
+     "event": "landWest",
+     "check": "inRange",
+     "within": 10,
+     "grace": 6,
+     "role": "ranged",
+     "label": "Living side: he is yours now",
+     "tip": "Only the side he stands on can hit him. Burn him while he is here."
+    },
+    {
+     "id": "otHold4",
+     "type": "playerAtSpotBy",
+     "spot": "otE",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Keep the undead side clear",
+     "tip": "Hold what is left of the spectral adds on your spot, away from the melee."
+    },
+    {
+     "id": "rangedHold4",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay on the living side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "meleeHold4",
+     "type": "playerAtSpotBy",
+     "spot": "meleeE",
+     "grace": 5,
+     "role": "melee",
+     "label": "Stay on the undead side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Bolts every second on whoever holds him. Harvest Soul makes every one of them hit harder. Heal ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The stacks do not come off. The longer this runs, the harder the bolts hit."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Undead side",
+   "subtitle": "Harvest Soul, Shadow Bolts",
+   "hpFrom": 0.46,
+   "hpTo": 0.3,
+   "duration": 20,
+   "bossState": "grounded",
+   "raidSpot": "raidGate",
+   "spots": {
+    "tank": "tankE",
+    "boss": "gothikE",
+    "ranged": "rangedW",
+    "healer": "healerGate",
+    "melee": "meleeE",
+    "offtank": "otE"
+   },
+   "skipActivity": "ranged",
+   "actions": [
+    {
+     "id": "landEast",
+     "first": 0
+    },
+    {
+     "id": "harvestSoul",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "harvestSoulGhost",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 4,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "land5",
+     "type": "afterEvent",
+     "event": "landEast",
+     "check": "hasAggro",
+     "within": 11,
+     "grace": 5,
+     "role": "tank",
+     "label": "Taunt him the moment he lands on the undead side",
+     "tip": "His threat table is empty every time he lands. Be through the gate and in Taunt range before anyone else has hit him."
+    },
+    {
+     "id": "dpsSide5",
+     "type": "afterEvent",
+     "event": "landEast",
+     "check": "inRange",
+     "within": 10,
+     "grace": 6,
+     "role": "melee",
+     "label": "Undead side: he is yours now",
+     "tip": "Only the side he stands on can hit him. Burn him while he is here."
+    },
+    {
+     "id": "otHold5",
+     "type": "playerAtSpotBy",
+     "spot": "otE",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Keep the undead side clear",
+     "tip": "Hold what is left of the spectral adds on your spot, away from the melee."
+    },
+    {
+     "id": "rangedHold5",
+     "type": "playerAtSpotBy",
+     "spot": "rangedW",
+     "grace": 5,
+     "role": "ranged",
+     "label": "Stay on the living side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "meleeHold5",
+     "type": "playerAtSpotBy",
+     "spot": "meleeE",
+     "grace": 5,
+     "role": "melee",
+     "label": "Stay on the undead side",
+     "tip": "The gate is shut. Wait on your side when he is across."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Bolts every second on whoever holds him. Harvest Soul makes every one of them hit harder. Heal ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "The stacks do not come off. The longer this runs, the harder the bolts hit."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "The gate opens",
+   "subtitle": "30%: everyone converges",
+   "hpFrom": 0.3,
+   "hpTo": 0,
+   "duration": 14,
+   "bossState": "grounded",
+   "raidSpot": "raidGate",
+   "spots": {
+    "tank": "tankGate",
+    "boss": "gothikGate",
+    "ranged": "rangedGate",
+    "healer": "healerGate",
+    "melee": "meleeGate",
+    "offtank": "otE"
+   },
+   "actions": [
+    {
+     "id": "landGate",
+     "first": 0
+    },
+    {
+     "id": "harvestSoul",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "harvestSoulGhost",
+     "first": 0.5,
+     "every": 17,
+     "jitter": 1.5
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 4,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "landGate",
+     "type": "afterEvent",
+     "event": "landGate",
+     "check": "hasAggro",
+     "within": 9,
+     "grace": 4,
+     "role": "tank",
+     "label": "Take him at the gate",
+     "tip": "He stops teleporting at 30%. Get him and hold him in the middle."
+    },
+    {
+     "id": "convergeMelee",
+     "type": "afterEvent",
+     "event": "landGate",
+     "check": "inRange",
+     "within": 9,
+     "grace": 4,
+     "role": "melee",
+     "label": "Through the gate and on him",
+     "tip": "The gate is open. Run to him and finish it."
+    },
+    {
+     "id": "convergeRanged",
+     "type": "afterEvent",
+     "event": "landGate",
+     "check": "inRange",
+     "within": 9,
+     "grace": 4,
+     "role": "ranged",
+     "label": "Get in range and burn",
+     "tip": "Everyone can reach him now. Everything you have."
+    },
+    {
+     "id": "otHold6",
+     "type": "playerAtSpotBy",
+     "spot": "otE",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Keep the undead side clear",
+     "tip": "Do not let the spectral adds reach the melee while they converge."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Everyone is on him now. Finish it before the stacks catch up."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Stack six on the tank by now. Pre-heal."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "drainLifeDone": {
+   "label": "Drain Life cast through",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 1,
+   "roles": "melee",
+   "tip": "Kick every Drain Life. If it finishes, the tank loses 4,000 health and you lose the race."
+  },
+  "attacksOnAdds": {
+   "label": "Attacks on adds",
+   "unit": "count",
+   "info": true,
+   "roles": "dps"
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.45
+ },
+ "cues": {
+  "notes": "Tank: Taunt on each landing. Melee: kick Drain Life and burn spectrals. Ranged: Riders first. Healer: heal.",
+  "windows": {
+   "perfect": 0.5
+  },
+  "list": [
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabAltarCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "trainees",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "tank",
+    "short": "GRAB",
+    "label": "Pick up your altar",
+    "tip": "Stand on the altar or Taunt the Trainee. Casters will rip anything loose.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabDkCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "deathknights",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "tank",
+    "short": "GRAB",
+    "label": "Pick up the Deathknight",
+    "tip": "Grab it before it Intercepts someone.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabPileCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "spectralTrainees",
+    "offset": 2,
+    "early": 2,
+    "late": 10,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Pick up the spectral add",
+    "tip": "Run to the pile, then Taunt or walk into it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabPileDkCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "spectralDeathknights",
+    "offset": 2,
+    "early": 2,
+    "late": 10,
+    "role": "offtank",
+    "short": "GRAB",
+    "label": "Pick up the Spectral Deathknight",
+    "tip": "Face it away from the melee.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "tauntWest",
+    "ability": "taunt",
+    "on": "event",
+    "event": "landWest",
+    "offset": 5,
+    "early": 5,
+    "late": 7,
+    "role": "tank",
+    "short": "TAUNT",
+    "label": "Taunt him on the living side",
+    "tip": "His table is empty. Taunt the moment he is in range."
+   },
+   {
+    "id": "tauntEast",
+    "ability": "taunt",
+    "on": "event",
+    "event": "landEast",
+    "offset": 5,
+    "early": 5,
+    "late": 7,
+    "role": "tank",
+    "short": "TAUNT",
+    "label": "Through the gate and Taunt",
+    "tip": "Run the gate, then Taunt. Every second he is loose he bolts someone."
+   },
+   {
+    "id": "tauntGate",
+    "ability": "taunt",
+    "on": "event",
+    "event": "landGate",
+    "offset": 3,
+    "early": 3,
+    "late": 7,
+    "role": "tank",
+    "short": "TAUNT",
+    "label": "Take him at the gate",
+    "tip": "He is in the middle now. Taunt."
+   },
+   {
+    "id": "kickDrain",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:drainLife",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 3,
+    "role": "melee",
+    "short": "KICK",
+    "label": "Kick Drain Life",
+    "tip": "Interrupt it. A Drain Life that finishes takes 4,000 from the tank.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "burnRider",
+    "ability": "attack",
+    "on": "event",
+    "event": "riders",
+    "offset": 1.5,
+    "early": 1.5,
+    "late": 7,
+    "role": "ranged",
+    "short": "RIDER",
+    "label": "Riders first",
+    "tip": "A Rider in range. Kill it before anything else: its aura pulses until it dies."
+   },
+   {
+    "id": "hitSpectral",
+    "ability": "attack",
+    "on": "event",
+    "event": "spectralTrainees",
+    "offset": 4,
+    "early": 3,
+    "late": 9,
+    "role": "melee",
+    "short": "HIT",
+    "label": "Get on the spectral add",
+    "tip": "Reach the pile and hit it."
+   },
+   {
+    "id": "burnWest",
+    "ability": "attack",
+    "on": "event",
+    "event": "landWest",
+    "offset": 9,
+    "early": 7,
+    "late": 8,
+    "role": "ranged",
+    "short": "BURN",
+    "label": "He is on your side: burn him",
+    "tip": "Only the side he is on can hurt him."
+   },
+   {
+    "id": "burnEast",
+    "ability": "attack",
+    "on": "event",
+    "event": "landEast",
+    "offset": 9,
+    "early": 7,
+    "late": 8,
+    "role": "melee",
+    "short": "BURN",
+    "label": "He is on your side: burn him",
+    "tip": "Only the side he is on can hurt him."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "landingDrill",
+   "name": "Pick him up",
+   "description": "He lands on your side with an empty table every 14 seconds. Get in range and Taunt him within 3 seconds.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 18,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "landWest",
+     "first": 2,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "pileDrill",
+   "name": "Run the bone piles",
+   "description": "Spectral adds appear on the piles every 16 seconds. Grab each one before it reaches the melee.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 64,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "spectralTrainees",
+     "first": 3,
+     "every": 16
+    }
+   ]
+  },
+  {
+   "id": "rangedDrill",
+   "name": "Riders and rings",
+   "description": "Living adds and Shadow Mark rings. Kill what spawns and step out of the rings.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 64,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "trainees",
+     "first": 3,
+     "every": 22
+    },
+    {
+     "id": "riders",
+     "first": 10,
+     "every": 28
+    },
+    {
+     "id": "shadowMark",
+     "first": 5,
+     "every": 9,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "kickDrill",
+   "name": "Kick Drain Life",
+   "description": "Spectral adds and a Drain Life every 11 seconds. Kick each one.",
+   "roles": "melee",
+   "startPhase": 1,
+   "duration": 64,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "spectralTrainees",
+     "first": 3,
+     "every": 22
+    },
+    {
+     "id": "drainLife",
+     "first": 6,
+     "every": 11,
+     "jitter": 1
+    },
+    {
+     "id": "spectralCleave",
+     "first": 9,
+     "every": 13,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "harvestDrill",
+   "name": "Heal through Harvest Soul",
+   "description": "Harvest Soul stacks every 12 seconds while Shadow Bolts hit the tank every second. Heal ahead of the stacks.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 18,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "harvestSoulGhost",
+     "first": 1,
+     "every": 5
+    },
+    {
+     "id": "landWest",
+     "first": 2,
+     "every": 40
+    }
+   ]
+  }
+ ]
+}

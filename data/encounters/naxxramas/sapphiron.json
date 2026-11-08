@@ -1,0 +1,3607 @@
+{
+ "id": "sapphiron",
+ "name": "Sapphiron",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/sapphiron.md. The lair is a 60 yd round room, an estimate; only the shape and 'spread like C'Thun' are sourced. HP is a clock: about 5 minutes of ground time plus four air phases, about 6:50 in all (classicdb 2.6M vs wiki 3.16M, kills run 6 to 10 min per the research), so the 15:00 Berserk (Frost Aura x6) is out of reach and not scheduled: noted, not modelled. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Frost Aura is 300 per 2 s on everyone (the real 600 per 2 s halved for about 150 frost resistance plus Greater Frost Protection; the research leaves resistance per raider open and the spell data ('Deals 600 frost damage a second', periodic dummy 601 every 1 second) vs the wiki's and Wowhead's every 2 s is unresolved; the 2 s reading is used, and a later log check should settle the scaling). Melee 850 per 2 s plus Cleave 1,100 is scaled from 10,680-12,258 pre-mitigation so a healer who does nothing loses the tank in about 20 seconds: passive healing with a player healer is 250 per second against about 700 per second incoming (the ghost tank is not hit by Frost Breath, it stands in for the tank hiding like everyone else). Air phase timing is DBM's where it has one: first lift-off 45 s (wiki/WT, DBM Era 31 to 46 s), later lift-off 67 s after landing (DBM 54 to 71 s), landing 28.5 s after lift-off, Frost Breath's cast 12.5 s before landing. The interval between the five Icebolts is not in any source: 2.5 s here is an estimate (the research implies 3 to 4 s and the air phase has about 13 s for all five before the cast). Ice blocks are random players in the real fight; the engine's cover uses fixed named spots, so each air phase has five block spots in a ring around the centre rotated between phases (a generated list, positions and their spread are placeholders). The ranged, healer and melee air spots and the tank's per-phase landing spot (`pickup1` to `pickup4`) are placed clear of every Icebolt splash of that phase. Icebolt lands on those spots as a telegraphed 10 yd hazard, and a green Ice Block circle marks each block. `iceboltYou` (playerChance 0.28, once per air phase, at the fifth bolt so a Chill laid earlier in the phase cannot catch a frozen player who cannot be damaged in the real game) is the Icebolt landing on the player: a stun until the breath lands and full cover from it, which is how the real ice block behaves (immune while frozen); the engine cannot make a frozen player immune to other damage. Icebolt's splash on neighbours is the hazard the others dodge. Frost Breath is 20,000 scaled (real 75,000 to 125,000 Frost, a one-shot either way); cover is a `safeSpots` circle 3 yd behind each block (`coverN_M`, radially away from the bomb's impact point at the hover spot, `safeRadius` 3.5): it accepts from about 0.5 yd in front of the block to 6.5 yd behind it and 3.5 yd to each side, and rejects the side facing the bomb. The engine cannot compute real line of sight, so this is the closest approximation; the wiki rule of moving after the third Icebolt is taught in the tips, not enforced. Life Drain is three copies of a curse per cast (the real spell hits 10 players; the engine has one debuff per action and the three copies keep the dispel decisions honest), 600 per second on the player when it lands (the wiki's 1,750 to 2,250 per 3 s), 12 s; the heal it gives Sapphiron cannot be expressed so it only hurts the raid and is scored as `debuffSeconds`. Mages/Druids decurse: the ranged role carries Dispel (curse only), which is the real assignment. Chill (Blizzard, real 3,063 to 3,907 per 2 s plus a 65% slow) is a stationary telegraphed zone every 12 s on the ground and once per air phase (cadence unknown in the sources, estimate; the air-phase count is low so that it cannot sit on the block a player must hide behind, which the marker cannot avoid) that never roams and does not slow; the engine has no moving hazards and no slow effect. Life Drain's second and third copies only land on non-tank roles so a lone tank player is not drained twice at once; the raid still spends the dispel. Sapphiron cannot be taunted: the tank's Taunt button is relabelled Threat burst and stands for the Heroic Strike and Sunder burst that takes him back after the landing. Landing grabs are scored with `hasAggro`. Whether DPS can keep hitting him in the air: Wowhead says ranged 'can cheat next to the cube', which implies yes, so ranged keep DPS (`attackableInAir`) and melee stand down; the research does not state this outright. Below 10% he stops flying; the script's last air phase is at 21% to 18% and the final phase runs to 0 grounded, so the real 'no air below 10%' rule is met by the clock. Cleave every 7.5 s, Tail Sweep every 11 s (conditional on someone standing behind him) and the 12 yd lift-off knockback radius are estimates; the sources give no cadence.",
+ "sources": [
+  "docs/research/naxxramas/sapphiron.md",
+  "https://warcraft.wiki.gg/wiki/Sapphiron_(Classic)",
+  "https://www.wowhead.com/classic/guide/sapphiron-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28531/frost-aura",
+  "https://www.wowhead.com/classic/spell=28542/life-drain",
+  "https://www.wowhead.com/classic/spell=28561/summon-blizzard",
+  "https://www.wowhead.com/classic/spell=31800/icebolt",
+  "https://www.wowhead.com/classic/spell=28524/frost-breath",
+  "https://www.wowhead.com/classic/spell=15847/tail-sweep",
+  "https://classicdb.ch/?npc=15989",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/FrostwyrmLair/Sapphiron.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "Sapphiron's Lair",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      60,
+      0
+     ],
+     [
+      59.1,
+      10.4
+     ],
+     [
+      56.4,
+      20.5
+     ],
+     [
+      52,
+      30
+     ],
+     [
+      46,
+      38.6
+     ],
+     [
+      38.6,
+      46
+     ],
+     [
+      30,
+      52
+     ],
+     [
+      20.5,
+      56.4
+     ],
+     [
+      10.4,
+      59.1
+     ],
+     [
+      0,
+      60
+     ],
+     [
+      -10.4,
+      59.1
+     ],
+     [
+      -20.5,
+      56.4
+     ],
+     [
+      -30,
+      52
+     ],
+     [
+      -38.6,
+      46
+     ],
+     [
+      -46,
+      38.6
+     ],
+     [
+      -52,
+      30
+     ],
+     [
+      -56.4,
+      20.5
+     ],
+     [
+      -59.1,
+      10.4
+     ],
+     [
+      -60,
+      0
+     ],
+     [
+      -59.1,
+      -10.4
+     ],
+     [
+      -56.4,
+      -20.5
+     ],
+     [
+      -52,
+      -30
+     ],
+     [
+      -46,
+      -38.6
+     ],
+     [
+      -38.6,
+      -46
+     ],
+     [
+      -30,
+      -52
+     ],
+     [
+      -20.5,
+      -56.4
+     ],
+     [
+      -10.4,
+      -59.1
+     ],
+     [
+      0,
+      -60
+     ],
+     [
+      10.4,
+      -59.1
+     ],
+     [
+      20.5,
+      -56.4
+     ],
+     [
+      30,
+      -52
+     ],
+     [
+      38.6,
+      -46
+     ],
+     [
+      46,
+      -38.6
+     ],
+     [
+      52,
+      -30
+     ],
+     [
+      56.4,
+      -20.5
+     ],
+     [
+      59.1,
+      -10.4
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -56
+     ],
+     [
+      9,
+      -56
+     ],
+     [
+      9,
+      -82
+     ],
+     [
+      -9,
+      -82
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -59.3
+     ],
+     [
+      23.4,
+      -55.3
+     ],
+     [
+      36.3,
+      -47.8
+     ],
+     [
+      46.9,
+      -37.4
+     ],
+     [
+      54.7,
+      -24.6
+     ],
+     [
+      59.1,
+      -10.4
+     ],
+     [
+      59.8,
+      4.5
+     ],
+     [
+      56.9,
+      19.1
+     ],
+     [
+      50.4,
+      32.6
+     ],
+     [
+      40.8,
+      44
+     ],
+     [
+      28.7,
+      52.7
+     ],
+     [
+      14.8,
+      58.1
+     ],
+     [
+      0,
+      60
+     ],
+     [
+      -14.8,
+      58.1
+     ],
+     [
+      -28.7,
+      52.7
+     ],
+     [
+      -40.8,
+      44
+     ],
+     [
+      -50.4,
+      32.6
+     ],
+     [
+      -56.9,
+      19.1
+     ],
+     [
+      -59.8,
+      4.5
+     ],
+     [
+      -59.1,
+      -10.4
+     ],
+     [
+      -54.7,
+      -24.6
+     ],
+     [
+      -46.9,
+      -37.4
+     ],
+     [
+      -36.3,
+      -47.8
+     ],
+     [
+      -23.4,
+      -55.3
+     ],
+     [
+      -9,
+      -59.3
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -59.3
+     ],
+     [
+      -9,
+      -82
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -59.3
+     ],
+     [
+      9,
+      -82
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -76
+    ]
+   },
+   {
+    "text": "Sapphiron",
+    "at": [
+     0,
+     30
+    ]
+   },
+   {
+    "text": "Raid stays clear of the tail",
+    "at": [
+     36,
+     6
+    ]
+   },
+   {
+    "text": "Tail Sweep cone",
+    "at": [
+     0,
+     -12
+    ]
+   }
+  ]
+ },
+ "hoverHeight": 24,
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -78,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 22,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 8,
+   "y": -46,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 27,
+   "tolerance": 5,
+   "label": "Tank: north of him, facing him north"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 14,
+   "heading": 90,
+   "tolerance": 9,
+   "headingTolerance": 70,
+   "label": "Sapphiron"
+  },
+  "raidGround": {
+   "x": 26,
+   "y": 18,
+   "spread": 13,
+   "label": "Raid: east of him, clear of the tail"
+  },
+  "raidAir": {
+   "x": 0,
+   "y": -2,
+   "spacing": 11,
+   "label": "Raid spread 10 yards"
+  },
+  "meleeSpot": {
+   "x": 12,
+   "y": 14,
+   "tolerance": 8,
+   "label": "Melee: his flank"
+  },
+  "meleeCheck": {
+   "x": 0,
+   "y": 14,
+   "tolerance": 15,
+   "label": "Melee check: his flank"
+  },
+  "rangedSpot": {
+   "x": 30,
+   "y": 22,
+   "tolerance": 10,
+   "label": "Ranged: east, spread"
+  },
+  "healerSpot": {
+   "x": 22,
+   "y": 26,
+   "tolerance": 10,
+   "label": "Healers: in range of the tank"
+  },
+  "rangedAir": {
+   "x": 33.8,
+   "y": -10.1,
+   "tolerance": 14,
+   "label": "Ranged: air spot"
+  },
+  "healerAir": {
+   "x": -34,
+   "y": 10,
+   "tolerance": 14,
+   "label": "Healers: air spot"
+  },
+  "meleeAir": {
+   "x": 9,
+   "y": -33,
+   "tolerance": 14,
+   "label": "Melee: air spot"
+  },
+  "roomMiddle": {
+   "x": 0,
+   "y": 2,
+   "tolerance": 38,
+   "label": "The room"
+  },
+  "pickupSpot": {
+   "x": -2,
+   "y": 28,
+   "tolerance": 12,
+   "label": "Tank: his landing spot"
+  },
+  "pickup1": {
+   "x": -7,
+   "y": 28,
+   "tolerance": 12,
+   "label": "Tank: clear of the Icebolts"
+  },
+  "pickup2": {
+   "x": 1,
+   "y": 24,
+   "tolerance": 12,
+   "label": "Tank: clear of the Icebolts"
+  },
+  "pickup3": {
+   "x": -9,
+   "y": 36,
+   "tolerance": 12,
+   "label": "Tank: clear of the Icebolts"
+  },
+  "pickup4": {
+   "x": 0,
+   "y": 27,
+   "tolerance": 12,
+   "label": "Tank: clear of the Icebolts"
+  },
+  "landSpot": {
+   "x": 0,
+   "y": 14,
+   "heading": 90
+  },
+  "hoverIdle": {
+   "x": 0,
+   "y": 6,
+   "z": 24
+  },
+  "block1_1": {
+   "x": 23.8,
+   "y": 5.3,
+   "label": "Ice block 1",
+   "tolerance": 6
+  },
+  "block1_2": {
+   "x": 4.2,
+   "y": 25.6,
+   "label": "Ice block 2",
+   "tolerance": 6
+  },
+  "block1_3": {
+   "x": -21.2,
+   "y": 13.3,
+   "label": "Ice block 3",
+   "tolerance": 6
+  },
+  "block1_4": {
+   "x": -17.3,
+   "y": -14.7,
+   "label": "Ice block 4",
+   "tolerance": 6
+  },
+  "block1_5": {
+   "x": 10.5,
+   "y": -19.6,
+   "label": "Ice block 5",
+   "tolerance": 6
+  },
+  "block2_1": {
+   "x": 17.3,
+   "y": 18.7,
+   "label": "Ice block 1",
+   "tolerance": 6
+  },
+  "block2_2": {
+   "x": -10.5,
+   "y": 23.6,
+   "label": "Ice block 2",
+   "tolerance": 6
+  },
+  "block2_3": {
+   "x": -23.8,
+   "y": -1.3,
+   "label": "Ice block 3",
+   "tolerance": 6
+  },
+  "block2_4": {
+   "x": -4.2,
+   "y": -21.6,
+   "label": "Ice block 4",
+   "tolerance": 6
+  },
+  "block2_5": {
+   "x": 21.2,
+   "y": -9.3,
+   "label": "Ice block 5",
+   "tolerance": 6
+  },
+  "block3_1": {
+   "x": 21.6,
+   "y": 12.5,
+   "label": "Ice block 1",
+   "tolerance": 6
+  },
+  "block3_2": {
+   "x": -3.3,
+   "y": 25.8,
+   "label": "Ice block 2",
+   "tolerance": 6
+  },
+  "block3_3": {
+   "x": -23.6,
+   "y": 6.2,
+   "label": "Ice block 3",
+   "tolerance": 6
+  },
+  "block3_4": {
+   "x": -11.3,
+   "y": -19.2,
+   "label": "Ice block 4",
+   "tolerance": 6
+  },
+  "block3_5": {
+   "x": 16.7,
+   "y": -15.3,
+   "label": "Ice block 5",
+   "tolerance": 6
+  },
+  "block4_1": {
+   "x": 11.3,
+   "y": 23.2,
+   "label": "Ice block 1",
+   "tolerance": 6
+  },
+  "block4_2": {
+   "x": -16.7,
+   "y": 19.3,
+   "label": "Ice block 2",
+   "tolerance": 6
+  },
+  "block4_3": {
+   "x": -21.6,
+   "y": -8.5,
+   "label": "Ice block 3",
+   "tolerance": 6
+  },
+  "block4_4": {
+   "x": 3.3,
+   "y": -21.8,
+   "label": "Ice block 4",
+   "tolerance": 6
+  },
+  "block4_5": {
+   "x": 23.6,
+   "y": -2.2,
+   "label": "Ice block 5",
+   "tolerance": 6
+  },
+  "cover1_1": {
+   "x": 26.8,
+   "y": 5.2,
+   "label": "Stand here, behind the block"
+  },
+  "cover1_2": {
+   "x": 4.8,
+   "y": 28.5,
+   "label": "Stand here, behind the block"
+  },
+  "cover1_3": {
+   "x": -24,
+   "y": 14.3,
+   "label": "Stand here, behind the block"
+  },
+  "cover1_4": {
+   "x": -19.2,
+   "y": -17,
+   "label": "Stand here, behind the block"
+  },
+  "cover1_5": {
+   "x": 11.6,
+   "y": -22.4,
+   "label": "Stand here, behind the block"
+  },
+  "cover2_1": {
+   "x": 19.7,
+   "y": 20.5,
+   "label": "Stand here, behind the block"
+  },
+  "cover2_2": {
+   "x": -12,
+   "y": 26.2,
+   "label": "Stand here, behind the block"
+  },
+  "cover2_3": {
+   "x": -26.7,
+   "y": -2.2,
+   "label": "Stand here, behind the block"
+  },
+  "cover2_4": {
+   "x": -4.7,
+   "y": -24.6,
+   "label": "Stand here, behind the block"
+  },
+  "cover2_5": {
+   "x": 23.6,
+   "y": -11.1,
+   "label": "Stand here, behind the block"
+  },
+  "cover3_1": {
+   "x": 24.5,
+   "y": 13.4,
+   "label": "Stand here, behind the block"
+  },
+  "cover3_2": {
+   "x": -3.8,
+   "y": 28.8,
+   "label": "Stand here, behind the block"
+  },
+  "cover3_3": {
+   "x": -26.6,
+   "y": 6.2,
+   "label": "Stand here, behind the block"
+  },
+  "cover3_4": {
+   "x": -12.5,
+   "y": -21.9,
+   "label": "Stand here, behind the block"
+  },
+  "cover3_5": {
+   "x": 18.6,
+   "y": -17.7,
+   "label": "Stand here, behind the block"
+  },
+  "cover4_1": {
+   "x": 12.9,
+   "y": 25.7,
+   "label": "Stand here, behind the block"
+  },
+  "cover4_2": {
+   "x": -19,
+   "y": 21.2,
+   "label": "Stand here, behind the block"
+  },
+  "cover4_3": {
+   "x": -24.1,
+   "y": -10.2,
+   "label": "Stand here, behind the block"
+  },
+  "cover4_4": {
+   "x": 3.7,
+   "y": -24.8,
+   "label": "Stand here, behind the block"
+  },
+  "cover4_5": {
+   "x": 26.4,
+   "y": -3.2,
+   "label": "Stand here, behind the block"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1250,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1500,
+  "healPerSecondWithPlayerHealer": 250,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 13,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "shape": "dragon",
+  "radius": 9,
+  "speed": 8,
+  "turnRate": 180,
+  "meleeRange": 11,
+  "meleeDamage": 850,
+  "meleeInterval": 2,
+  "cones": {
+   "cleave": {
+    "angle": 110,
+    "range": 15,
+    "label": "Cleave",
+    "facing": "front",
+    "style": "cleave"
+   },
+   "tail": {
+    "angle": 120,
+    "range": 30,
+    "label": "Tail Sweep",
+    "facing": "back",
+    "style": "tail"
+   }
+  },
+  "facingCone": "cleave",
+  "enrageMultiplier": 1.5,
+  "attackableInAir": true,
+  "landingDuration": 2.5,
+  "takeoffDuration": 2.5,
+  "pickupGrace": 6,
+  "settleAfterLanding": 2.5,
+  "looseHint": "He cannot be taunted. Burst threat to get him back"
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "One tank on Sapphiron, north of him, facing him north so Cleave and his tail stay off the raid. He cannot be taunted: every landing is a threat race. When he flies, be a normal raider: spread, then hide behind an ice block before the breath.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "On his flank, never in front and never in the 30-yard tail cone. In the air spread out, then hide behind a block before Frost Breath lands. Step out of any Chill zone immediately.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 8
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Spread east of him and burn him. You are the decursers: Life Drain is a curse and every second it stays up it drains the raid and heals him. In the air, stay spread, then hide behind a block before the breath. Frost spells do nothing to him.",
+   "abilities": [
+    "attack",
+    "dispel"
+   ],
+   "attackRange": 30,
+   "dispels": [
+    "curse"
+   ]
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Frost Aura ticks forever, so keep the raid up and the tank above half. Decurse Life Drain the moment it lands. In the air, spread, then hide behind a block; heal only when you are safe.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40,
+   "dispels": [
+    "curse"
+   ]
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Threat burst",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Sapphiron cannot be taunted. This button stands for the Heroic Strike and Sunder burst that takes him back after a landing."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2600,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "curse"
+   ],
+   "tip": "Remove Curse. Life Drain is the only curse here. Decurse every target within a few seconds of it landing."
+  }
+ },
+ "actions": {
+  "takeoff": {
+   "label": "Takeoff",
+   "cast": 0,
+   "warn": true,
+   "cue": "takeoff",
+   "icon": "takeoff",
+   "kind": "transition",
+   "tip": "He lifts off. Move out from under him, then spread."
+  },
+  "landing": {
+   "label": "Landing",
+   "cast": 0,
+   "warn": true,
+   "cue": "landing",
+   "icon": "landing",
+   "kind": "transition",
+   "tip": "He is down. Tank grabs him, melee back on his flank."
+  },
+  "frostAura": {
+   "label": "Frost Aura",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 300,
+   "tankDamage": 300,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "any",
+   "hidden": true,
+   "tip": "Frost Aura hits everyone in the room every 2 seconds. It never stops. Frost resistance and potions are the answer."
+  },
+  "lifeDrain": {
+   "label": "Life Drain",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.3,
+   "dispel": "curse",
+   "duration": 12,
+   "tickDamage": 600,
+   "follow": [
+    {
+     "id": "lifeDrain2",
+     "delay": 0
+    },
+    {
+     "id": "lifeDrain3",
+     "delay": 0
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Life Drain curses raiders, drains their health and heals him. Decurse every target at once."
+  },
+  "lifeDrain2": {
+   "label": "Life Drain",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.25,
+   "roles": "nontank",
+   "dispel": "curse",
+   "duration": 12,
+   "tickDamage": 600,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Life Drain curses raiders, drains their health and heals him. Decurse every target at once."
+  },
+  "lifeDrain3": {
+   "label": "Life Drain",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.25,
+   "roles": "nontank",
+   "dispel": "curse",
+   "duration": 12,
+   "tickDamage": 600,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Life Drain curses raiders, drains their health and heals him. Decurse every target at once."
+  },
+  "cleave": {
+   "label": "Cleave",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "cleave",
+   "damage": 1100,
+   "hitsMelee": false,
+   "raidMetric": "cleaveOnRaid",
+   "raidToast": "Cleave hit the raid: turn him away",
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A frontal Cleave on the tank. Keep his front off the raid."
+  },
+  "tailSweep": {
+   "label": "Tail Sweep",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "tail",
+   "damage": 800,
+   "knockback": 8,
+   "hitsMelee": true,
+   "conditional": "behind",
+   "playerMetric": "tailed",
+   "raidMetric": "tailOnRaid",
+   "raidToast": "Tail Sweep hit the raid: mind his tail",
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Thirty yards long, 120 degrees wide, behind him. Nobody stands there, ever."
+  },
+  "blizzard": {
+   "label": "Chill",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "radius": 6,
+   "warning": 1.6,
+   "active": 8,
+   "damage": 1700,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "any",
+   "tip": "Chill lands under a random raider and roams. Step out at once: three thousand every 2 seconds and a 65% slow."
+  },
+  "liftOff": {
+   "label": "Lift-off",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 12,
+   "knockbackRange": 12,
+   "radial": true,
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "any",
+   "tip": "He beats his wings and knocks away anyone under him."
+  },
+  "iceboltYou": {
+   "label": "Icebolt: frozen",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.28,
+   "dispel": "none",
+   "duration": 11,
+   "stun": 10,
+   "warn": true,
+   "cue": "roar",
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "You are frozen in a block. You cannot move and you are immune to the breath. Everyone else will hide behind you."
+  },
+  "blockCover": {
+   "label": "At the ice block",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "player",
+   "dispel": "none",
+   "duration": 6,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "any",
+   "hidden": true,
+   "tip": "You are at an ice block. Only the far side from the centre of the room is out of the line of sight of Frost Breath: stand there until it lands."
+  },
+  "icebolt1_1": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_1"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock1_1",
+     "delay": 1.7
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock1_1": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_1"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 18.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt1_2": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_2"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock1_2",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock1_2": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_2"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 15.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt1_3": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_3"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock1_3",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock1_3": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_3"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 13.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt1_4": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_4"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock1_4",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock1_4": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_4"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 10.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt1_5": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_5"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock1_5",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock1_5": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block1_5"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 8.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "frostBreath1": {
+   "label": "Frost Breath",
+   "kind": "aoe",
+   "cast": 7,
+   "damage": 20000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "cover1_1",
+    "cover1_2",
+    "cover1_3",
+    "cover1_4",
+    "cover1_5"
+   ],
+   "safeRadius": 3.5,
+   "safeIfDebuff": "iceboltYou",
+   "playerMetric": "breathHits",
+   "warn": true,
+   "cue": "roar",
+   "icon": "breath",
+   "requires": "airborne",
+   "hidden": false,
+   "tip": "A 7 second cast, then 75,000 Frost to anyone in line of sight. Get behind an ice block before the bar finishes."
+  },
+  "icebolt2_1": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_1"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock2_1",
+     "delay": 1.7
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock2_1": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_1"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 18.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt2_2": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_2"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock2_2",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock2_2": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_2"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 15.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt2_3": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_3"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock2_3",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock2_3": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_3"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 13.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt2_4": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_4"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock2_4",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock2_4": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_4"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 10.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt2_5": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_5"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock2_5",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock2_5": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block2_5"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 8.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "frostBreath2": {
+   "label": "Frost Breath",
+   "kind": "aoe",
+   "cast": 7,
+   "damage": 20000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "cover2_1",
+    "cover2_2",
+    "cover2_3",
+    "cover2_4",
+    "cover2_5"
+   ],
+   "safeRadius": 3.5,
+   "safeIfDebuff": "iceboltYou",
+   "playerMetric": "breathHits",
+   "warn": true,
+   "cue": "roar",
+   "icon": "breath",
+   "requires": "airborne",
+   "hidden": false,
+   "tip": "A 7 second cast, then 75,000 Frost to anyone in line of sight. Get behind an ice block before the bar finishes."
+  },
+  "icebolt3_1": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_1"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock3_1",
+     "delay": 1.7
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock3_1": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_1"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 18.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt3_2": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_2"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock3_2",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock3_2": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_2"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 15.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt3_3": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_3"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock3_3",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock3_3": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_3"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 13.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt3_4": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_4"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock3_4",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock3_4": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_4"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 10.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt3_5": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_5"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock3_5",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock3_5": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block3_5"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 8.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "frostBreath3": {
+   "label": "Frost Breath",
+   "kind": "aoe",
+   "cast": 7,
+   "damage": 20000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "cover3_1",
+    "cover3_2",
+    "cover3_3",
+    "cover3_4",
+    "cover3_5"
+   ],
+   "safeRadius": 3.5,
+   "safeIfDebuff": "iceboltYou",
+   "playerMetric": "breathHits",
+   "warn": true,
+   "cue": "roar",
+   "icon": "breath",
+   "requires": "airborne",
+   "hidden": false,
+   "tip": "A 7 second cast, then 75,000 Frost to anyone in line of sight. Get behind an ice block before the bar finishes."
+  },
+  "icebolt4_1": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_1"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock4_1",
+     "delay": 1.7
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock4_1": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_1"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 18.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt4_2": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_2"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock4_2",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock4_2": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_2"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 15.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt4_3": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_3"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock4_3",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock4_3": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_3"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 13.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt4_4": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_4"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock4_4",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock4_4": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_4"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 10.900000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "icebolt4_5": {
+   "label": "Icebolt",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_5"
+   ],
+   "radius": 10,
+   "warning": 1.6,
+   "active": 0.5,
+   "damage": 3000,
+   "follow": [
+    {
+     "id": "iceBlock4_5",
+     "delay": 1.7
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "tip": "Icebolt freezes a random raider and hits everyone within 10 yards of them. Spread 10 yards. Never stack on a block until the breath is coming."
+  },
+  "iceBlock4_5": {
+   "label": "Ice block",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "block4_5"
+   ],
+   "radius": 6,
+   "warning": 0,
+   "active": 8.400000000000002,
+   "applies": "blockCover",
+   "damage": 0,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "airborne",
+   "hidden": true,
+   "tip": "A frozen raider. Stand directly behind this block, on the far side from the centre of the room, and you are out of the line of sight of Frost Breath."
+  },
+  "frostBreath4": {
+   "label": "Frost Breath",
+   "kind": "aoe",
+   "cast": 7,
+   "damage": 20000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "cover4_1",
+    "cover4_2",
+    "cover4_3",
+    "cover4_4",
+    "cover4_5"
+   ],
+   "safeRadius": 3.5,
+   "safeIfDebuff": "iceboltYou",
+   "playerMetric": "breathHits",
+   "warn": true,
+   "cue": "roar",
+   "icon": "breath",
+   "requires": "airborne",
+   "hidden": false,
+   "tip": "A 7 second cast, then 75,000 Frost to anyone in line of sight. Get behind an ice block before the bar finishes."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Ground 1",
+   "subtitle": "First lift-off at 45 seconds",
+   "hpFrom": 1,
+   "hpTo": 0.87,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidGround",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "lifeDrain",
+     "first": 22,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7.5,
+     "jitter": 1
+    },
+    {
+     "id": "tailSweep",
+     "first": 9,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "blizzard",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 22,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pull him to the north side and face him north",
+     "tip": "Walk him to his spot and keep his breath and Cleave pointing away from the raid. The tail is 30 yards long and points south, so keep the raid at his side."
+    },
+    {
+     "id": "rangedHold1",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 7,
+     "role": "ranged",
+     "label": "Hold your spot east of him",
+     "tip": "Stay at your spot, spread, out of the tail. Chill moves you, come back."
+    },
+    {
+     "id": "healHold1",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 7,
+     "role": "healer",
+     "label": "Stay in range of the tank",
+     "tip": "Stay east of him, spread from your group, inside 40 yards of the tank."
+    },
+    {
+     "id": "meleeFlank1",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCheck",
+     "grace": 8,
+     "role": "melee",
+     "label": "Be on his flank when he lifts off",
+     "tip": "At his side, behind the forelegs. Never behind the tail and never in front."
+    },
+    {
+     "id": "decurse1",
+     "type": "afterEvent",
+     "event": "lifeDrain",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Life Drain at once",
+     "tip": "Life Drain pulls health off the raid and heals him. Curse off, every target, within a few seconds of it landing."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "chillDodge1",
+     "type": "afterEvent",
+     "event": "blizzard",
+     "check": "outsideHazard",
+     "within": 2.8,
+     "grace": 2.5,
+     "notBefore": 1.6,
+     "role": null,
+     "label": "Step out of Chill",
+     "tip": "A Chill landing under you. Three thousand a second and it slows you. Step out now."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Air phase 1",
+   "subtitle": "Five Icebolts, then Frost Breath: hide behind a block",
+   "hpFrom": 0.87,
+   "hpTo": 0.84,
+   "duration": 26,
+   "bossState": "airborne",
+   "raidSpot": "raidAir",
+   "spots": {
+    "tank": "pickup1",
+    "boss": "bossSpot",
+    "pickup": "pickup1",
+    "ranged": "rangedAir",
+    "healer": "healerAir",
+    "melee": "meleeAir"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "liftOff",
+     "first": 0.3
+    },
+    {
+     "id": "blizzard",
+     "first": 5,
+     "every": 30
+    },
+    {
+     "id": "icebolt1_1",
+     "first": 3.5
+    },
+    {
+     "id": "icebolt1_2",
+     "first": 6
+    },
+    {
+     "id": "icebolt1_3",
+     "first": 8.5
+    },
+    {
+     "id": "icebolt1_4",
+     "first": 11
+    },
+    {
+     "id": "icebolt1_5",
+     "first": 13.5
+    },
+    {
+     "id": "iceboltYou",
+     "first": 13.5
+    },
+    {
+     "id": "frostBreath1",
+     "first": 16
+    }
+   ],
+   "expectations": [
+    {
+     "id": "coverMetric2",
+     "type": "continuous",
+     "metric": "breathHits",
+     "label": "Behind a block when Frost Breath lands",
+     "tip": "The bomb is a one-shot. Pick your block after the third Icebolt and be behind it before the bar finishes."
+    },
+    {
+     "id": "inRoom2",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "nontank",
+     "label": "Spread out for the air phase, 10 yards from anyone",
+     "tip": "Do not stand next to anybody. An Icebolt splashes 10 yards and the block is what will save you from the breath."
+    },
+    {
+     "id": "airSpotTank2",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "tanks",
+     "label": "Be a normal raider while he flies",
+     "tip": "Run out from under him, spread, then hide behind a block like everyone else. He lands on his spot: be near it."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Ground 2",
+   "subtitle": "Ground phase: spread, decurse, dodge Chill",
+   "hpFrom": 0.84,
+   "hpTo": 0.65,
+   "duration": 67,
+   "bossState": "grounded",
+   "raidSpot": "raidGround",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "lifeDrain",
+     "first": 22,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7.5,
+     "jitter": 1
+    },
+    {
+     "id": "tailSweep",
+     "first": 9,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "blizzard",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "landGrab3",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 8,
+     "role": "tanks",
+     "label": "Grab him the moment he lands",
+     "tip": "He cannot be taunted. Burst threat the second he touches down, and walk him back onto his spot facing north."
+    },
+    {
+     "id": "landSpot3",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 10,
+     "grace": 8,
+     "from": "landing",
+     "role": "tanks",
+     "label": "Back onto his spot after landing",
+     "tip": "He lands on his spot. Stand on the north side so he faces away from the raid."
+    },
+    {
+     "id": "meleeBack3",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "inRange",
+     "within": 9,
+     "grace": 7,
+     "role": "melee",
+     "label": "Back on his flank after he lands",
+     "tip": "As soon as he touches down, get back to his side. Not behind him, not in front."
+    },
+    {
+     "id": "rangedHold3",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 7,
+     "role": "ranged",
+     "label": "Hold your spot east of him",
+     "tip": "Stay at your spot, spread, out of the tail. Chill moves you, come back."
+    },
+    {
+     "id": "healHold3",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 7,
+     "role": "healer",
+     "label": "Stay in range of the tank",
+     "tip": "Stay east of him, spread from your group, inside 40 yards of the tank."
+    },
+    {
+     "id": "meleeFlank3",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCheck",
+     "grace": 8,
+     "role": "melee",
+     "label": "Be on his flank when he lifts off",
+     "tip": "At his side, behind the forelegs. Never behind the tail and never in front."
+    },
+    {
+     "id": "decurse3",
+     "type": "afterEvent",
+     "event": "lifeDrain",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Life Drain at once",
+     "tip": "Life Drain pulls health off the raid and heals him. Curse off, every target, within a few seconds of it landing."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "chillDodge3",
+     "type": "afterEvent",
+     "event": "blizzard",
+     "check": "outsideHazard",
+     "within": 2.8,
+     "grace": 2.5,
+     "notBefore": 1.6,
+     "role": null,
+     "label": "Step out of Chill",
+     "tip": "A Chill landing under you. Three thousand a second and it slows you. Step out now."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Air phase 2",
+   "subtitle": "Five Icebolts, then Frost Breath: hide behind a block",
+   "hpFrom": 0.65,
+   "hpTo": 0.62,
+   "duration": 26,
+   "bossState": "airborne",
+   "raidSpot": "raidAir",
+   "spots": {
+    "tank": "pickup2",
+    "boss": "bossSpot",
+    "pickup": "pickup2",
+    "ranged": "rangedAir",
+    "healer": "healerAir",
+    "melee": "meleeAir"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "liftOff",
+     "first": 0.3
+    },
+    {
+     "id": "blizzard",
+     "first": 5,
+     "every": 30
+    },
+    {
+     "id": "icebolt2_1",
+     "first": 3.5
+    },
+    {
+     "id": "icebolt2_2",
+     "first": 6
+    },
+    {
+     "id": "icebolt2_3",
+     "first": 8.5
+    },
+    {
+     "id": "icebolt2_4",
+     "first": 11
+    },
+    {
+     "id": "icebolt2_5",
+     "first": 13.5
+    },
+    {
+     "id": "iceboltYou",
+     "first": 13.5
+    },
+    {
+     "id": "frostBreath2",
+     "first": 16
+    }
+   ],
+   "expectations": [
+    {
+     "id": "coverMetric4",
+     "type": "continuous",
+     "metric": "breathHits",
+     "label": "Behind a block when Frost Breath lands",
+     "tip": "The bomb is a one-shot. Pick your block after the third Icebolt and be behind it before the bar finishes."
+    },
+    {
+     "id": "inRoom4",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "nontank",
+     "label": "Spread out for the air phase, 10 yards from anyone",
+     "tip": "Do not stand next to anybody. An Icebolt splashes 10 yards and the block is what will save you from the breath."
+    },
+    {
+     "id": "airSpotTank4",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "tanks",
+     "label": "Be a normal raider while he flies",
+     "tip": "Run out from under him, spread, then hide behind a block like everyone else. He lands on his spot: be near it."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Ground 3",
+   "subtitle": "Ground phase: spread, decurse, dodge Chill",
+   "hpFrom": 0.62,
+   "hpTo": 0.43,
+   "duration": 67,
+   "bossState": "grounded",
+   "raidSpot": "raidGround",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "lifeDrain",
+     "first": 22,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7.5,
+     "jitter": 1
+    },
+    {
+     "id": "tailSweep",
+     "first": 9,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "blizzard",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "landGrab5",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 8,
+     "role": "tanks",
+     "label": "Grab him the moment he lands",
+     "tip": "He cannot be taunted. Burst threat the second he touches down, and walk him back onto his spot facing north."
+    },
+    {
+     "id": "landSpot5",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 10,
+     "grace": 8,
+     "from": "landing",
+     "role": "tanks",
+     "label": "Back onto his spot after landing",
+     "tip": "He lands on his spot. Stand on the north side so he faces away from the raid."
+    },
+    {
+     "id": "meleeBack5",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "inRange",
+     "within": 9,
+     "grace": 7,
+     "role": "melee",
+     "label": "Back on his flank after he lands",
+     "tip": "As soon as he touches down, get back to his side. Not behind him, not in front."
+    },
+    {
+     "id": "rangedHold5",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 7,
+     "role": "ranged",
+     "label": "Hold your spot east of him",
+     "tip": "Stay at your spot, spread, out of the tail. Chill moves you, come back."
+    },
+    {
+     "id": "healHold5",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 7,
+     "role": "healer",
+     "label": "Stay in range of the tank",
+     "tip": "Stay east of him, spread from your group, inside 40 yards of the tank."
+    },
+    {
+     "id": "meleeFlank5",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCheck",
+     "grace": 8,
+     "role": "melee",
+     "label": "Be on his flank when he lifts off",
+     "tip": "At his side, behind the forelegs. Never behind the tail and never in front."
+    },
+    {
+     "id": "decurse5",
+     "type": "afterEvent",
+     "event": "lifeDrain",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Life Drain at once",
+     "tip": "Life Drain pulls health off the raid and heals him. Curse off, every target, within a few seconds of it landing."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "chillDodge5",
+     "type": "afterEvent",
+     "event": "blizzard",
+     "check": "outsideHazard",
+     "within": 2.8,
+     "grace": 2.5,
+     "notBefore": 1.6,
+     "role": null,
+     "label": "Step out of Chill",
+     "tip": "A Chill landing under you. Three thousand a second and it slows you. Step out now."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Air phase 3",
+   "subtitle": "Five Icebolts, then Frost Breath: hide behind a block",
+   "hpFrom": 0.43,
+   "hpTo": 0.4,
+   "duration": 26,
+   "bossState": "airborne",
+   "raidSpot": "raidAir",
+   "spots": {
+    "tank": "pickup3",
+    "boss": "bossSpot",
+    "pickup": "pickup3",
+    "ranged": "rangedAir",
+    "healer": "healerAir",
+    "melee": "meleeAir"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "liftOff",
+     "first": 0.3
+    },
+    {
+     "id": "blizzard",
+     "first": 5,
+     "every": 30
+    },
+    {
+     "id": "icebolt3_1",
+     "first": 3.5
+    },
+    {
+     "id": "icebolt3_2",
+     "first": 6
+    },
+    {
+     "id": "icebolt3_3",
+     "first": 8.5
+    },
+    {
+     "id": "icebolt3_4",
+     "first": 11
+    },
+    {
+     "id": "icebolt3_5",
+     "first": 13.5
+    },
+    {
+     "id": "iceboltYou",
+     "first": 13.5
+    },
+    {
+     "id": "frostBreath3",
+     "first": 16
+    }
+   ],
+   "expectations": [
+    {
+     "id": "coverMetric6",
+     "type": "continuous",
+     "metric": "breathHits",
+     "label": "Behind a block when Frost Breath lands",
+     "tip": "The bomb is a one-shot. Pick your block after the third Icebolt and be behind it before the bar finishes."
+    },
+    {
+     "id": "inRoom6",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "nontank",
+     "label": "Spread out for the air phase, 10 yards from anyone",
+     "tip": "Do not stand next to anybody. An Icebolt splashes 10 yards and the block is what will save you from the breath."
+    },
+    {
+     "id": "airSpotTank6",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "tanks",
+     "label": "Be a normal raider while he flies",
+     "tip": "Run out from under him, spread, then hide behind a block like everyone else. He lands on his spot: be near it."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Ground 4",
+   "subtitle": "Ground phase: spread, decurse, dodge Chill",
+   "hpFrom": 0.4,
+   "hpTo": 0.21,
+   "duration": 67,
+   "bossState": "grounded",
+   "raidSpot": "raidGround",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "lifeDrain",
+     "first": 22,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7.5,
+     "jitter": 1
+    },
+    {
+     "id": "tailSweep",
+     "first": 9,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "blizzard",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "landGrab7",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 8,
+     "role": "tanks",
+     "label": "Grab him the moment he lands",
+     "tip": "He cannot be taunted. Burst threat the second he touches down, and walk him back onto his spot facing north."
+    },
+    {
+     "id": "landSpot7",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 10,
+     "grace": 8,
+     "from": "landing",
+     "role": "tanks",
+     "label": "Back onto his spot after landing",
+     "tip": "He lands on his spot. Stand on the north side so he faces away from the raid."
+    },
+    {
+     "id": "meleeBack7",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "inRange",
+     "within": 9,
+     "grace": 7,
+     "role": "melee",
+     "label": "Back on his flank after he lands",
+     "tip": "As soon as he touches down, get back to his side. Not behind him, not in front."
+    },
+    {
+     "id": "rangedHold7",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 7,
+     "role": "ranged",
+     "label": "Hold your spot east of him",
+     "tip": "Stay at your spot, spread, out of the tail. Chill moves you, come back."
+    },
+    {
+     "id": "healHold7",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 7,
+     "role": "healer",
+     "label": "Stay in range of the tank",
+     "tip": "Stay east of him, spread from your group, inside 40 yards of the tank."
+    },
+    {
+     "id": "meleeFlank7",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCheck",
+     "grace": 8,
+     "role": "melee",
+     "label": "Be on his flank when he lifts off",
+     "tip": "At his side, behind the forelegs. Never behind the tail and never in front."
+    },
+    {
+     "id": "decurse7",
+     "type": "afterEvent",
+     "event": "lifeDrain",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Life Drain at once",
+     "tip": "Life Drain pulls health off the raid and heals him. Curse off, every target, within a few seconds of it landing."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "chillDodge7",
+     "type": "afterEvent",
+     "event": "blizzard",
+     "check": "outsideHazard",
+     "within": 2.8,
+     "grace": 2.5,
+     "notBefore": 1.6,
+     "role": null,
+     "label": "Step out of Chill",
+     "tip": "A Chill landing under you. Three thousand a second and it slows you. Step out now."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Air phase 4",
+   "subtitle": "Five Icebolts, then Frost Breath: hide behind a block",
+   "hpFrom": 0.21,
+   "hpTo": 0.18,
+   "duration": 26,
+   "bossState": "airborne",
+   "raidSpot": "raidAir",
+   "spots": {
+    "tank": "pickup4",
+    "boss": "bossSpot",
+    "pickup": "pickup4",
+    "ranged": "rangedAir",
+    "healer": "healerAir",
+    "melee": "meleeAir"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "liftOff",
+     "first": 0.3
+    },
+    {
+     "id": "blizzard",
+     "first": 5,
+     "every": 30
+    },
+    {
+     "id": "icebolt4_1",
+     "first": 3.5
+    },
+    {
+     "id": "icebolt4_2",
+     "first": 6
+    },
+    {
+     "id": "icebolt4_3",
+     "first": 8.5
+    },
+    {
+     "id": "icebolt4_4",
+     "first": 11
+    },
+    {
+     "id": "icebolt4_5",
+     "first": 13.5
+    },
+    {
+     "id": "iceboltYou",
+     "first": 13.5
+    },
+    {
+     "id": "frostBreath4",
+     "first": 16
+    }
+   ],
+   "expectations": [
+    {
+     "id": "coverMetric8",
+     "type": "continuous",
+     "metric": "breathHits",
+     "label": "Behind a block when Frost Breath lands",
+     "tip": "The bomb is a one-shot. Pick your block after the third Icebolt and be behind it before the bar finishes."
+    },
+    {
+     "id": "inRoom8",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "nontank",
+     "label": "Spread out for the air phase, 10 yards from anyone",
+     "tip": "Do not stand next to anybody. An Icebolt splashes 10 yards and the block is what will save you from the breath."
+    },
+    {
+     "id": "airSpotTank8",
+     "type": "playerAtSpotBy",
+     "spot": "roomMiddle",
+     "grace": 2,
+     "role": "tanks",
+     "label": "Be a normal raider while he flies",
+     "tip": "Run out from under him, spread, then hide behind a block like everyone else. He lands on his spot: be near it."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Burn",
+   "subtitle": "No more air phases: kill him",
+   "hpFrom": 0.18,
+   "hpTo": 0,
+   "duration": 58,
+   "bossState": "grounded",
+   "raidSpot": "raidGround",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeSpot"
+   },
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "lifeDrain",
+     "first": 22,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7.5,
+     "jitter": 1
+    },
+    {
+     "id": "tailSweep",
+     "first": 9,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "blizzard",
+     "first": 8,
+     "every": 12,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "landGrab9",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 8,
+     "role": "tanks",
+     "label": "Grab him the moment he lands",
+     "tip": "He cannot be taunted. Burst threat the second he touches down, and walk him back onto his spot facing north."
+    },
+    {
+     "id": "landSpot9",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 10,
+     "grace": 8,
+     "from": "landing",
+     "role": "tanks",
+     "label": "Back onto his spot after landing",
+     "tip": "He lands on his spot. Stand on the north side so he faces away from the raid."
+    },
+    {
+     "id": "meleeBack9",
+     "type": "afterEvent",
+     "event": "landing",
+     "check": "inRange",
+     "within": 9,
+     "grace": 7,
+     "role": "melee",
+     "label": "Back on his flank after he lands",
+     "tip": "As soon as he touches down, get back to his side. Not behind him, not in front."
+    },
+    {
+     "id": "rangedHold9",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 7,
+     "role": "ranged",
+     "label": "Hold your spot east of him",
+     "tip": "Stay at your spot, spread, out of the tail. Chill moves you, come back."
+    },
+    {
+     "id": "healHold9",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 7,
+     "role": "healer",
+     "label": "Stay in range of the tank",
+     "tip": "Stay east of him, spread from your group, inside 40 yards of the tank."
+    },
+    {
+     "id": "meleeFlank9",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCheck",
+     "grace": 8,
+     "role": "melee",
+     "label": "Be on his flank when he lifts off",
+     "tip": "At his side, behind the forelegs. Never behind the tail and never in front."
+    },
+    {
+     "id": "decurse9",
+     "type": "afterEvent",
+     "event": "lifeDrain",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 5,
+     "role": [
+      "healer",
+      "ranged"
+     ],
+     "label": "Decurse Life Drain at once",
+     "tip": "Life Drain pulls health off the raid and heals him. Curse off, every target, within a few seconds of it landing."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "chillDodge9",
+     "type": "afterEvent",
+     "event": "blizzard",
+     "check": "outsideHazard",
+     "within": 2.8,
+     "grace": 2.5,
+     "notBefore": 1.6,
+     "role": null,
+     "label": "Step out of Chill",
+     "tip": "A Chill landing under you. Three thousand a second and it slows you. Step out now."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Frost Aura never stops and he hits the tank every 2 seconds. Keep the tank above half."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A Cleave and two swings on a low tank is a dead tank. Stay ahead."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 2.5,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.6,
+   "severe": 12,
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "tip": "Dispel the moment it lands."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 1.2,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "breathHits": {
+   "label": "Frost Breaths taken in the open",
+   "unit": "count",
+   "penaltyPerUnit": 22,
+   "severe": 1,
+   "tip": "A one-shot. Be behind a block before the 7 second cast finishes."
+  },
+  "tailed": {
+   "label": "Tail Sweeps taken",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Thirty yards behind him is his tail. Stay at his flank."
+  },
+  "tailOnRaid": {
+   "label": "Tail Sweeps into the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "cleaveOnRaid": {
+   "label": "Cleaves into the raid",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 1,
+   "roles": "tanks",
+   "tip": "Face him north, away from everyone."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Grab him on every landing; decurse Life Drain; melee back in after he lands.",
+  "windows": {
+   "perfect": 0.4
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Sapphiron turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": [
+     "healer",
+     "ranged"
+    ],
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dispel the moment it lands. Tank first, then healers, then everyone else."
+   },
+   {
+    "id": "meleeBackCue",
+    "ability": "attack",
+    "on": "event",
+    "event": "landing",
+    "offset": 6,
+    "early": 5,
+    "late": 7,
+    "role": "melee",
+    "short": "BACK IN",
+    "label": "Back on him after he lands",
+    "tip": "Get to his flank and start hitting him again."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "breathDrill",
+   "name": "Frost Breath cover",
+   "description": "Five Icebolts, then the breath. Find a block after the third bolt and be behind it when the bar finishes.",
+   "roles": null,
+   "startPhase": 2,
+   "duration": 24,
+   "loop": true,
+   "start": "pickup",
+   "actions": [
+    {
+     "id": "icebolt1_1",
+     "first": 3.5
+    },
+    {
+     "id": "icebolt1_2",
+     "first": 6
+    },
+    {
+     "id": "icebolt1_3",
+     "first": 8.5
+    },
+    {
+     "id": "icebolt1_4",
+     "first": 11
+    },
+    {
+     "id": "icebolt1_5",
+     "first": 13.5
+    },
+    {
+     "id": "frostBreath1",
+     "first": 16
+    }
+   ]
+  },
+  {
+   "id": "chillDrill",
+   "name": "Dodge Chill",
+   "description": "Chill lands under the raid every few seconds. Step out, then get back to your job.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "blizzard",
+     "first": 3,
+     "every": 6,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "tailDrill",
+   "name": "Hold him facing away",
+   "description": "Cleave and Tail Sweep keep coming. Keep him pointed north and the raid will never see them.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 2,
+     "every": 5
+    },
+    {
+     "id": "tailSweep",
+     "first": 4,
+     "every": 8
+    }
+   ]
+  },
+  {
+   "id": "curseDrill",
+   "name": "Decurse Life Drain",
+   "description": "Life Drain lands on three raiders every 16 seconds, the raid is taking Frost Aura, and the tank needs a heal after every Cleave.",
+   "roles": [
+    "healer",
+    "ranged"
+   ],
+   "startPhase": 1,
+   "duration": 40,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "frostAura",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "lifeDrain",
+     "first": 2,
+     "every": 16
+    },
+    {
+     "id": "cleave",
+     "first": 3,
+     "every": 7
+    }
+   ]
+  }
+ ]
+}

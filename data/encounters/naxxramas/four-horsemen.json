@@ -1,0 +1,2463 @@
+{
+ "id": "four-horsemen",
+ "name": "The Four Horsemen",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "naxxramas",
+  "name": "Naxxramas",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/naxxramas/four-horsemen.md. The room (a 108 yd square, Horsemen in the corners 76 yd apart) is an estimate from the guides' prose. WHAT THE ENGINE CANNOT DO: there is one boss entity, so four live Horsemen with four threat tables, Spirits at the corpses and separate HP pools cannot exist. The fight is modelled as what each group of raiders actually experiences: one 39 s stop at each corner (three Marks), walking clockwise to the next corner, for two full circuits. The boss entity teleports corner to corner each stop (`teleportBossTo` with a `threatWipe`), standing for the Horseman of that corner, with a single HP pool draining across all eight stops: 321 s total (real kills run about 5 to 8 minutes). THE MARKS: real cadence first at 20 s (DBM 21 s), then 12 to 12.9 s (DBM 12.9 s is used). Each Horseman's mark is a stacking debuff (`maxStacks`) with its 75 s duration so the stack counter shows, and the first three stacks' damage (0, then 250, then 1,000: exact values from the wiki, unresistable) is a `radius: 65` `aoe` on the stacks that do damage, cast with the stack debuff. Stack damage is nonlinear (0/250/1,000/3,000/5,000), which `maxStacks`' per-stack `tickDamage` cannot express, so each damaging Mark is its own action. Marks cannot be dropped in the engine except by leaving range, so each stop hard-codes the three stack levels you will really have when the raid rotates on schedule. OVERSTAYING (the actual skill): at +12.9 s after each stop starts (the next Mark tick), anyone not within 24 yd of the new corner's group spot takes `overstay` 3,000 (scored `overstay`): the 4th stack of the Horseman they should have left, 3,000 per the wiki. A real raider who overstays takes even more on the next tick; the engine cannot model the rest of the ladder (5,000, 6,000) because stacks are hard-coded by the stop. The walk between corners (76 yd, about 11 s) must therefore start at the Mark that closes the previous stop. The safe spot in the middle (15 yd around the room's centre, real: 'in front of the platform, out of range of all four') is named for the backup-tank plan but the current rotation never needs it, and marks' `safeSpots` include it so a player who hides there is not hit. TANK ROTATION: real raids use 8 tanks (4 main, 4 backup), each holding about 3 stacks and handing off to a backup Taunt, resisted 16% of the time. The engine has one tank role, so the player tank's loop is 'walk to the next corner, Taunt that Horseman, hold through 3 Marks, repeat': the same loop the real main tanks do on their rotation, without the backups and Taunt resists. Each corner stop is a `threatWipe` so every Horseman's table starts fresh, as it does for that tank. `boss.stationary` keeps him at his corner because tanks walk to the Horseman in this rotation model; in the real fight tanks DRAG Horsemen to the corners on the pull, which happens once, off-screen, inside the 21 s before the first Mark. The ghost tank in other roles follows the same walk. Damage: boss melee is 800 per 2 s swing (one value for all four: classicdb 4,066 to 6,807 before armor; scaled). Righteous Fire (Mograine) is the real 2,160 hit plus 600/s for 8 s on the tank, every 9 s (25% proc per swing, approximated as a fixed cadence). Holy Wrath: the tank takes the first jump (550) as a `debuff`; for everyone else it is a `carried` `stayPut` bomb (`playerChance` 0.3): 1,100 on you (the second jump's damage), raid members within 9.5 yd count as a chain into the raid (`chainOnRaid`), scored only when the raid is spread and you are not on your spot, because the raid formation (`spacing` 10 on this stop) keeps dots 10 yd from you automatically. The real chain doubles per jump; the engine counts jumps as one metric. The chain metric is only scored for ranged and healers: the melee dots hug him at his flanks, so a melee player cannot be 10 yards clear of them; melee still carries and detonates the bomb, unscored. Meteor: a random raider (`playerChance` 0.35) eats 6,000 if they are not inside the 9 yd stack spot at 9 yd from him (`safeSpots` cover; the tank and melee stand inside it too); real Meteor is 12,825 split among everyone within 8 yd, so stacking is the cover here. The tank's share is a 1,300 `debuff`. Void Zones land under random raiders (`playerChance` 0.35, 1.5 s warning, 40 s active, the real 90 s is pointless once the raid has left the corner) and tick 1,500/s (real 3,950 to 4,750, scaled to the bar), and because adds and spirits do not exist, the Spirits-at-corpses mechanic (dead Horsemen keep marking their corner until the fight ends) is unmodelled: the corners never go quiet. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. A healer who does nothing loses the tank repeatedly: 400 DPS plus Marks and Righteous Fire against a 150/s passive rate. Shield Wall (each Horseman at 50% and 20%, 20 s) is two `shield` windows on the boss's single HP pool, the first at about 44% (the 5th stop's 18 s mark, late so it does not overlap the walk and the rotate note) and the second at about 20% (the real ones are four independent ones per Horseman at 50% and 20%); DPS must stop attacking for 20 s (`attacksIntoShield` scored), standing in for the real instruction to swap to another Horseman, which the engine cannot show because only one boss exists. Enrage (100 Marks, about 20 min) is not reached and not modelled; Mark radius and cadence open questions are in the research file. Spirit HP (6,920 and 937) and melee are unused. Disarms are not modelled.",
+ "sources": [
+  "docs/research/naxxramas/four-horsemen.md",
+  "https://warcraft.wiki.gg/wiki/Four_Horsemen_(Classic)",
+  "https://www.wowhead.com/classic/guide/four-horsemen-naxxramas-raid-strategy",
+  "https://www.wowhead.com/classic/spell=28832/mark-of-korthazz",
+  "https://www.wowhead.com/classic/spell=28833/mark-of-blaumeux",
+  "https://www.wowhead.com/classic/spell=28834/mark-of-mograine",
+  "https://www.wowhead.com/classic/spell=28835/mark-of-zeliek",
+  "https://www.wowhead.com/classic/spell=28884/meteor",
+  "https://www.wowhead.com/classic/spell=28882/righteous-fire",
+  "https://www.wowhead.com/classic/spell=28863/void-zone",
+  "https://classicdb.ch/?npc=16062",
+  "https://classicdb.ch/?npc=16063",
+  "https://classicdb.ch/?npc=16064",
+  "https://classicdb.ch/?npc=16065",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/VanillaNaxx/MilitaryQuarter/Horsemen.lua",
+  "https://www.warcrafttavern.com/wow-classic/guides/naxxramas/"
+ ],
+ "arena": {
+  "name": "The Four Horsemen's Hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -54,
+      -54
+     ],
+     [
+      54,
+      -54
+     ],
+     [
+      54,
+      54
+     ],
+     [
+      -54,
+      54
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -8,
+      -80
+     ],
+     [
+      8,
+      -80
+     ],
+     [
+      8,
+      -50
+     ],
+     [
+      -8,
+      -50
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -8,
+      -54
+     ],
+     [
+      -54,
+      -54
+     ],
+     [
+      -54,
+      54
+     ],
+     [
+      54,
+      54
+     ],
+     [
+      54,
+      -54
+     ],
+     [
+      8,
+      -54
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -8,
+      -54
+     ],
+     [
+      -8,
+      -80
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      8,
+      -54
+     ],
+     [
+      8,
+      -80
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -74
+    ]
+   },
+   {
+    "text": "Korth'azz (SE)",
+    "at": [
+     38,
+     -46
+    ]
+   },
+   {
+    "text": "Mograine (SW)",
+    "at": [
+     -38,
+     -46
+    ]
+   },
+   {
+    "text": "Zeliek (NW)",
+    "at": [
+     -38,
+     46
+    ]
+   },
+   {
+    "text": "Blaumeux (NE)",
+    "at": [
+     38,
+     46
+    ]
+   },
+   {
+    "text": "Safe spot",
+    "at": [
+     0,
+     4
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -68,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 38,
+   "y": -38,
+   "heading": 135
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -60,
+   "spread": 8
+  },
+  "safeCenter": {
+   "x": 0,
+   "y": 0,
+   "tolerance": 8,
+   "label": "Safe spot (stands for the area in front of the platform)"
+  },
+  "boss_k": {
+   "x": 38,
+   "y": -38,
+   "tolerance": 8,
+   "label": "Thane Korth'azz"
+  },
+  "tank_k": {
+   "x": 34.5,
+   "y": -34.5,
+   "tolerance": 4,
+   "label": "Tank: Korth'azz"
+  },
+  "melee_k": {
+   "x": 33.8,
+   "y": -39.4,
+   "tolerance": 3.5,
+   "label": "Melee: at his flank"
+  },
+  "ranged_k": {
+   "x": 30.2,
+   "y": -27.4,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healer_k": {
+   "x": 28.1,
+   "y": -32.3,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "group_k": {
+   "x": 30.9,
+   "y": -30.9,
+   "tolerance": 24,
+   "label": "Korth'azz's group"
+  },
+  "raid_k": {
+   "x": 27.4,
+   "y": -27.4,
+   "spread": 6,
+   "label": "Raid: Korth'azz"
+  },
+  "boss_m": {
+   "x": -38,
+   "y": -38,
+   "tolerance": 8,
+   "label": "Highlord Mograine"
+  },
+  "tank_m": {
+   "x": -34.5,
+   "y": -34.5,
+   "tolerance": 4,
+   "label": "Tank: Mograine"
+  },
+  "melee_m": {
+   "x": -39.4,
+   "y": -33.8,
+   "tolerance": 3.5,
+   "label": "Melee: at his flank"
+  },
+  "ranged_m": {
+   "x": -19.6,
+   "y": -28.1,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healer_m": {
+   "x": -26,
+   "y": -16.1,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "group_m": {
+   "x": -30.9,
+   "y": -30.9,
+   "tolerance": 24,
+   "label": "Mograine's group"
+  },
+  "raid_m": {
+   "x": -27.4,
+   "y": -27.4,
+   "spread": 9,
+   "label": "Raid: Mograine"
+  },
+  "boss_z": {
+   "x": -38,
+   "y": 38,
+   "tolerance": 8,
+   "label": "Sir Zeliek"
+  },
+  "tank_z": {
+   "x": -34.5,
+   "y": 34.5,
+   "tolerance": 4,
+   "label": "Tank: Zeliek"
+  },
+  "melee_z": {
+   "x": -33.8,
+   "y": 39.4,
+   "tolerance": 3.5,
+   "label": "Melee: at his flank"
+  },
+  "ranged_z": {
+   "x": -28.1,
+   "y": 19.6,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healer_z": {
+   "x": -16.1,
+   "y": 26,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "group_z": {
+   "x": -30.9,
+   "y": 30.9,
+   "tolerance": 24,
+   "label": "Zeliek's group"
+  },
+  "raid_z": {
+   "x": -16.8,
+   "y": 16.8,
+   "spacing": 10,
+   "spread": 22,
+   "label": "Raid: spread out 10 yards"
+  },
+  "boss_b": {
+   "x": 38,
+   "y": 38,
+   "tolerance": 8,
+   "label": "Lady Blaumeux"
+  },
+  "tank_b": {
+   "x": 34.5,
+   "y": 34.5,
+   "tolerance": 4,
+   "label": "Tank: Blaumeux"
+  },
+  "melee_b": {
+   "x": 39.4,
+   "y": 33.8,
+   "tolerance": 3.5,
+   "label": "Melee: at his flank"
+  },
+  "ranged_b": {
+   "x": 19.6,
+   "y": 28.1,
+   "tolerance": 7,
+   "label": "Ranged"
+  },
+  "healer_b": {
+   "x": 26,
+   "y": 16.1,
+   "tolerance": 7,
+   "label": "Healers"
+  },
+  "group_b": {
+   "x": 30.9,
+   "y": 30.9,
+   "tolerance": 24,
+   "label": "Blaumeux's group"
+  },
+  "raid_b": {
+   "x": 27.4,
+   "y": 27.4,
+   "spread": 9,
+   "label": "Raid: Blaumeux"
+  },
+  "tankSpot": {
+   "x": 34.5,
+   "y": -34.5,
+   "tolerance": 4,
+   "label": "Tank: Korth'azz"
+  },
+  "bossSpot": {
+   "x": 38,
+   "y": -38,
+   "tolerance": 8,
+   "label": "Thane Korth'azz"
+  },
+  "stack_k": {
+   "x": 31.6,
+   "y": -31.6,
+   "tolerance": 7,
+   "label": "Korth'azz stack"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1400,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1500,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 6,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 3.5,
+  "speed": 7,
+  "turnRate": 360,
+  "meleeRange": 6,
+  "meleeDamage": 800,
+  "meleeInterval": 2,
+  "stationary": true,
+  "looseHint": "New corner. Walk over and Taunt.",
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 700,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 150,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "You rotate with your group: three stacks on one Horseman, then walk to the next corner and Taunt the next one. The fourth stack is 3,000 and the fifth is 5,000, so the walk starts on the third Mark, every time.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Rotate clockwise with your group. Korth'azz: stack on his group for Meteor. Zeliek: spread 10 yards or Holy Wrath chains. Blaumeux: move out of Void Zones. Mograine: stay on him. Shield Wall at 50% and 20%: stop.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Rotate with your group, three Marks per corner, and stay inside 30 yards of your Horseman. Same rules: stack on Korth'azz, spread on Zeliek, dodge Blaumeux's zones.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Move with your group and keep the tank up: the tank walks between Horsemen and takes Righteous Fire on Mograine. Marks hit the tank too, and they hit you. Never take the fourth Mark yourself.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "markStack_k": {
+   "label": "Mark of Korth'azz",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 75,
+   "maxStacks": 8,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": false,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "One stack does nothing. The next stacks cost 250, then 1,000, then 3,000. Rotate before the fourth."
+  },
+  "markHit_k_2": {
+   "label": "Mark of Korth'azz: 250",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 250,
+   "tankDamage": 250,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The second stack costs 250."
+  },
+  "markHit_k_3": {
+   "label": "Mark of Korth'azz: 1,000",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 1000,
+   "tankDamage": 1000,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The third stack costs 1,000. Your next Mark here costs 3,000: be walking to the next corner."
+  },
+  "arrival_k": {
+   "label": "First Mark of the stop",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The Mark lands wherever you are standing."
+  },
+  "overstay_k": {
+   "label": "You overstayed",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 3000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "group_k"
+   ],
+   "safeRadius": 24,
+   "playerMetric": "overstay",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "You were too far from this corner's group when the Mark landed: 3,000 for the old Horseman's fourth stack."
+  },
+  "arrive_k": {
+   "label": "Rotate to Korth'azz",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "boss_k",
+   "toast": "New corner: Korth'azz. Taunt!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "New corner, new Horseman, a fresh threat table. Be walking the moment the third Mark lands."
+  },
+  "markStack_m": {
+   "label": "Mark of Mograine",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 75,
+   "maxStacks": 8,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": false,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "One stack does nothing. The next stacks cost 250, then 1,000, then 3,000. Rotate before the fourth."
+  },
+  "markHit_m_2": {
+   "label": "Mark of Mograine: 250",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 250,
+   "tankDamage": 250,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The second stack costs 250."
+  },
+  "markHit_m_3": {
+   "label": "Mark of Mograine: 1,000",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 1000,
+   "tankDamage": 1000,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The third stack costs 1,000. Your next Mark here costs 3,000: be walking to the next corner."
+  },
+  "arrival_m": {
+   "label": "First Mark of the stop",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The Mark lands wherever you are standing."
+  },
+  "overstay_m": {
+   "label": "You overstayed",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 3000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "group_m"
+   ],
+   "safeRadius": 24,
+   "playerMetric": "overstay",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "You were too far from this corner's group when the Mark landed: 3,000 for the old Horseman's fourth stack."
+  },
+  "arrive_m": {
+   "label": "Rotate to Mograine",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "boss_m",
+   "toast": "New corner: Mograine. Taunt!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "New corner, new Horseman, a fresh threat table. Be walking the moment the third Mark lands."
+  },
+  "markStack_z": {
+   "label": "Mark of Zeliek",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 75,
+   "maxStacks": 8,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": false,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "One stack does nothing. The next stacks cost 250, then 1,000, then 3,000. Rotate before the fourth."
+  },
+  "markHit_z_2": {
+   "label": "Mark of Zeliek: 250",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 250,
+   "tankDamage": 250,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The second stack costs 250."
+  },
+  "markHit_z_3": {
+   "label": "Mark of Zeliek: 1,000",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 1000,
+   "tankDamage": 1000,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The third stack costs 1,000. Your next Mark here costs 3,000: be walking to the next corner."
+  },
+  "arrival_z": {
+   "label": "First Mark of the stop",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The Mark lands wherever you are standing."
+  },
+  "overstay_z": {
+   "label": "You overstayed",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 3000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "group_z"
+   ],
+   "safeRadius": 24,
+   "playerMetric": "overstay",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "You were too far from this corner's group when the Mark landed: 3,000 for the old Horseman's fourth stack."
+  },
+  "arrive_z": {
+   "label": "Rotate to Zeliek",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "boss_z",
+   "toast": "New corner: Zeliek. Taunt!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "New corner, new Horseman, a fresh threat table. Be walking the moment the third Mark lands."
+  },
+  "markStack_b": {
+   "label": "Mark of Blaumeux",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "dispel": "none",
+   "duration": 75,
+   "maxStacks": 8,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": false,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "One stack does nothing. The next stacks cost 250, then 1,000, then 3,000. Rotate before the fourth."
+  },
+  "markHit_b_2": {
+   "label": "Mark of Blaumeux: 250",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 250,
+   "tankDamage": 250,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The second stack costs 250."
+  },
+  "markHit_b_3": {
+   "label": "Mark of Blaumeux: 1,000",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 65,
+   "damage": 1000,
+   "tankDamage": 1000,
+   "safeSpots": [
+    "safeCenter"
+   ],
+   "safeRadius": 15,
+   "hidden": true,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The third stack costs 1,000. Your next Mark here costs 3,000: be walking to the next corner."
+  },
+  "arrival_b": {
+   "label": "First Mark of the stop",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The Mark lands wherever you are standing."
+  },
+  "overstay_b": {
+   "label": "You overstayed",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 3000,
+   "tankDamage": 0,
+   "safeSpots": [
+    "group_b"
+   ],
+   "safeRadius": 24,
+   "playerMetric": "overstay",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "You were too far from this corner's group when the Mark landed: 3,000 for the old Horseman's fourth stack."
+  },
+  "arrive_b": {
+   "label": "Rotate to Blaumeux",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "boss_b",
+   "toast": "New corner: Blaumeux. Taunt!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "New corner, new Horseman, a fresh threat table. Be walking the moment the third Mark lands."
+  },
+  "meteor": {
+   "label": "Meteor",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.35,
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 6000,
+   "safeSpots": [
+    "stack_k"
+   ],
+   "safeRadius": 9,
+   "safeRoles": "nontank",
+   "playerMetric": "meteorsAlone",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Meteor splits among everyone within 8 yards. Stand in the group or eat it alone."
+  },
+  "meteorTank": {
+   "label": "Meteor: the tank's share",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 1300,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The tank takes a share every time."
+  },
+  "holyWrath": {
+   "label": "Holy Wrath",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "roles": "nontank",
+   "playerChance": 0.3,
+   "carried": true,
+   "stayPut": true,
+   "radius": 9.5,
+   "warning": 2.5,
+   "active": 0.4,
+   "damage": 1100,
+   "raidMetric": "chainOnRaid",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "It chains to anyone within 10 yards of you and doubles each jump. Hold your spot in the formation."
+  },
+  "holyWrathTank": {
+   "label": "Holy Wrath on the tank",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 550,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "It starts on the tank."
+  },
+  "voidZone": {
+   "label": "Void Zone",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "roles": "nontank",
+   "playerChance": 0.35,
+   "radius": 5,
+   "warning": 1.5,
+   "active": 40,
+   "damage": 1500,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A black circle. Step out before it opens; Consumption hurts every second."
+  },
+  "righteousFireHit": {
+   "label": "Righteous Fire",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.05,
+   "tickDamage": 2160,
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Mograine procs 2,160 Fire on his target, then 600 a second for 8 seconds. It is not dispellable."
+  },
+  "righteousFire": {
+   "label": "Righteous Fire",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 8.05,
+   "tickDamage": 600,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "600 Fire a second for 8 seconds."
+  },
+  "shieldWall": {
+   "label": "Shield Wall",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 20,
+   "reflectDamage": 0,
+   "roles": "dps",
+   "toast": "Shield Wall: stop attacking for 20 seconds",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "-75% damage taken for 20 seconds. Stop hitting this one until it ends."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Korth'azz",
+   "subtitle": "Pull 1: three Marks",
+   "hpFrom": 1,
+   "hpTo": 0.875,
+   "duration": 48,
+   "bossState": "grounded",
+   "raidSpot": "raid_k",
+   "spots": {
+    "tank": "tank_k",
+    "boss": "boss_k",
+    "melee": "melee_k",
+    "ranged": "stack_k",
+    "healer": "stack_k"
+   },
+   "actions": [
+    {
+     "id": "arrival_k",
+     "first": 21
+    },
+    {
+     "id": "markStack_k",
+     "first": 21
+    },
+    {
+     "id": "markStack_k",
+     "first": 33.9
+    },
+    {
+     "id": "markHit_k_2",
+     "first": 33.9
+    },
+    {
+     "id": "markStack_k",
+     "first": 46.8
+    },
+    {
+     "id": "markHit_k_3",
+     "first": 46.8
+    },
+    {
+     "id": "meteor",
+     "first": 22,
+     "every": 13.5,
+     "jitter": 2
+    },
+    {
+     "id": "meteorTank",
+     "first": 22,
+     "every": 13.5,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "playerAtSpotBy",
+     "spot": "tank_k",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Pull him to Korth'azz's corner before the first Mark",
+     "tip": "You have 20 seconds. Drag him to the corner, stack with your group."
+    },
+    {
+     "id": "rotate1",
+     "type": "onEvent",
+     "event": "arrival_k",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Korth'azz when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over1",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "stack1",
+     "type": "continuous",
+     "metric": "meteorsAlone",
+     "role": "nontank",
+     "label": "Stack on the group",
+     "tip": "Meteor splits among everyone within 8 yards. Stand in the pile: alone you take the whole thing."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Korth'azz: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Mograine",
+   "subtitle": "Stop 2: three Marks",
+   "hpFrom": 0.875,
+   "hpTo": 0.75,
+   "duration": 39,
+   "bossState": "grounded",
+   "raidSpot": "raid_m",
+   "spots": {
+    "tank": "tank_m",
+    "boss": "boss_m",
+    "melee": "melee_m",
+    "ranged": "ranged_m",
+    "healer": "healer_m"
+   },
+   "actions": [
+    {
+     "id": "arrive_m",
+     "first": 0.1
+    },
+    {
+     "id": "overstay_m",
+     "first": 12.9
+    },
+    {
+     "id": "arrival_m",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_m",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_m",
+     "first": 25.8
+    },
+    {
+     "id": "markHit_m_2",
+     "first": 25.8
+    },
+    {
+     "id": "markStack_m",
+     "first": 38.7
+    },
+    {
+     "id": "markHit_m_3",
+     "first": 38.7
+    },
+    {
+     "id": "righteousFireHit",
+     "first": 8,
+     "every": 9,
+     "jitter": 2
+    },
+    {
+     "id": "righteousFire",
+     "first": 8,
+     "every": 9,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "arrive2",
+     "type": "afterEvent",
+     "event": "arrive_m",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Walk to Mograine and Taunt",
+     "tip": "Your Marks here are gone by now. Three stacks on the last corner: now take Mograine."
+    },
+    {
+     "id": "rotate2",
+     "type": "onEvent",
+     "event": "arrival_m",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Mograine when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over2",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mograine: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Zeliek",
+   "subtitle": "Stop 3: three Marks",
+   "hpFrom": 0.75,
+   "hpTo": 0.625,
+   "duration": 39,
+   "bossState": "grounded",
+   "raidSpot": "raid_z",
+   "spots": {
+    "tank": "tank_z",
+    "boss": "boss_z",
+    "melee": "melee_z",
+    "ranged": "ranged_z",
+    "healer": "healer_z"
+   },
+   "actions": [
+    {
+     "id": "arrive_z",
+     "first": 0.1
+    },
+    {
+     "id": "overstay_z",
+     "first": 12.9
+    },
+    {
+     "id": "arrival_z",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_z",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_z",
+     "first": 25.8
+    },
+    {
+     "id": "markHit_z_2",
+     "first": 25.8
+    },
+    {
+     "id": "markStack_z",
+     "first": 38.7
+    },
+    {
+     "id": "markHit_z_3",
+     "first": 38.7
+    },
+    {
+     "id": "holyWrath",
+     "first": 16,
+     "every": 13.5,
+     "jitter": 2
+    },
+    {
+     "id": "holyWrathTank",
+     "first": 16,
+     "every": 13.5,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "arrive3",
+     "type": "afterEvent",
+     "event": "arrive_z",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Walk to Zeliek and Taunt",
+     "tip": "Your Marks here are gone by now. Three stacks on the last corner: now take Zeliek."
+    },
+    {
+     "id": "rotate3",
+     "type": "onEvent",
+     "event": "arrival_z",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Zeliek when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over3",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "spread3",
+     "type": "continuous",
+     "metric": "chainOnRaid",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Spread 10 yards apart",
+     "tip": "Holy Wrath chains to anyone within 10 yards and doubles each jump. Stay on your spot in the formation."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Zeliek: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Blaumeux",
+   "subtitle": "Stop 4: three Marks",
+   "hpFrom": 0.625,
+   "hpTo": 0.5,
+   "duration": 39,
+   "bossState": "grounded",
+   "raidSpot": "raid_b",
+   "spots": {
+    "tank": "tank_b",
+    "boss": "boss_b",
+    "melee": "melee_b",
+    "ranged": "ranged_b",
+    "healer": "healer_b"
+   },
+   "actions": [
+    {
+     "id": "arrive_b",
+     "first": 0.1
+    },
+    {
+     "id": "overstay_b",
+     "first": 12.9
+    },
+    {
+     "id": "arrival_b",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_b",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_b",
+     "first": 25.8
+    },
+    {
+     "id": "markHit_b_2",
+     "first": 25.8
+    },
+    {
+     "id": "markStack_b",
+     "first": 38.7
+    },
+    {
+     "id": "markHit_b_3",
+     "first": 38.7
+    },
+    {
+     "id": "voidZone",
+     "first": 13,
+     "every": 13.5,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "arrive4",
+     "type": "afterEvent",
+     "event": "arrive_b",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Walk to Blaumeux and Taunt",
+     "tip": "Your Marks here are gone by now. Three stacks on the last corner: now take Blaumeux."
+    },
+    {
+     "id": "rotate4",
+     "type": "onEvent",
+     "event": "arrival_b",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Blaumeux when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over4",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "void4",
+     "type": "afterEvent",
+     "event": "voidZone",
+     "check": "outsideHazard",
+     "within": 2.2,
+     "grace": 2,
+     "notBefore": 1.3,
+     "role": "nontank",
+     "label": "Step out of the Void Zone",
+     "tip": "A black circle at your feet. Move before it opens."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Blaumeux: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Korth'azz",
+   "subtitle": "Stop 5: three Marks",
+   "hpFrom": 0.5,
+   "hpTo": 0.375,
+   "duration": 39,
+   "bossState": "grounded",
+   "raidSpot": "raid_k",
+   "spots": {
+    "tank": "tank_k",
+    "boss": "boss_k",
+    "melee": "melee_k",
+    "ranged": "stack_k",
+    "healer": "stack_k"
+   },
+   "actions": [
+    {
+     "id": "arrive_k",
+     "first": 0.1
+    },
+    {
+     "id": "overstay_k",
+     "first": 12.9
+    },
+    {
+     "id": "arrival_k",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_k",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_k",
+     "first": 25.8
+    },
+    {
+     "id": "markHit_k_2",
+     "first": 25.8
+    },
+    {
+     "id": "markStack_k",
+     "first": 38.7
+    },
+    {
+     "id": "markHit_k_3",
+     "first": 38.7
+    },
+    {
+     "id": "meteor",
+     "first": 16,
+     "every": 13.5,
+     "jitter": 2
+    },
+    {
+     "id": "meteorTank",
+     "first": 16,
+     "every": 13.5,
+     "jitter": 2
+    },
+    {
+     "id": "shieldWall",
+     "first": 18
+    }
+   ],
+   "expectations": [
+    {
+     "id": "arrive5",
+     "type": "afterEvent",
+     "event": "arrive_k",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Walk to Korth'azz and Taunt",
+     "tip": "Your Marks here are gone by now. Three stacks on the last corner: now take Korth'azz."
+    },
+    {
+     "id": "rotate5",
+     "type": "onEvent",
+     "event": "arrival_k",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Korth'azz when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over5",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "stack5",
+     "type": "continuous",
+     "metric": "meteorsAlone",
+     "role": "nontank",
+     "label": "Stack on the group",
+     "tip": "Meteor splits among everyone within 8 yards. Stand in the pile: alone you take the whole thing."
+    },
+    {
+     "id": "shieldStop5",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop on Shield Wall",
+     "tip": "He is taking 75% less for 20 seconds. Hold your attacks, then burn him when it fades."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Korth'azz: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Mograine",
+   "subtitle": "Stop 6: three Marks",
+   "hpFrom": 0.375,
+   "hpTo": 0.25,
+   "duration": 39,
+   "bossState": "grounded",
+   "raidSpot": "raid_m",
+   "spots": {
+    "tank": "tank_m",
+    "boss": "boss_m",
+    "melee": "melee_m",
+    "ranged": "ranged_m",
+    "healer": "healer_m"
+   },
+   "actions": [
+    {
+     "id": "arrive_m",
+     "first": 0.1
+    },
+    {
+     "id": "overstay_m",
+     "first": 12.9
+    },
+    {
+     "id": "arrival_m",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_m",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_m",
+     "first": 25.8
+    },
+    {
+     "id": "markHit_m_2",
+     "first": 25.8
+    },
+    {
+     "id": "markStack_m",
+     "first": 38.7
+    },
+    {
+     "id": "markHit_m_3",
+     "first": 38.7
+    },
+    {
+     "id": "righteousFireHit",
+     "first": 8,
+     "every": 9,
+     "jitter": 2
+    },
+    {
+     "id": "righteousFire",
+     "first": 8,
+     "every": 9,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "arrive6",
+     "type": "afterEvent",
+     "event": "arrive_m",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Walk to Mograine and Taunt",
+     "tip": "Your Marks here are gone by now. Three stacks on the last corner: now take Mograine."
+    },
+    {
+     "id": "rotate6",
+     "type": "onEvent",
+     "event": "arrival_m",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Mograine when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over6",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mograine: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Zeliek",
+   "subtitle": "Stop 7: three Marks",
+   "hpFrom": 0.25,
+   "hpTo": 0.125,
+   "duration": 39,
+   "bossState": "grounded",
+   "raidSpot": "raid_z",
+   "spots": {
+    "tank": "tank_z",
+    "boss": "boss_z",
+    "melee": "melee_z",
+    "ranged": "ranged_z",
+    "healer": "healer_z"
+   },
+   "actions": [
+    {
+     "id": "arrive_z",
+     "first": 0.1
+    },
+    {
+     "id": "overstay_z",
+     "first": 12.9
+    },
+    {
+     "id": "arrival_z",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_z",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_z",
+     "first": 25.8
+    },
+    {
+     "id": "markHit_z_2",
+     "first": 25.8
+    },
+    {
+     "id": "markStack_z",
+     "first": 38.7
+    },
+    {
+     "id": "markHit_z_3",
+     "first": 38.7
+    },
+    {
+     "id": "holyWrath",
+     "first": 16,
+     "every": 13.5,
+     "jitter": 2
+    },
+    {
+     "id": "holyWrathTank",
+     "first": 16,
+     "every": 13.5,
+     "jitter": 2
+    },
+    {
+     "id": "shieldWall",
+     "first": 15
+    }
+   ],
+   "expectations": [
+    {
+     "id": "arrive7",
+     "type": "afterEvent",
+     "event": "arrive_z",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Walk to Zeliek and Taunt",
+     "tip": "Your Marks here are gone by now. Three stacks on the last corner: now take Zeliek."
+    },
+    {
+     "id": "rotate7",
+     "type": "onEvent",
+     "event": "arrival_z",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Zeliek when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over7",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "spread7",
+     "type": "continuous",
+     "metric": "chainOnRaid",
+     "role": [
+      "ranged",
+      "healer"
+     ],
+     "label": "Spread 10 yards apart",
+     "tip": "Holy Wrath chains to anyone within 10 yards and doubles each jump. Stay on your spot in the formation."
+    },
+    {
+     "id": "shieldStop7",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "dps",
+     "label": "Stop on Shield Wall",
+     "tip": "He is taking 75% less for 20 seconds. Hold your attacks, then burn him when it fades."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Zeliek: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Blaumeux",
+   "subtitle": "Stop 8: three Marks",
+   "hpFrom": 0.125,
+   "hpTo": 0,
+   "duration": 39,
+   "bossState": "grounded",
+   "raidSpot": "raid_b",
+   "spots": {
+    "tank": "tank_b",
+    "boss": "boss_b",
+    "melee": "melee_b",
+    "ranged": "ranged_b",
+    "healer": "healer_b"
+   },
+   "actions": [
+    {
+     "id": "arrive_b",
+     "first": 0.1
+    },
+    {
+     "id": "overstay_b",
+     "first": 12.9
+    },
+    {
+     "id": "arrival_b",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_b",
+     "first": 12.9
+    },
+    {
+     "id": "markStack_b",
+     "first": 25.8
+    },
+    {
+     "id": "markHit_b_2",
+     "first": 25.8
+    },
+    {
+     "id": "markStack_b",
+     "first": 38.7
+    },
+    {
+     "id": "markHit_b_3",
+     "first": 38.7
+    },
+    {
+     "id": "voidZone",
+     "first": 13,
+     "every": 13.5,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "arrive8",
+     "type": "afterEvent",
+     "event": "arrive_b",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Walk to Blaumeux and Taunt",
+     "tip": "Your Marks here are gone by now. Three stacks on the last corner: now take Blaumeux."
+    },
+    {
+     "id": "rotate8",
+     "type": "onEvent",
+     "event": "arrival_b",
+     "check": "inRange",
+     "grace": 2,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Be at Blaumeux when the Marks land",
+     "tip": "Rotate clockwise on the third Mark of the last corner. Marks do not care that you were walking."
+    },
+    {
+     "id": "over8",
+     "type": "continuous",
+     "metric": "overstay",
+     "label": "Never take a fourth Mark",
+     "tip": "Three stacks and you walk. The fourth stack costs 3,000, and the fifth costs 5,000."
+    },
+    {
+     "id": "void8",
+     "type": "afterEvent",
+     "event": "voidZone",
+     "check": "outsideHazard",
+     "within": 2.2,
+     "grace": 2,
+     "notBefore": 1.3,
+     "role": "nontank",
+     "label": "Step out of the Void Zone",
+     "tip": "A black circle at your feet. Move before it opens."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Blaumeux: keep the tank up through the Mark ticks and whatever this Horseman does."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Marks and swings stack up. Stay ahead of the next one."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.05,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "overstay": {
+   "label": "Fourth Mark stacks",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "tip": "Three stacks, then walk."
+  },
+  "meteorsAlone": {
+   "label": "Meteors you took alone",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stand in the stack on Korth'azz."
+  },
+  "chainOnRaid": {
+   "label": "Holy Wrath chained into the raid",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": [
+    "ranged",
+    "healer"
+   ],
+   "tip": "Hold your spot on Zeliek: 10 yards from everyone."
+  },
+  "attacksIntoShield": {
+   "label": "Attacks into Shield Wall",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Stop for 20 seconds when he Shield Walls."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.45
+ },
+ "cues": {
+  "notes": "Tank: walk to each corner and Taunt. DPS: be attacking again soon after each corner. Healer: Righteous Fire on Mograine.",
+  "windows": {
+   "perfect": 0.5
+  },
+  "list": [
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "tauntC_k",
+    "ability": "taunt",
+    "on": "event",
+    "event": "arrive_k",
+    "offset": 8.2,
+    "early": 3.5,
+    "late": 6,
+    "role": "tanks",
+    "short": "TAUNT",
+    "label": "Taunt Korth'azz",
+    "tip": "Finish the walk and Taunt him."
+   },
+   {
+    "id": "tauntC_m",
+    "ability": "taunt",
+    "on": "event",
+    "event": "arrive_m",
+    "offset": 8.2,
+    "early": 3.5,
+    "late": 6,
+    "role": "tanks",
+    "short": "TAUNT",
+    "label": "Taunt Mograine",
+    "tip": "Finish the walk and Taunt him."
+   },
+   {
+    "id": "tauntC_z",
+    "ability": "taunt",
+    "on": "event",
+    "event": "arrive_z",
+    "offset": 8.2,
+    "early": 3.5,
+    "late": 6,
+    "role": "tanks",
+    "short": "TAUNT",
+    "label": "Taunt Zeliek",
+    "tip": "Finish the walk and Taunt him."
+   },
+   {
+    "id": "tauntC_b",
+    "ability": "taunt",
+    "on": "event",
+    "event": "arrive_b",
+    "offset": 8.2,
+    "early": 3.5,
+    "late": 6,
+    "role": "tanks",
+    "short": "TAUNT",
+    "label": "Taunt Blaumeux",
+    "tip": "Finish the walk and Taunt him."
+   },
+   {
+    "id": "hitC_k",
+    "ability": "attack",
+    "on": "event",
+    "event": "arrive_k",
+    "offset": 12,
+    "early": 4,
+    "late": 7,
+    "role": "dps",
+    "short": "HIT",
+    "label": "Back on Korth'azz",
+    "tip": "Get to the new corner and start hitting."
+   },
+   {
+    "id": "hitC_m",
+    "ability": "attack",
+    "on": "event",
+    "event": "arrive_m",
+    "offset": 12,
+    "early": 4,
+    "late": 7,
+    "role": "dps",
+    "short": "HIT",
+    "label": "Back on Mograine",
+    "tip": "Get to the new corner and start hitting."
+   },
+   {
+    "id": "hitC_z",
+    "ability": "attack",
+    "on": "event",
+    "event": "arrive_z",
+    "offset": 12,
+    "early": 4,
+    "late": 7,
+    "role": "dps",
+    "short": "HIT",
+    "label": "Back on Zeliek",
+    "tip": "Get to the new corner and start hitting."
+   },
+   {
+    "id": "hitC_b",
+    "ability": "attack",
+    "on": "event",
+    "event": "arrive_b",
+    "offset": 12,
+    "early": 4,
+    "late": 7,
+    "role": "dps",
+    "short": "HIT",
+    "label": "Back on Blaumeux",
+    "tip": "Get to the new corner and start hitting."
+   },
+   {
+    "id": "healRf",
+    "ability": "heal",
+    "on": "event",
+    "event": "righteousFireHit",
+    "offset": 1.2,
+    "early": 0.9,
+    "late": 2.4,
+    "role": "healer",
+    "short": "HEAL",
+    "label": "Heal through Righteous Fire",
+    "tip": "Hit, then DoT. Pre-heal the tank for the next one."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "cornerDrill",
+   "name": "Walk and Taunt",
+   "description": "A new corner opens and his table is empty. Walk there and Taunt within 12 seconds, then hold him through the Marks.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 36,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "arrive_m",
+     "first": 1
+    },
+    {
+     "id": "markStack_m",
+     "first": 13
+    },
+    {
+     "id": "markStack_m",
+     "first": 25
+    },
+    {
+     "id": "righteousFireHit",
+     "first": 15,
+     "every": 9
+    }
+   ]
+  },
+  {
+   "id": "voidDrill",
+   "name": "Dance out of Void Zones",
+   "description": "A Void Zone drops under someone every 8 seconds. Step out before it opens, then keep attacking.",
+   "roles": "dps",
+   "startPhase": 4,
+   "duration": 36,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "arrive_b",
+     "first": 1
+    },
+    {
+     "id": "voidZone",
+     "first": 6,
+     "every": 8,
+     "jitter": 1.5
+    }
+   ]
+  },
+  {
+   "id": "rfDrill",
+   "name": "Heal Righteous Fire",
+   "description": "Mograine procs Righteous Fire every 7 seconds. Heal the 2,160 and the 8 seconds of burn.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 36,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "arrive_m",
+     "first": 1
+    },
+    {
+     "id": "righteousFireHit",
+     "first": 13,
+     "every": 7
+    },
+    {
+     "id": "righteousFire",
+     "first": 13,
+     "every": 7
+    }
+   ]
+  }
+ ]
+}
