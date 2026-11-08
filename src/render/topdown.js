@@ -350,6 +350,7 @@ export function spotTolerance(script, reason) {
   if (reason === 'pickupSpot' || reason === 'dodgeLane' || reason === 'dodgeZone') return (P.pickupSpot && P.pickupSpot.tolerance) ?? 6;
   if (P[reason] && P[reason].tolerance != null) return P[reason].tolerance;
   if (reason === 'meleeSpot') return 3;
+  if (reason === 'los') return 5;
   if (reason === 'rangedSpot' || reason === 'healerSpot' || reason === 'raidSpot') return 8;
   return 3;
 }

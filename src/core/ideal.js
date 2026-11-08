@@ -133,8 +133,16 @@ export function idealPlayerPos(state, script) {
   if (!state.phaseDef) return { x: w.player.x, y: w.player.y, reason: 'wait' };
   const bomb = w.hazards.find((h) => h.carried && h.state === 'warning');
   if (bomb) return { x: bomb.runTo.x, y: bomb.runTo.y, reason: 'runOut' };
-  // A telegraphed pulse around the boss: walk out of its radius for the cast.
   const castDef = b.cast && script.actions[b.cast.id];
+  // Cover: for a cast you can hide from, or when a stacking debuff has reached the point where you drop it.
+  const heavy = state.debuffs.find((d) => d.on === 'player' && d.shelterAt && d.stacks >= d.shelterAt && d.safeSpots);
+  const hideFrom = (castDef && castDef.safeSpots && roleMatches(castDef.safeRoles, state.role, state.tankRole)) ? castDef.safeSpots : heavy ? heavy.safeSpots : null;
+  if (hideFrom) {
+    let best = null, bd = Infinity;
+    for (const n of hideFrom) { const s = script.positions[n]; if (!s) continue; const d = dist(w.player.x, w.player.y, s.x, s.y); if (d < bd) { bd = d; best = s; } }
+    if (best) return { x: best.x, y: best.y, reason: 'los' };
+  }
+  // A telegraphed pulse around the boss: walk out of its radius for the cast.
   if (castDef && castDef.moveOut && castDef.radius && roleMatches(castDef.moveOut === true ? null : castDef.moveOut, state.role, state.tankRole)) {
     const need = script.boss.radius + castDef.radius + 3;
     const p = w.player;

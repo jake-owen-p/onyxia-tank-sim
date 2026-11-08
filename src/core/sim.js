@@ -179,6 +179,12 @@ export function createSim(script, options = {}) {
 
   function toast(text, kind = 'info') { state.feedback.toast = { t: state.t, text, kind }; }
 
+  /** Is the player behind cover from this action (out of its line of sight)? */
+  function sheltered(def) {
+    const p = state.world.player;
+    return (def.safeSpots || []).some((n) => P[n] && dist(p.x, p.y, P[n].x, P[n].y) <= (def.safeRadius ?? P[n].tolerance ?? 6));
+  }
+
   /** True for `threat.turnGrace` seconds after a scripted turn onto the raid and after she comes back:
    *  while she swings round, facing, cleaves and tail sweeps on the raid are the fight's doing, not the tank's. */
   function turnSettling() {
@@ -479,7 +485,7 @@ export function createSim(script, options = {}) {
         break;
       }
       case 'aoe': {
-        const inRadius = !def.radius || bossRangeTo(p.x, p.y) <= def.radius;
+        const inRadius = (!def.radius || bossRangeTo(p.x, p.y) <= def.radius) && !sheltered(def);
         if (inRadius) { damagePlayer(def.damage || 0, id); if (def.playerMetric) addMetric(def.playerMetric, 1); stunPlayer(def.stun); }
         if (def.tankDamage || !def.radius || ghostInBossRange(def.radius)) damageGhost(def.tankDamage ?? def.damage ?? 0, id);
         emit('raidDamage', { id, label: def.label, amount: def.damage || 0 });
@@ -581,14 +587,14 @@ export function createSim(script, options = {}) {
     }
     const r = def.radius || 6;
     const centres = [];
-    if (placement === 'player') centres.push({ x: p.x, y: p.y, onPlayer: true });
+    if (placement === 'player') { if (roleMatches(def.roles)) centres.push({ x: p.x, y: p.y, onPlayer: true }); }
     else if (placement === 'boss') centres.push({ x: b.x, y: b.y });
     else if (placement === 'spots') {
       for (const name of def.spots || []) { if (P[name]) centres.push({ x: P[name].x, y: P[name].y }); }
     } else if (placement === 'random') {
       const n = def.count || 1;
       for (let i = 0; i < n; i++) {
-        if (pickRandomVictim({ count: 1, playerChance: def.playerChance })) centres.push({ x: p.x, y: p.y, onPlayer: true });
+        if (roleMatches(def.roles) && pickRandomVictim({ count: 1, playerChance: def.playerChance })) centres.push({ x: p.x, y: p.y, onPlayer: true });
         else if (!def.carried) { const d = rng.pick(w.raid.dots); centres.push({ x: d.x, y: d.y }); }   // a carried bomb on a ghost raider is theirs to handle
       }
     } else if (placement === 'tank') { const g = w.ghost.tanking ? w.ghost : p; centres.push({ x: g.x, y: g.y, onPlayer: !w.ghost.tanking }); }
@@ -627,6 +633,8 @@ export function createSim(script, options = {}) {
     else if (tgt === 'all') on = 'player';
     else on = pickRandomVictim(def) ? 'player' : 'raid';
     if (on === 'player' && !roleMatches(def.roles)) on = 'raid';   // e.g. a melee-only stun cannot reach the healers
+    if (on === 'player' && sheltered(def)) return;                 // behind cover: it does not land, and existing stacks run out
+    if (on === 'player' && def.playerMetric) addMetric(def.playerMetric, 1);
     if (def.maxStacks) {
       const cur = state.debuffs.find((x) => x.actionId === id && x.on === on);
       if (cur) {
@@ -644,6 +652,7 @@ export function createSim(script, options = {}) {
       appliedAt: state.t, until: state.t + (def.duration || 10),
       tickDamage: def.tickDamage || 0, nextTickAt: state.t + 1, actionId: id, tip: def.tip || '',
       stacks: 1, damageTakenMult: def.damageTakenMult ?? null, healingMult: def.healingMult ?? null,
+      safeSpots: def.safeSpots || null, shelterAt: def.shelterAt ?? null,
     };
     state.debuffs.push(d);
     emit('debuffApplied', { uid: d.uid, name: d.name, dispel: d.dispel, on, duration: def.duration || 10 });
@@ -853,6 +862,7 @@ export function createSim(script, options = {}) {
     const set = (label, kind) => { state.nextExpected = { label, kind }; };
     // Urgent corrections first, then a near deadline, then hints, then far deadlines.
     if (ideal.reason === 'runOut') return set('Run out of the raid before it goes off', 'fix');
+    if (ideal.reason === 'los') return set('Get behind cover', 'fix');
     if (ideal.reason === 'moveOut') return set(`Get out of range: ${b.cast ? b.cast.label : 'move'}`, 'fix');
     if (!tankRole && shieldUp()) return set('Shield up: stop attacking', 'fix');
     if (!tankRole && ideal.reason === 'whelps') return set('Pick up the adds', 'fix');
@@ -926,7 +936,10 @@ export function createSim(script, options = {}) {
 
     // Boss casting and schedule.
     if (b.cast && state.t >= b.cast.end) { const id = b.cast.id; b.cast = null; resolveAction(id); }
-    for (const id of dueActions(state.schedule, state.t, rng)) startAction(id);
+    for (const id of dueActions(state.schedule, state.t, rng)) {
+      // A cast that comes due while another is running waits its turn instead of vanishing.
+      if (!startAction(id) && b.cast && (script.actions[id] || {}).cast > 0) scheduleOnce(state.schedule, id, b.cast.end + 0.2);
+    }
 
     const flags = updateBoss(state, script, dt);
     if (flags.landed) onLanded();
@@ -976,8 +989,8 @@ export function createSim(script, options = {}) {
     // Raid, adds, projectiles, debuffs.
     updateRaid(state, script, dt);
     if (p.fearedUntil <= state.t) {
-      const addDef = Object.values(script.actions).find((a) => a.kind === 'adds' && roleMatches(a.pickup || 'offtank'));
-      if (addDef && pickupWhelps(state, script, addDef.aggroRange || 10) > 0) onWhelpPickup();
+      const reach = Object.values(script.actions).filter((a) => a.kind === 'adds' && roleMatches(a.pickup || 'offtank')).reduce((m, a) => Math.max(m, a.aggroRange || 10), 0);
+      if (reach && pickupWhelps(state, script, reach) > 0) onWhelpPickup();
     }
     const wf = updateWhelps(state, script, dt);
     if (wf.onRaid && state.role === 'offtank') addMetric('whelpsOnRaid', dt);

@@ -20,11 +20,12 @@ export function dueActions(schedule, t, rng) {
     if (t >= s.nextAt) {
       due.push(s.id);
       s.fired++;
-      if (s.every == null) { s.nextAt = Infinity; continue; }   // one-shot
+      if (s.every == null) { s.nextAt = Infinity; continue; }   // one-shot, swept below
       const j = s.jitter ? rng.range(-s.jitter, s.jitter) : 0;
       s.nextAt = Math.max(t + 0.5, s.nextAt + s.every + j);
     }
   }
+  for (let i = schedule.length - 1; i >= 0; i--) if (schedule[i].once && schedule[i].nextAt === Infinity) schedule.splice(i, 1);
   return due;
 }
 

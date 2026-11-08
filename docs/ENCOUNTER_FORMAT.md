@@ -93,7 +93,7 @@ Every action has `label`, `kind`, `cast` (seconds, 0 = instant), `warn`
 `icon`, `requires` (`grounded` default, or `airborne`), optional `conditional`
 (`behind`: only when someone is in the rear cone; `onPlayer`: only while the
 boss is on the tank and not held by a Taunt; `meleeEmpty`: only when the tank is out of melee, like Ragnaros' Magma Blast), `offBoss` (cast by something other than the boss, such as a priest: the boss keeps swinging and moving through it, and an interrupt needs no range to the boss), `interruptible`, `hidden`
-(never on the timeline), `follow: [{ id, delay }]` (queue another action), `teleportBossTo` (`raid` or a spot name: Blink), `teleportTankTo` (a spot name: Executus), `completedMetric` (scores a cast that finished, for the roles that can interrupt) and `tip`.
+(never on the timeline), `follow: [{ id, delay }]` (queue another action), `teleportBossTo` (`raid` or a spot name: Blink), `teleportTankTo` (a spot name: Executus), `completedMetric` (scores a cast that finished, for the roles that can interrupt), `safeSpots` with `safeRadius` and `safeRoles` (cover: on an `aoe` or `debuff`, a player within `safeRadius` of a named spot is out of its line of sight, and on a cast the marker walks `safeRoles` to the nearest one) and `tip`.
 
 | kind | fields | what happens |
 |---|---|---|
@@ -102,12 +102,12 @@ boss is on the tank and not held by a Taunt; `meleeEmpty`: only when the tank is
 | `fear` | `duration`, `targets` (`all`, `tank`, `random` + `count`), `playerChance`, `radius`, `roles` | fears the player (random: with probability count / raid size, or `playerChance`); `radius` from her edge and a `roles` filter limit who it can reach |
 | `aoe` | `damage`, `radius` (from her edge; 0 or missing = whole room), `tankDamage`, `playerMetric`, `moveOut`, `stun` | damages the player (and the ghost tank); `playerMetric` counts each hit, so a radius you were meant to leave is scored. With a `cast` and `moveOut` (`true`, or a role filter) the ideal marker walks those roles out of the radius for the cast |
 | `shield` | `duration`, `reflectDamage`, `roles` (Magic Reflection stops casters, Damage Shield stops melee), `toast` | a reflect or damage shield on the boss: the Attack key shows HOLD, attacks count as `attacksIntoShield`, and each one costs `reflectDamage` |
-| `hazard` | `placement` (`player`, `tank`, `boss`, `random` + `count`, `spots` + `spots:[]`, `lanes` + `lanes` key, `polys` + `polys` key), `radius`, `warning`, `active`, `damage`, `tick` (damage per second instead of once), `laneWidth` for lanes, `playerChance` (odds that `random` lands on you), `carried` + `raidMetric` (a bomb: the zone follows you through `warning`, the ideal marker shows where to run, and `raidMetric` counts each time it goes off with raid members inside) | a telegraphed floor zone; `polys` pulses persistent polygons listed in a phase's `persistentHazards` |
+| `hazard` | `roles` (who it can land on), `placement` (`player`, `tank`, `boss`, `random` + `count`, `spots` + `spots:[]`, `lanes` + `lanes` key, `polys` + `polys` key), `radius`, `warning`, `active`, `damage`, `tick` (damage per second instead of once), `laneWidth` for lanes, `playerChance` (odds that `random` lands on you), `carried` + `raidMetric` (a bomb: the zone follows you through `warning`, the ideal marker shows where to run, and `raidMetric` counts each time it goes off with raid members inside) | a telegraphed floor zone; `polys` pulses persistent polygons listed in a phase's `persistentHazards` |
 | `adds` | `count` per spot, `from: [spotNames]`, `playerFrom` (the spots that are the player's job; the others go to a ghost group), `speed`, `aggroRange`, `lifetime`, `heldLifetime`, `pickup` (role filter for who takes them, default `offtank`), `holdSpot`, `killable` (DPS can attack them) and `killFirst` (attacking the boss while one lives counts as `attacksOffPriority`) | spawns a wave that walks at the raid; the pickup role catches them by proximity or Taunt |
 | `aggroPull` | `threatMultiplier` (tank roles), `duration` (others) | a DPS overtakes the tank: she turns on the raid until the tank Taunts |
 | `targetSwitch` | `duration`, `toast` | she goes for someone else; the tank has to take her back |
 | `threatWipe` | `toast` | the whole table resets (raid keeps `threat.landingRaidThreat`) |
-| `debuff` | `dispel` (`magic`, `curse`, `poison`, `disease`, `none`), `duration`, `tickDamage`, `target` (`random` + `count`, `tank`, `player`, `all`), `playerChance`, `roles` (who it can land on), `fear`, `stun` (seconds the player cannot act), `maxStacks` (re-application stacks instead of adding a copy), `damageTakenMult` and `healingMult` (per stack: 1.5 means +50% damage taken, 0.5 means -50% healing received) | puts a debuff on someone; dispellable ones raise the healer's DISPEL note |
+| `debuff` | `dispel` (`magic`, `curse`, `poison`, `disease`, `none`), `duration`, `tickDamage`, `target` (`random` + `count`, `tank`, `player`, `all`), `playerChance`, `roles` (who it can land on), `fear`, `stun` (seconds the player cannot act), `maxStacks` (re-application stacks instead of adding a copy), `shelterAt` (with `safeSpots`: at this many stacks the marker sends you to cover until they fall off), `playerMetric`, `damageTakenMult` and `healingMult` (per stack: 1.5 means +50% damage taken, 0.5 means -50% healing received) | puts a debuff on someone; dispellable ones raise the healer's DISPEL note |
 | `enrage` | `toast` | melee damage x `boss.enrageMultiplier` from now on |
 | `projectile` | `travel`, `splash`, `damage`, `playerChance` | a fireball at a random target |
 | `transition` | | `landing` / `takeoff` are driven by `phases[].bossState`; define them so the timeline can name them |
@@ -167,7 +167,7 @@ metrics listed in `continuousMetrics` are scored or shown; use `roles`,
 { "id": "tauntLost", "ability": "taunt", "on": "event", "event": "threatLost", "offset": 0, "early": 0, "late": 3, "role": "tanks", "short": "ON RAID", "label": "...", "tip": "..." }
 ```
 
-Events that raise notes: action ids (when the action resolves), `cast:<actionId>` (when its cast bar appears, for interrupts), `landing`, `emerge`, `threatLost`, `whelpWave`,
+Events that raise notes: action ids (when the action resolves), `cast:<actionId>` (when its cast bar appears, for interrupts), `landing`, `emerge`, `threatLost`,
 `whelpPickup` (as `doneBy`), `tankLow`, `debuffApplied`, `dispelled`,
 `interrupted`. A note is only raised when the ability can be ready inside its
 window.

@@ -357,3 +357,46 @@ test('stuns stop you acting; stacked debuffs cut healing and raise damage; off-b
   assert.ok(s.world.boss.nextMelee > next || ev2.length >= 0);
   assert.ok(s.world.boss.lastHit >= s.t - 3, 'she kept swinging through the off-boss cast');
 });
+
+test('cover: a room-wide breath misses you behind it, and the marker takes you there during the cast', () => {
+  const s2 = structuredClone(script);
+  s2.positions.door = { x: 30, y: 40, tolerance: 6 };
+  s2.actions.breath2 = { label: 'Time Lapse', kind: 'aoe', cast: 2, damage: 500, safeSpots: ['door'], warn: true, icon: 'roar', playerMetric: 'breaths' };
+  s2.continuousMetrics.breaths = { label: 'b', unit: 'count', penaltyPerUnit: 1 };
+  s2.actions.buffet2 = { label: 'Flame Buffet', kind: 'debuff', cast: 0, target: 'all', dispel: 'none', duration: 4, maxStacks: 5, safeSpots: ['door'], shelterAt: 2, warn: false, icon: 'roar' };
+  const sim = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, p = s.world.player;
+  p.x = 0; p.y = 0;
+  sim.triggerAction('breath2');
+  sim.step(idle(), FIXED_DT);
+  assert.equal(s.world.idealPlayer.reason, 'los');
+  run(sim, 2.1);
+  assert.equal(s.metrics.breaths, 1, 'in the open it hits');
+  sim.triggerAction('breath2');
+  p.x = 30; p.y = 40;
+  run(sim, 2.1);
+  assert.equal(s.metrics.breaths, 1, 'behind cover it misses');
+  // Stacks: out in the open they build, the marker sends you to cover at the threshold, and there they run out.
+  p.x = 0; p.y = 0;
+  sim.triggerAction('buffet2'); sim.triggerAction('buffet2');
+  assert.equal(s.debuffs[0].stacks, 2);
+  sim.step(idle(), FIXED_DT);
+  assert.equal(s.world.idealPlayer.reason, 'los');
+  p.x = 30; p.y = 40;
+  sim.triggerAction('buffet2');
+  assert.equal(s.debuffs[0].stacks, 2, 'no new stack behind cover');
+  run(sim, 4.2);
+  assert.equal(s.debuffs.length, 0);
+});
+
+test('a cast that comes due during another cast waits its turn', () => {
+  const s2 = structuredClone(script);
+  Object.assign(s2.actions, {
+    first: { label: 'A', kind: 'aoe', cast: 2, radius: 1, damage: 0, warn: false, icon: 'roar' },
+    second: { label: 'B', kind: 'aoe', cast: 1, radius: 1, damage: 0, warn: false, icon: 'roar' },
+  });
+  const sim = createSim(s2, { role: 'tank', start: 'wall', seed: 5, actions: [{ id: 'first', first: 1, every: 100 }, { id: 'second', first: 2, every: 100 }] });
+  const ev = run(sim, 6);
+  const done = ev.filter((e) => e.type === 'action' && (e.id === 'first' || e.id === 'second')).map((e) => e.id);
+  assert.deepEqual(done, ['first', 'second']);
+});
