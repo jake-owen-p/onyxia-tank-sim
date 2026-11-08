@@ -48,7 +48,7 @@ export function perfectTank() {
     const face = b.state === 'grounded' && b.engaged && close ? b : null;
     const cmd = driveToward(sim, ideal, face);
     const inRange = b.state === 'grounded' && dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= sim.script.playerAbilities.taunt.range;
-    const ready = s.abilities.readyAt.taunt <= s.t;
+    const ready = s.abilities.readyAt.taunt <= s.t && !s.debuffs.some((d) => d.on === 'player' && d.forbidAbilities);
     if (s.tankRole && inRange && ready && (b.target !== 'player' || !b.engaged) && !b.passive && p.fearedUntil <= s.t) { cmd.abilities.push('taunt'); lastTaunt = s.t; }
     return cmd;
   };
@@ -70,7 +70,7 @@ export function roleBot(role) {
     const face = add || (b.state === 'grounded' && b.engaged && close ? b : null);
     const cmd = driveToward(sim, ideal, face);
     const gcdReady = s.abilities.gcdUntil <= s.t;
-    if (p.fearedUntil > s.t) return cmd;
+    if (p.fearedUntil > s.t || s.debuffs.some((d) => d.on === 'player' && d.forbidAbilities)) return cmd;
     const castDef = b.cast && sim.script.actions[b.cast.id];
     const kick = sim.script.playerAbilities.interrupt;
     if (castDef && castDef.interruptible && kick && s.abilities.list.includes('interrupt') && s.abilities.readyAt.interrupt <= s.t && (castDef.offBoss || dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= (kick.range ?? 8))) cmd.abilities.push('interrupt');
