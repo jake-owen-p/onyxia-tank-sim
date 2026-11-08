@@ -1,0 +1,974 @@
+{
+ "id": "firemaw",
+ "name": "Firemaw",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "blackwing-lair",
+  "name": "Blackwing Lair",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/blackwing-lair/firemaw.md. Era 40-man: 999,300 HP, no enrage, tauntable. Modelled as one 280 s phase (research: 4-6 minutes). Flame Buffet: everyone in his line of sight, every ~5 s (cmangos), 139-162 Fire plus +150 Fire taken per stack, refreshed by every application; stack thresholds 5-7 (leave) and 10 (hard stop) from the guides. Duration is 20 s here (classicdb, Warcraft Wiki) but the Wowhead Classic tooltip and guide say 10 s: unresolved, needs a look at a live Era client, and it sets how long you must hide. Cover: two `safeSpots` behind the door frame (`coverWest` and `coverEast`, radius 3, checked by computation to be on the floor, out of his line of sight from the boss spot and within 40 yards of the tank), with `shelterAt: 6` from the 5-7 guidance. At 6 stacks the marker sends you behind the frame; on cover the debuff does not land and the 20 s runs out. The tick is 110 per stack per second to a 15-stack cap: player passive healing is 1250/s for every role, so 6 stacks is 660/s (fine) and 12 stacks 1320/s (dying); this is scaled from the real +150 Fire taken per stack, a placeholder. Melee pay for hiding with a walk of about 3 s each way (outOfRange is softened: dropping stacks is the right kind of out of range), ranged stay in attack range at cover. The tank-targeted Flame Buffet action (`flameBuffetTank`, capped at 8 stacks) puts the same stacking debuff on whoever holds him so the healer feels the ramp, and has no cover: the tank does not hide; `flameBuffet` (`roles: nontank`) is the raid copy applied to the player only. The debuff is non-dispellable (classicdb: no dispel type). Layout: he is fought just inside his lab with his tail to the door and the tank against the north wall (the research and guides have him tanked in the doorway; moving the tank wall 6 yards toward the door keeps the back-to-the-wall check and is what lets a healer behind the door frame still reach the tank). The room is a schematic. Wing Buffet: `knockback` with `threatCut: 0.5` (Warcraft Tavern 50%, the research open question uses that), every 30-35 s (cmangos), first at 30 s; 1 s cast. The real plan is an off-tank Taunting 3-5 s before each buffet to absorb it; this engine has one tank role, so a player tank eats the buffet, loses half their threat and Taunts back. Wall behind the tank blocks the knockback, `buffetsOffWall` scores standing in the open. Shadow Flame: 2 s cast, 45 yd frontal cone, first ~18 s, then every 15-18 s (cmangos, logs 13-26 s; open question), 4000 Shadow (real 3938-5063), `conditional: onPlayer` so a threat flip cannot point it at the raid in this model. The no-cloak DoT is not modelled (Onyxia Scale Cloak assumed on everyone; its absence would be fatal). Thrash: 2 extra swings every 2-6 s (cmangos) as a `cone` hit on the tank every ~4 s. Summon Player is not modelled (trigger conditions unknown). Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 600 per 2 s, Thrash 500, Shadow Flame 4000, stacking Flame Buffet up to 280/s, Wing Buffet 750. Passive healing is 1250 HP/s on a tank-role player and on the ghost without a healer, 250 with a healer player (placeholder). Engine gaps: cover stops the debuff landing but attacks have no line of sight, so a ranged player in cover keeps attacking (real casters must step into sight to cast); one tank in the rehearsal (the real three-tank buffet rotation is reduced to one tank eating the buffet and Taunting back); no Summon Player.",
+ "sources": [
+  "docs/research/blackwing-lair/firemaw.md",
+  "https://warcraft.wiki.gg/wiki/Firemaw",
+  "https://classicdb.ch/?npc=11983",
+  "https://classicdb.ch/?spell=23341",
+  "https://classicdb.ch/?spell=22539",
+  "https://classicdb.ch/?spell=23339",
+  "https://classicdb.ch/?spell=3391",
+  "https://classicdb.ch/?spell=22682",
+  "https://classicdb.ch/?spell=22683",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/blackwing_lair/boss_firemaw.cpp",
+  "https://github.com/BigWigsMods/BigWigs_Classic/blob/master/BlackwingLair/Firemaw.lua",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/BWL/Firemaw.lua",
+  "https://www.warcrafttavern.com/guides/wow-classic-blackwing-lair-guide/",
+  "https://www.tentonhammer.com/guides/blackwing-lair-guide-7-25-06-page-five",
+  "https://us.millenium.gg/guide/6486.html?page=4",
+  "https://yttrium-tyclief.github.io/sod-guides/bwl/firemaw"
+ ],
+ "arena": {
+  "name": "Crimson Laboratories, Firemaw's door",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "southHall",
+    "poly": [
+     [
+      -40,
+      -36
+     ],
+     [
+      40,
+      -36
+     ],
+     [
+      40,
+      -6
+     ],
+     [
+      -40,
+      -6
+     ]
+    ]
+   },
+   {
+    "id": "door",
+    "poly": [
+     [
+      -9,
+      -10
+     ],
+     [
+      9,
+      -10
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      -9,
+      12
+     ]
+    ]
+   },
+   {
+    "id": "lab",
+    "poly": [
+     [
+      -42,
+      8
+     ],
+     [
+      42,
+      8
+     ],
+     [
+      42,
+      32
+     ],
+     [
+      -42,
+      32
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -60
+     ],
+     [
+      9,
+      -60
+     ],
+     [
+      9,
+      -32
+     ],
+     [
+      -9,
+      -32
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "south",
+    "points": [
+     [
+      -9,
+      -36
+     ],
+     [
+      -40,
+      -36
+     ],
+     [
+      -40,
+      -6
+     ],
+     [
+      -9,
+      -6
+     ],
+     [
+      -9,
+      8
+     ],
+     [
+      -42,
+      8
+     ],
+     [
+      -42,
+      32
+     ],
+     [
+      42,
+      32
+     ],
+     [
+      42,
+      8
+     ],
+     [
+      9,
+      8
+     ],
+     [
+      9,
+      -6
+     ],
+     [
+      40,
+      -6
+     ],
+     [
+      40,
+      -36
+     ],
+     [
+      9,
+      -36
+     ]
+    ]
+   },
+   {
+    "id": "entranceW",
+    "points": [
+     [
+      -9,
+      -36
+     ],
+     [
+      -9,
+      -60
+     ]
+    ]
+   },
+   {
+    "id": "entranceE",
+    "points": [
+     [
+      9,
+      -36
+     ],
+     [
+      9,
+      -60
+     ]
+    ]
+   }
+  ],
+  "backWall": [
+   [
+    -42,
+    32
+   ],
+   [
+    42,
+    32
+   ]
+  ],
+  "nearWallDistance": 7,
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Broodlord's hall",
+    "at": [
+     -24,
+     -22
+    ]
+   },
+   {
+    "text": "Cover west of the door frame",
+    "at": [
+     -22,
+     -8
+    ]
+   },
+   {
+    "text": "Cover east of the door frame",
+    "at": [
+     22,
+     -8
+    ]
+   },
+   {
+    "text": "Door frame",
+    "at": [
+     0,
+     2
+    ]
+   },
+   {
+    "text": "Firemaw's lab",
+    "at": [
+     24,
+     22
+    ]
+   },
+   {
+    "text": "Tank wall",
+    "at": [
+     -24,
+     30
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -56,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 18,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -28,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 26,
+   "tolerance": 4,
+   "label": "Tank: back to the wall, boss just inside his room with his tail to the door"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 18,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Firemaw, head to the wall, tail to the door"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -4,
+   "spread": 12
+  },
+  "rangedSpot": {
+   "x": 2,
+   "y": -8,
+   "tolerance": 8,
+   "label": "Ranged: Broodlord's side of the door"
+  },
+  "healerSpot": {
+   "x": -4,
+   "y": -4,
+   "tolerance": 7,
+   "label": "Healers: in the doorway, in reach of the tank"
+  },
+  "coverWest": {
+   "x": -13,
+   "y": -8,
+   "tolerance": 3,
+   "label": "West of the door frame: out of his sight"
+  },
+  "coverEast": {
+   "x": 13,
+   "y": -8,
+   "tolerance": 3,
+   "label": "East of the door frame: out of his sight"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1250,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1250,
+  "healPerSecondWithPlayerHealer": 250,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "shape": "dragon",
+  "radius": 6,
+  "speed": 7,
+  "turnRate": 200,
+  "meleeRange": 8,
+  "meleeDamage": 600,
+  "meleeInterval": 2,
+  "facingCone": "breath",
+  "cones": {
+   "breath": {
+    "angle": 60,
+    "range": 45,
+    "label": "Shadow Flame",
+    "facing": "front",
+    "style": "breath"
+   },
+   "wing": {
+    "angle": 120,
+    "range": 20,
+    "label": "Wing Buffet",
+    "facing": "front"
+   }
+  },
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.36
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull him just inside his room with his tail to the door and plant your back against the wall so Wing Buffet has nowhere to throw you. Every Wing Buffet halves your threat: Taunt the moment he turns. You swap tanks to drop stacks in the real raid; here you hold him all the way.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Behind him, never in front. Watch your Flame Buffet stacks: at 6 run around the door frame out of his sight, let them fall off, and walk back. The threat bar still matters because every Wing Buffet halves the tank.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand in the doorway on the far side of the door frame and cast. At 6 stacks step behind the door frame until they fall off; you can still reach him from there. Keep your threat under a tank whose threat gets halved every 30 seconds.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Heal from the doorway, in reach of the tank. At 6 stacks step behind the door frame, between Shadow Flames: you are out of his sight there and can still reach the tank. A Shadow Flame lands every 15 to 18 seconds and Thrash hits come in threes. Nothing here can be dispelled.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "flameBuffet": {
+   "label": "Flame Buffet",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "all",
+   "duration": 20,
+   "tickDamage": 110,
+   "maxStacks": 15,
+   "roles": "nontank",
+   "safeSpots": [
+    "coverWest",
+    "coverEast"
+   ],
+   "safeRadius": 3,
+   "shelterAt": 6,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "Everyone he can see gains a stack every 5 seconds: +150 Fire taken and a ramping tick. At 6 stacks get behind the door frame, out of his sight, and wait for them to fall off. Nothing else removes it."
+  },
+  "flameBuffetTank": {
+   "label": "Flame Buffet (tank)",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 20,
+   "tickDamage": 35,
+   "maxStacks": 8,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "The tank stacks Flame Buffet like everyone else. In the real raid tanks swap to drop stacks."
+  },
+  "shadowFlame": {
+   "label": "Shadow Flame",
+   "kind": "cone",
+   "cone": "breath",
+   "cast": 2,
+   "conditional": "onPlayer",
+   "damage": 4000,
+   "raidMetric": "raidBreathHits",
+   "raidToast": "Shadow Flame hit the raid",
+   "playerMetric": "breathsTaken",
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A 2 s cast, 4 to 5 thousand Shadow in a 45 yd cone. Only the tank may be in front. Without the Onyxia Scale Cloak the raid dies; everyone is wearing it here."
+  },
+  "wingBuffet": {
+   "label": "Wing Buffet",
+   "kind": "knockback",
+   "cast": 1,
+   "knockback": 8,
+   "knockbackRange": 20,
+   "damage": 750,
+   "threatCut": 0.5,
+   "wallMetric": "buffetsOffWall",
+   "warn": true,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "A frontal shove and half your threat, every 30 to 35 seconds. Back to the wall and Taunt the moment he turns."
+  },
+  "thrash": {
+   "label": "Thrash",
+   "kind": "cone",
+   "cone": "wing",
+   "cast": 0,
+   "damage": 500,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Three swings in quick succession on the tank. Spike healing."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Firemaw",
+   "subtitle": "Flame Buffet ramps until you leave his sight",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 280,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "flameBuffet",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "flameBuffetTank",
+     "first": 5,
+     "every": 5
+    },
+    {
+     "id": "thrash",
+     "first": 6,
+     "every": 4,
+     "jitter": 1
+    },
+    {
+     "id": "shadowFlame",
+     "first": 18,
+     "every": 16.5,
+     "jitter": 3
+    },
+    {
+     "id": "wingBuffet",
+     "first": 30,
+     "every": 33,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 6,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pull him just inside his room, tail to the door",
+     "tip": "Taunt him, walk past him to the north wall and turn him so his head is at the wall and his tail is to the door."
+    },
+    {
+     "id": "buffetRetaunt",
+     "type": "afterEvent",
+     "event": "wingBuffet",
+     "check": "hasAggro",
+     "notBefore": 0.3,
+     "within": 6,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt straight after the buffet",
+     "tip": "Wing Buffet halves your threat and he turns. Taunt the moment you see it. In the real raid your off-tank eats this one for you."
+    },
+    {
+     "id": "wallCheck",
+     "type": "continuous",
+     "metric": "buffetsOffWall",
+     "role": "tanks",
+     "label": "Keep your back to the wall",
+     "tip": "If you have open floor behind you, Wing Buffet throws you and Firemaw moves, breaking every sightline the raid has set up."
+    },
+    {
+     "id": "facingBreath",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tanks",
+     "label": "His head stays on the wall",
+     "tip": "Shadow Flame goes 45 yards in front of him. If it reaches anyone in the raid they die. His head stays at the wall."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "threatRed",
+     "type": "continuous",
+     "metric": "attacksInRed",
+     "role": "dps",
+     "label": "Stop in the red band after a Wing Buffet",
+     "tip": "The tank has just lost half their threat. If you were close before, you are over them now."
+    },
+    {
+     "id": "noBreath",
+     "type": "continuous",
+     "metric": "breathsTaken",
+     "role": "nontank",
+     "label": "Stay out of Shadow Flame",
+     "tip": "Only the tank is ever in front of him. Everyone else stands at his back or on the far side of the door."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Flame every 16 s, Thrash bursts in between, and stacks rising. Pre-shield the tank before the breath and heal hard right after."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 40,
+   "roles": "dps",
+   "tip": "Dropping stacks behind the door frame is the right kind of out of range. Standing around out of range is not."
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in his front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ],
+   "tip": "Melee stand behind him and never in front. Shadow Flame and Wing Buffet go forward."
+  },
+  "breathsTaken": {
+   "label": "Shadow Flames taken",
+   "unit": "count",
+   "penaltyPerUnit": 10,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "raidBreathHits": {
+   "label": "Shadow Flames on the raid",
+   "unit": "count",
+   "penaltyPerUnit": 12,
+   "severe": 1,
+   "roles": "tanks"
+  },
+  "buffetsOffWall": {
+   "label": "Buffets taken off the wall",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 1,
+   "roles": "tanks",
+   "tip": "Back to the wall. In the open Wing Buffet throws you and he moves."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.45
+ },
+ "cues": {
+  "notes": "Press notes: Taunt straight after a Wing Buffet and when he turns; Heal behind each Shadow Flame.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntBuffet",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt straight after the buffet",
+    "tip": "He has turned. Taunt now."
+   },
+   {
+    "id": "healFlame",
+    "ability": "heal",
+    "on": "event",
+    "event": "shadowFlame",
+    "offset": 0.2,
+    "early": 1,
+    "late": 3.5,
+    "role": "healer",
+    "short": "BREATH",
+    "label": "Heal right after Shadow Flame",
+    "tip": "Land the big heal the moment the breath lands."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with stacks and a Shadow Flame coming is where tanks die. Heal now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "buffetSwap",
+   "name": "Wing Buffet recovery",
+   "description": "Already against the wall. Wing Buffet every 12 s halves your threat: Taunt the moment he turns, then hold him through a Shadow Flame.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thrash",
+     "first": 6,
+     "every": 4
+    },
+    {
+     "id": "wingBuffet",
+     "first": 3,
+     "every": 12
+    },
+    {
+     "id": "shadowFlame",
+     "first": 9,
+     "every": 16
+    }
+   ]
+  },
+  {
+   "id": "buffetDps",
+   "name": "Threat after a buffet",
+   "description": "Attack on every global but stop in the red band. Every Wing Buffet halves the tank.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "flameBuffet",
+     "first": 3,
+     "every": 5
+    },
+    {
+     "id": "wingBuffet",
+     "first": 8,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "flameHeals",
+   "name": "Shadow Flame healing",
+   "description": "Heal right behind each Shadow Flame while Thrash spikes the tank between them.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thrash",
+     "first": 3,
+     "every": 4
+    },
+    {
+     "id": "shadowFlame",
+     "first": 5,
+     "every": 8
+    },
+    {
+     "id": "flameBuffetTank",
+     "first": 2,
+     "every": 5
+    }
+   ]
+  }
+ ]
+}

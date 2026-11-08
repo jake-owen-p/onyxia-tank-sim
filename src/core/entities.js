@@ -335,7 +335,7 @@ export function spawnAdds(state, script, actionDef) {
         x: c.x + rng.range(-3, 3), y: c.y + rng.range(-3, 3),
         heading: 0,
         target: playerPicks ? 'raid' : 'ghost',
-        speed: actionDef.speed || 6,
+        speed: actionDef.speed ?? 6,
         spawnedAt: state.t,
         lifetime: actionDef.lifetime || 28,
         diesAt: state.t + (playerPicks ? (actionDef.heldLifetime || 70) : (actionDef.lifetime || 28)),

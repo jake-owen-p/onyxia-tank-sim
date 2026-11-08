@@ -1,0 +1,1932 @@
+{
+ "id": "nefarian",
+ "name": "Nefarian",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "blackwing-lair",
+  "name": "Blackwing Lair",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/blackwing-lair/nefarian.md. Era 40-man: HP 2,100,000 (classicdb, flagged suspect in the research, likely a lower bound) on three phases: 175 s of drakonids (`submerged`, HP held at 100%), 270 s of Nefarian to 20% (real 6-10 minutes; compressed), 90 s of phase 3 with Bone Constructs to 0% (real last stretch is the phase 2 pattern; research: a 20-30 minute fight in all). He cannot be Taunted on one guide's word (Millenium); Wowhead and the Wiki are silent on it, so treat that as unverified (the button is relabelled Step in and stands for re-establishing threat; he actually lands on the tank). Phase 1: Lord Victor Nefarius (immune) on the throne; two tunnels each spawn drakonids until 42 have died (cmangos, Warcraft Wiki, Warcraft Tavern). Engine: 2 adds per wave (one per tunnel) every 8 s for 175 s (about 44 adds), generic and without colours; the colour resistances, Brood Powers, Chromatics, kill order and the kill-count trigger for phase 2 are not modelled (HP is a clock; here phase 1 simply runs out). Tanks hold the west tunnel exit, the off-tank role (`holdsBoss: false`) holds the east one; the ghost group takes the other side; adds on the kiter are a repeating `aoe` with `tankDamage` (placeholder) so a healer has something to do. Nefarius' spells are placeholders with the research cadences: Shadow Bolt Volley every 19-28 s, Shadow Command (15 s MC, +300% damage) every 24-30 s as an undispellable debuff (dispel type n/a on Wowhead Classic and classicdb) that takes control 5 s; real raids polymorph or root the victim; plain Shadow Bolt, Silence and Polymorph are omitted (a debuff queue that never reaches the player would add noise). Landing: on the phase change he emerges, a `threatWipe` plus a room-wide `aoe` of 2500. The damage is a placeholder: sources range from about 1000 (Wiki, modern text) to about 4000-5000 (research estimate) and cmangos casts no landing breath at all; without the Onyxia Scale Cloak it is a lethal DoT, and the cloak is assumed. Behind the throne (`throneBack`, radius 5, hidden from the boss spot by the throne wall drawn at y=44 and within 40 yards of the tank, checked by computation) is the only safe place in the room (Warcraft Wiki, Millenium); it stays an option rather than a drill, because the landing is instant and the marker only walks to cover for casts, so it is not scored. Phase 2: Shadow Flame cone every ~12 s (cmangos; logs 8-37 s, irregular), 4000 Shadow, `conditional: onPlayer`, a 2 s cast. Bellowing Roar: 1.5 s cast, 4 s fear, 35 yd radius around him, every ~30 s (cmangos, BigWigs 32 s, logs 27-90 s); ranged stand beyond it (attack range extended to 38 yd so that is possible; the real raid has Tremor Totem and Fear Ward, which the engine cannot express, so the tank takes the fear). Veil of Shadow: tank `debuff`, Curse, 6 s, `healingMult 0.25`, every ~15 s (cmangos), dispellable by the healer; Tail Lash (cone) with `conditional: behind`; Cleave cone. Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 650 per 2 s, Shadow Flame 4000, Cleave 350, class-call debuffs below; placeholders. Passive healing is 1350 HP/s on a player tank, 1300 on the ghost without a healer player, 220 with one (the class-call durations are 30 s now and the ghost tank has no way to answer a Veil of Shadow; the raid's healers are represented by this number). Class calls (every ~30 s in the research: 30 s DBM/BigWigs, 25-35 Warcraft Wiki, 35-40 cmangos; 30 s used) are approximations, one per class call, cycling Warrior, Priest, Mage, Paladin, Rogue, Hunter, Shaman, Warlock across a 240 s rotation: Warrior = `debuff` +30% damage taken on the tank (30 s; +30% spell data, +10% Millenium, an open question); Priest = a Shadow DoT on the tank (`debuff`, no dispel, 30 s) standing in for Corrupted Healing, since the engine has no healing penalty based on who casts; Mage = random Magic debuff with a 4 s stun for Wild Polymorph (playerChance 0.3); Paladin = `shield` (`roles: melee`, 10 s) for Siphon Blessing putting physical immunity on him; Rogue = a 30 s `debuff` on the melee role standing for the root, which does not stop attacks (the teleport into his arcs is not modelled; the real MT has to turn him); Hunter = no effect (the free call); Shaman = Corrupted Totems, three stationary `killFirst` adds near his flank (`speed` 0.01 because the engine reads 0 as unset) that must die before phase 3; Warlock = Infernals, three `killFirst` adds from the raid side (fire-immune and stunning in the real fight, neither expressible). The Druid call is left out: it only matters for a Druid main tank. The choose-of-nine random roll is replaced by a fixed rotation so a rehearsal covers each one. The \"stop at 21%, push on a Hunter or Paladin call\" tactic cannot be expressed. He is `stationary` in phases 2 and 3 (tanked where he lands, no knockback of the tank into the raid, an approximation: the real tank repositions and turns him for class calls). Phase 3 (20%): Bone Constructs (HP 6,104 each; roughly 42 in the real fight) as one `adds` wave of 12 from the old tunnel exits, `killFirst`, 24 s lifetime (placeholder; the real count is tied to kills in phase 1, and they scatter where the drakonids fell, which the engine cannot express). Off-tank role holds two of the spawn points; the rest go to the ghost group. Engine gaps: the marker cannot walk anyone to cover for an instant such as the landing Shadow Flame, no Fear Ward or Tremor, no mind control, adds without abilities or colours, one tank in the rehearsal, no Taunt immunity, class calls are fixed and simplified.",
+ "sources": [
+  "docs/research/blackwing-lair/nefarian.md",
+  "https://warcraft.wiki.gg/wiki/Nefarian_(tactics)",
+  "https://classicdb.ch/?npc=11583",
+  "https://classicdb.ch/?npc=10162",
+  "https://classicdb.ch/?npc=14605",
+  "https://classicdb.ch/?spell=22539",
+  "https://classicdb.ch/?spell=22686",
+  "https://classicdb.ch/?spell=22687",
+  "https://classicdb.ch/?spell=23364",
+  "https://classicdb.ch/?spell=22665",
+  "https://classicdb.ch/?spell=22667",
+  "https://classicdb.ch/?spell=23397",
+  "https://classicdb.ch/?spell=23401",
+  "https://classicdb.ch/?spell=23410",
+  "https://classicdb.ch/?spell=23414",
+  "https://classicdb.ch/?spell=23418",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/blackwing_lair/boss_nefarian.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/blackwing_lair/boss_victor_nefarius.cpp",
+  "https://github.com/BigWigsMods/BigWigs_Classic/blob/master/BlackwingLair/Nefarian.lua",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/BWL/Nefarian.lua",
+  "https://www.tentonhammer.com/guides/blackwing-lair-guide-7-25-06-page-eight",
+  "https://www.warcrafttavern.com/guides/wow-classic-blackwing-lair-guide/",
+  "https://us.millenium.gg/guide/6486.html?page=7",
+  "https://yttrium-tyclief.github.io/sod-guides/bwl/nefarian"
+ ],
+ "arena": {
+  "name": "Nefarian's lair",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "chamber",
+    "poly": [
+     [
+      54,
+      0
+     ],
+     [
+      53.2,
+      9.4
+     ],
+     [
+      50.7,
+      18.5
+     ],
+     [
+      46.8,
+      27
+     ],
+     [
+      41.4,
+      34.7
+     ],
+     [
+      34.7,
+      41.4
+     ],
+     [
+      27,
+      46.8
+     ],
+     [
+      18.5,
+      50.7
+     ],
+     [
+      9.4,
+      53.2
+     ],
+     [
+      0,
+      54
+     ],
+     [
+      -9.4,
+      53.2
+     ],
+     [
+      -18.5,
+      50.7
+     ],
+     [
+      -27,
+      46.8
+     ],
+     [
+      -34.7,
+      41.4
+     ],
+     [
+      -41.4,
+      34.7
+     ],
+     [
+      -46.8,
+      27
+     ],
+     [
+      -50.7,
+      18.5
+     ],
+     [
+      -53.2,
+      9.4
+     ],
+     [
+      -54,
+      0
+     ],
+     [
+      -53.2,
+      -9.4
+     ],
+     [
+      -50.7,
+      -18.5
+     ],
+     [
+      -46.8,
+      -27
+     ],
+     [
+      -41.4,
+      -34.7
+     ],
+     [
+      -34.7,
+      -41.4
+     ],
+     [
+      -27,
+      -46.8
+     ],
+     [
+      -18.5,
+      -50.7
+     ],
+     [
+      -9.4,
+      -53.2
+     ],
+     [
+      0,
+      -54
+     ],
+     [
+      9.4,
+      -53.2
+     ],
+     [
+      18.5,
+      -50.7
+     ],
+     [
+      27,
+      -46.8
+     ],
+     [
+      34.7,
+      -41.4
+     ],
+     [
+      41.4,
+      -34.7
+     ],
+     [
+      46.8,
+      -27
+     ],
+     [
+      50.7,
+      -18.5
+     ],
+     [
+      53.2,
+      -9.4
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -50
+     ],
+     [
+      9,
+      -50
+     ],
+     [
+      9,
+      -76
+     ],
+     [
+      -9,
+      -76
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "chamberWall",
+    "points": [
+     [
+      9,
+      -53.2
+     ],
+     [
+      21.8,
+      -49.4
+     ],
+     [
+      33.2,
+      -42.6
+     ],
+     [
+      42.7,
+      -33.1
+     ],
+     [
+      49.5,
+      -21.6
+     ],
+     [
+      53.3,
+      -8.8
+     ],
+     [
+      53.8,
+      4.5
+     ],
+     [
+      51.1,
+      17.6
+     ],
+     [
+      45.2,
+      29.6
+     ],
+     [
+      36.6,
+      39.7
+     ],
+     [
+      25.7,
+      47.5
+     ],
+     [
+      13.2,
+      52.3
+     ],
+     [
+      0,
+      54
+     ],
+     [
+      -13.2,
+      52.3
+     ],
+     [
+      -25.7,
+      47.5
+     ],
+     [
+      -36.6,
+      39.7
+     ],
+     [
+      -45.2,
+      29.6
+     ],
+     [
+      -51.1,
+      17.6
+     ],
+     [
+      -53.8,
+      4.5
+     ],
+     [
+      -53.3,
+      -8.8
+     ],
+     [
+      -49.5,
+      -21.6
+     ],
+     [
+      -42.7,
+      -33.1
+     ],
+     [
+      -33.2,
+      -42.6
+     ],
+     [
+      -21.8,
+      -49.4
+     ],
+     [
+      -9,
+      -53.2
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -53.2
+     ],
+     [
+      -9,
+      -76
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -53.2
+     ],
+     [
+      9,
+      -76
+     ]
+    ]
+   },
+   {
+    "id": "throne",
+    "points": [
+     [
+      -8,
+      44
+     ],
+     [
+      8,
+      44
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -70
+    ]
+   },
+   {
+    "text": "Throne: he lands here",
+    "at": [
+     0,
+     46
+    ]
+   },
+   {
+    "text": "West tunnel",
+    "at": [
+     -44,
+     -22
+    ]
+   },
+   {
+    "text": "East tunnel",
+    "at": [
+     44,
+     -22
+    ]
+   },
+   {
+    "text": "Raid: stay on his flank, out of front and tail",
+    "at": [
+     32,
+     8
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -70,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 30,
+   "heading": 270
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 38,
+   "tolerance": 4,
+   "label": "Tank: he lands here, face him away from the raid"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 30,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Nefarian"
+  },
+  "westExit": {
+   "x": -30,
+   "y": -18,
+   "tolerance": 5,
+   "label": "West tunnel: tank the drakonids here"
+  },
+  "eastExit": {
+   "x": 30,
+   "y": -18,
+   "tolerance": 5,
+   "label": "East tunnel: off-tank the drakonids here"
+  },
+  "tunnelWest": {
+   "x": -42,
+   "y": -24
+  },
+  "tunnelEast": {
+   "x": 42,
+   "y": -24
+  },
+  "boneWestA": {
+   "x": -26,
+   "y": -10
+  },
+  "boneWestB": {
+   "x": -12,
+   "y": -22
+  },
+  "boneEastA": {
+   "x": 26,
+   "y": -10
+  },
+  "boneEastB": {
+   "x": 12,
+   "y": -22
+  },
+  "constructHold": {
+   "x": 30,
+   "y": -8,
+   "tolerance": 6,
+   "label": "Hold the Bone Constructs here"
+  },
+  "offtankFlank": {
+   "x": 12,
+   "y": 30,
+   "tolerance": 4,
+   "label": "Off-tank: at his flank, ready for anything loose"
+  },
+  "throneBack": {
+   "x": 0,
+   "y": 50,
+   "tolerance": 4,
+   "label": "Behind the throne"
+  },
+  "totemNear": {
+   "x": 14,
+   "y": 30,
+   "label": "Corrupted Totem"
+  },
+  "totemLow": {
+   "x": 16,
+   "y": 22,
+   "label": "Corrupted Totem"
+  },
+  "totemHigh": {
+   "x": 12,
+   "y": 38,
+   "label": "Corrupted Totem"
+  },
+  "infernalA": {
+   "x": 30,
+   "y": 10,
+   "label": "Infernal"
+  },
+  "infernalB": {
+   "x": 40,
+   "y": 14,
+   "label": "Infernal"
+  },
+  "infernalC": {
+   "x": 36,
+   "y": 32,
+   "label": "Infernal"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -8,
+   "spread": 14
+  },
+  "raidSpotP2": {
+   "x": 28,
+   "y": 20,
+   "spread": 10
+  },
+  "rangedSpotP1": {
+   "x": 0,
+   "y": -10,
+   "tolerance": 8,
+   "label": "Ranged: reach both tunnels"
+  },
+  "healerSpotP1": {
+   "x": -8,
+   "y": -6,
+   "tolerance": 7,
+   "label": "Healers: split by side"
+  },
+  "rangedSpot": {
+   "x": 42,
+   "y": 24,
+   "tolerance": 6,
+   "label": "Ranged: beyond 35 yd of him"
+  },
+  "healerSpot": {
+   "x": 30,
+   "y": 30,
+   "tolerance": 7,
+   "label": "Healers: in reach of the tank (the MT group stays inside 35)"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1350,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1300,
+  "healPerSecondWithPlayerHealer": 220,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 10,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "shape": "dragon",
+  "radius": 6,
+  "speed": 7,
+  "turnRate": 200,
+  "meleeRange": 8,
+  "meleeDamage": 650,
+  "meleeInterval": 2,
+  "facingCone": "breath",
+  "stationary": true,
+  "cones": {
+   "breath": {
+    "angle": 60,
+    "range": 45,
+    "label": "Shadow Flame",
+    "facing": "front",
+    "style": "breath"
+   },
+   "cleave": {
+    "angle": 90,
+    "range": 15,
+    "label": "Cleave",
+    "facing": "front",
+    "style": "cleave"
+   },
+   "tail": {
+    "angle": 90,
+    "range": 30,
+    "label": "Tail Lash",
+    "facing": "back",
+    "style": "tail"
+   }
+  },
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Phase 1, hold the west tunnel and take every drakonid that comes out. When he lands, step in, face him away from the raid, and hold him through every fear. Veil of Shadow cuts healing on you to a quarter for 6 seconds; the class calls hurt. He cannot be Taunted, so if you die, it is over.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "East tunnel / off-tank",
+   "short": "Off-tank",
+   "description": "Phase 1, hold the east tunnel. Phase 2, stand at his flank and pick up anything loose, Infernals on the Warlock call included. Phase 3, the Bone Constructs are yours from the east side.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Phase 1, kill the drakonids at the tunnel exits. Phase 2 at his flank, out of the front cone and the 30 yard tail; switch to Corrupted Totems and Infernals the moment they appear. Stop attacking when the Paladin call puts his Blessing on him. Phase 3, Bone Constructs first, then back to him.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Phase 1, keep killing drakonids at both tunnels. Phase 2 stand beyond 35 yards of him so Bellowing Roar misses you; switch to Corrupted Totems and Infernals the moment they appear. Phase 3, Bone Constructs first, then back to him.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 38
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Keep the tank up and dispel Veil of Shadow in a second: it cuts healing to a quarter for 6 seconds. Pre-heal before Shadow Flame and before every Warrior or Priest class call. You are in the main tank's group, inside Roar range; expect the fear.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Step in",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Nefarian cannot be Taunted. This is your way back on top of his threat list after a fear or when something else has his attention. Also picks up drakonids in phase 1."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic",
+    "curse"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. Here one button stands in for Dispel Magic, Cleanse, Remove Curse, Cure Poison and Cure Disease."
+  }
+ },
+ "actions": {
+  "drakonidWest": {
+   "label": "Drakonid (west)",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "tunnelWest"
+   ],
+   "speed": 5,
+   "aggroRange": 16,
+   "lifetime": 28,
+   "heldLifetime": 28,
+   "pickup": "tanks",
+   "holdSpot": "westExit",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Drakonids come out of the tunnels at a steady rate until 42 have died. Pick each one up as it comes out; Chromatics to the dedicated tank."
+  },
+  "drakonidEast": {
+   "label": "Drakonid (east)",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "tunnelEast"
+   ],
+   "speed": 5,
+   "aggroRange": 16,
+   "lifetime": 28,
+   "heldLifetime": 28,
+   "pickup": "offtank",
+   "holdSpot": "eastExit",
+   "killable": true,
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Drakonids come out of the tunnels at a steady rate until 42 have died. Pick each one up as it comes out."
+  },
+  "kiterDamage": {
+   "label": "Drakonids on your tank",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 0,
+   "tankDamage": 900,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "The drakonids hit whoever is holding them."
+  },
+  "shadowVolley": {
+   "label": "Shadow Bolt Volley",
+   "kind": "aoe",
+   "cast": 2,
+   "radius": 0,
+   "damage": 300,
+   "tankDamage": 300,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "fireball",
+   "requires": "submerged",
+   "tip": "Nefarius volleys shadow bolts into the raid every 19 to 28 seconds. Shadow Protection potions help."
+  },
+  "shadowCommand": {
+   "label": "Shadow Command",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "random",
+   "count": 1,
+   "playerChance": 0.25,
+   "duration": 15,
+   "fear": 5,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "submerged",
+   "tip": "Nefarius mind-controls a player for 15 seconds with +300% damage. It cannot be dispelled: polymorph or root the victim, and do not kill them. Here you lose control for 5 seconds if it is you."
+  },
+  "landingWipe": {
+   "label": "Landing",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "Nefarian lands! Step in and face him away from the raid.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Nefarian lands on the throne side and the threat table is empty. Tanks, go."
+  },
+  "landingFlame": {
+   "label": "Shadow Flame (landing)",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 2500,
+   "tankDamage": 2500,
+   "safeSpots": [
+    "throneBack"
+   ],
+   "safeRadius": 5,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A room-wide Shadow Flame on landing. The Onyxia Scale Cloak stops the lethal part; without one you die. Behind the throne is the only place it cannot reach."
+  },
+  "shadowFlame": {
+   "label": "Shadow Flame",
+   "kind": "cone",
+   "cone": "breath",
+   "cast": 2,
+   "conditional": "onPlayer",
+   "damage": 4000,
+   "raidMetric": "raidBreathHits",
+   "raidToast": "Shadow Flame hit the raid",
+   "playerMetric": "breathsTaken",
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A 2 s cast and 4000 to 5000 Shadow in front of him. Only the tank belongs there."
+  },
+  "cleave": {
+   "label": "Cleave",
+   "kind": "cone",
+   "cone": "cleave",
+   "cast": 0,
+   "damage": 350,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "He cleaves the front. Tanks only."
+  },
+  "tailLash": {
+   "label": "Tail Lash",
+   "kind": "cone",
+   "cone": "tail",
+   "cast": 0,
+   "damage": 1100,
+   "conditional": "behind",
+   "hitsMelee": true,
+   "playerMetric": "tailsTaken",
+   "warn": false,
+   "cue": null,
+   "icon": "tail",
+   "requires": "grounded",
+   "tip": "A 30 yard cone behind him, with a stun and a disarm. Stay on the flank."
+  },
+  "bellowingRoar": {
+   "label": "Bellowing Roar",
+   "kind": "fear",
+   "cast": 1.5,
+   "duration": 4,
+   "targets": "all",
+   "radius": 35,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "A 35 yard fear every ~30 seconds. Ranged stand beyond 35 yards. Tanks need Fear Ward or Tremor Totem, the ground shakes first."
+  },
+  "veilOfShadow": {
+   "label": "Veil of Shadow",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "curse",
+   "target": "tank",
+   "duration": 6,
+   "healingMult": 0.25,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A Curse on the tank: healing taken down 75% for 6 seconds, every 15 seconds or so. Decurse it inside a second."
+  },
+  "warriorCall": {
+   "label": "Class call: Warriors",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 30,
+   "damageTakenMult": 1.3,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "\"Warriors, I know you can hit harder than that!\" Forced into Berserker Stance: +30% damage taken for 30 seconds. Call the cooldowns."
+  },
+  "priestCall": {
+   "label": "Class call: Priests",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 30,
+   "tickDamage": 110,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "\"Priests! Let's make your healing more interesting!\" Direct heals now DoT the target for 30 seconds. Priests stop direct healing; everyone else carries the tank."
+  },
+  "mageCall": {
+   "label": "Class call: Mages",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "count": 1,
+   "playerChance": 0.3,
+   "duration": 20,
+   "stun": 4,
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "\"Mages too?\" Wild Polymorph on random raid members every 5 seconds for 30 seconds, tanks and healers first to dispel."
+  },
+  "paladinCall": {
+   "label": "Class call: Paladins",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 10,
+   "roles": "melee",
+   "toast": "Paladin call: Blessing of Protection on him. Melee, stop hitting!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "\"Paladins, I've heard you have many lives.\" He gains a Blessing of Protection every 5 seconds. Physical attacks hit nothing, so melee stop; casters continue."
+  },
+  "rogueCall": {
+   "label": "Class call: Rogues",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "random",
+   "count": 1,
+   "playerChance": 0.5,
+   "duration": 30,
+   "roles": "melee",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "\"Rogues? Stop hiding!\" Every rogue is teleported beside him and rooted for 30 seconds; a rooted rogue can still attack."
+  },
+  "hunterCall": {
+   "label": "Class call: Hunters",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "\"Hunters and your annoying pea-shooters!\" The free call: unequip the ranged weapon, get the macro ready."
+  },
+  "shamanCall": {
+   "label": "Class call: Shamans",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "totemNear",
+    "totemLow",
+    "totemHigh"
+   ],
+   "speed": 0.01,
+   "aggroRange": 0,
+   "lifetime": 25,
+   "heldLifetime": 25,
+   "pickup": [],
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "\"Shamans, show me what your totems can do!\" Corrupted Totems appear near his flank. Single-target them down: they must not survive into phase 3."
+  },
+  "warlockCall": {
+   "label": "Class call: Warlocks",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "infernalA",
+    "infernalB",
+    "infernalC"
+   ],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 25,
+   "heldLifetime": 25,
+   "pickup": "offtank",
+   "holdSpot": "offtankFlank",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "\"Warlocks, you should not be meddling with demons!\" Infernals land on the raid side. They are immune to fire and stun anyone near them: off-tank picks them up, DPS kill them first."
+  },
+  "boneConstructs": {
+   "label": "Bone Constructs",
+   "kind": "adds",
+   "cast": 0,
+   "count": 3,
+   "from": [
+    "boneWestA",
+    "boneWestB",
+    "boneEastA",
+    "boneEastB"
+   ],
+   "playerFrom": [
+    "boneEastA",
+    "boneEastB"
+   ],
+   "speed": 6,
+   "aggroRange": 14,
+   "lifetime": 24,
+   "heldLifetime": 24,
+   "pickup": "offtank",
+   "holdSpot": "constructHold",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "At 20% every dead drakonid rises as a Bone Construct. Off-tanks gather them, everyone else kills them before going back to him."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Drakonids",
+   "subtitle": "Hold the tunnels",
+   "hpFrom": 1,
+   "hpTo": 1,
+   "duration": 175,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "westExit",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpotP1",
+    "healer": "healerSpotP1",
+    "offtank": "eastExit"
+   },
+   "actions": [
+    {
+     "id": "drakonidWest",
+     "first": 8,
+     "every": 8,
+     "jitter": 1
+    },
+    {
+     "id": "drakonidEast",
+     "first": 8,
+     "every": 8,
+     "jitter": 1
+    },
+    {
+     "id": "kiterDamage",
+     "first": 12,
+     "every": 3.5,
+     "jitter": 0.5
+    },
+    {
+     "id": "shadowVolley",
+     "first": 20,
+     "every": 23,
+     "jitter": 4
+    },
+    {
+     "id": "shadowCommand",
+     "first": 26,
+     "every": 27,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "westHold",
+     "type": "afterEvent",
+     "event": "drakonidWest",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Take every drakonid from the west tunnel",
+     "tip": "Stand at the exit, pick each one up as it comes out, and keep them off the casters."
+    },
+    {
+     "id": "eastHold",
+     "type": "afterEvent",
+     "event": "drakonidEast",
+     "check": "whelpsPicked",
+     "within": 9,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Take every drakonid from the east tunnel",
+     "tip": "Stand at the exit, pick each one up as it comes out, and keep them off the casters."
+    },
+    {
+     "id": "addsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the drakonids off the raid",
+     "tip": "A drakonid on a caster is a dead caster. Hold them at the tunnel."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "The drakonids hit your tank hard. Keep them above half until the tunnels close."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Nefarian",
+   "subtitle": "Fears, curses and class calls",
+   "hpFrom": 1,
+   "hpTo": 0.2,
+   "duration": 270,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "offtankFlank"
+   },
+   "actions": [
+    {
+     "id": "landingWipe",
+     "first": 0
+    },
+    {
+     "id": "landingFlame",
+     "first": 0.5
+    },
+    {
+     "id": "cleave",
+     "first": 7,
+     "every": 7,
+     "jitter": 1
+    },
+    {
+     "id": "tailLash",
+     "first": 10,
+     "every": 10,
+     "jitter": 1
+    },
+    {
+     "id": "shadowFlame",
+     "first": 12,
+     "every": 13,
+     "jitter": 2
+    },
+    {
+     "id": "veilOfShadow",
+     "first": 15,
+     "every": 15,
+     "jitter": 2
+    },
+    {
+     "id": "bellowingRoar",
+     "first": 30,
+     "every": 31,
+     "jitter": 2
+    },
+    {
+     "id": "warriorCall",
+     "first": 32,
+     "every": 240
+    },
+    {
+     "id": "priestCall",
+     "first": 62,
+     "every": 240
+    },
+    {
+     "id": "mageCall",
+     "first": 92,
+     "every": 240
+    },
+    {
+     "id": "paladinCall",
+     "first": 122,
+     "every": 240
+    },
+    {
+     "id": "rogueCall",
+     "first": 152,
+     "every": 240
+    },
+    {
+     "id": "hunterCall",
+     "first": 182,
+     "every": 240
+    },
+    {
+     "id": "shamanCall",
+     "first": 212,
+     "every": 240
+    },
+    {
+     "id": "warlockCall",
+     "first": 242,
+     "every": 240
+    }
+   ],
+   "expectations": [
+    {
+     "id": "landingGrab",
+     "type": "afterEvent",
+     "event": "landingWipe",
+     "check": "hasAggro",
+     "within": 12,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Step in as he lands",
+     "tip": "Get to the landing spot the moment the last drakonid falls. He is not on anyone: you take him."
+    },
+    {
+     "id": "tankSpotP2",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 22,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Plant him facing away",
+     "tip": "Drag him to the throne side and face him away from the raid. The raid stays on his flank, never behind."
+    },
+    {
+     "id": "roarBack",
+     "type": "afterEvent",
+     "event": "bellowingRoar",
+     "check": "hasAggro",
+     "notBefore": 4.5,
+     "within": 9,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Take him back after the fear",
+     "tip": "Roar fears you for 4 seconds. The moment you can move, get him back on you."
+    },
+    {
+     "id": "facingBreath",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tanks",
+     "label": "He faces away from the raid",
+     "tip": "Shadow Flame reaches 45 yards. It never goes through the raid."
+    },
+    {
+     "id": "offtankFlankCheck",
+     "type": "onEvent",
+     "event": "bellowingRoar",
+     "check": "inRange",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Be at his flank in phase 2",
+     "tip": "If something gets loose you are the catch. Be at his flank, never in front or behind."
+    },
+    {
+     "id": "veilDispel",
+     "type": "afterEvent",
+     "event": "veilOfShadow",
+     "check": "noDispellable",
+     "within": 2,
+     "grace": 3,
+     "role": "healer",
+     "label": "Decurse Veil of Shadow inside a second",
+     "tip": "Healing on the tank is down 75% for 6 seconds. Mages and druids decurse it. Now."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Totems and Infernals first",
+     "tip": "Corrupted Totems must die before phase 3 and Infernals stun anyone near them. Switch to them the moment they appear."
+    },
+    {
+     "id": "infernalsPicked",
+     "type": "afterEvent",
+     "event": "warlockCall",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Infernals",
+     "tip": "They land on the raid side. Run to them, Taunt or walk into them, and hold them off the raid."
+    },
+    {
+     "id": "polyDispel",
+     "type": "afterEvent",
+     "event": "mageCall",
+     "check": "noDispellable",
+     "within": 5,
+     "grace": 4,
+     "role": "healer",
+     "label": "Dispel the polymorphs",
+     "tip": "Tanks and healers first. A sheeped tank is a dead raid."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "shieldStop",
+     "type": "continuous",
+     "metric": "attacksIntoShield",
+     "role": "melee",
+     "label": "Stop attacking on the Paladin call",
+     "tip": "Blessing of Protection means physical attacks do nothing. Casters keep going, melee stop."
+    },
+    {
+     "id": "stayFlank",
+     "type": "continuous",
+     "metric": "tailsTaken",
+     "role": "melee",
+     "label": "Stay out of the tail",
+     "tip": "The rear is a 30 yard cone with a stun. On his flank only."
+    },
+    {
+     "id": "noBreath",
+     "type": "continuous",
+     "metric": "breathsTaken",
+     "role": "nontank",
+     "label": "Stay out of Shadow Flame",
+     "tip": "Only the tank goes in front."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Shadow Flame on the tank every 12 seconds, Veil of Shadow on top of it, class calls that hurt. Top the tank before each one."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Bone Constructs",
+   "subtitle": "At 20% the dead rise",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "constructHold"
+   },
+   "actions": [
+    {
+     "id": "boneConstructs",
+     "first": 3
+    },
+    {
+     "id": "cleave",
+     "first": 7,
+     "every": 7,
+     "jitter": 1
+    },
+    {
+     "id": "tailLash",
+     "first": 10,
+     "every": 10,
+     "jitter": 1
+    },
+    {
+     "id": "shadowFlame",
+     "first": 6,
+     "every": 13,
+     "jitter": 2
+    },
+    {
+     "id": "veilOfShadow",
+     "first": 9,
+     "every": 15,
+     "jitter": 2
+    },
+    {
+     "id": "bellowingRoar",
+     "first": 18,
+     "every": 31,
+     "jitter": 2
+    },
+    {
+     "id": "warriorCall",
+     "first": 22,
+     "every": 60
+    },
+    {
+     "id": "priestCall",
+     "first": 52,
+     "every": 60
+    }
+   ],
+   "expectations": [
+    {
+     "id": "roarBack3",
+     "type": "afterEvent",
+     "event": "bellowingRoar",
+     "check": "hasAggro",
+     "notBefore": 4.5,
+     "within": 9,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Take him back after the fear",
+     "tip": "Same rule as before. Do not chase the Constructs: stay on him."
+    },
+    {
+     "id": "constructsPicked",
+     "type": "afterEvent",
+     "event": "boneConstructs",
+     "check": "whelpsPicked",
+     "within": 12,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Gather the Bone Constructs",
+     "tip": "Run to your side, Taunt or walk into them, and drag them to the AoE spot."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Bone Constructs first",
+     "tip": "Face a Construct and kill it. Every attack on Nefarian while they live is wasted."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "veilDispel3",
+     "type": "afterEvent",
+     "event": "veilOfShadow",
+     "check": "noDispellable",
+     "within": 2,
+     "grace": 3,
+     "role": "healer",
+     "label": "Decurse Veil of Shadow inside a second",
+     "tip": "Do not lose track of it in the add chaos."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Constructs on the raid, Veil on the tank. Keep the tank up."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "phases": [
+    1,
+    3
+   ],
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in his front",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ],
+   "tip": "On his flank, never in the front arc."
+  },
+  "breathsTaken": {
+   "label": "Shadow Flames taken",
+   "unit": "count",
+   "penaltyPerUnit": 10,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "raidBreathHits": {
+   "label": "Shadow Flames on the raid",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "tanks"
+  },
+  "tailsTaken": {
+   "label": "Tail Lashes taken",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": "nontank"
+  },
+  "playerInTail": {
+   "label": "Seconds behind him",
+   "unit": "s",
+   "info": true,
+   "roles": "melee"
+  },
+  "attacksIntoShield": {
+   "label": "Attacks into the Paladin blessing",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 2,
+   "roles": "melee",
+   "tip": "Physical attacks are wasted while Blessing of Protection is on him. Hold."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Press notes: Step in as he lands, Step back in after the fear, pick up drakonids and constructs, dispel Veil of Shadow and polymorphs, Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "stepInRoar",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 5.5,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Take him back after the fear",
+    "tip": "Fear has dropped you off him. The moment you can move, Step in."
+   },
+   {
+    "id": "tauntWest",
+    "ability": "taunt",
+    "on": "event",
+    "event": "drakonidWest",
+    "offset": 1,
+    "early": 1,
+    "late": 7,
+    "role": "tank",
+    "short": "WEST",
+    "label": "Pick up the west drakonid",
+    "tip": "Taunt it or walk into it as it comes out of the tunnel.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "tauntEast",
+    "ability": "taunt",
+    "on": "event",
+    "event": "drakonidEast",
+    "offset": 1,
+    "early": 1,
+    "late": 7,
+    "role": "offtank",
+    "short": "EAST",
+    "label": "Pick up the east drakonid",
+    "tip": "Taunt it or walk into it as it comes out of the tunnel.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "tauntInfernals",
+    "ability": "taunt",
+    "on": "event",
+    "event": "warlockCall",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "INFERNALS",
+    "label": "Pick up the Infernals",
+    "tip": "They land on the raid side. Get to them and take them.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "tauntConstructs",
+    "ability": "taunt",
+    "on": "event",
+    "event": "boneConstructs",
+    "offset": 2,
+    "early": 2,
+    "late": 10,
+    "role": "offtank",
+    "short": "BONES",
+    "label": "Gather the Bone Constructs",
+    "tip": "Run to them and pick them up.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Veil of Shadow comes off the tank first, then polymorphs on tanks and healers."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a breath or Veil coming is where tanks die. Heal now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "roarDrill",
+   "name": "Fears and Shadow Flame",
+   "description": "Already on him. Bellowing Roar every 14 s and a Shadow Flame between them: take him back after every fear.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7
+    },
+    {
+     "id": "bellowingRoar",
+     "first": 4,
+     "every": 14
+    },
+    {
+     "id": "shadowFlame",
+     "first": 10,
+     "every": 14
+    },
+    {
+     "id": "veilOfShadow",
+     "first": 8,
+     "every": 15
+    },
+    {
+     "id": "warriorCall",
+     "first": 20,
+     "every": 22
+    }
+   ]
+  },
+  {
+   "id": "tunnelDrill",
+   "name": "Tunnel pickup",
+   "description": "Drakonids every 6 s from the east tunnel. Catch each one and hold it at the exit, off the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "drakonidEast",
+     "first": 3,
+     "every": 6
+    }
+   ]
+  },
+  {
+   "id": "p3Priority",
+   "name": "Bone Constructs first",
+   "description": "Phase 3 rules: kill every Construct before you touch him, and stop attacking on the Paladin call.",
+   "roles": "dps",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "boneConstructs",
+     "first": 3,
+     "every": 24
+    },
+    {
+     "id": "paladinCall",
+     "first": 10,
+     "every": 24
+    }
+   ]
+  },
+  {
+   "id": "veilDrill",
+   "name": "Veil of Shadow dispels",
+   "description": "Veil of Shadow every 8 s and a Shadow Flame every 12 s: decurse inside a second and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "veilOfShadow",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "shadowFlame",
+     "first": 6,
+     "every": 12
+    },
+    {
+     "id": "cleave",
+     "first": 4,
+     "every": 7
+    },
+    {
+     "id": "warriorCall",
+     "first": 20,
+     "every": 20
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,830 @@
+{
+ "id": "broodlord-lashlayer",
+ "name": "Broodlord Lashlayer",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "blackwing-lair",
+  "name": "Blackwing Lair",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/blackwing-lair/broodlord-lashlayer.md. Era 40-man: 916,025 HP, no enrage, immune to Taunt (the button is relabelled and stands for re-establishing threat, not a real Taunt; his Taunt immunity rests on a Season of Discovery guide, and Wowhead and the Wiki are silent on it: unverified). The fight is modelled as one 270 s phase (research: 4-5 minutes). The Suppression Room before him (research README) is not modelled at all: no Suppression Devices, whelps, Hatchers or Taskmasters. Knock Away: `knockback` with `threatCut: 0.5`, every 15-30 s (cmangos), first at 12 s. Knockback distance is a placeholder (8 yd; spell data 132 at speed 125 means a long throw); the corner wall stops it, and `wallMetric` scores being knocked while not backed into the wall (Warcraft Wiki, Warcraft Tavern, Ten Ton Hammer). The real cut applies to the top-threat player only; here the threat cut lands on the tank pool in the tank roles and on the ghost in the others, and `dangerBandDps` 0.32 keeps the DPS under the halved tank (the real threat table with three tanks building threat in parallel cannot be expressed; the off-tank who holds him during the swap is modelled only as the player tank re-gaining him with the button). Mortal Strike: first ~30 s, then every 25-35 s (cmangos), 5000 on a plate tank (research: 5-8k, crits to 8k plate) as a `cone` hit on the tank followed by a `debuff` with `healingMult: 0.5` for 5 s. Placeholder magnitude scaled to the 10,000 HP tank. Blast Wave: 20 yd, first ~20 s then every 8-16 s (cmangos). Real cast is instant; engine models a 3 s `offBoss` warning bar as an `aoe` with `moveOut` for melee (the warning stands in for the boss-mod timer melee actually use), 2000 Fire on the tank (scaled from 2625) and 3000 on anyone in the radius (2625-3375 before resistance; open question: ~3000 per Wowhead). Sources disagree on the plan: Wowhead has melee stay with their backs to a wall and eat it with Fire Resistance, Icy Veins has them run or LoS it around the corner, Warcraft Tavern weaves out; this rehearsal drills the walk-out only, and line-of-sight strategies around the corner are not modelled. The -50% movement slow is not modelled. Cleave: first 8 s then every ~7 s (cmangos), frontal cone. Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 450 per 2 s, Blast Wave 2000 on the tank, Mortal Strike 5000. Without a healer player the ghost has 850 HP/s passive, with one only 200 HP/s; a player tank has 950 HP/s (the real tank is healed by a whole raid). All are placeholders. Threat and pacing: the raid pool holds for 20 s after the pull (research: DPS starts 20-30 s in, Warcraft Tavern \"about 30 seconds\"). Wand/Vanish/Feign threat dumps and the three-tank queue do not exist in the engine; pacing is expressed through `dangerBandDps` and penalties. Engine gaps: no Suppression Room; no multi-tank threat table (a Knock Away really passes him to the off-tank who was building threat, here a single tank role re-takes him); Blast Wave has no slow and no line of sight; healing is one button; nothing to dispel.",
+ "sources": [
+  "docs/research/blackwing-lair/broodlord-lashlayer.md",
+  "docs/research/blackwing-lair/README.md",
+  "https://warcraft.wiki.gg/wiki/Broodlord_Lashlayer",
+  "https://classicdb.ch/?npc=12017",
+  "https://classicdb.ch/?spell=23331",
+  "https://classicdb.ch/?spell=24573",
+  "https://classicdb.ch/?spell=18670",
+  "https://classicdb.ch/?spell=15284",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/blackwing_lair/boss_broodlord_lashlayer.cpp",
+  "https://github.com/BigWigsMods/BigWigs_Classic/blob/master/BlackwingLair/Broodlord.lua",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/BWL/Broodlord.lua",
+  "https://www.warcrafttavern.com/guides/wow-classic-blackwing-lair-guide/",
+  "https://www.tentonhammer.com/guides/blackwing-lair-guide-7-25-06-page-four",
+  "https://us.millenium.gg/guide/6486.html?page=3",
+  "https://yttrium-tyclief.github.io/sod-guides/bwl/broodlord"
+ ],
+ "arena": {
+  "name": "Halls of Strife, the gate cubby",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "hall",
+    "poly": [
+     [
+      -46,
+      -12
+     ],
+     [
+      46,
+      -12
+     ],
+     [
+      46,
+      46
+     ],
+     [
+      -46,
+      46
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -34
+     ],
+     [
+      10,
+      -34
+     ],
+     [
+      10,
+      -8
+     ],
+     [
+      -10,
+      -8
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "hallWall",
+    "points": [
+     [
+      -10,
+      -12
+     ],
+     [
+      -46,
+      -12
+     ],
+     [
+      -46,
+      46
+     ],
+     [
+      46,
+      46
+     ],
+     [
+      46,
+      -12
+     ],
+     [
+      10,
+      -12
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -12
+     ],
+     [
+      -10,
+      -34
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -12
+     ],
+     [
+      10,
+      -34
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -28
+    ]
+   },
+   {
+    "text": "Tank corner",
+    "at": [
+     -40,
+     41
+    ]
+   },
+   {
+    "text": "Gate to the laboratories",
+    "at": [
+     8,
+     43
+    ]
+   },
+   {
+    "text": "Suppression Room behind you",
+    "at": [
+     0,
+     -8
+    ]
+   },
+   {
+    "text": "Ranged corner",
+    "at": [
+     -14,
+     8
+    ]
+   }
+  ],
+  "backWall": [
+   [
+    -46,
+    30
+   ],
+   [
+    -46,
+    46
+   ],
+   [
+    -30,
+    46
+   ]
+  ],
+  "nearWallDistance": 5
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -30,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": -18,
+   "y": 28,
+   "heading": 180
+  },
+  "raidWait": {
+   "x": -6,
+   "y": -2,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": -41,
+   "y": 41,
+   "tolerance": 4,
+   "label": "Tank: back in the corner, no open space behind you"
+  },
+  "bossSpot": {
+   "x": -35,
+   "y": 35,
+   "heading": 135,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Broodlord, facing the corner"
+  },
+  "raidSpotP1": {
+   "x": -13,
+   "y": 11,
+   "spread": 11
+  },
+  "rangedSpot": {
+   "x": -14,
+   "y": 11,
+   "tolerance": 7,
+   "label": "Ranged: opposite corner, 25-30 yd out"
+  },
+  "healerSpot": {
+   "x": -15,
+   "y": 13,
+   "tolerance": 6,
+   "label": "Healers: with the ranged, in reach of the tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 950,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 850,
+  "healPerSecondWithPlayerHealer": 200,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 20
+ },
+ "boss": {
+  "radius": 5,
+  "speed": 8.5,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 450,
+  "meleeInterval": 2,
+  "facingCone": "cleave",
+  "cones": {
+   "cleave": {
+    "angle": 90,
+    "range": 14,
+    "label": "Cleave",
+    "facing": "front",
+    "style": "cleave"
+   }
+  },
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.32
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Back into the corner before he arrives so Knock Away has nowhere to throw you. Every time he halves your threat, you take him straight back. He cannot be Taunted; this button is your way back onto the top of the list.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Threat is the whole fight. Stay behind him, stop in the red band, and step out of 20 yards for every Blast Wave. A Blast Wave you could have walked out of is a 3000 Fire hit you bought yourself. Some raids stay in with backs to the wall and eat it with Fire Resistance; this rehearsal drills the walk-out.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand in the opposite corner at 25 to 30 yards. Attack slowly, watch the threat bar, and pause when Knock Away halves the tank.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Only heal the tank holding him. Mortal Strike is a 5000 hit and halves your healing for 5 s, so have the tank near full going in and land the big heal right after.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Step back in",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Broodlord cannot be Taunted. This is your way back to the top of his threat list after a Knock Away. Use it the moment he turns, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "knockAway": {
+   "label": "Knock Away",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 8,
+   "knockbackRange": 10,
+   "damage": 400,
+   "threatCut": 0.5,
+   "wallMetric": "knocksOffWall",
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Every 15 to 30 seconds he throws the top-threat tank and halves their threat. Back in the corner means no throw, so you only lose the threat. Pick him back up the moment he turns."
+  },
+  "cleave": {
+   "label": "Cleave",
+   "kind": "cone",
+   "cone": "cleave",
+   "cast": 0,
+   "damage": 300,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "He cleaves everything in front of him. A cloth wearer in there dies."
+  },
+  "mortalStrike": {
+   "label": "Mortal Strike",
+   "kind": "cone",
+   "cone": "cleave",
+   "cast": 0,
+   "damage": 5000,
+   "follow": [
+    {
+     "id": "mortalDebuff",
+     "delay": 0.05
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "A huge hit on the tank, 5000 or more, and healing on them halves for 5 seconds. Have them near full going in."
+  },
+  "mortalDebuff": {
+   "label": "Mortal Strike debuff",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 5,
+   "tickDamage": 0,
+   "healingMult": 0.5,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Healing taken on the tank is halved for 5 seconds."
+  },
+  "blastWave": {
+   "label": "Blast Wave",
+   "kind": "aoe",
+   "cast": 3,
+   "offBoss": true,
+   "radius": 20,
+   "damage": 3000,
+   "tankDamage": 2000,
+   "moveOut": "melee",
+   "playerMetric": "blastWavesTaken",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Fire blasts everything within 20 yards of him every 8 to 16 seconds. Melee walk out of 20 yards on the warning, then come straight back. Ranged stay out of 20 yards entirely. Some raids stay in with backs to the wall and eat it with Fire Resistance; this rehearsal drills the walk-out."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Broodlord",
+   "subtitle": "Threat is the whole fight",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 270,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 8,
+     "every": 7,
+     "jitter": 1
+    },
+    {
+     "id": "knockAway",
+     "first": 12,
+     "every": 22,
+     "jitter": 7
+    },
+    {
+     "id": "blastWave",
+     "first": 20,
+     "every": 12,
+     "jitter": 4
+    },
+    {
+     "id": "mortalStrike",
+     "first": 30,
+     "every": 30,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 16,
+     "grace": 6,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Back into the corner before he gets there",
+     "tip": "Run to the corner, face him into the wall. If your back is in the open Knock Away throws you into the raid."
+    },
+    {
+     "id": "knockBack",
+     "type": "afterEvent",
+     "event": "knockAway",
+     "check": "hasAggro",
+     "notBefore": 0.2,
+     "within": 8,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Take him back after Knock Away",
+     "tip": "He halved your threat and looked for the next target. Step back in the moment he turns. He cannot be Taunted."
+    },
+    {
+     "id": "knockWall",
+     "type": "continuous",
+     "metric": "knocksOffWall",
+     "role": "tanks",
+     "label": "Stay backed into the corner",
+     "tip": "A wall behind you means Knock Away only takes threat. In the open it throws you across the room."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "threatRed",
+     "type": "continuous",
+     "metric": "attacksInRed",
+     "role": "dps",
+     "label": "Stop in the red band, especially after a Knock Away",
+     "tip": "Knock Away halves the tank. If you were at 80% of the tank, you are now over them. Stop and wait."
+    },
+    {
+     "id": "blastAvoid",
+     "type": "continuous",
+     "metric": "blastWavesTaken",
+     "role": "nontank",
+     "label": "Stay out of Blast Wave",
+     "tip": "Melee walk out to 20 yards on the warning, then come straight back. Ranged and healers never come within 20. Some raids stay in with backs to the wall and eat it with Fire Resistance; this rehearsal drills the walk-out."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Mortal Strike lands for 5000 and halves your heals for 5 seconds. Have the tank near full going in, and heal right after."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 40,
+   "roles": "dps",
+   "tip": "Melee are meant to walk out of Blast Wave every 8 to 16 seconds and come back. Being out of range at any other time is wasted time."
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "knocksOffWall": {
+   "label": "Knocked away from the wall",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 1,
+   "roles": "tanks",
+   "tip": "Keep your back in the corner. A Knock Away with open space behind you throws you into the raid."
+  },
+  "blastWavesTaken": {
+   "label": "Blast Waves taken",
+   "unit": "count",
+   "penaltyPerUnit": 4,
+   "severe": 2,
+   "roles": "nontank",
+   "tip": "Melee step out of 20 yards on the warning. Ranged and healers stay out of 20 at all times."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Press notes: take him back when he turns, heal right behind a Mortal Strike. The Blast Wave dance is about your feet.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "stepBack",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Take him back when he turns",
+    "tip": "Knock Away halved you and he has looked away. Get back on top."
+   },
+   {
+    "id": "healMortal",
+    "ability": "heal",
+    "on": "event",
+    "event": "mortalStrike",
+    "offset": 0.2,
+    "early": 1,
+    "late": 3.5,
+    "role": "healer",
+    "short": "MORTAL",
+    "label": "Heal right after Mortal Strike",
+    "tip": "Mortal Strike has just landed for 5000 and your heals are halved. Land the biggest heal you have."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a Mortal Strike coming is where tanks die. Heal now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "knockDrill",
+   "name": "Knock Away",
+   "description": "Already in the corner. Knock Away every 12 s: take him back every time and hold him through Cleaves and a Mortal Strike.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7
+    },
+    {
+     "id": "knockAway",
+     "first": 3,
+     "every": 12
+    },
+    {
+     "id": "mortalStrike",
+     "first": 14,
+     "every": 20
+    }
+   ]
+  },
+  {
+   "id": "blastDance",
+   "name": "Blast Wave dance",
+   "description": "Already on him. Blast Wave every 9 s: walk out of 20 yards and come straight back. Knock Away is halving threat the whole time, so also stop in the red band.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "blastWave",
+     "first": 4,
+     "every": 9
+    },
+    {
+     "id": "knockAway",
+     "first": 6,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "healMs",
+   "name": "Mortal Strike windows",
+   "description": "Mortal Strikes every 14 s with the debuff active on the tank: heal right behind each one and keep them above half through Cleaves.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 7
+    },
+    {
+     "id": "mortalStrike",
+     "first": 4,
+     "every": 14
+    },
+    {
+     "id": "blastWave",
+     "first": 9,
+     "every": 12
+    }
+   ]
+  }
+ ]
+}

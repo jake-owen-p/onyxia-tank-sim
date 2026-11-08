@@ -21,7 +21,7 @@ import { createCues, planCues, onCueEvent, onCuePress, clearPendingCues } from '
 import { createLane, createZone, createCracks, pulseCracks, updateHazards, hazardAt } from './hazards.js';
 import { buildSchedule, dueActions, scheduleOnce, upcoming as scheduleUpcoming } from './scheduler.js';
 import { createInstance, resolve, roleMatches as roleFilter } from './scoring.js';
-import { runCheck, playerAtSpot, bossAtSpot, bossFacingRaid, nearWall, attackRange } from './expectations.js';
+import { runCheck, playerAtSpot, bossAtSpot, bossFacingRaid, nearWall, attackRange, canDispel as canDispelFor } from './expectations.js';
 import {
   createPlayer, updatePlayer, knockback, createBoss, updateBoss, beginTakeoff, beginLanding, bossTargetPos,
   createRaid, setRaidSpot, updateRaid, spawnAdds, updateWhelps, pickupWhelps, createGhost, updateGhost,
@@ -657,18 +657,13 @@ export function createSim(script, options = {}) {
     };
     state.debuffs.push(d);
     emit('debuffApplied', { uid: d.uid, name: d.name, dispel: d.dispel, on, duration: def.duration || 10 });
-    if (d.dispel !== 'none') for (const beat of onCueEvent(state, script, 'debuffApplied', state.t)) emitBeat(beat);
+    if (canDispel(d)) for (const beat of onCueEvent(state, script, 'debuffApplied', state.t)) emitBeat(beat);
     if (on === 'player') toast(`${def.label} on you`, d.dispel !== 'none' ? 'warn' : 'bad');
     if (def.fear && on === 'player') { state.world.player.fearedUntil = state.t + (def.fear); emit('feared', { duration: def.fear }); }
     if (on === 'player') stunPlayer(def.stun);
   }
 
-  /** Can this role remove this debuff? A role may limit its button with `dispels` (Tranquilizing Shot only removes enrages). */
-  function canDispel(d) {
-    if (d.dispel === 'none' || !state.abilities.list.includes('dispel')) return false;
-    const types = roleDef.dispels || (script.playerAbilities.dispel || {}).dispels;
-    return !types || types.includes(d.dispel);
-  }
+  const canDispel = (d) => canDispelFor(state, script, d);
 
   function updateDebuffs(dt) {
     for (let i = state.debuffs.length - 1; i >= 0; i--) {

@@ -84,7 +84,56 @@
       "id": "blackwing-lair",
       "name": "Blackwing Lair",
       "size": 40,
-      "bosses": []
+      "bosses": [
+        {
+          "id": "razorgore",
+          "name": "Razorgore the Untamed",
+          "file": "razorgore.json",
+          "status": "ready"
+        },
+        {
+          "id": "vaelastrasz",
+          "name": "Vaelastrasz the Corrupt",
+          "file": "vaelastrasz.json",
+          "status": "ready"
+        },
+        {
+          "id": "broodlord-lashlayer",
+          "name": "Broodlord Lashlayer",
+          "file": "broodlord-lashlayer.json",
+          "status": "ready"
+        },
+        {
+          "id": "firemaw",
+          "name": "Firemaw",
+          "file": "firemaw.json",
+          "status": "ready"
+        },
+        {
+          "id": "ebonroc",
+          "name": "Ebonroc",
+          "file": "ebonroc.json",
+          "status": "ready"
+        },
+        {
+          "id": "flamegor",
+          "name": "Flamegor",
+          "file": "flamegor.json",
+          "status": "ready"
+        },
+        {
+          "id": "chromaggus",
+          "name": "Chromaggus",
+          "file": "chromaggus.json",
+          "status": "ready"
+        },
+        {
+          "id": "nefarian",
+          "name": "Nefarian",
+          "file": "nefarian.json",
+          "status": "ready"
+        }
+      ]
     },
     {
       "id": "zul-gurub",

@@ -80,9 +80,16 @@ export function notInFront(state, script) {
   return true;
 }
 
-/** No dispellable debuff is outstanding on anyone. */
-export function noDispellable(state) {
-  return !state.debuffs.some((d) => d.dispel && d.dispel !== 'none');
+/** Can this role remove this debuff? A role may limit its button with `dispels` (Tranquilizing Shot only removes enrages). */
+export function canDispel(state, script, d) {
+  if (!d.dispel || d.dispel === 'none' || !state.abilities.list.includes('dispel')) return false;
+  const types = state.roleDef.dispels || (script.playerAbilities.dispel || {}).dispels;
+  return !types || types.includes(d.dispel);
+}
+
+/** Nothing this role could remove is still up. */
+export function noDispellable(state, script) {
+  return !state.debuffs.some((d) => canDispel(state, script, d));
 }
 
 /** Is the player within a named spot's tolerance? */

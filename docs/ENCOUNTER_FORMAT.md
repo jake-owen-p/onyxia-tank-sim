@@ -84,7 +84,7 @@ ghost tank alive.
 Kinds: `taunt` (also picks up loose adds in range), `attack` (adds `threat`,
 counted for uptime), `heal` (heals the ghost tank by `amount`), `dispel`
 (removes the oldest dispellable debuff, optionally only of the listed types),
-`interrupt` (stops a cast whose action has `interruptible: true`). Any role can be given `dispel`; a role's own `dispels` list limits what its button removes (ranged Hunters with `"dispels": ["enrage"]` for Tranquilizing Shot).
+`interrupt` (stops a cast whose action has `interruptible: true`). Dispel targets the raid abstractly, so it has no range check. Any role can be given `dispel`; a role's own `dispels` list limits what its button removes (ranged Hunters with `"dispels": ["enrage"]` for Tranquilizing Shot).
 
 ### Actions
 

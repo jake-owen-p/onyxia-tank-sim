@@ -1,0 +1,1356 @@
+{
+ "id": "razorgore",
+ "name": "Razorgore the Untamed",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "blackwing-lair",
+  "name": "Blackwing Lair",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/blackwing-lair/razorgore.md. Era 40-man: 449,685 HP (a 2026 guild runbook snippet quotes 350,000 for a later patch: open question), immune to Taunt, no enrage timer. Phase 1 is compressed to 240 s (a real egg phase runs 4-6 minutes, about 5 minutes for 30 eggs at 3 s cast + 7 s cooldown each) and is `bossState: submerged` with HP frozen at 100%. Orb control itself CANNOT be modelled: the engine has no possession, no steering the boss, no Destroy Egg, no Mind Exhaustion, no 90 s control timer, and no egg count. The 30-egg win condition is replaced by the phase clock, so the kill clock of phase 1 is a placeholder. The real risk (he dies during P1, or an add pack reaches the orb) cannot be expressed either. Adds: Grethok the Controller and two Blackwing Guardsmen on the platform 12 s in (the main tank picks them up; killable and kill-first in the data, but kill-first is only scored against boss attacks, so with the boss submerged the kill order among adds, Mages > Dragonspawn > Legionnaires, is in tips only). Waves: first at 45 s (BigWigs 45 s, Warcraft Wiki 45 s, DBM 47 s, cmangos 40 s), then 4 adds every 15 s from the four corners (cmangos). Wave composition is not modelled: every add is generic and the 12 Dragonspawn / 40 orc caps, the replacement of dead adds, and the player-managed sleep/polymorph plan are not represented. Adds have no attacks of their own, so the kiters' damage is a repeating `aoe` with `tankDamage` only (placeholder, 1000 per 3.5 s) that the healer must offset; it only exists so healers have kiting damage to heal. Off-tank: `holdsBoss: false`; their phase 1 job is the two east spawners (the ghost handles the west ones). Their phase 2 job is standing at his flank to catch him on Conflagration, scored by being in melee range when it lands. Dominate Mind (Grethok, Magic, 15 s charm; in the real fight a 2 s interruptible cast, here instant with no interrupt) is a Magic debuff that takes control for 6 s (`fear: 6`) if it lands on you and the healer dispels it; only the two casts inside Grethok's life are scheduled. No mind control exists in the engine, so the victim cannot be ordered about or attacked by friends. Phase 2: 150 s (research: 2-3 minutes at 450k HP). He is not tauntable in the real fight (Warcraft Wiki, classicdb); the button is relabelled Threat dump and models the recovery of threat with Sunder/Revenge after a panic rather than a real Taunt. Warming Flames back to full HP and the wait for the controller are only represented by the `threatWipe` at phase start with a toast; the rule that the controller (who should be the MT) has the only real threat on him is not expressible. The transition `emerge` plus an immediate `threatWipe` fire together, so the tank must grab him; a DPS who keeps swinging pulls aggro. Conflagration: 3000 Fire over 10 s on the top-threat target and 10 s panic (cmangos first 10-15 s, then every 15-25 s). Modelled as a tank `debuff` (10 s, `fear: 10`, tickDamage 300) plus a `targetSwitch` onto the raid; the ghost tank comes back after 4 s, a player tank presses the button when the panic ends. Sources disagree on whether threat is lost at all: on the Warcraft Wiki reading he returns to his normal threat table when the panic ends, Warcraft Tavern says it drops all threat, Wowhead is silent and cmangos has no threat code for it; the button stands for getting back on top either way. Open question from research: 300 Fire/s splash on allies within 30 yd (classicdb) vs 150 (Warcraft Wiki); the splash is NOT modelled because the engine has no spread/move-apart mechanic and no damage-near-target rule, so the \"10 yd apart\" rule is in tips only. The threat-drop of \"everyone in front of him\" from Ten Ton Hammer is not modelled either (a targetSwitch does not cut threat). Fireball Volley: 2 s cast, everyone within 45 yards; cmangos first 15-20 s then every 15-20 s. Damage is placeholder 350 (classicdb base 255 vs Warcraft Wiki 133-154: open question). It reaches 45 yards and the pillars break line of sight (Wowhead, Warcraft Wiki): `radius 45` with the `pillarCover` safe spot behind the pillar drawn at y=10 (radius 7.5, checked by computation to be on the floor, out of his line of sight from the boss spot and in heal reach of the tank; a radius of 8 leaves a sliver exposed at the rim), so `rangedSpot` and `healerSpot` are already behind it and the marker steps them onto the spot for the cast. War Stomp: 15 yd radial knockback + 5 s stun, every 30 s (cmangos). Cleave: every 4-8 s (cmangos), as a frontal cone on the tank. Damage is scaled so a 10,000 HP tank survives on a healer but not without one: melee 550 per 2 s, which on the ghost tank with passive healing alone (no healer player) is survivable, but when the healer player is the only source of healing (150 HP/s passive), ignoring the tank or a Conflagration tick kills them. Numbers that were not measured are placeholders: melee, Cleave, the volley damage, and the add damage on kiters. Aggro pulls every ~45 s stand in for DPS overtaking a tank whose threat was halved by Conflagration; the real threat table is not modelled. Hold-damage-after-P2-start is a toast, not a scored mechanic beyond threatDps. Engine gaps: possession and eggs; adds that deal no damage and have no abilities or facing; no kill order among adds; Razorgore immune to Taunt not enforceable (the button text says so); Conflagration splash; cover stops only the damage to you, and attacks have no line of sight; debuffs on others are only dispelled when the player is the healer.",
+ "sources": [
+  "docs/research/blackwing-lair/razorgore.md",
+  "https://warcraft.wiki.gg/wiki/Razorgore_the_Untamed",
+  "https://classicdb.ch/?npc=12435",
+  "https://classicdb.ch/?npc=12557",
+  "https://classicdb.ch/?npc=12416",
+  "https://classicdb.ch/?npc=12420",
+  "https://classicdb.ch/?npc=12422",
+  "https://classicdb.ch/?spell=19873",
+  "https://classicdb.ch/?spell=23014",
+  "https://classicdb.ch/?spell=22425",
+  "https://classicdb.ch/?spell=23023",
+  "https://classicdb.ch/?spell=24375",
+  "https://classicdb.ch/?spell=19632",
+  "https://classicdb.ch/?spell=23040",
+  "https://classicdb.ch/?spell=14515",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/blackwing_lair/boss_razorgore.cpp",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/blackwing_lair/blackwing_lair.cpp",
+  "https://github.com/BigWigsMods/BigWigs_Classic/blob/master/BlackwingLair/Razorgore.lua",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/BWL/Razorgore.lua",
+  "https://www.tentonhammer.com/guides/blackwing-lair-guide-7-25-06-page-two",
+  "https://www.warcrafttavern.com/guides/wow-classic-blackwing-lair-guide/",
+  "https://us.millenium.gg/guide/6486.html?page=2",
+  "https://yttrium-tyclief.github.io/sod-guides/bwl/razorgore",
+  "https://docs.google.com/document/d/1VT_67cPSHqvRK2_yit0QSiyzGwf9oXTKjcinxsVymoA"
+ ],
+ "arena": {
+  "name": "Dragonmaw Garrison",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "hall",
+    "poly": [
+     [
+      -42,
+      -30
+     ],
+     [
+      42,
+      -30
+     ],
+     [
+      42,
+      46
+     ],
+     [
+      -42,
+      46
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -52
+     ],
+     [
+      9,
+      -52
+     ],
+     [
+      9,
+      -26
+     ],
+     [
+      -9,
+      -26
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "hallWall",
+    "points": [
+     [
+      -9,
+      -30
+     ],
+     [
+      -42,
+      -30
+     ],
+     [
+      -42,
+      46
+     ],
+     [
+      42,
+      46
+     ],
+     [
+      42,
+      -30
+     ],
+     [
+      9,
+      -30
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -30
+     ],
+     [
+      -9,
+      -52
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -30
+     ],
+     [
+      9,
+      -52
+     ]
+    ]
+   },
+   {
+    "id": "orbPlatform",
+    "points": [
+     [
+      -11,
+      46
+     ],
+     [
+      -11,
+      38
+     ],
+     [
+      11,
+      38
+     ],
+     [
+      11,
+      46
+     ]
+    ]
+   },
+   {
+    "id": "pillar",
+    "points": [
+     [
+      -5,
+      10
+     ],
+     [
+      5,
+      10
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -46
+    ]
+   },
+   {
+    "text": "Orb of Domination",
+    "at": [
+     0,
+     42
+    ]
+   },
+   {
+    "text": "NW spawner",
+    "at": [
+     -37,
+     42
+    ]
+   },
+   {
+    "text": "NE spawner",
+    "at": [
+     37,
+     42
+    ]
+   },
+   {
+    "text": "SW spawner",
+    "at": [
+     -37,
+     -26
+    ]
+   },
+   {
+    "text": "SE spawner",
+    "at": [
+     37,
+     -26
+    ]
+   },
+   {
+    "text": "Egg clutch",
+    "at": [
+     -22,
+     18
+    ]
+   },
+   {
+    "text": "Egg clutch",
+    "at": [
+     22,
+     18
+    ]
+   },
+   {
+    "text": "Pillar: hide from Fireball Volley",
+    "at": [
+     0,
+     12
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -48,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 14,
+   "heading": 270
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 33,
+   "tolerance": 4,
+   "label": "Main tank (phase 2)"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 24,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Razorgore"
+  },
+  "orbSpot": {
+   "x": 0,
+   "y": 32,
+   "tolerance": 5,
+   "label": "Orb platform steps: take the last control cycle from here"
+  },
+  "raidSpotP1": {
+   "x": 0,
+   "y": -8,
+   "spread": 14
+  },
+  "raidSpotP2": {
+   "x": 0,
+   "y": -2,
+   "spread": 12
+  },
+  "rangedSpotP1": {
+   "x": 0,
+   "y": -6,
+   "tolerance": 8,
+   "label": "Ranged: reach both add groups"
+  },
+  "healerSpotP1": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 6,
+   "label": "Healers: follow your kiter"
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": 2,
+   "tolerance": 8,
+   "label": "Ranged: outside War Stomp"
+  },
+  "healerSpot": {
+   "x": 5,
+   "y": -2,
+   "tolerance": 6,
+   "label": "Healers: within reach of the tank"
+  },
+  "pillarCover": {
+   "x": 0,
+   "y": 1,
+   "tolerance": 6,
+   "label": "Behind the pillar: out of Fireball Volley"
+  },
+  "grethokSpot": {
+   "x": 0,
+   "y": 38,
+   "label": "Grethok"
+  },
+  "guardA": {
+   "x": -6,
+   "y": 36,
+   "label": "Guardsman"
+  },
+  "guardB": {
+   "x": 6,
+   "y": 36,
+   "label": "Guardsman"
+  },
+  "addNW": {
+   "x": -38,
+   "y": 42
+  },
+  "addNE": {
+   "x": 38,
+   "y": 42
+  },
+  "addSW": {
+   "x": -38,
+   "y": -26
+  },
+  "addSE": {
+   "x": 38,
+   "y": -26
+  },
+  "addHoldWest": {
+   "x": -26,
+   "y": 8,
+   "label": "West corner kite"
+  },
+  "addHoldEast": {
+   "x": 26,
+   "y": 10,
+   "tolerance": 5,
+   "label": "East corner kite: your adds, held here"
+  },
+  "offtankFlank": {
+   "x": 9,
+   "y": 24,
+   "tolerance": 4,
+   "label": "Off-tank: at his flank, never in front"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 420,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 480,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 8.5,
+  "turnRate": 240,
+  "meleeRange": 7,
+  "meleeDamage": 550,
+  "meleeInterval": 2,
+  "cones": {
+   "cleave": {
+    "angle": 90,
+    "range": 14,
+    "label": "Cleave",
+    "facing": "front",
+    "style": "cleave"
+   }
+  },
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pick up Grethok and his Guardsmen on the platform, then be the warrior on the orb for the last egg so Razorgore comes to you. In phase 2 he panics you with Conflagration every 20 s: when it ends, get him back at once.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Corner kiter / off-tank",
+   "short": "Off-tank",
+   "description": "Phase 1 you own the east spawners: catch every add before it reaches the raid and hold them on your spot. Phase 2 stand at his flank, never in front, and catch him the moment the main tank panics.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill whatever is in reach in the egg room: Mages first, then Dragonspawn, then Legionnaires. In phase 2 hit him from behind or the flank, stay out of the front, and keep an eye on the threat bar.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stand where you reach both add groups, Mages first. In phase 2 stay outside the 15 yd War Stomp and spread: a Conflagration on someone near you burns everyone within 30 yards.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Dispel Grethok's Dominate Mind, keep your kiting warrior alive through the add waves, and in phase 2 keep the tank up through Conflagration and the volleys.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Threat dump",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Razorgore cannot be Taunted. This button stands for getting back on top of his threat list (Sunder, Revenge, Heroic Strike). Press it the moment you can act and he is not on you, never while he is already on you. It also picks up adds in phase 1."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Dispel",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "magic"
+   ],
+   "tip": "Removes the oldest dispellable debuff on the raid. Here one button stands in for Dispel Magic, Cleanse, Remove Curse, Cure Poison and Cure Disease."
+  }
+ },
+ "actions": {
+  "grethok": {
+   "label": "Grethok and Guardsmen",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "grethokSpot",
+    "guardA",
+    "guardB"
+   ],
+   "speed": 4,
+   "aggroRange": 14,
+   "lifetime": 24,
+   "heldLifetime": 24,
+   "pickup": "tanks",
+   "holdSpot": "addHoldWest",
+   "killFirst": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Grethok the Controller and two Guardsmen hold the orb platform. Tanks take them, everyone else kills Grethok first: he casts Dominate Mind."
+  },
+  "addWave": {
+   "label": "Dragonkin wave",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "addNW",
+    "addNE",
+    "addSW",
+    "addSE"
+   ],
+   "playerFrom": [
+    "addNE",
+    "addSE"
+   ],
+   "speed": 5,
+   "aggroRange": 12,
+   "lifetime": 28,
+   "heldLifetime": 28,
+   "pickup": "offtank",
+   "holdSpot": "addHoldWest",
+   "killable": true,
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "A wave every 15 s from the corners: Blackwing Legionnaires, Mages and Death Talon Dragonspawn. Kiters catch them, Mages die first, Dragonspawn get slept."
+  },
+  "kiterDamage": {
+   "label": "Adds on your kiter",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 0,
+   "tankDamage": 1000,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "The packs hit the kiting warrior while they walk."
+  },
+  "dominateMind": {
+   "label": "Dominate Mind",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "magic",
+   "target": "random",
+   "count": 1,
+   "playerChance": 0.3,
+   "duration": 15,
+   "fear": 6,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "submerged",
+   "tip": "Grethok mind-controls a random player inside 20 yards for 15 s. If it is you, you are out of the fight for a moment. Priests and Paladins dispel it, Grethok dies first."
+  },
+  "emergeWipe": {
+   "label": "Warming Flames",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "Razorgore heals to full and comes for his controller. Grab him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The last egg breaks: he heals to full, the adds run, and he looks for whoever had the orb. That person must be the main tank, already at the threat dump."
+  },
+  "cleave": {
+   "label": "Cleave",
+   "kind": "cone",
+   "cone": "cleave",
+   "cast": 0,
+   "damage": 250,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Razorgore cleaves everything in front of him. Only the tank belongs there."
+  },
+  "fireballVolley": {
+   "label": "Fireball Volley",
+   "kind": "aoe",
+   "cast": 2,
+   "radius": 45,
+   "damage": 350,
+   "tankDamage": 350,
+   "safeSpots": [
+    "pillarCover"
+   ],
+   "safeRadius": 7.5,
+   "safeRoles": [
+    "ranged",
+    "healer"
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "A 2 s cast and everyone within 45 yards takes a fireball, unless a pillar breaks line of sight. Ranged and healers stand behind the pillar; melee take it."
+  },
+  "conflagration": {
+   "label": "Conflagration",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "none",
+   "target": "tank",
+   "duration": 10,
+   "tickDamage": 300,
+   "fear": 10,
+   "follow": [
+    {
+     "id": "conflagTurn",
+     "delay": 0.05
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "fireball",
+   "requires": "grounded",
+   "tip": "The top-threat player burns for 3000 over 10 s and panics. He turns to the next on his list for those 10 seconds."
+  },
+  "conflagTurn": {
+   "label": "Conflagration (turned)",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 4,
+   "toast": "Conflagration: he has turned on the next target!",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "While the main tank panics he goes to the next on his threat list. A second tank should already be close to catch him."
+  },
+  "warStomp": {
+   "label": "War Stomp",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 8,
+   "knockbackRange": 15,
+   "radial": true,
+   "damage": 500,
+   "stun": 5,
+   "warn": true,
+   "cue": "buffet",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Everyone within 15 yards of him is knocked back and stunned for 5 seconds. Melee take it and go straight back in; ranged stay outside it."
+  },
+  "aggroPull": {
+   "label": "Aggro pull",
+   "kind": "aggroPull",
+   "cast": 0,
+   "threatMultiplier": 1.15,
+   "duration": 3,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "conditional": "onPlayer",
+   "tip": "A burst of DPS overtakes the tank after a Conflagration chewed their threat."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "The Egg Room",
+   "subtitle": "Add waves while the orb controller breaks eggs",
+   "hpFrom": 1,
+   "hpTo": 1,
+   "duration": 240,
+   "bossState": "submerged",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "orbSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpotP1",
+    "healer": "healerSpotP1",
+    "offtank": "addHoldEast"
+   },
+   "actions": [
+    {
+     "id": "grethok",
+     "first": 12
+    },
+    {
+     "id": "dominateMind",
+     "first": 18
+    },
+    {
+     "id": "dominateMind",
+     "first": 30
+    },
+    {
+     "id": "kiterDamage",
+     "first": 30,
+     "every": 3.5,
+     "jitter": 0.5
+    },
+    {
+     "id": "addWave",
+     "first": 45,
+     "every": 15,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "grethokPickup",
+     "type": "afterEvent",
+     "event": "grethok",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 8,
+     "role": "tanks",
+     "label": "Take Grethok and his guards",
+     "tip": "Before anything else: walk up, grab Grethok and the two Guardsmen, and keep them on you until the DPS drop Grethok."
+    },
+    {
+     "id": "orbReady",
+     "type": "playerAtSpotBy",
+     "spot": "orbSpot",
+     "grace": 6,
+     "role": "tanks",
+     "label": "Be at the orb steps for the last egg",
+     "tip": "The tank who takes the last control cycle gets Razorgore when the egg dies. In this rehearsal, that means being at the steps as the phase ends."
+    },
+    {
+     "id": "addsPicked",
+     "type": "afterEvent",
+     "event": "addWave",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Catch every add from your corners",
+     "tip": "Run to your east corners when a wave spawns, Taunt or walk into them, and bring them back to your spot. Nothing reaches the raid."
+    },
+    {
+     "id": "addsAway",
+     "type": "continuous",
+     "metric": "whelpsOnRaid",
+     "role": "offtank",
+     "label": "Keep the adds off the raid",
+     "tip": "A pack in the raid means Cleaves on healers. Stand between them and the raid and hold them on your spot."
+    },
+    {
+     "id": "dominateDispel",
+     "type": "afterEvent",
+     "event": "dominateMind",
+     "check": "noDispellable",
+     "within": 6,
+     "grace": 3,
+     "role": "healer",
+     "label": "Dispel Dominate Mind",
+     "tip": "A mind-controlled raid member kills your healers. Dispel Magic the moment it lands."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Your kiter takes the whole pack. Keep them above half and never let them die with adds on them."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Phase 2",
+   "subtitle": "Razorgore awake",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 150,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP2",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "offtankFlank"
+   },
+   "actions": [
+    {
+     "id": "emergeWipe",
+     "first": 0
+    },
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 6,
+     "jitter": 2
+    },
+    {
+     "id": "conflagration",
+     "first": 14,
+     "every": 20,
+     "jitter": 4
+    },
+    {
+     "id": "fireballVolley",
+     "first": 18,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "warStomp",
+     "first": 30,
+     "every": 30,
+     "jitter": 2
+    },
+    {
+     "id": "aggroPull",
+     "first": 42,
+     "every": 45,
+     "jitter": 5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emerge",
+     "type": "afterEvent",
+     "event": "emergeWipe",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Grab him the moment he wakes",
+     "tip": "He comes for the last controller, and the threat table is empty. You are the tank, you were on the orb, you hit him first."
+    },
+    {
+     "id": "tankSpotP2",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Pull him to the tank spot",
+     "tip": "Drag him north onto the tank spot, facing away from the raid and the corner."
+    },
+    {
+     "id": "conflagBack",
+     "type": "afterEvent",
+     "event": "conflagration",
+     "check": "hasAggro",
+     "notBefore": 10.5,
+     "within": 15,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Take him back when the panic ends",
+     "tip": "He went to the next tank while you panicked. On the Warcraft Wiki reading he comes back by himself when the panic ends; Warcraft Tavern says the panic wipes your threat. Here the button stands for getting back on top either way."
+    },
+    {
+     "id": "retaunt",
+     "type": "afterEvent",
+     "event": "aggroPull",
+     "check": "hasAggro",
+     "notBefore": 0.2,
+     "within": 3,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Take him back when a DPS pulls aggro",
+     "tip": "A big crit overtakes you after a Conflagration chewed your threat. Dump threat and turn him back round."
+    },
+    {
+     "id": "offtankCatch",
+     "type": "onEvent",
+     "event": "conflagration",
+     "check": "inRange",
+     "grace": 6,
+     "role": "offtank",
+     "label": "Be at his flank when the main tank panics",
+     "tip": "Conflagration lands every 15-25 s. If you are not at his side, nobody catches him and he goes for the raid. Never stand in front."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "threatRed",
+     "type": "continuous",
+     "metric": "attacksInRed",
+     "role": "dps",
+     "label": "Stop in the red band",
+     "tip": "A Conflagration has just halved the tank's lead. Every hit in the red band is a chance to pull him onto yourself."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Conflagration ticks for 3000 and the second he turns, the off-tank takes a Cleave. Pre-heal whoever is about to take him."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tank"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.5,
+   "severe": 10,
+   "roles": "offtank",
+   "phases": [
+    1
+   ],
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "playerInFront": {
+   "label": "Standing in his front",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 3,
+   "roles": [
+    "melee",
+    "offtank"
+   ],
+   "bossStates": [
+    "grounded"
+   ],
+   "tip": "Cleave and, in real tanking, the threat drop on Conflagration both land in front of him. Melee and off-tanks stand behind or beside."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Press notes: threat dump the moment the panic ends, when he wakes, and after an aggro pull. Pick up adds. Dispel Dominate Mind. Heal when the tank is low.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntEmerge",
+    "ability": "taunt",
+    "on": "event",
+    "event": "emergeWipe",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "GRAB",
+    "label": "Hit him as he wakes",
+    "tip": "He comes up with an empty table. Threat dump the instant he is in range."
+   },
+   {
+    "id": "tauntConflag",
+    "ability": "taunt",
+    "on": "event",
+    "event": "conflagration",
+    "offset": 10,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "PANIC OVER",
+    "label": "Take him back when the panic ends",
+    "tip": "He went to the next tank while you panicked. On the Warcraft Wiki reading he comes back by himself when the panic ends; Warcraft Tavern says the panic wipes your threat. Here the button stands for getting back on top either way."
+   },
+   {
+    "id": "tauntAggro",
+    "ability": "taunt",
+    "on": "event",
+    "event": "aggroPull",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Take him back when he turns",
+    "tip": "A DPS has overtaken you. Dump threat the moment he turns."
+   },
+   {
+    "id": "tauntGrethok",
+    "ability": "taunt",
+    "on": "event",
+    "event": "grethok",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "tank",
+    "short": "GUARDS",
+    "label": "Pick up Grethok and the Guardsmen",
+    "tip": "Run into them or Taunt one as they turn on the raid.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "tauntWave",
+    "ability": "taunt",
+    "on": "event",
+    "event": "addWave",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "WAVE",
+    "label": "Pick up the wave",
+    "tip": "Get to your corners and take them before they reach the raid.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a Conflagration coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Dominate Mind on a raid member is the most dangerous thing in this room. Dispel it."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "conflagDrill",
+   "name": "Conflagration swaps",
+   "description": "Already on him in phase 2. Conflagration every 15 s: wait out the panic, then get him back and hold him through the aggro pulls.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 65,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 6,
+     "jitter": 1
+    },
+    {
+     "id": "conflagration",
+     "first": 5,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "aggroPull",
+     "first": 17,
+     "every": 20,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "waveDrill",
+   "name": "Catching the waves",
+   "description": "A wave every 15 s from the east corners. Catch both spawners before they reach the raid and hold them on your spot.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "addWave",
+     "first": 3,
+     "every": 15
+    }
+   ]
+  },
+  {
+   "id": "threatP2",
+   "name": "Threat discipline in phase 2",
+   "description": "Attack on every global, stop when the bar goes red, and hold while he changes targets during Conflagration.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 6,
+     "jitter": 1
+    },
+    {
+     "id": "conflagration",
+     "first": 5,
+     "every": 16,
+     "jitter": 1
+    },
+    {
+     "id": "fireballVolley",
+     "first": 12,
+     "every": 15
+    },
+    {
+     "id": "aggroPull",
+     "first": 20,
+     "every": 20,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "p1Adds",
+   "name": "Egg room add DPS",
+   "description": "Add waves spawn from the corners. Face them and kill Mages first. Nothing here is on a boss.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "addWave",
+     "first": 3,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "healConflag",
+   "name": "Healing through Conflagration",
+   "description": "Keep the tank above half through Conflagration burns, War Stomp and Fireball Volley while dispels land.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 6,
+     "jitter": 1
+    },
+    {
+     "id": "conflagration",
+     "first": 4,
+     "every": 15,
+     "jitter": 1
+    },
+    {
+     "id": "fireballVolley",
+     "first": 8,
+     "every": 12
+    },
+    {
+     "id": "warStomp",
+     "first": 18,
+     "every": 26
+    }
+   ]
+  }
+ ]
+}

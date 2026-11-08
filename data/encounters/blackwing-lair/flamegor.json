@@ -1,0 +1,937 @@
+{
+ "id": "flamegor",
+ "name": "Flamegor",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "blackwing-lair",
+  "name": "Blackwing Lair",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/blackwing-lair/flamegor.md. Era 40-man: 999,300 HP, no enrage, tauntable. Modelled as one 240 s phase (research: 4-5 minutes). Frenzy: first ~10 s, then every 10-15 s (cmangos; logs 8.3-11.3 s between removal and the next cast). Real Frenzy is 10 s, +150% attack speed, Fire Nova every 2 s, removed only by Hunter Tranquilizing Shot (dispel type `enrage`). It is a `debuff` on the tank with `damageTakenMult` 1.4 (standing in for roughly 2.5x swings: the multiplier applies to everything on the tank, Shadow Flame included, so it is deliberately lower than 2.5). The `ranged` role carries the Tranq button (`roles.ranged.dispels: ['enrage']`) and is scored on it: expectation, press cue and `debuffSeconds` are all on `ranged`, and the healer no longer has a dispel at all. In the other seats nobody can press it, so the debuff's 4 s duration (not 10 s) stands for how fast the raid's hunters catch it. Fire Nova: `aoe` chained with `follow` after each Frenzy at +2 s and +4 s, 500 Fire (scaled from 555-645), and `conditional: debuff:frenzy` so a pulse only lands while Frenzy is up: a Tranq inside 2 s stops it completely, exactly as Wowhead describes (DPS take no damage when hunters react fast). Wing Buffet: `knockback` with `threatCut: 0.5`, first ~30 s then 30-35 s (cmangos), 1 s cast, as a single-tank model: the tank eats it and Taunts back. Shadow Flame: 2 s cast, 45 yd cone, first ~18 s then every 15-18 s (logs 12.9-23 s), 4000 Shadow, `conditional: onPlayer`. Thrash: cone on the tank every ~4 s. Summon Player is not modelled. Line of sight does not stop Fire Nova since patch 1.11, so it has no cover here. Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 600 per 2 s, Thrash 500, Shadow Flame 4000, Wing Buffet 750, Fire Nova 500, Frenzy multiplies all tank damage by 1.4 while up; placeholders. Passive healing is 1400 HP/s on a player tank (the raid heals you and you cannot press your own heal), 1200 on the ghost without a healer player and 200 with one. Engine gaps: one tank role, so the buffet off-tank is the same player Taunting back; no hunter rotation or Tranq cooldown (the real 20 s cooldown with 2-3 hunters is represented by a free button); only the ranged seat can Tranq, so in the other seats Frenzy simply lasts its 4 s.",
+ "sources": [
+  "docs/research/blackwing-lair/flamegor.md",
+  "https://warcraft.wiki.gg/wiki/Flamegor",
+  "https://classicdb.ch/?npc=11981",
+  "https://classicdb.ch/?spell=23342",
+  "https://classicdb.ch/?spell=23462",
+  "https://classicdb.ch/?spell=22539",
+  "https://classicdb.ch/?spell=22682",
+  "https://classicdb.ch/?spell=23339",
+  "https://classicdb.ch/?spell=3391",
+  "https://github.com/cmangos/mangos-classic/blob/master/src/game/AI/ScriptDevAI/scripts/eastern_kingdoms/blackwing_lair/boss_flamegor.cpp",
+  "https://github.com/BigWigsMods/BigWigs_Classic/blob/master/BlackwingLair/Flamegor.lua",
+  "https://github.com/DeadlyBossMods/DBM-Vanilla/blob/master/DBM-Raids-Vanilla/BWL/Flamegor.lua",
+  "https://www.warcrafttavern.com/guides/wow-classic-blackwing-lair-guide/",
+  "https://www.tentonhammer.com/guides/blackwing-lair-guide-7-25-06-page-six",
+  "https://us.millenium.gg/guide/6486.html?page=5",
+  "https://yttrium-tyclief.github.io/sod-guides/bwl/twindrakes"
+ ],
+ "arena": {
+  "name": "Crimson Laboratories, the upper room",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "hall",
+    "poly": [
+     [
+      -42,
+      -18
+     ],
+     [
+      42,
+      -18
+     ],
+     [
+      42,
+      44
+     ],
+     [
+      -42,
+      44
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -14
+     ],
+     [
+      -9,
+      -14
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "hallWall",
+    "points": [
+     [
+      -9,
+      -18
+     ],
+     [
+      -42,
+      -18
+     ],
+     [
+      -42,
+      44
+     ],
+     [
+      42,
+      44
+     ],
+     [
+      42,
+      -18
+     ],
+     [
+      9,
+      -18
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -18
+     ],
+     [
+      -9,
+      -42
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -18
+     ],
+     [
+      9,
+      -42
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -36
+    ]
+   },
+   {
+    "text": "Tank spot",
+    "at": [
+     0,
+     42
+    ]
+   },
+   {
+    "text": "Everyone behind him",
+    "at": [
+     0,
+     -8
+    ]
+   },
+   {
+    "text": "Tank wall",
+    "at": [
+     18,
+     42
+    ]
+   }
+  ],
+  "backWall": [
+   [
+    -42,
+    44
+   ],
+   [
+    42,
+    44
+   ]
+  ],
+  "nearWallDistance": 7
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -38,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 14,
+   "y": 22,
+   "heading": 200
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -24,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 38,
+   "tolerance": 4,
+   "label": "Tank: back to the wall"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 30,
+   "heading": 90,
+   "tolerance": 6,
+   "headingTolerance": 60,
+   "label": "Flamegor, head to the wall"
+  },
+  "raidSpotP1": {
+   "x": 2,
+   "y": 2,
+   "spread": 13
+  },
+  "rangedSpot": {
+   "x": 2,
+   "y": 4,
+   "tolerance": 8,
+   "label": "Ranged: behind him, clear shot for Tranq"
+  },
+  "healerSpot": {
+   "x": -6,
+   "y": 4,
+   "tolerance": 7,
+   "label": "Healers: in reach of the tank"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1400,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1200,
+  "healPerSecondWithPlayerHealer": 200,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 50,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "shape": "dragon",
+  "radius": 6,
+  "speed": 7,
+  "turnRate": 200,
+  "meleeRange": 8,
+  "meleeDamage": 600,
+  "meleeInterval": 2,
+  "facingCone": "breath",
+  "cones": {
+   "breath": {
+    "angle": 60,
+    "range": 45,
+    "label": "Shadow Flame",
+    "facing": "front",
+    "style": "breath"
+   },
+   "wing": {
+    "angle": 120,
+    "range": 20,
+    "label": "Wing Buffet",
+    "facing": "front"
+   }
+  },
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 300,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.32
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him at the wall, back to it, head away from the raid, exactly as Ebonroc. When he frenzies the hunters shoot it off; you just survive it and Taunt back after every Wing Buffet.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Directly behind him, never in front. Fire Nova cannot be avoided by position, so wear your Fire Resistance and bandage if the Tranq rotation slips.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Behind him at range with a clear line for Tranq. You are the Tranq shot: the moment he frenzies, shoot it off. Inside 2 seconds the Fire Nova never comes. Keep your threat under a tank whose threat gets halved by Wing Buffet.",
+   "abilities": [
+    "attack",
+    "dispel"
+   ],
+   "attackRange": 30,
+   "dispels": [
+    "enrage"
+   ]
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Hunters shoot Frenzy off; your job is the tank. Keep them up through the Thrash bursts, the Fire Nova pulses when a Frenzy gets through, and the Shadow Flames. Nothing here is yours to dispel.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Tranquilizing Shot",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 45,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "enrage"
+   ],
+   "tip": "Frenzy: +150% attack speed and Fire Nova every 2 s until a hunter Tranquilizing Shots it off. The Tranq order is named before the pull. In the ranged seat this button is the shot: land it inside 2 seconds and the Fire Nova never comes."
+  }
+ },
+ "actions": {
+  "frenzy": {
+   "label": "Frenzy",
+   "kind": "debuff",
+   "cast": 0,
+   "dispel": "enrage",
+   "target": "tank",
+   "duration": 4,
+   "damageTakenMult": 1.4,
+   "follow": [
+    {
+     "id": "fireNova",
+     "delay": 2
+    },
+    {
+     "id": "fireNova",
+     "delay": 4
+    }
+   ],
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He frenzies every 10 to 15 seconds: attack speed up by 150% for 10 seconds and Fire Nova every 2 seconds on the raid. Hunters Tranquilizing Shot it off in a fixed order."
+  },
+  "fireNova": {
+   "label": "Fire Nova",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 500,
+   "tankDamage": 500,
+   "conditional": "debuff:frenzy",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "555 Fire on the whole room every 2 seconds while he is frenzied, and not otherwise."
+  },
+  "shadowFlame": {
+   "label": "Shadow Flame",
+   "kind": "cone",
+   "cone": "breath",
+   "cast": 2,
+   "conditional": "onPlayer",
+   "damage": 4000,
+   "raidMetric": "raidBreathHits",
+   "raidToast": "Shadow Flame hit the raid",
+   "playerMetric": "breathsTaken",
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A 2 s cast, 4 to 5 thousand Shadow in a 45 yd cone on the current tank. Everyone else stays behind him."
+  },
+  "wingBuffet": {
+   "label": "Wing Buffet",
+   "kind": "knockback",
+   "cast": 1,
+   "knockback": 8,
+   "knockbackRange": 20,
+   "damage": 750,
+   "threatCut": 0.5,
+   "wallMetric": "buffetsOffWall",
+   "warn": true,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "A frontal shove and half your threat, every 30 to 35 seconds. Back to the wall and Taunt the moment he turns."
+  },
+  "thrash": {
+   "label": "Thrash",
+   "kind": "cone",
+   "cone": "wing",
+   "cast": 0,
+   "damage": 500,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Three swings in quick succession on the tank. Under Frenzy this is the tank killer."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Flamegor",
+   "subtitle": "Tranquilizing Shot every Frenzy",
+   "hpFrom": 1,
+   "hpTo": 0,
+   "duration": 240,
+   "bossState": "grounded",
+   "raidSpot": "raidSpotP1",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "melee": null,
+    "ranged": "rangedSpot",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "thrash",
+     "first": 6,
+     "every": 4,
+     "jitter": 1
+    },
+    {
+     "id": "frenzy",
+     "first": 10,
+     "every": 12,
+     "jitter": 2
+    },
+    {
+     "id": "shadowFlame",
+     "first": 18,
+     "every": 16.5,
+     "jitter": 3
+    },
+    {
+     "id": "wingBuffet",
+     "first": 30,
+     "every": 33,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 18,
+     "grace": 6,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pull him to the wall",
+     "tip": "Taunt him, walk to the wall and turn him so his head is on it. Melee and ranged go behind him."
+    },
+    {
+     "id": "buffetRetaunt",
+     "type": "afterEvent",
+     "event": "wingBuffet",
+     "check": "hasAggro",
+     "notBefore": 0.3,
+     "within": 6,
+     "grace": 3,
+     "role": "tanks",
+     "label": "Taunt straight after the buffet",
+     "tip": "Wing Buffet halves your threat and he turns. Taunt the moment you see it."
+    },
+    {
+     "id": "wallCheck",
+     "type": "continuous",
+     "metric": "buffetsOffWall",
+     "role": "tanks",
+     "label": "Keep your back to the wall",
+     "tip": "If there is open floor behind you, Wing Buffet throws you and he moves."
+    },
+    {
+     "id": "facingBreath",
+     "type": "continuous",
+     "metric": "bossFacingRaid",
+     "role": "tanks",
+     "label": "His head stays on the wall",
+     "tip": "Shadow Flame goes 45 yards in front of him. If it reaches the raid, people die."
+    },
+    {
+     "id": "tranq",
+     "type": "afterEvent",
+     "event": "frenzy",
+     "check": "noDispellable",
+     "within": 1.5,
+     "grace": 2,
+     "role": "ranged",
+     "label": "Tranq Frenzy off the moment it lands",
+     "tip": "Tranquilizing Shot the instant the emote and the size change fire. Every 2 seconds it stays up is another Fire Nova on the raid."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "threatRed",
+     "type": "continuous",
+     "metric": "attacksInRed",
+     "role": "dps",
+     "label": "Stop in the red band after a Wing Buffet",
+     "tip": "The tank has just lost half their threat. If you were close before, you are over them now."
+    },
+    {
+     "id": "noBreath",
+     "type": "continuous",
+     "metric": "breathsTaken",
+     "role": "nontank",
+     "label": "Stay out of Shadow Flame",
+     "tip": "Everyone but the tank stays behind him."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Fire Nova on every Frenzy that slips through, and Shadow Flames on the current tank. Hunters Tranq; you heal."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times he turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull him. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had him",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled him before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.4,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in fire",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Fire on the ground is never worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.5,
+   "severe": 10,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds Frenzy stayed up",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 10,
+   "roles": "ranged",
+   "tip": "Tranquilizing Shot the moment it lands. Every 2 seconds is another Fire Nova on the raid."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in his front",
+   "unit": "s",
+   "penaltyPerSecond": 3,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ],
+   "tip": "Melee stand directly behind him and never in front."
+  },
+  "breathsTaken": {
+   "label": "Shadow Flames taken",
+   "unit": "count",
+   "penaltyPerUnit": 10,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "raidBreathHits": {
+   "label": "Shadow Flames on the raid",
+   "unit": "count",
+   "penaltyPerUnit": 12,
+   "severe": 1,
+   "roles": "tanks"
+  },
+  "buffetsOffWall": {
+   "label": "Buffets taken off the wall",
+   "unit": "count",
+   "penaltyPerUnit": 5,
+   "severe": 1,
+   "roles": "tanks",
+   "tip": "Back to the wall. In the open Wing Buffet throws you and he moves."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Press notes: Taunt straight after a Wing Buffet; Tranq the Frenzy the moment it lands; Heal behind each Shadow Flame.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntBuffet",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt straight after the buffet",
+    "tip": "He has turned. Taunt now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 3,
+    "role": "ranged",
+    "short": "TRANQ",
+    "label": "Tranq the Frenzy",
+    "tip": "Shoot the Frenzy off. Every 2 seconds of it is another Fire Nova on the raid."
+   },
+   {
+    "id": "healFlame",
+    "ability": "heal",
+    "on": "event",
+    "event": "shadowFlame",
+    "offset": 0.2,
+    "early": 1,
+    "late": 3.5,
+    "role": "healer",
+    "short": "BREATH",
+    "label": "Heal right after Shadow Flame",
+    "tip": "Land the big heal the moment the breath lands."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a Frenzy up is where tanks die. Heal now."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "buffetTaunts",
+   "name": "Wing Buffet and Frenzy",
+   "description": "Already against the wall. Wing Buffet every 12 s halves your threat: Taunt the moment he turns, then survive the Frenzy bursts.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 62,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thrash",
+     "first": 6,
+     "every": 4
+    },
+    {
+     "id": "wingBuffet",
+     "first": 3,
+     "every": 12
+    },
+    {
+     "id": "frenzy",
+     "first": 5,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "behindDps",
+   "name": "Behind him, keep attacking",
+   "description": "Attack on every global but stop in the red band. Every Wing Buffet halves the tank.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "wingBuffet",
+     "first": 8,
+     "every": 14
+    },
+    {
+     "id": "frenzy",
+     "first": 4,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "tranqDrill",
+   "name": "Tranq the Frenzy",
+   "description": "Frenzy every 8 s: Tranq it off inside 2 s and the Fire Nova never lands.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thrash",
+     "first": 3,
+     "every": 4
+    },
+    {
+     "id": "frenzy",
+     "first": 2,
+     "every": 8
+    },
+    {
+     "id": "shadowFlame",
+     "first": 6,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "healFrenzy",
+   "name": "Healing through Frenzy",
+   "description": "Frenzy every 8 s and a Shadow Flame every 10 s: keep the tank up through the Thrash bursts and the Fire Nova pulses.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "thrash",
+     "first": 3,
+     "every": 4
+    },
+    {
+     "id": "frenzy",
+     "first": 2,
+     "every": 8
+    },
+    {
+     "id": "shadowFlame",
+     "first": 6,
+     "every": 10
+    }
+   ]
+  }
+ ]
+}
