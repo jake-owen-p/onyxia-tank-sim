@@ -41,7 +41,7 @@ export function outsideLane(state) {
 /** Is the player outside every telegraphed or active hazard of any kind? */
 export function outsideHazard(state) {
   const p = state.world.player;
-  return !hazardAt(state.world.hazards, p.x, p.y, null, ['warning', 'active']);
+  return !hazardAt(state.world.hazards.filter((h) => !h.carried), p.x, p.y, null, ['warning', 'active']);
 }
 
 /** Is she on the tank and not facing the raid (the state to restore after a fear)? */

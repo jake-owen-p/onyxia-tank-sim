@@ -493,7 +493,7 @@ export function createSim(script, options = {}) {
         break;
       }
       case 'aoe': {
-        const inRadius = (!def.radius || bossRangeTo(p.x, p.y) <= def.radius) && !sheltered(def);
+        const inRadius = (!def.radius || bossRangeTo(p.x, p.y) <= def.radius) && !sheltered(def) && roleMatches(def.roles);
         if (inRadius) { damagePlayer(def.damage || 0, id); if (def.playerMetric) addMetric(def.playerMetric, 1); stunPlayer(def.stun); }
         if (!def.radius || ghostInBossRange(def.radius)) damageGhost(def.tankDamage ?? def.damage ?? 0, id);
         emit('raidDamage', { id, label: def.label, amount: def.damage || 0 });
@@ -628,7 +628,7 @@ export function createSim(script, options = {}) {
   /** The nearest point on the floor that clears every raid dot by `r` (or the emptiest point there is). */
   function runOutPoint(r) {
     const w = state.world, p = w.player, dots = w.raid.dots;
-    const clearance = (x, y) => dots.reduce((m, d) => Math.min(m, dist(x, y, d.x, d.y)), Infinity);
+    const clearance = (x, y) => (hazardAt(w.hazards, x, y, null, ['warning', 'active']) ? 0 : dots.reduce((m, d) => Math.min(m, dist(x, y, d.x, d.y)), Infinity));
     let best = null, bestD = Infinity, widest = null, widestC = -Infinity;
     for (let ring = 6; ring <= 66; ring += 6) {
       for (let i = 0; i < 24; i++) {

@@ -369,7 +369,7 @@ export function spawnAdds(state, script, actionDef) {
         onRaid: false,
         label: actionDef.label,
         killable: !!(actionDef.killable || actionDef.killFirst),
-        priority: !!actionDef.killFirst,
+        priority: !!actionDef.killFirst && roleMatches(actionDef.killFirstRoles, state.role, state.tankRole),
         hp: 1,                       // fraction left; the raid burns it down over `lifetime`, your attacks speed that up
       });
     }
