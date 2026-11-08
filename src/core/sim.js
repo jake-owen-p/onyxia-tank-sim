@@ -101,6 +101,7 @@ export function createSim(script, options = {}) {
     shieldUntil: -Infinity,  // a reflect or damage shield: attacks are wasted and scored until this time
     shieldDamage: 0,
     shieldRoles: null,
+    shieldBossOnly: false,
     tankLowSince: null,
   };
   state.world.ghost.tanking = !tankRole;
@@ -540,6 +541,7 @@ export function createSim(script, options = {}) {
         state.shieldUntil = state.t + (def.duration || 10);
         state.shieldDamage = def.reflectDamage || 0;
         state.shieldRoles = def.roles || null;
+        state.shieldBossOnly = !!def.bossOnly;
         if (roleMatches(def.roles)) toast(def.toast || `${def.label}: stop attacking`, 'bad');
         break;
       }
@@ -748,7 +750,7 @@ export function createSim(script, options = {}) {
         const tgt = attackTarget(range);
         if (!tgt) return fail('range', bossLive() ? 'Out of range' : 'Nothing to hit right now');
         addMetric('attacks', 1);
-        const shielded = shieldUp();
+        const shielded = shieldUp() && !(tgt.add && state.shieldBossOnly);
         if (shielded) { addMetric('attacksIntoShield', 1); if (state.shieldDamage) damagePlayer(state.shieldDamage, 'shield'); toast('Shield is up. Stop attacking', 'bad'); }
         if (tgt.add) {
           if (!shielded) tgt.add.hp -= def.addDamage ?? 0.06;

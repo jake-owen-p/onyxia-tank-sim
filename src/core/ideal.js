@@ -171,7 +171,7 @@ export function idealPlayerPos(state, script) {
     if (dist(p.x, p.y, b.x, b.y) < need) {
       for (const a of [angleTo(b.x, b.y, p.x, p.y), angleTo(b.x, b.y, w.raid.anchor.x, w.raid.anchor.y)]) {
         const x = b.x + Math.cos(a) * need, y = b.y + Math.sin(a) * need;
-        if (onFloor(x, y, script.arena.floor)) return { x, y, reason: 'moveOut' };
+        if (onFloor(x, y, script.arena.floor)) return dodgeHazards(x, y, state, 'moveOut');
       }
     }
   }

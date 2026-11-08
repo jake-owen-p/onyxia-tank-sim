@@ -50,6 +50,8 @@ export function perfectTank() {
     const inRange = b.state === 'grounded' && dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= sim.script.playerAbilities.taunt.range;
     const ready = s.abilities.readyAt.taunt <= s.t && !s.debuffs.some((d) => d.on === 'player' && d.forbidAbilities);
     if (s.tankRole && inRange && ready && (b.target !== 'player' || !b.engaged) && !b.passive && p.fearedUntil <= s.t) { cmd.abilities.push('taunt'); lastTaunt = s.t; }
+    const castDef = b.cast && sim.script.actions[b.cast.id], kick = sim.script.playerAbilities.interrupt;
+    if (castDef && castDef.interruptible && kick && s.abilities.list.includes('interrupt') && s.abilities.readyAt.interrupt <= s.t && p.fearedUntil <= s.t && p.stunnedUntil <= s.t && (castDef.offBoss || dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= (kick.range ?? 8))) cmd.abilities.push('interrupt');
     return cmd;
   };
 }

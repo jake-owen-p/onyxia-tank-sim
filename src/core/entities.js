@@ -376,6 +376,7 @@ export function updateWhelps(state, script, dt) {
       wh.x += Math.cos(a) * step; wh.y += Math.sin(a) * step;
     }
     wh.onRaid = false;
+    if (wh.target === 'player') continue;   // someone has it: holding adds near the raid is not losing them
     for (const dot of w.raid.dots) {
       if (dist(wh.x, wh.y, dot.x, dot.y) <= script.raid.whelpContactRange) { wh.onRaid = true; onRaid = true; break; }
     }
