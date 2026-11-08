@@ -494,8 +494,18 @@ export function createSim(script, options = {}) {
       }
       case 'aoe': {
         const inRadius = (!def.radius || bossRangeTo(p.x, p.y) <= def.radius) && !sheltered(def) && roleMatches(def.roles);
-        if (inRadius) { damagePlayer(def.damage || 0, id); if (def.playerMetric) addMetric(def.playerMetric, 1); stunPlayer(def.stun); }
-        if (!def.radius || ghostInBossRange(def.radius)) damageGhost(def.tankDamage ?? def.damage ?? 0, id);
+        // Percentage hits: Decimate sets you to 5% however much you had; Thundercrash takes half of what is left.
+        const percentHit = (who) => (def.setHpFraction != null ? Math.max(0, who.hp - who.maxHp * def.setHpFraction) : def.currentHpFraction != null ? who.hp * def.currentHpFraction : null);
+        if (inRadius) {
+          const hit = percentHit(p);
+          if (hit != null) { p.hp -= hit; emit('damage', { amount: hit, source: id }); } else damagePlayer(def.damage || 0, id);
+          if (def.playerMetric) addMetric(def.playerMetric, 1);
+          stunPlayer(def.stun);
+        }
+        if (!def.radius || ghostInBossRange(def.radius)) {
+          const g = w.ghost, hit = percentHit(g);
+          if (hit != null) { if (g.tanking) g.hp -= hit; } else damageGhost(def.tankDamage ?? def.damage ?? 0, id);
+        }
         emit('raidDamage', { id, label: def.label, amount: def.damage || 0 });
         break;
       }

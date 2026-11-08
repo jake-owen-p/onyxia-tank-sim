@@ -559,3 +559,19 @@ test('a boss-only shield leaves adds as the job, and an exempt phase does not pu
   };
   assert.ok(sc(true) > sc(false) + 40);
 });
+
+test('percentage hits: Decimate leaves everyone at 5% however much they had; Thundercrash halves what is left', () => {
+  const s2 = structuredClone(script);
+  s2.actions.decimate = { label: 'Decimate', kind: 'aoe', cast: 0, setHpFraction: 0.05, warn: false, icon: 'roar' };
+  s2.actions.crash = { label: 'Thundercrash', kind: 'aoe', cast: 0, currentHpFraction: 0.5, warn: false, icon: 'roar' };
+  const sim = createSim(s2, { role: 'healer', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, p = s.world.player, g = s.world.ghost;
+  sim.triggerAction('crash');
+  assert.ok(Math.abs(p.hp - p.maxHp / 2) < 1, 'half of what you had');
+  assert.ok(Math.abs(g.hp - g.maxHp / 2) < 1);
+  sim.triggerAction('decimate');
+  assert.ok(Math.abs(p.hp - p.maxHp * 0.05) < 1);
+  assert.ok(Math.abs(g.hp - g.maxHp * 0.05) < 1);
+  sim.triggerAction('decimate');
+  assert.ok(p.hp > 0, 'already low: it does not kill');
+});
