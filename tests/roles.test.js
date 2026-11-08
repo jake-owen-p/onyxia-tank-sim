@@ -525,7 +525,7 @@ test('a spaced raid really keeps its spacing and clears room for the player; a s
   const sim = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
   const s = sim.state, p = s.world.player, a = s.world.raid.anchor;
   p.x = a.x; p.y = a.y; p.heading = 0;
-  run(sim, 8);
+  run(sim, 14);   // long enough for everyone to walk to their cell
   const ranged = s.world.raid.dots.filter((d) => !d.melee);
   let closest = Infinity;
   for (let i = 0; i < ranged.length; i++) for (let j = i + 1; j < ranged.length; j++) closest = Math.min(closest, Math.hypot(ranged[i].x - ranged[j].x, ranged[i].y - ranged[j].y));

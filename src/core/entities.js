@@ -265,6 +265,7 @@ export function updateRaid(state, script, dt) {
     r.anchor.x += Math.cos(a) * step; r.anchor.y += Math.sin(a) * step;
   }
   const meleeOnBoss = b.state === 'grounded' && b.engaged && !b.passive;
+  let spare = 0;
   for (const d of r.dots) {
     if (d.melee && meleeOnBoss) {
       const p = offsetPoint(b.x, b.y, b.heading, d.slot, d.side * script.raid.meleeFlankDistance);
@@ -272,8 +273,12 @@ export function updateRaid(state, script, dt) {
     } else if (r.spacing) {
       // A formation: every raider holds their own cell, and steps aside for the player.
       d.tx = r.anchor.x + d.gx * r.spacing; d.ty = r.anchor.y + d.gy * r.spacing;
-      const p = state.world.player, off = dist(d.tx, d.ty, p.x, p.y);
-      if (off < r.spacing) { const a = off < 1e-3 ? d.gx : angleTo(p.x, p.y, d.tx, d.ty); d.tx = p.x + Math.cos(a) * r.spacing; d.ty = p.y + Math.sin(a) * r.spacing; }
+      const p = state.world.player;
+      if (dist(d.tx, d.ty, p.x, p.y) < r.spacing * 0.99) {
+        // Someone's cell is too close to the player: they take a free cell outside the formation.
+        const c = hexCell(r.dots.length + spare++);
+        d.tx = r.anchor.x + c.gx * r.spacing; d.ty = r.anchor.y + c.gy * r.spacing;
+      }
     } else {
       const s = d.melee ? r.spread * 0.6 : r.spread;
       d.tx = r.anchor.x + d.ox * s; d.ty = r.anchor.y + d.oy * s;
