@@ -24,6 +24,7 @@ function spot(state, script, key, fallback) {
 export function dodgeHazards(x, y, state, reason) {
   const w = state.world;
   for (const h of w.hazards) {
+    if (h.carried) continue;                                  // you cannot step out of the bomb you are carrying
     if (h.state === 'idle' && h.kind !== 'crack') continue;   // idle cracks are still not a place to stand
     if (h.kind === 'lane') {
       const e = escapeLane(x, y, h.from, h.to, h.width, 4);
@@ -119,6 +120,8 @@ function meleePos(state, script) {
 export function idealPlayerPos(state, script) {
   const w = state.world, b = w.boss;
   if (!state.phaseDef) return { x: w.player.x, y: w.player.y, reason: 'wait' };
+  const bomb = w.hazards.find((h) => h.carried && h.state === 'warning');
+  if (bomb) return { x: bomb.runTo.x, y: bomb.runTo.y, reason: 'runOut' };
   if (isTankRole(state.role)) return idealTankPos(state, script, 'player');
   const raid = script.positions[state.phaseDef.raidSpot];
   if (state.role === 'melee') {

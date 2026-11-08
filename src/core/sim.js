@@ -11,7 +11,7 @@
 // (cone, knockback, fear, aoe, hazard, adds, aggroPull, threatWipe, debuff,
 // enrage, targetSwitch). Nothing in here is specific to one boss.
 
-import { rad, dist, angleTo, inCone, angleDelta, lerp, clamp, circlePoints } from './geometry.js';
+import { rad, dist, angleTo, inCone, angleDelta, lerp, clamp, circlePoints, onFloor } from './geometry.js';
 import { createRng } from './rng.js';
 import {
   createThreat, tickThreat, applyTaunt, applyGhostTaunt, applyBuffet, applyAggroPull, applyPlayerThreat,
@@ -385,7 +385,9 @@ export function createSim(script, options = {}) {
   }
 
   function pickRandomVictim(def) {
-    // Is the player one of the `count` random victims out of the raid?
+    // Is the player one of the `count` random victims out of the raid? `playerChance`
+    // overrides the fair odds so a rehearsal can actually put the mechanic on you.
+    if (def.playerChance != null) return rng.next() < def.playerChance;
     const n = def.count || 1;
     const pool = script.raid.size + 1;
     return rng.next() < Math.min(1, n / pool);
@@ -411,8 +413,10 @@ export function createSim(script, options = {}) {
       case 'knockback': {
         w.coneFlash.knockback = state.t;
         const d = bossRangeTo(p.x, p.y);
-        const front = Math.abs(angleDelta(b.heading, angleTo(b.x, b.y, p.x, p.y))) <= Math.PI / 2;
+        const front = def.radial || Math.abs(angleDelta(b.heading, angleTo(b.x, b.y, p.x, p.y))) <= Math.PI / 2;
         if (d <= def.knockbackRange && front) {
+          if (def.damage) damagePlayer(def.damage, id);
+          if (def.playerMetric) addMetric(def.playerMetric, 1);
           const offWall = tankRole && script.arena.backWall && !nearWall(state, script);
           knockback(p, b.x, b.y, def.knockback, state.t);
           if (tankRole) applyBuffet(state.threat, def.threatCut || 0, true);
@@ -435,7 +439,7 @@ export function createSim(script, options = {}) {
       }
       case 'aoe': {
         const inRadius = !def.radius || bossRangeTo(p.x, p.y) <= def.radius;
-        if (inRadius) damagePlayer(def.damage || 0, id);
+        if (inRadius) { damagePlayer(def.damage || 0, id); if (def.playerMetric) addMetric(def.playerMetric, 1); }
         if (def.tankDamage || !def.radius || ghostInBossRange(def.radius)) damageGhost(def.tankDamage ?? def.damage ?? 0, id);
         emit('raidDamage', { id, label: def.label, amount: def.damage || 0 });
         break;
@@ -526,16 +530,35 @@ export function createSim(script, options = {}) {
     else if (placement === 'random') {
       const n = def.count || 1;
       for (let i = 0; i < n; i++) {
-        if (pickRandomVictim({ count: 1 })) centres.push({ x: p.x, y: p.y, onPlayer: true });
-        else { const d = rng.pick(w.raid.dots); centres.push({ x: d.x, y: d.y }); }
+        if (pickRandomVictim({ count: 1, playerChance: def.playerChance })) centres.push({ x: p.x, y: p.y, onPlayer: true });
+        else if (!def.carried) { const d = rng.pick(w.raid.dots); centres.push({ x: d.x, y: d.y }); }   // a carried bomb on a ghost raider is theirs to handle
       }
     } else if (placement === 'tank') { const g = w.ghost.tanking ? w.ghost : p; centres.push({ x: g.x, y: g.y, onPlayer: !w.ghost.tanking }); }
     for (const c of centres) {
       const z = createZone(circlePoints(c.x, c.y, r, 20), def, state.t, def.label, { radius: r, id: `${id}:${++uid}` });
       z.source = id;
+      if (def.carried && c.onPlayer) { z.carried = true; z.raidMetric = def.raidMetric || null; z.runTo = runOutPoint(r); toast(`${def.label} on you. Run out of the raid!`, 'bad'); }
       w.hazards.push(z);
     }
     emit('hazardWarn', { kind: 'zone', label: def.label, in: def.warning || 0, onPlayer: centres.some((c) => c.onPlayer) });
+  }
+
+  /** The nearest point on the floor that clears every raid dot by `r` (or the emptiest point there is). */
+  function runOutPoint(r) {
+    const w = state.world, p = w.player, dots = w.raid.dots;
+    const clearance = (x, y) => dots.reduce((m, d) => Math.min(m, dist(x, y, d.x, d.y)), Infinity);
+    let best = null, bestD = Infinity, widest = null, widestC = -Infinity;
+    for (let ring = 6; ring <= 66; ring += 6) {
+      for (let i = 0; i < 24; i++) {
+        const a = (i / 24) * Math.PI * 2, x = p.x + Math.cos(a) * ring, y = p.y + Math.sin(a) * ring;
+        if (!onFloor(x, y, script.arena.floor)) continue;
+        const c = clearance(x, y);
+        if (c > widestC) { widestC = c; widest = { x, y }; }
+        if (c >= r + 3 && ring < bestD) { bestD = ring; best = { x, y }; }
+      }
+      if (best) break;
+    }
+    return best || widest || { x: p.x, y: p.y };
   }
 
   function applyDebuff(def, id) {
@@ -721,6 +744,7 @@ export function createSim(script, options = {}) {
     const soon = expectation && expectation.deadline != null && expectation.deadline - state.t <= 20;
     const set = (label, kind) => { state.nextExpected = { label, kind }; };
     // Urgent corrections first, then a near deadline, then hints, then far deadlines.
+    if (ideal.reason === 'runOut') return set('Run out of the raid before it goes off', 'fix');
     if (ideal.reason === 'dodgeLane') return set('Step out of the lane', 'fix');
     if (ideal.reason === 'dodgeZone' || fb.inHazard) return set(fb.inHazard ? 'Get out of it' : 'Move away from the hazard', 'fix');
     if (tankRole) {
@@ -840,11 +864,19 @@ export function createSim(script, options = {}) {
     }
     updateDebuffs(dt);
 
-    // Hazards.
+    // Hazards. A carried zone stays centred on the player until it goes off.
+    for (const h of w.hazards) {
+      if (h.carried && h.state === 'warning') { h.poly = circlePoints(p.x, p.y, h.radius, 20); h.centroid = { x: p.x, y: p.y }; }
+    }
     for (const tr of updateHazards(w.hazards, state.t)) {
       const h = tr.hazard;
       if (tr.to === 'active') {
         emit('hazardActive', { kind: h.kind, label: h.label });
+        if (h.carried) {
+          const caught = w.raid.dots.filter((d) => dist(d.x, d.y, h.centroid.x, h.centroid.y) <= h.radius).length;
+          if (caught && h.raidMetric) { addMetric(h.raidMetric, 1); toast(`${h.label} went off in the raid`, 'bad'); }
+          emit('carriedDetonated', { label: h.label, caught });
+        }
         if (h.kind === 'lane') { emit('action', { id: 'deepBreath', label: h.label }); onActionEvent('deepBreath'); }
       } else if (tr.to === 'ended' && h.kind === 'lane') {
         if (P.hoverIdle) b.hover = { ...P.hoverIdle };

@@ -31,6 +31,8 @@ function lint(script, file) {
     if (a.kind === 'hazard' && a.placement === 'polys' && !script[a.polys]) e(`action ${id}: polys key ${a.polys} missing`);
     if (a.kind === 'adds') for (const s of a.from || []) if (!P[s]) e(`action ${id}: spawn spot ${s} missing`);
     if (a.kind === 'hazard' && a.placement === 'spots') for (const s of a.spots || []) if (!P[s]) e(`action ${id}: spot ${s} missing`);
+    for (const key of ['raidMetric', 'playerMetric', 'wallMetric']) if (a[key] && !script.continuousMetrics[a[key]]) e(`action ${id}: ${key} ${a[key]} is not in continuousMetrics, so it would never be scored`);
+    if (a.carried && a.placement !== 'player' && a.placement !== 'random') e(`action ${id}: carried needs placement player or random`);
     if (a.kind === 'debuff' && !['magic', 'curse', 'poison', 'disease', 'none', undefined].includes(a.dispel)) e(`action ${id}: dispel type ${a.dispel}`);
   }
   for (const [name, c] of Object.entries(script.boss.cones || {})) if (c.angle == null || c.range == null) e(`cone ${name} needs angle and range`);

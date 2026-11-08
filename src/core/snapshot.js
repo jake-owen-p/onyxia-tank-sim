@@ -17,7 +17,7 @@ export function snapshot(state) {
       boss: { x: w.boss.x, y: w.boss.y, z: w.boss.z, heading: w.boss.heading, state: w.boss.state, target: w.boss.target, engaged: w.boss.engaged, cast: w.boss.cast ? { ...w.boss.cast } : null, lastHit: w.boss.lastHit },
       raid: { anchor: { ...w.raid.anchor }, dots: w.raid.dots.map((d) => ({ x: d.x, y: d.y, melee: d.melee })) },
       whelps: w.whelps.map((x) => ({ x: x.x, y: x.y, heading: x.heading, target: x.target, onRaid: x.onRaid })),
-      hazards: w.hazards.map((h) => ({ uid: h.uid, id: h.id, kind: h.kind, label: h.label, poly: h.poly, state: h.state, warnAt: h.warnAt, activeAt: h.activeAt, endsAt: h.endsAt, radius: h.radius || null, centroid: h.centroid ? { ...h.centroid } : null })),
+      hazards: w.hazards.map((h) => ({ uid: h.uid, id: h.id, kind: h.kind, label: h.label, poly: h.poly, state: h.state, warnAt: h.warnAt, activeAt: h.activeAt, endsAt: h.endsAt, radius: h.radius || null, centroid: h.centroid ? { ...h.centroid } : null, carried: !!h.carried })),
       projectiles: w.projectiles.map((p) => ({ ...p })),
       ghost: { ...w.ghost },
       idealPlayer: { ...w.idealPlayer },

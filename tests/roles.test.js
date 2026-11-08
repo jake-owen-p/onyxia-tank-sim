@@ -118,3 +118,53 @@ test('every role completes the full fight with the scripted bot and scores a B o
     assert.equal(s.metrics.tankDeaths, undefined, `${role}: the tank died`);
   }
 });
+
+test('carried bomb: follows the player, marks where to run, and only counts against you if it goes off in the raid', () => {
+  const bomb = { label: 'Living Bomb', kind: 'hazard', placement: 'player', carried: true, radius: 12, warning: 8, active: 0.5, damage: 1000, raidMetric: 'bombsOnRaid', cast: 0, warn: false, icon: 'eruption' };
+  const s2 = { ...script, actions: { ...script.actions, bomb }, continuousMetrics: { ...script.continuousMetrics, bombsOnRaid: { label: 'Bombs in the raid', unit: 'count', penaltyPerUnit: 10 } } };
+  // Stay put in the raid: it goes off on top of them.
+  const stay = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  const p = stay.state.world.player, a = stay.state.world.raid.anchor;
+  p.x = a.x; p.y = a.y;
+  stay.triggerAction('bomb');
+  const z = stay.state.world.hazards.find((h) => h.carried);
+  assert.ok(z, 'the zone exists');
+  stay.step(idle(), FIXED_DT);
+  assert.equal(stay.state.world.idealPlayer.reason, 'runOut');
+  p.x += 2;
+  stay.step(idle(), FIXED_DT);
+  assert.ok(Math.abs(z.centroid.x - p.x) < 0.01, 'the zone follows the player');
+  run(stay, 8.2);
+  assert.equal(stay.state.metrics.bombsOnRaid, 1);
+  // Follow the marker: clear of the raid, no penalty, still takes the hit.
+  const go = createSim(s2, { role: 'ranged', start: 'wall', manual: true, seed: 5 });
+  go.triggerAction('bomb');
+  run(go, 8.6, roleBot('ranged'));
+  assert.equal(go.state.metrics.bombsOnRaid, undefined);
+});
+
+test('radial knockback catches you behind her; aoe playerMetric counts a hit inside the radius only', () => {
+  const s2 = { ...script, actions: { ...script.actions,
+    wrath: { label: 'Wrath', kind: 'knockback', radial: true, knockback: 20, knockbackRange: 25, cast: 0, damage: 1000, warn: false, icon: 'buffet', playerMetric: 'wrathHits' },
+    nova: { label: 'Nova', kind: 'aoe', radius: 20, damage: 500, cast: 0, warn: false, icon: 'eruption', playerMetric: 'novaHits' },
+  }, continuousMetrics: { ...script.continuousMetrics, wrathHits: { label: 'w', unit: 'count', penaltyPerUnit: 1 }, novaHits: { label: 'n', unit: 'count', penaltyPerUnit: 1 } } };
+  const sim = createSim(s2, { role: 'melee', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state, p = s.world.player, b = s.world.boss;
+  p.x = b.x; p.y = b.y - script.boss.radius - 5;     // directly behind her
+  sim.triggerAction('wrath');
+  assert.equal(s.metrics.wrathHits, 1);
+  sim.triggerAction('nova');
+  assert.equal(s.metrics.novaHits, 1);
+  p.x = 0; p.y = -60;                                 // far away
+  sim.triggerAction('nova');
+  assert.equal(s.metrics.novaHits, 1, 'out of the radius is safe');
+});
+
+test('playerChance decides how often a random effect lands on you', () => {
+  const s2 = { ...script, actions: { ...script.actions, curse: { kind: 'debuff', label: 'C', dispel: 'none', duration: 1, target: 'random', playerChance: 1, cast: 0, warn: false, icon: 'roar' }, never: { kind: 'debuff', label: 'N', dispel: 'none', duration: 1, target: 'random', playerChance: 0, cast: 0, warn: false, icon: 'roar' } } };
+  const sim = createSim(s2, { role: 'melee', start: 'wall', manual: true, seed: 5 });
+  sim.triggerAction('curse');
+  assert.equal(sim.state.debuffs[0].on, 'player');
+  sim.triggerAction('never');
+  assert.equal(sim.state.debuffs[1].on, 'raid');
+});

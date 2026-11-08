@@ -98,15 +98,15 @@ boss is on the tank and not held by a Taunt), `interruptible`, `hidden`
 | kind | fields | what happens |
 |---|---|---|
 | `cone` | `cone` (name in `boss.cones`), `damage`, `knockback`, `hitsMelee`, `raidMetric`, `raidToast`, `playerMetric` | hits whoever is in the cone: the player, the ghost tank, the raid dots (melee dots only with `hitsMelee`) |
-| `knockback` | `knockback`, `knockbackRange`, `threatCut`, `wallMetric` | pushes the player back if in front and in range; cuts the tank's threat |
-| `fear` | `duration`, `targets` (`all`, `tank`, `random` + `count`) | fears the player (random: with probability count / raid size) |
-| `aoe` | `damage`, `radius` (0 or missing = whole room), `tankDamage` | damages the player (and the ghost tank) |
-| `hazard` | `placement` (`player`, `tank`, `boss`, `random` + `count`, `spots` + `spots:[]`, `lanes` + `lanes` key, `polys` + `polys` key), `radius`, `warning`, `active`, `damage`, `tick` (damage per second instead of once), `laneWidth` for lanes | a telegraphed floor zone; `polys` pulses persistent polygons listed in a phase's `persistentHazards` |
+| `knockback` | `knockback`, `knockbackRange`, `damage`, `threatCut`, `wallMetric`, `radial`, `playerMetric` | pushes the player back if in front and in range (`radial`: all round her, like Wrath of Ragnaros); cuts the tank's threat |
+| `fear` | `duration`, `targets` (`all`, `tank`, `random` + `count`), `playerChance` | fears the player (random: with probability count / raid size, or `playerChance`) |
+| `aoe` | `damage`, `radius` (from her edge; 0 or missing = whole room), `tankDamage`, `playerMetric` | damages the player (and the ghost tank); `playerMetric` counts each hit, so a radius you were meant to leave is scored |
+| `hazard` | `placement` (`player`, `tank`, `boss`, `random` + `count`, `spots` + `spots:[]`, `lanes` + `lanes` key, `polys` + `polys` key), `radius`, `warning`, `active`, `damage`, `tick` (damage per second instead of once), `laneWidth` for lanes, `playerChance` (odds that `random` lands on you), `carried` + `raidMetric` (a bomb: the zone follows you through `warning`, the ideal marker shows where to run, and `raidMetric` counts each time it goes off with raid members inside) | a telegraphed floor zone; `polys` pulses persistent polygons listed in a phase's `persistentHazards` |
 | `adds` | `count` per spot, `from: [spotNames]`, `speed`, `aggroRange`, `lifetime`, `heldLifetime`, `pickup` (role that takes them, default `offtank`), `holdSpot` | spawns a wave that walks at the raid; the pickup role catches them by proximity or Taunt |
 | `aggroPull` | `threatMultiplier` (tank roles), `duration` (others) | a DPS overtakes the tank: she turns on the raid until the tank Taunts |
 | `targetSwitch` | `duration`, `toast` | she goes for someone else; the tank has to take her back |
 | `threatWipe` | `toast` | the whole table resets (raid keeps `threat.landingRaidThreat`) |
-| `debuff` | `dispel` (`magic`, `curse`, `poison`, `disease`, `none`), `duration`, `tickDamage`, `target` (`random` + `count`, `tank`, `player`, `all`), `fear` | puts a debuff on someone; dispellable ones raise the healer's DISPEL note |
+| `debuff` | `dispel` (`magic`, `curse`, `poison`, `disease`, `none`), `duration`, `tickDamage`, `target` (`random` + `count`, `tank`, `player`, `all`), `playerChance`, `fear` | puts a debuff on someone; dispellable ones raise the healer's DISPEL note |
 | `enrage` | `toast` | melee damage x `boss.enrageMultiplier` from now on |
 | `projectile` | `travel`, `splash`, `damage`, `playerChance` | a fireball at a random target |
 | `transition` | | `landing` / `takeoff` are driven by `phases[].bossState`; define them so the timeline can name them |

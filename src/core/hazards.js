@@ -42,6 +42,7 @@ export function createZone(poly, actionDef, t, label = null, extra = {}) {
     endsAt: t + (actionDef.warning || 0) + (actionDef.active || 5),
     damage: actionDef.damage || 0,
     tick: !!actionDef.tick,          // damage every second inside instead of once
+    carried: false,                  // follows the player until it goes off (Living Bomb and friends)
     nextTickAt: 0,
     hitPlayer: false,
   };
