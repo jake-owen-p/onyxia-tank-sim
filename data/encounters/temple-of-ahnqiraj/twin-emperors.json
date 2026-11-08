@@ -1,0 +1,2510 @@
+{
+ "id": "twin-emperors",
+ "name": "Twin Emperors",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "temple-of-ahnqiraj",
+  "name": "Temple of Ahn'Qiraj",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/twin-emperors.md. HP is a clock over 210 s (six 35 s cycles; each but the last is split into a 30 s phase and a 5 s phase in which melee leave him); real kills run 6 to 10 min and both Wowhead pools (6,995,100) are 'Seasonal 40 Player', so the shared-percentage health is not meaningful here. The 15 min Berserk is not reached. ESTIMATES: the hall's size and the 62 yd between the two Emperor spots are chosen to honor the >60 yd Heal Brother rule. Melee 800 per 2 s (the real number is unlisted, Unbalancing Strike is the threat) plus Shadow Bolt on the ghost tank (900 per 3 s) and Unbalancing Strike (3,500 every ~20 s, scaled from 4,000 to 8,000) puts ~875 per second on the ghost, which holds on passive healing (`healPerSecond` 1,050) and is lost inside 30 s if a player healer ignores it (150 per second). ENGINE GAPS. The engine has one boss. The boss object is Vek'nilash (melee, physical). The tank, melee and ghost tank play him; Vek'lor is a labelled, unkillable add standing at the far side, and the ranged role's Attack button is abstracted to the one boss: in the real fight ranged hit Vek'lor (magic) and melee hit Vek'nilash (physical), and either being healed by proximity (Heal Brother) cannot be simulated at all, so that 60 yd rule is `bossAtSpot` plus tips. Each teleport is a `threatWipe` with `teleportBossTo` and, because two tank teams would exist in the real fight and the role here is one body, `teleportTankTo` the tank spot on the new side; the real fight has a warrior waiting on each side. Twin Teleport's cadence is 29.1 to 40.5 s (DBM) and is a fixed 35 s here (no jitter across phases). The 2 s post-teleport root is not modelled. The warlock tank's Shadow Bolt (spam 3,000 to 4,000 Shadow on the warlock) is the `shadowBolt` `aoe` hitting only the ghost tank (`damage: 0` to the player role): the real target is a separate person, and for the tank role (which plays the warrior) the bolts do not land at all. Unbalancing Strike is a frontal `cone` (`damage` 3,500 in a 60 degree, 9 yd cone that hits only the tank in practice, scaled from 4,000 to 8,000) plus a `damageTakenMult` 1.3 debuff on the tank for 6 s (standing in for -100 Defense). Uppercut is a frontal `knockback` on the tank role (real: random target in melee range); warlocks' Arcane Burst and the 'run from exploding bugs' fire as telegraphed `hazard`s. Arcane Burst is a ring (10 yd) on Vek'lor's far-side spot every ~9 s (real trigger: a player in his melee range, which cannot be expressed, so it fires on a timer): melee standing on the side he just teleported onto must leave that spot fast, as they really do. Blizzard: a real 10 s, 10 yd ground spell, modelled as a three-step `hazard` (`follow` every 3.5 s, each placed on a random raider with `playerChance` 0.35 so it walks across the raid, 750 per second, the real 1,388 to 1,612 per 2 s) because the cast-on-the-group rule within 40 yd of Vek'lor cannot be tested. Mutate Bug (`killable` adds, the off-tank bug team holds them, adds do not actually deal damage) and Explode Bug (a `hazard`, 3,000 Fire, warning 3.5 s) use estimated cadences of 22 s and 15 s from the DBM variances (real 10.9 to 27.1 and 4.5 to 32.3 s). The neutral scarab hordes, the Virulent Poison they apply, and the no-AoE rule are tips only. Melee leaving 5 s before the teleport is modelled: in the last 5 s of each cycle `spots.melee` walks them to `meleeCross` in the middle of the room and `skipActivity: 'melee'` stops that costing uptime. Who is actually closest when he lands is not simulated, so the warrior's first threat comes from the Taunt either way.",
+ "sources": [
+  "docs/research/temple-of-ahnqiraj/twin-emperors.md",
+  "https://warcraft.wiki.gg/wiki/Twin_Emperors",
+  "https://www.wowhead.com/classic/npc=15276/emperor-veklor",
+  "https://www.wowhead.com/classic/npc=15275/emperor-veknilash",
+  "https://www.wowhead.com/classic/spell=26006/shadow-bolt",
+  "https://www.wowhead.com/classic/spell=26607/blizzard",
+  "https://www.wowhead.com/classic/spell=568/arcane-burst",
+  "https://www.warcrafttavern.com/wow-classic/guides/temple-of-ahnqiraj-aq40",
+  "https://www.warcrafttavern.com/wow-classic/guides/warlock-twin-emperor-tanking-wow-classic-season-of-mastery",
+  "https://www.tentonhammer.com/guides/tentonhammer-s-guide-to-aq40-twin-emps",
+  "https://us.millenium.gg/guide/7179.html?page=6",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/AQ40/Twins.lua",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/AQ40/TwinEmps.lua"
+ ],
+ "arena": {
+  "name": "The Emperors' Hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -46,
+      -34
+     ],
+     [
+      46,
+      -34
+     ],
+     [
+      46,
+      30
+     ],
+     [
+      -46,
+      30
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -56
+     ],
+     [
+      10,
+      -56
+     ],
+     [
+      10,
+      -30
+     ],
+     [
+      -10,
+      -30
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -10,
+      -34
+     ],
+     [
+      -46,
+      -34
+     ],
+     [
+      -46,
+      30
+     ],
+     [
+      46,
+      30
+     ],
+     [
+      46,
+      -34
+     ],
+     [
+      10,
+      -34
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -34
+     ],
+     [
+      -10,
+      -56
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -34
+     ],
+     [
+      10,
+      -56
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -50
+    ]
+   },
+   {
+    "text": "West side",
+    "at": [
+     -38,
+     16
+    ]
+   },
+   {
+    "text": "East side",
+    "at": [
+     38,
+     16
+    ]
+   },
+   {
+    "text": "Stairs: ranged",
+    "at": [
+     0,
+     20
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -48,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": -31,
+   "y": 4,
+   "heading": 0
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -28,
+   "spread": 9
+  },
+  "tankSpot": {
+   "x": -39,
+   "y": 4,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": -31,
+   "y": 4,
+   "heading": 180,
+   "tolerance": 8,
+   "headingTolerance": 80,
+   "label": "Vek'nilash"
+  },
+  "tankWest": {
+   "x": -39,
+   "y": 4,
+   "tolerance": 4,
+   "label": "Tank: west wall"
+  },
+  "bossWest": {
+   "x": -31,
+   "y": 4,
+   "heading": 180,
+   "tolerance": 8,
+   "headingTolerance": 80,
+   "label": "Vek'nilash, west"
+  },
+  "tankEast": {
+   "x": 39,
+   "y": 4,
+   "tolerance": 4,
+   "label": "Tank: east wall"
+  },
+  "bossEast": {
+   "x": 31,
+   "y": 4,
+   "heading": 0,
+   "tolerance": 8,
+   "headingTolerance": 80,
+   "label": "Vek'nilash, east"
+  },
+  "veklorWest": {
+   "x": -31,
+   "y": 4,
+   "label": "Vek'lor"
+  },
+  "veklorEast": {
+   "x": 31,
+   "y": 4,
+   "label": "Vek'lor"
+  },
+  "raidSpot": {
+   "x": 0,
+   "y": 6,
+   "spread": 13,
+   "label": "Raid"
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": 12,
+   "tolerance": 9,
+   "label": "Ranged: on the stairs"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": 2,
+   "tolerance": 9,
+   "label": "Healers: the middle"
+  },
+  "meleeCross": {
+   "x": 0,
+   "y": -2,
+   "tolerance": 12,
+   "label": "Melee: middle of the room, clear of both Emperors"
+  },
+  "otCenter": {
+   "x": 0,
+   "y": -18,
+   "tolerance": 7,
+   "label": "Bug team: south middle"
+  },
+  "bugHold": {
+   "x": 0,
+   "y": -14,
+   "label": "Bugs"
+  },
+  "bugA": {
+   "x": -12,
+   "y": -20,
+   "label": "Bug"
+  },
+  "bugB": {
+   "x": 12,
+   "y": -20,
+   "label": "Bug"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 800,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 1050,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 3,
+  "speed": 7,
+  "turnRate": 320,
+  "meleeRange": 6,
+  "meleeDamage": 800,
+  "meleeInterval": 2,
+  "cones": {
+   "strike": {
+    "angle": 60,
+    "range": 9,
+    "label": "Unbalancing Strike",
+    "facing": "front",
+    "style": "cleave"
+   }
+  },
+  "facingCone": "strike"
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 450,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.7
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "You are the warrior on Vek'nilash. Back to the wall. Every 35 seconds he teleports: be the closest player when he lands, because he goes to whoever is nearest, then Taunt to lock him. Stay on your wall; bring him closer than 60 yards to his brother and they heal each other.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Bug team tank",
+   "short": "Off-tank",
+   "description": "A neutral bug gets Mutated every ~20 seconds and hits like a boss. Grab it fast and keep it away from the raid while the bug team kills it.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "You only ever hit Vek'nilash. Leave him about 5 seconds BEFORE each teleport so the warrior is the closest player when he lands, and be gone from that spot: Vek'lor arrives there and Arcane Bursts anyone within 10 yards. Then cross the room.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Your damage is abstracted to the one boss; really you are on Vek'lor with magic. Stay on the stairs, out of 10 yards of him, and move out of Blizzard and exploding bugs.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 34
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Pre-cast for Unbalancing Strike on the warrior and the Shadow Bolts on the other tank. Move out of Blizzard yourself.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 20,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 64,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on whichever tank needs it. The sim keeps it in range of both ends of the hall, so the healers do not cross the room."
+  }
+ },
+ "actions": {
+  "teleportEast": {
+   "label": "Twin Teleport: east",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossEast",
+   "teleportTankTo": "tankEast",
+   "toast": "Twin Teleport! Threat wiped: Taunt!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "They swap sides and wipe threat. Taunt the moment you can."
+  },
+  "teleportWest": {
+   "label": "Twin Teleport: west",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossWest",
+   "teleportTankTo": "tankWest",
+   "toast": "Twin Teleport! Threat wiped: Taunt!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "They swap sides and wipe threat. Taunt the moment you can."
+  },
+  "unbalancingStrike": {
+   "label": "Unbalancing Strike",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "strike",
+   "damage": 3500,
+   "hitsMelee": false,
+   "follow": [
+    {
+     "id": "defenseDown",
+     "delay": 0
+    }
+   ],
+   "warn": true,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "A huge hit on his tank and -100 Defense for 6 seconds. Tank full, healers pre-casting."
+  },
+  "defenseDown": {
+   "label": "Unbalanced",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 6,
+   "damageTakenMult": 1.3,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "-100 Defense for 6 seconds."
+  },
+  "uppercut": {
+   "label": "Uppercut",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 7,
+   "knockbackRange": 10,
+   "damage": 1400,
+   "threatCut": 0,
+   "warn": false,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "He punts someone in melee. With your back to the wall it does little."
+  },
+  "shadowBolt": {
+   "label": "Shadow Bolt (on the warlock tank)",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 900,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Vek'lor spams his warlock tank. In this sim it lands on the ghost tank's health bar for you to heal."
+  },
+  "arcaneBurstE": {
+   "label": "Arcane Burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "veklorEast"
+   ],
+   "radius": 10,
+   "warning": 1,
+   "active": 1,
+   "damage": 4050,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Anyone within 10 yards of Vek'lor eats this. Run."
+  },
+  "arcaneBurstW": {
+   "label": "Arcane Burst",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "spots",
+   "spots": [
+    "veklorWest"
+   ],
+   "radius": 10,
+   "warning": 1,
+   "active": 1,
+   "damage": 4050,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Anyone within 10 yards of Vek'lor eats this. Run."
+  },
+  "blizzardA": {
+   "label": "Blizzard",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.35,
+   "roles": "nontank",
+   "radius": 10,
+   "warning": 2,
+   "active": 4,
+   "damage": 750,
+   "tick": true,
+   "follow": [
+    {
+     "id": "blizzardB",
+     "delay": 3.5
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A patch of ice lands under someone. It will creep after the group."
+  },
+  "blizzardB": {
+   "label": "Blizzard",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.35,
+   "roles": "nontank",
+   "radius": 10,
+   "warning": 2,
+   "active": 4,
+   "damage": 750,
+   "tick": true,
+   "follow": [
+    {
+     "id": "blizzardC",
+     "delay": 3.5
+    }
+   ],
+   "hidden": true,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "It keeps coming. Keep moving."
+  },
+  "blizzardC": {
+   "label": "Blizzard",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.35,
+   "roles": "nontank",
+   "radius": 10,
+   "warning": 2,
+   "active": 4,
+   "damage": 750,
+   "tick": true,
+   "hidden": true,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "It keeps coming. Keep moving."
+  },
+  "explodeBug": {
+   "label": "Explode Bug",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "radius": 10,
+   "warning": 3.5,
+   "active": 1,
+   "damage": 3000,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A bug swells up. Three to four seconds until it explodes."
+  },
+  "mutateBug": {
+   "label": "Mutate Bug",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "bugA",
+    "bugB"
+   ],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 26,
+   "heldLifetime": 26,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "bugHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A mutated bug appears. Bug team grabs it and kills it."
+  },
+  "veklorEastAdd": {
+   "label": "Emperor Vek'lor",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "veklorEast"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "aggroRange": 1,
+   "lifetime": 34.7,
+   "heldLifetime": 34.7,
+   "pickup": "offtank",
+   "holdSpot": "veklorEast",
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Vek'lor stands on the opposite side."
+  },
+  "veklorWestAdd": {
+   "label": "Emperor Vek'lor",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "veklorWest"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "aggroRange": 1,
+   "lifetime": 34.7,
+   "heldLifetime": 34.7,
+   "pickup": "offtank",
+   "holdSpot": "veklorWest",
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Vek'lor stands on the opposite side."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Cycle 1: Vek'nilash on the west side",
+   "subtitle": "Build threat before the first teleport",
+   "hpFrom": 1,
+   "hpTo": 0.8543,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankWest",
+    "boss": "bossWest",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter"
+   },
+   "actions": [
+    {
+     "id": "arcaneBurstE",
+     "first": 8,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 14,
+     "every": 20,
+     "jitter": 3
+    },
+    {
+     "id": "uppercut",
+     "first": 20,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "blizzardA",
+     "first": 18,
+     "every": 30,
+     "jitter": 4
+    },
+    {
+     "id": "explodeBug",
+     "first": 12,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "mutateBug",
+     "first": 22,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "veklorEastAdd",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossWest",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pull Vek'nilash to the wall, facing it",
+     "tip": "Back to the wall so Uppercut cannot punt you. Keep him on his side: 60 yards from his brother or they heal each other."
+    },
+    {
+     "id": "avoidBurst",
+     "type": "afterEvent",
+     "event": "arcaneBurstE",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 0.8,
+     "role": "melee",
+     "label": "Out of the ring on his side",
+     "tip": "Vek'lor is on that side now. Anyone within 10 yards eats an Arcane Burst and gets knocked. Leave, do not stop to look."
+    },
+    {
+     "id": "bugDodge",
+     "type": "afterEvent",
+     "event": "explodeBug",
+     "check": "outsideHazard",
+     "within": 3.5,
+     "grace": 3,
+     "notBefore": 2.8,
+     "role": "nontank",
+     "label": "Run from the swelling bug",
+     "tip": "Three to four seconds after a bug starts to grow it explodes for 3,000 within 10 yards. Run."
+    },
+    {
+     "id": "blizzardMove",
+     "type": "afterEvent",
+     "event": "blizzardA",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 1.4,
+     "role": "nontank",
+     "label": "Step out of Blizzard",
+     "tip": "It walks after the group. Move, then keep moving as it follows you."
+    },
+    {
+     "id": "grabBug",
+     "type": "afterEvent",
+     "event": "mutateBug",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Mutated Bug",
+     "tip": "A mutated bug hits for a thousand a swing. Bug team takes it instantly and keeps it away from the raid."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "meleeUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Melee: on Vek'nilash, every global",
+     "tip": "Physical only. Stop and leave 5 seconds before every teleport, then get back on him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Unbalancing Strike can take half his bar in one hit. Pre-cast, do not chase it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Under half after a Strike with the next Strike coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Cycle 1: leave him, he teleports in 5 s",
+   "subtitle": "Melee: get clear so the warrior is closest",
+   "hpFrom": 0.8543,
+   "hpTo": 0.83,
+   "duration": 5,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankWest",
+    "boss": "bossWest",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter",
+    "melee": "meleeCross"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "arcaneBurstE",
+     "first": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "meleeLeave",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCross",
+     "grace": 2,
+     "role": "melee",
+     "label": "Leave him 5 seconds before the teleport",
+     "tip": "He goes to whoever is closest when he lands, and that has to be the warrior on the far side. Be off this side before he moves, and clear of where Vek'lor lands with Arcane Burst."
+    },
+    {
+     "id": "holdTillTeleport",
+     "type": "bossAtSpot",
+     "spot": "bossWest",
+     "within": 3,
+     "grace": 2,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him until the teleport",
+     "tip": "He is about to go to the far side. Stay on your wall, ready to Taunt the moment he lands."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "healerMid",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Stay in the middle",
+     "tip": "You reach both walls from here, so you do not cross the room."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Cycle 2: Vek'nilash on the east side",
+   "subtitle": "Threat wiped: Taunt, cross, reposition",
+   "hpFrom": 0.83,
+   "hpTo": 0.6843,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossEast",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter"
+   },
+   "actions": [
+    {
+     "id": "teleportEast",
+     "first": 0.1
+    },
+    {
+     "id": "arcaneBurstW",
+     "first": 3,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 8,
+     "every": 20,
+     "jitter": 3
+    },
+    {
+     "id": "uppercut",
+     "first": 16,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "blizzardA",
+     "first": 12,
+     "every": 30,
+     "jitter": 4
+    },
+    {
+     "id": "explodeBug",
+     "first": 10,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "mutateBug",
+     "first": 18,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "veklorWestAdd",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "atSide",
+     "type": "bossAtSpot",
+     "spot": "bossEast",
+     "within": 10,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on this side, far from his brother",
+     "tip": "They heal each other if they are within 60 yards. Stay on your wall."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "teleportEast",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt the moment he lands",
+     "tip": "The teleport wipes his table. Be the closest player and Taunt before he picks a healer."
+    },
+    {
+     "id": "avoidBurst",
+     "type": "afterEvent",
+     "event": "arcaneBurstW",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 0.8,
+     "role": "melee",
+     "label": "Out of the ring on his side",
+     "tip": "Vek'lor is on that side now. Anyone within 10 yards eats an Arcane Burst and gets knocked. Leave, do not stop to look."
+    },
+    {
+     "id": "bugDodge",
+     "type": "afterEvent",
+     "event": "explodeBug",
+     "check": "outsideHazard",
+     "within": 3.5,
+     "grace": 3,
+     "notBefore": 2.8,
+     "role": "nontank",
+     "label": "Run from the swelling bug",
+     "tip": "Three to four seconds after a bug starts to grow it explodes for 3,000 within 10 yards. Run."
+    },
+    {
+     "id": "blizzardMove",
+     "type": "afterEvent",
+     "event": "blizzardA",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 1.4,
+     "role": "nontank",
+     "label": "Step out of Blizzard",
+     "tip": "It walks after the group. Move, then keep moving as it follows you."
+    },
+    {
+     "id": "grabBug",
+     "type": "afterEvent",
+     "event": "mutateBug",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Mutated Bug",
+     "tip": "A mutated bug hits for a thousand a swing. Bug team takes it instantly and keeps it away from the raid."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "meleeUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Melee: on Vek'nilash, every global",
+     "tip": "Physical only. Stop and leave 5 seconds before every teleport, then get back on him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Unbalancing Strike can take half his bar in one hit. Pre-cast, do not chase it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Under half after a Strike with the next Strike coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Cycle 2: leave him, he teleports in 5 s",
+   "subtitle": "Melee: get clear so the warrior is closest",
+   "hpFrom": 0.6843,
+   "hpTo": 0.66,
+   "duration": 5,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossEast",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter",
+    "melee": "meleeCross"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "arcaneBurstW",
+     "first": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "meleeLeave",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCross",
+     "grace": 2,
+     "role": "melee",
+     "label": "Leave him 5 seconds before the teleport",
+     "tip": "He goes to whoever is closest when he lands, and that has to be the warrior on the far side. Be off this side before he moves, and clear of where Vek'lor lands with Arcane Burst."
+    },
+    {
+     "id": "holdTillTeleport",
+     "type": "bossAtSpot",
+     "spot": "bossEast",
+     "within": 3,
+     "grace": 2,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him until the teleport",
+     "tip": "He is about to go to the far side. Stay on your wall, ready to Taunt the moment he lands."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "healerMid",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Stay in the middle",
+     "tip": "You reach both walls from here, so you do not cross the room."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Cycle 3: Vek'nilash on the west side",
+   "subtitle": "Threat wiped: Taunt, cross, reposition",
+   "hpFrom": 0.66,
+   "hpTo": 0.5229,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankWest",
+    "boss": "bossWest",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter"
+   },
+   "actions": [
+    {
+     "id": "teleportWest",
+     "first": 0.1
+    },
+    {
+     "id": "arcaneBurstE",
+     "first": 3,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 8,
+     "every": 20,
+     "jitter": 3
+    },
+    {
+     "id": "uppercut",
+     "first": 16,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "blizzardA",
+     "first": 12,
+     "every": 30,
+     "jitter": 4
+    },
+    {
+     "id": "explodeBug",
+     "first": 10,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "mutateBug",
+     "first": 18,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "veklorEastAdd",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "atSide",
+     "type": "bossAtSpot",
+     "spot": "bossWest",
+     "within": 10,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on this side, far from his brother",
+     "tip": "They heal each other if they are within 60 yards. Stay on your wall."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "teleportWest",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt the moment he lands",
+     "tip": "The teleport wipes his table. Be the closest player and Taunt before he picks a healer."
+    },
+    {
+     "id": "avoidBurst",
+     "type": "afterEvent",
+     "event": "arcaneBurstE",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 0.8,
+     "role": "melee",
+     "label": "Out of the ring on his side",
+     "tip": "Vek'lor is on that side now. Anyone within 10 yards eats an Arcane Burst and gets knocked. Leave, do not stop to look."
+    },
+    {
+     "id": "bugDodge",
+     "type": "afterEvent",
+     "event": "explodeBug",
+     "check": "outsideHazard",
+     "within": 3.5,
+     "grace": 3,
+     "notBefore": 2.8,
+     "role": "nontank",
+     "label": "Run from the swelling bug",
+     "tip": "Three to four seconds after a bug starts to grow it explodes for 3,000 within 10 yards. Run."
+    },
+    {
+     "id": "blizzardMove",
+     "type": "afterEvent",
+     "event": "blizzardA",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 1.4,
+     "role": "nontank",
+     "label": "Step out of Blizzard",
+     "tip": "It walks after the group. Move, then keep moving as it follows you."
+    },
+    {
+     "id": "grabBug",
+     "type": "afterEvent",
+     "event": "mutateBug",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Mutated Bug",
+     "tip": "A mutated bug hits for a thousand a swing. Bug team takes it instantly and keeps it away from the raid."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "meleeUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Melee: on Vek'nilash, every global",
+     "tip": "Physical only. Stop and leave 5 seconds before every teleport, then get back on him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Unbalancing Strike can take half his bar in one hit. Pre-cast, do not chase it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Under half after a Strike with the next Strike coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Cycle 3: leave him, he teleports in 5 s",
+   "subtitle": "Melee: get clear so the warrior is closest",
+   "hpFrom": 0.5229,
+   "hpTo": 0.5,
+   "duration": 5,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankWest",
+    "boss": "bossWest",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter",
+    "melee": "meleeCross"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "arcaneBurstE",
+     "first": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "meleeLeave",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCross",
+     "grace": 2,
+     "role": "melee",
+     "label": "Leave him 5 seconds before the teleport",
+     "tip": "He goes to whoever is closest when he lands, and that has to be the warrior on the far side. Be off this side before he moves, and clear of where Vek'lor lands with Arcane Burst."
+    },
+    {
+     "id": "holdTillTeleport",
+     "type": "bossAtSpot",
+     "spot": "bossWest",
+     "within": 3,
+     "grace": 2,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him until the teleport",
+     "tip": "He is about to go to the far side. Stay on your wall, ready to Taunt the moment he lands."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "healerMid",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Stay in the middle",
+     "tip": "You reach both walls from here, so you do not cross the room."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Cycle 4: Vek'nilash on the east side",
+   "subtitle": "Threat wiped: Taunt, cross, reposition",
+   "hpFrom": 0.5,
+   "hpTo": 0.3543,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossEast",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter"
+   },
+   "actions": [
+    {
+     "id": "teleportEast",
+     "first": 0.1
+    },
+    {
+     "id": "arcaneBurstW",
+     "first": 3,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 8,
+     "every": 20,
+     "jitter": 3
+    },
+    {
+     "id": "uppercut",
+     "first": 16,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "blizzardA",
+     "first": 12,
+     "every": 30,
+     "jitter": 4
+    },
+    {
+     "id": "explodeBug",
+     "first": 10,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "mutateBug",
+     "first": 18,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "veklorWestAdd",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "atSide",
+     "type": "bossAtSpot",
+     "spot": "bossEast",
+     "within": 10,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on this side, far from his brother",
+     "tip": "They heal each other if they are within 60 yards. Stay on your wall."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "teleportEast",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt the moment he lands",
+     "tip": "The teleport wipes his table. Be the closest player and Taunt before he picks a healer."
+    },
+    {
+     "id": "avoidBurst",
+     "type": "afterEvent",
+     "event": "arcaneBurstW",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 0.8,
+     "role": "melee",
+     "label": "Out of the ring on his side",
+     "tip": "Vek'lor is on that side now. Anyone within 10 yards eats an Arcane Burst and gets knocked. Leave, do not stop to look."
+    },
+    {
+     "id": "bugDodge",
+     "type": "afterEvent",
+     "event": "explodeBug",
+     "check": "outsideHazard",
+     "within": 3.5,
+     "grace": 3,
+     "notBefore": 2.8,
+     "role": "nontank",
+     "label": "Run from the swelling bug",
+     "tip": "Three to four seconds after a bug starts to grow it explodes for 3,000 within 10 yards. Run."
+    },
+    {
+     "id": "blizzardMove",
+     "type": "afterEvent",
+     "event": "blizzardA",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 1.4,
+     "role": "nontank",
+     "label": "Step out of Blizzard",
+     "tip": "It walks after the group. Move, then keep moving as it follows you."
+    },
+    {
+     "id": "grabBug",
+     "type": "afterEvent",
+     "event": "mutateBug",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Mutated Bug",
+     "tip": "A mutated bug hits for a thousand a swing. Bug team takes it instantly and keeps it away from the raid."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "meleeUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Melee: on Vek'nilash, every global",
+     "tip": "Physical only. Stop and leave 5 seconds before every teleport, then get back on him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Late cycle: Unbalancing Strike and Shadow Bolts together. Be high before the teleport."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Under half after a Strike with the next Strike coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Cycle 4: leave him, he teleports in 5 s",
+   "subtitle": "Melee: get clear so the warrior is closest",
+   "hpFrom": 0.3543,
+   "hpTo": 0.33,
+   "duration": 5,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossEast",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter",
+    "melee": "meleeCross"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "arcaneBurstW",
+     "first": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "meleeLeave",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCross",
+     "grace": 2,
+     "role": "melee",
+     "label": "Leave him 5 seconds before the teleport",
+     "tip": "He goes to whoever is closest when he lands, and that has to be the warrior on the far side. Be off this side before he moves, and clear of where Vek'lor lands with Arcane Burst."
+    },
+    {
+     "id": "holdTillTeleport",
+     "type": "bossAtSpot",
+     "spot": "bossEast",
+     "within": 3,
+     "grace": 2,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him until the teleport",
+     "tip": "He is about to go to the far side. Stay on your wall, ready to Taunt the moment he lands."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "healerMid",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Stay in the middle",
+     "tip": "You reach both walls from here, so you do not cross the room."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Cycle 5: Vek'nilash on the west side",
+   "subtitle": "Threat wiped: Taunt, cross, reposition",
+   "hpFrom": 0.33,
+   "hpTo": 0.1843,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankWest",
+    "boss": "bossWest",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter"
+   },
+   "actions": [
+    {
+     "id": "teleportWest",
+     "first": 0.1
+    },
+    {
+     "id": "arcaneBurstE",
+     "first": 3,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 8,
+     "every": 20,
+     "jitter": 3
+    },
+    {
+     "id": "uppercut",
+     "first": 16,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "blizzardA",
+     "first": 12,
+     "every": 30,
+     "jitter": 4
+    },
+    {
+     "id": "explodeBug",
+     "first": 10,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "mutateBug",
+     "first": 18,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "veklorEastAdd",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "atSide",
+     "type": "bossAtSpot",
+     "spot": "bossWest",
+     "within": 10,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on this side, far from his brother",
+     "tip": "They heal each other if they are within 60 yards. Stay on your wall."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "teleportWest",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt the moment he lands",
+     "tip": "The teleport wipes his table. Be the closest player and Taunt before he picks a healer."
+    },
+    {
+     "id": "avoidBurst",
+     "type": "afterEvent",
+     "event": "arcaneBurstE",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 0.8,
+     "role": "melee",
+     "label": "Out of the ring on his side",
+     "tip": "Vek'lor is on that side now. Anyone within 10 yards eats an Arcane Burst and gets knocked. Leave, do not stop to look."
+    },
+    {
+     "id": "bugDodge",
+     "type": "afterEvent",
+     "event": "explodeBug",
+     "check": "outsideHazard",
+     "within": 3.5,
+     "grace": 3,
+     "notBefore": 2.8,
+     "role": "nontank",
+     "label": "Run from the swelling bug",
+     "tip": "Three to four seconds after a bug starts to grow it explodes for 3,000 within 10 yards. Run."
+    },
+    {
+     "id": "blizzardMove",
+     "type": "afterEvent",
+     "event": "blizzardA",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 1.4,
+     "role": "nontank",
+     "label": "Step out of Blizzard",
+     "tip": "It walks after the group. Move, then keep moving as it follows you."
+    },
+    {
+     "id": "grabBug",
+     "type": "afterEvent",
+     "event": "mutateBug",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Mutated Bug",
+     "tip": "A mutated bug hits for a thousand a swing. Bug team takes it instantly and keeps it away from the raid."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "meleeUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Melee: on Vek'nilash, every global",
+     "tip": "Physical only. Stop and leave 5 seconds before every teleport, then get back on him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Late cycle: Unbalancing Strike and Shadow Bolts together. Be high before the teleport."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Under half after a Strike with the next Strike coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Cycle 5: leave him, he teleports in 5 s",
+   "subtitle": "Melee: get clear so the warrior is closest",
+   "hpFrom": 0.1843,
+   "hpTo": 0.16,
+   "duration": 5,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankWest",
+    "boss": "bossWest",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter",
+    "melee": "meleeCross"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "arcaneBurstE",
+     "first": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "meleeLeave",
+     "type": "playerAtSpotBy",
+     "spot": "meleeCross",
+     "grace": 2,
+     "role": "melee",
+     "label": "Leave him 5 seconds before the teleport",
+     "tip": "He goes to whoever is closest when he lands, and that has to be the warrior on the far side. Be off this side before he moves, and clear of where Vek'lor lands with Arcane Burst."
+    },
+    {
+     "id": "holdTillTeleport",
+     "type": "bossAtSpot",
+     "spot": "bossWest",
+     "within": 3,
+     "grace": 2,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him until the teleport",
+     "tip": "He is about to go to the far side. Stay on your wall, ready to Taunt the moment he lands."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "healerMid",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Stay in the middle",
+     "tip": "You reach both walls from here, so you do not cross the room."
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "name": "Cycle 6: Vek'nilash on the east side",
+   "subtitle": "Threat wiped: Taunt, cross, reposition",
+   "hpFrom": 0.16,
+   "hpTo": 0,
+   "duration": 35,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankEast",
+    "boss": "bossEast",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otCenter"
+   },
+   "actions": [
+    {
+     "id": "teleportEast",
+     "first": 0.1
+    },
+    {
+     "id": "arcaneBurstW",
+     "first": 3,
+     "every": 9,
+     "jitter": 1
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 8,
+     "every": 20,
+     "jitter": 3
+    },
+    {
+     "id": "uppercut",
+     "first": 16,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "blizzardA",
+     "first": 12,
+     "every": 30,
+     "jitter": 4
+    },
+    {
+     "id": "explodeBug",
+     "first": 10,
+     "every": 15,
+     "jitter": 3
+    },
+    {
+     "id": "mutateBug",
+     "first": 18,
+     "every": 22,
+     "jitter": 4
+    },
+    {
+     "id": "veklorWestAdd",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "atSide",
+     "type": "bossAtSpot",
+     "spot": "bossEast",
+     "within": 10,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on this side, far from his brother",
+     "tip": "They heal each other if they are within 60 yards. Stay on your wall."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "teleportEast",
+     "check": "hasAggro",
+     "within": 5,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt the moment he lands",
+     "tip": "The teleport wipes his table. Be the closest player and Taunt before he picks a healer."
+    },
+    {
+     "id": "avoidBurst",
+     "type": "afterEvent",
+     "event": "arcaneBurstW",
+     "check": "outsideHazard",
+     "within": 2,
+     "grace": 2,
+     "notBefore": 0.8,
+     "role": "melee",
+     "label": "Out of the ring on his side",
+     "tip": "Vek'lor is on that side now. Anyone within 10 yards eats an Arcane Burst and gets knocked. Leave, do not stop to look."
+    },
+    {
+     "id": "bugDodge",
+     "type": "afterEvent",
+     "event": "explodeBug",
+     "check": "outsideHazard",
+     "within": 3.5,
+     "grace": 3,
+     "notBefore": 2.8,
+     "role": "nontank",
+     "label": "Run from the swelling bug",
+     "tip": "Three to four seconds after a bug starts to grow it explodes for 3,000 within 10 yards. Run."
+    },
+    {
+     "id": "blizzardMove",
+     "type": "afterEvent",
+     "event": "blizzardA",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 1.4,
+     "role": "nontank",
+     "label": "Step out of Blizzard",
+     "tip": "It walks after the group. Move, then keep moving as it follows you."
+    },
+    {
+     "id": "grabBug",
+     "type": "afterEvent",
+     "event": "mutateBug",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Mutated Bug",
+     "tip": "A mutated bug hits for a thousand a swing. Bug team takes it instantly and keeps it away from the raid."
+    },
+    {
+     "id": "otCenter",
+     "type": "playerAtSpotBy",
+     "spot": "otCenter",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold the bug in the south middle",
+     "tip": "Away from both Emperors and away from the raid."
+    },
+    {
+     "id": "rangedStairs",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on the stairs, out of Vek'lor's reach",
+     "tip": "At least 10 yards from Vek'lor. From the middle you reach him on either side, so you do not cross."
+    },
+    {
+     "id": "meleeUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Melee: on Vek'nilash, every global",
+     "tip": "Physical only. Stop and leave 5 seconds before every teleport, then get back on him."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Late cycle: Unbalancing Strike and Shadow Bolts together. Be high before the teleport."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Under half after a Strike with the next Strike coming is a dead tank."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 20,
+   "roles": "dps",
+   "phases": [
+    1,
+    3,
+    5,
+    7,
+    9,
+    11
+   ],
+   "tip": "Melee run across the room after every teleport; that is the job. Do not stop to look."
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Taunt after every Twin Teleport; heal the tank through Strikes and Shadow Bolts.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Vek'nilash turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabBugCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "mutateBug",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "BUG",
+    "label": "Pick up the Mutated Bug",
+    "tip": "Taunt it or stand on it.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "teleportDrill",
+   "name": "Teleport Taunts",
+   "description": "A teleport every 15 s. Taunt the moment you land.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "teleportEast",
+     "first": 4,
+     "every": 30
+    },
+    {
+     "id": "teleportWest",
+     "first": 19,
+     "every": 30
+    },
+    {
+     "id": "unbalancingStrike",
+     "first": 7,
+     "every": 15
+    }
+   ]
+  },
+  {
+   "id": "bugDrill",
+   "name": "Bugs and ice",
+   "description": "Explode Bug and Blizzard chains land near you. Keep moving and stay on the stairs.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "explodeBug",
+     "first": 3,
+     "every": 11
+    },
+    {
+     "id": "blizzardA",
+     "first": 7,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "mutateDrill",
+   "name": "Grab the Mutated Bug",
+   "description": "A Mutated Bug every 14 s. Be on it first.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "mutateBug",
+     "first": 3,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "healDrill",
+   "name": "Healing the Strike",
+   "description": "Unbalancing Strike every 9 s and Shadow Bolts, teleports every 25 s. Pre-cast.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "unbalancingStrike",
+     "first": 4,
+     "every": 9
+    },
+    {
+     "id": "shadowBolt",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "teleportEast",
+     "first": 14,
+     "every": 50
+    },
+    {
+     "id": "teleportWest",
+     "first": 39,
+     "every": 50
+    }
+   ]
+  }
+ ]
+}

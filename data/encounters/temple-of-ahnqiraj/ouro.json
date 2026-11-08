@@ -1,0 +1,1605 @@
+{
+ "id": "ouro",
+ "name": "Ouro",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "temple-of-ahnqiraj",
+  "name": "Temple of Ahn'Qiraj",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/ouro.md. Wowhead's 5,889,208 HP is a 'Seasonal 40 Player' value, so HP is a clock over 424 s: 100 to 60% in a 180 s surfaced phase (BW/DBM's 180 to 184.6 s), a 30 s submerge, 60 to 20% in another 180 s, and a 34 s Berserk (20% to 0). No enrage timer is documented, and early submerges (nobody in melee) are not simulated. ESTIMATES: the room is a 44 yd sand pit. Melee 900 per 2 s, Sweep (2,000, the wiki and Tavern's spread) and Sand Blast (3,400 base) keep a 10,000 HP tank alive on passive healing (`healPerSecond` 880 for a player tank, 860 ghost) and kill him inside 30 s if a player healer ignores it (140 per second of healing). `stationary: true` matches a worm that does not walk while surfaced; he still turns to face his target. Sand Blast: a 180 degree, 45 yd frontal `cone` (3,400, 2 s cast) as the research lists, with `follow` applying a 5 s stun `debuff` on the tank and, 5.05 s later, a `threatWipe` standing in for 'everyone hit has their threat cleared' (the player tank's own Taunt back after he wakes). The research's real rotation (a second tank already #2 on threat) has one-tank-player bypassing: the tank role is stunned and then must Taunt, while in the real fight another tank catches him during the stun; ghost tank roles see the ghost get stunned-free hits. Sweep is a radial `knockback` 1.5 s cast, 12 yd from his edge (research says the spell's 30 yd radius but guides treat it as melee range), 2,000 damage, and it cuts the swept tank's threat by a quarter (`threatCut` 0.25, a placeholder for the wiki's 'a tank will lose aggro'; `dangerBandDps` 0.6 keeps the DPS clear of the sudden drop). Sand Blast's and Sweep's timers are BW/DBM (22 s and 21 s). Submerge is `bossState: submerged` (no boss, 30 s). Dirt Mounds are telegraphed `hazard`s on random raiders every 4 s (5 yd, 1,000 per second, `playerChance` 0.35), the research's 'mounds chase you' reduced to placement at your feet; real Quake chases and the pit fills up, so this is lighter than the real thing. Emerge fires `emerge` plus one-shot `threatWipe`, `groundRupture` (2,250 within 6 yd of his spot, not the real random emerge point) and ~20 Scarabs (`count: 5` from four spots, `killFirst`, 18 s `lifetime` standing for AoE, real 45 s despawn), the off-tank role catches those from one spot (`playerFrom`) while ghosts handle the rest. Scarab bites are not modelled (adds cannot damage). Berserk at 20% is `enrage` (`enrageMultiplier` 1.3, the wiki's +150% attack speed folded in, the real thing is far harsher but a 10,000 HP sim tank has to live through it), periodic scarab waves and mounds continue, and Boulder is a `projectile` (6,000 splash) `conditional: meleeEmpty` that fires only if the tank leaves melee. Early submerge if nobody is in melee, the Boulder's phase restriction to Berserk being a wiki detail, Intercept back to him after Sweep, and the pit rotating aggro to a third tank are not modelled.",
+ "sources": [
+  "docs/research/temple-of-ahnqiraj/ouro.md",
+  "https://warcraft.wiki.gg/wiki/Ouro",
+  "https://www.wowhead.com/classic/npc=15517/ouro",
+  "https://www.wowhead.com/classic/guide/ouro-temple-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/temple-of-ahnqiraj-aq40",
+  "https://www.tentonhammer.com/guides/tentonhammer-s-guide-to-aq40-ouro-the-sandworm.amp",
+  "https://us.millenium.gg/guide/7179.html?page=10",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/AQ40/Ouro.lua",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/AQ40/Ouro.lua"
+ ],
+ "arena": {
+  "name": "The Sand Pit",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -40
+     ],
+     [
+      10,
+      -40
+     ],
+     [
+      10,
+      -68
+     ],
+     [
+      -10,
+      -68
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      10,
+      -42.8
+     ],
+     [
+      20,
+      -39.2
+     ],
+     [
+      28.8,
+      -33.2
+     ],
+     [
+      36,
+      -25.3
+     ],
+     [
+      41,
+      -15.9
+     ],
+     [
+      43.6,
+      -5.6
+     ],
+     [
+      43.7,
+      5
+     ],
+     [
+      41.2,
+      15.4
+     ],
+     [
+      36.3,
+      24.8
+     ],
+     [
+      29.3,
+      32.8
+     ],
+     [
+      20.5,
+      38.9
+     ],
+     [
+      10.6,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.6,
+      42.7
+     ],
+     [
+      -20.5,
+      38.9
+     ],
+     [
+      -29.3,
+      32.8
+     ],
+     [
+      -36.3,
+      24.8
+     ],
+     [
+      -41.2,
+      15.4
+     ],
+     [
+      -43.7,
+      5
+     ],
+     [
+      -43.6,
+      -5.6
+     ],
+     [
+      -41,
+      -15.9
+     ],
+     [
+      -36,
+      -25.3
+     ],
+     [
+      -28.8,
+      -33.2
+     ],
+     [
+      -20,
+      -39.2
+     ],
+     [
+      -10,
+      -42.8
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -42.8
+     ],
+     [
+      -10,
+      -68
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -42.8
+     ],
+     [
+      10,
+      -68
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -62
+    ]
+   },
+   {
+    "text": "Ouro",
+    "at": [
+     0,
+     9
+    ]
+   },
+   {
+    "text": "Raid, behind him",
+    "at": [
+     0,
+     -14
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -60,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 14,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 24,
+   "tolerance": 4,
+   "label": "Tank, north of him"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 14,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 70,
+   "label": "Ouro, facing north"
+  },
+  "tankEmerge": {
+   "x": 0,
+   "y": 24,
+   "tolerance": 9,
+   "label": "Tank: be here for the emerge"
+  },
+  "otEmerge": {
+   "x": 14,
+   "y": 8,
+   "tolerance": 7,
+   "label": "Off-tank: be ready for the Scarabs"
+  },
+  "meleeWait": {
+   "x": -8,
+   "y": 4,
+   "tolerance": 8,
+   "label": "Melee: spread, gather near the middle"
+  },
+  "raidSpot": {
+   "x": 0,
+   "y": -10,
+   "spread": 13,
+   "label": "Raid: behind him"
+  },
+  "rangedSpot": {
+   "x": -6,
+   "y": -12,
+   "tolerance": 8,
+   "label": "Ranged: behind him"
+  },
+  "healerSpot": {
+   "x": 6,
+   "y": -11,
+   "tolerance": 8,
+   "label": "Healers: behind him"
+  },
+  "otSpot": {
+   "x": -11,
+   "y": 9,
+   "tolerance": 7,
+   "label": "Off-tank: just out of the cone"
+  },
+  "sc1": {
+   "x": -26,
+   "y": -10,
+   "label": "Scarabs"
+  },
+  "sc2": {
+   "x": 26,
+   "y": -10,
+   "label": "Scarabs"
+  },
+  "sc3": {
+   "x": -22,
+   "y": 22,
+   "label": "Scarabs"
+  },
+  "sc4": {
+   "x": 22,
+   "y": 22,
+   "label": "Scarabs"
+  },
+  "scarabHold": {
+   "x": -2,
+   "y": -2,
+   "label": "Scarabs"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 880,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 860,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 6,
+  "speed": 0,
+  "turnRate": 220,
+  "meleeRange": 8,
+  "meleeDamage": 900,
+  "meleeInterval": 2,
+  "stationary": true,
+  "cones": {
+   "sandBlast": {
+    "angle": 180,
+    "range": 45,
+    "label": "Sand Blast",
+    "facing": "front",
+    "style": "breath"
+   }
+  },
+  "facingCone": "sandBlast",
+  "enrageMultiplier": 1.3
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 300,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.6
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Face him north, away from the raid. He Sand Blasts you every 20 to 25 seconds: 3,400 and a 5 second stun, and your threat is gone when you wake. Taunt the instant you can. Be on the spot for every emerge.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Scarab tank",
+   "short": "Off-tank",
+   "description": "When he emerges, about twenty Scarabs swarm the raid. Catch the group from your side and hold them while the raid AoEs. Stand just out of the Sand Blast cone until then.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Behind him, always. Run back in if Sweep knocks you out. On every emerge, Scarabs first, then him. Keep out of Dirt Mounds.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Behind him and past the Sweep ring (12 yards in the sim; spell data lists 30, so do not count on it in the real fight). AoE the Scarabs on the emerge, then back to him. Keep out of Dirt Mounds.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Spike heals on the tank after every Sand Blast and Sweep. Drink when he submerges, but keep moving: the Mounds chase you.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0.08
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "sandBlast": {
+   "label": "Sand Blast",
+   "kind": "cone",
+   "cast": 2,
+   "cone": "sandBlast",
+   "damage": 3400,
+   "hitsMelee": false,
+   "raidMetric": "raidInBlast",
+   "raidToast": "Sand Blast hit the raid!",
+   "playerMetric": "blastHits",
+   "follow": [
+    {
+     "id": "sandStun",
+     "delay": 0.02
+    },
+    {
+     "id": "sandBlastWipe",
+     "delay": 5.05
+    }
+   ],
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A 180 degree blast for 3,400. Stuns and wipes threat. Stay behind him."
+  },
+  "sandStun": {
+   "label": "Sand Blast: stunned",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 5,
+   "stun": 5,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "Five seconds of stun. Your threat is gone when you wake."
+  },
+  "sandBlastWipe": {
+   "label": "Threat cleared",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "Sand Blast wiped threat. Taunt!",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Your threat is gone. Taunt him back."
+  },
+  "sweep": {
+   "label": "Sweep",
+   "kind": "knockback",
+   "cast": 1.5,
+   "knockback": 7,
+   "knockbackRange": 12,
+   "radial": true,
+   "damage": 2000,
+   "threatCut": 0.25,
+   "warn": true,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Everyone in his melee area takes it and is knocked away. Run back in straight away."
+  },
+  "groundRupture": {
+   "label": "Ground Rupture",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 6,
+   "damage": 2250,
+   "tankDamage": 2250,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "He bursts out of the ground. 2,250 and a knockback to anyone standing on him."
+  },
+  "emergeWipe": {
+   "label": "Threat wiped",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "He is back up. Tank, Taunt him!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Back up with an empty table. Tank first."
+  },
+  "scarabs": {
+   "label": "Ouro Scarabs",
+   "kind": "adds",
+   "cast": 0,
+   "count": 5,
+   "from": [
+    "sc1",
+    "sc2",
+    "sc3",
+    "sc4"
+   ],
+   "playerFrom": [
+    "sc1"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 18,
+   "heldLifetime": 24,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "scarabHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "About twenty Scarabs. AoE them, tanks catch them."
+  },
+  "dirtMound": {
+   "label": "Dirt Mound",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.35,
+   "radius": 5,
+   "warning": 1.4,
+   "active": 6,
+   "damage": 1000,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "any",
+   "tip": "A mound chases you. Keep moving; the ground under you is not safe."
+  },
+  "berserk20": {
+   "label": "Berserk",
+   "kind": "enrage",
+   "cast": 0,
+   "toast": "Berserk at 20%!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He will not submerge again. He hits harder and Mounds and Scarabs keep coming."
+  },
+  "boulder": {
+   "label": "Boulder",
+   "kind": "projectile",
+   "cast": 0,
+   "travel": 1.5,
+   "splash": 5,
+   "damage": 6000,
+   "playerChance": 0.35,
+   "conditional": "meleeEmpty",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "He has nobody in melee, so he throws Boulders at the raid. Tank, get back to him."
+  },
+  "submerge": {
+   "label": "Submerge",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He burrows for 30 seconds. Move out of the Mounds and gather for the emerge."
+  },
+  "emerge": {
+   "label": "Emerge",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He surfaces near the raid, so the raid decides where. Be gathered at the agreed spot before the 30 seconds run out."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "First surface",
+   "subtitle": "100% to 60%",
+   "hpFrom": 1,
+   "hpTo": 0.6,
+   "duration": 180,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "sandBlast",
+     "first": 24,
+     "every": 24,
+     "jitter": 2
+    },
+    {
+     "id": "sweep",
+     "first": 22,
+     "every": 21,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Face him north, away from the raid",
+     "tip": "Sand Blast is 180 degrees. Face him away before anyone attacks."
+    },
+    {
+     "id": "blastRegain",
+     "type": "afterEvent",
+     "event": "sandBlastWipe",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back the moment you wake",
+     "tip": "Sand Blast stuns you for 5 seconds and clears your threat. Press Taunt the instant you can act."
+    },
+    {
+     "id": "outOfBlast",
+     "type": "onEvent",
+     "event": "sandBlast",
+     "check": "notInFront",
+     "grace": 1,
+     "role": "nontank",
+     "label": "Never in front of him",
+     "tip": "Sand Blast covers his entire front. Everyone but the tank stays behind him."
+    },
+    {
+     "id": "otStandby",
+     "type": "playerAtSpotBy",
+     "spot": "otSpot",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stand by, just out of the cone",
+     "tip": "When the Scarabs come, catch them. Stay close to him but never in front of him."
+    },
+    {
+     "id": "rangedBehind",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay behind him and out of Sweep",
+     "tip": "The sim's Sweep ring is 12 yards from his edge. Spell data lists 30, so in the real fight do not assume you are safe just outside melee."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He has no real rotation besides Sand Blast and Sweep. Be full before the next one."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A tank under half with Sand Blast coming dies if a Sweep lands first."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Submerged",
+   "subtitle": "Mounds",
+   "hpFrom": 0.6,
+   "hpTo": 0.6,
+   "duration": 30,
+   "bossState": "submerged",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankEmerge",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otEmerge",
+    "melee": "meleeWait"
+   },
+   "actions": [
+    {
+     "id": "dirtMound",
+     "first": 2,
+     "every": 4,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeSpot",
+     "type": "playerAtSpotBy",
+     "spot": "tankEmerge",
+     "grace": 3,
+     "role": "tanks",
+     "label": "Be at the emerge spot",
+     "tip": "He comes up where the raid is gathered. If no tank reaches him inside 10 seconds he goes straight back down."
+    },
+    {
+     "id": "otEmerge",
+     "type": "playerAtSpotBy",
+     "spot": "otEmerge",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Be ready to catch the Scarabs",
+     "tip": "Twenty of them on the raid in the first second. Be close."
+    },
+    {
+     "id": "meleeGather",
+     "type": "playerAtSpotBy",
+     "spot": "meleeWait",
+     "grace": 3,
+     "role": "melee",
+     "label": "Gather near the middle",
+     "tip": "Close enough to him but spread, so the Mounds do not catch the group."
+    },
+    {
+     "id": "mountDodge",
+     "type": "afterEvent",
+     "event": "dirtMound",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 1.5,
+     "notBefore": 1.2,
+     "role": "nontank",
+     "label": "Stay out of the Mounds",
+     "tip": "They track you. Keep moving, and drink when you can."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A breather. Full tank before he comes back."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Second surface",
+   "subtitle": "60% to 20%",
+   "hpFrom": 0.6,
+   "hpTo": 0.2,
+   "duration": 180,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "emergeWipe",
+     "first": 0.1
+    },
+    {
+     "id": "groundRupture",
+     "first": 0.15
+    },
+    {
+     "id": "scarabs",
+     "first": 1
+    },
+    {
+     "id": "sandBlast",
+     "first": 12,
+     "every": 24,
+     "jitter": 2
+    },
+    {
+     "id": "sweep",
+     "first": 20,
+     "every": 21,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "emergeBoss",
+     "type": "afterEvent",
+     "event": "emergeWipe",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Take him the instant he surfaces",
+     "tip": "Empty threat table, Scarabs everywhere. You first, then everyone."
+    },
+    {
+     "id": "scarabGrab",
+     "type": "afterEvent",
+     "event": "scarabs",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Catch the Scarabs on your side",
+     "tip": "Pick up your group. Keep them off the healers."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Scarabs first, then him",
+     "tip": "On every emerge, AoE the Scarabs before anything else. They are on the raid, and they cost you healers."
+    },
+    {
+     "id": "blastRegain",
+     "type": "afterEvent",
+     "event": "sandBlastWipe",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back the moment you wake",
+     "tip": "Sand Blast stuns you for 5 seconds and clears your threat. Press Taunt the instant you can act."
+    },
+    {
+     "id": "outOfBlast",
+     "type": "onEvent",
+     "event": "sandBlast",
+     "check": "notInFront",
+     "grace": 1,
+     "role": "nontank",
+     "label": "Never in front of him",
+     "tip": "Sand Blast covers his entire front. Everyone but the tank stays behind him."
+    },
+    {
+     "id": "otStandby",
+     "type": "playerAtSpotBy",
+     "spot": "otSpot",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stand by, just out of the cone",
+     "tip": "When the Scarabs come, catch them. Stay close to him but never in front of him."
+    },
+    {
+     "id": "rangedBehind",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay behind him and out of Sweep",
+     "tip": "The sim's Sweep ring is 12 yards from his edge. Spell data lists 30, so in the real fight do not assume you are safe just outside melee."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He has no real rotation besides Sand Blast and Sweep. Be full before the next one."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A tank under half with Sand Blast coming dies if a Sweep lands first."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Berserk",
+   "subtitle": "20% to dead",
+   "hpFrom": 0.2,
+   "hpTo": 0,
+   "duration": 34,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otSpot"
+   },
+   "actions": [
+    {
+     "id": "berserk20",
+     "first": 0.5
+    },
+    {
+     "id": "sandBlast",
+     "first": 8,
+     "every": 22,
+     "jitter": 2
+    },
+    {
+     "id": "sweep",
+     "first": 16,
+     "every": 21,
+     "jitter": 1
+    },
+    {
+     "id": "dirtMound",
+     "first": 4,
+     "every": 11,
+     "jitter": 2
+    },
+    {
+     "id": "scarabs",
+     "first": 6,
+     "every": 18
+    },
+    {
+     "id": "boulder",
+     "first": 1,
+     "every": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "stayOn",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 16,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Stay in melee, whatever else happens",
+     "tip": "If he has nobody in melee he throws 6,000 Boulders at the raid instead."
+    },
+    {
+     "id": "scarabGrab2",
+     "type": "afterEvent",
+     "event": "scarabs",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Catch the Scarabs on your side",
+     "tip": "They keep coming in Berserk."
+    },
+    {
+     "id": "blastRegain2",
+     "type": "afterEvent",
+     "event": "sandBlastWipe",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back the moment you wake",
+     "tip": "Same rule: a Sand Blast wipes your threat."
+    },
+    {
+     "id": "mountDodge2",
+     "type": "afterEvent",
+     "event": "dirtMound",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 1.5,
+     "notBefore": 1.2,
+     "role": "nontank",
+     "label": "Step out of Mounds",
+     "tip": "He keeps summoning them in Berserk."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Scarabs first, then him",
+     "tip": "Even at 20%: Scarabs on the raid first."
+    },
+    {
+     "id": "blastRegain",
+     "type": "afterEvent",
+     "event": "sandBlastWipe",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt him back the moment you wake",
+     "tip": "Sand Blast stuns you for 5 seconds and clears your threat. Press Taunt the instant you can act."
+    },
+    {
+     "id": "outOfBlast",
+     "type": "onEvent",
+     "event": "sandBlast",
+     "check": "notInFront",
+     "grace": 1,
+     "role": "nontank",
+     "label": "Never in front of him",
+     "tip": "Sand Blast covers his entire front. Everyone but the tank stays behind him."
+    },
+    {
+     "id": "otStandby",
+     "type": "playerAtSpotBy",
+     "spot": "otSpot",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stand by, just out of the cone",
+     "tip": "When the Scarabs come, catch them. Stay close to him but never in front of him."
+    },
+    {
+     "id": "rangedBehind",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay behind him and out of Sweep",
+     "tip": "The sim's Sweep ring is 12 yards from his edge. Spell data lists 30, so in the real fight do not assume you are safe just outside melee."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Berserk: heal the tank and let the rest of the raid heal itself."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A tank under half with Sand Blast coming dies if a Sweep lands first."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 0.6,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "raidInBlast": {
+   "label": "Sand Blasts that hit the raid",
+   "unit": "count",
+   "penaltyPerUnit": 8,
+   "severe": 1,
+   "roles": "tanks",
+   "tip": "Face him north. 180 degrees is a lot of arc."
+  },
+  "blastHits": {
+   "label": "Sand Blasts you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 6,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stay behind him. 3,400 and a stun."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Taunt back after every Sand Blast; catch the Scarabs; heal the spikes.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Ouro turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "scarabCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "scarabs",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "SCARABS",
+    "label": "Pick up the Scarabs",
+    "tip": "Taunt them or stand on them.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "blastDrill",
+   "name": "Sand Blast and Taunt",
+   "description": "Sand Blast every 14 s. Stunned 5 s, Taunt the moment you can.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "sandBlast",
+     "first": 3,
+     "every": 14
+    },
+    {
+     "id": "sweep",
+     "first": 9,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "scarabDrill",
+   "name": "Scarab swarm",
+   "description": "A wave of Scarabs every 18 s. Kill them before the boss.",
+   "roles": "dps",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "scarabs",
+     "first": 2,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "moundDrill",
+   "name": "Dirt Mounds",
+   "description": "Mounds land every 4 s. Keep moving.",
+   "roles": "dps",
+   "startPhase": 2,
+   "duration": 28,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "dirtMound",
+     "first": 2,
+     "every": 4
+    }
+   ]
+  },
+  {
+   "id": "catchDrill",
+   "name": "Catch the Scarabs",
+   "description": "A wave every 16 s. Catch them on your side and hold them.",
+   "roles": "offtank",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "scarabs",
+     "first": 3,
+     "every": 16
+    }
+   ]
+  },
+  {
+   "id": "healDrill",
+   "name": "Spike healing",
+   "description": "Sand Blast and Sweep close together, and a Berserked melee. Stay ahead.",
+   "roles": "healer",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "sandBlast",
+     "first": 3,
+     "every": 12
+    },
+    {
+     "id": "sweep",
+     "first": 8,
+     "every": 12
+    },
+    {
+     "id": "berserk20",
+     "first": 1
+    }
+   ]
+  }
+ ]
+}

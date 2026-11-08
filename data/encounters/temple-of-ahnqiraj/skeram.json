@@ -1,0 +1,2251 @@
+{
+ "id": "skeram",
+ "name": "The Prophet Skeram",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "temple-of-ahnqiraj",
+  "name": "Temple of Ahn'Qiraj",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/skeram.md. Wowhead's 4,264,000 HP is a 'Seasonal 40 Player' value, so HP here is a clock: a 258 s kill. ESTIMATES: the room is drawn from prose (three platforms, 22 to 40 yd apart so a late run costs real Earth Shocks, closer than the real stairs so one tank can walk it). No boss mod carries a timer for Arcane Explosion, Blink or True Fulfillment, so their cadences here are guesses: Arcane Explosion every 16 s, Blink once per phase, True Fulfillment every 28 s. Melee 850 per 2 s (wiki 700 to 1,000) is ~425 per second, scaled so a 10,000 HP tank lives on the raid's passive healing (500 per second) and an ignored tank dies inside 30 s (only 140 per second of healing while a player heals). Arcane Explosion 1,500 is the guide figure, not the 388 base or the wiki's ~200. Earth Shock 1,100 per 1.5 s is between the 654 base and the 'up to 3,000' guide figure. ENGINE GAPS. Blink: phases 2, 4, 5, 7 and 8 are 'Skeram is on that platform' stretches, each opened by a `threatWipe` with `teleportBossTo` at the phase start, because the engine has one tank spot per phase. Blink timing is therefore fixed per phase instead of random. The Skeram you face in each split is the real one by construction; identifying him by mana or a raid marker is not simulated. Arcane Explosion: the '5 or more in melee' trigger (and the 1.12 note that it is no longer guaranteed) cannot be expressed, so it fires on a timer; the raid's real melee count is not simulated either, so the melee role is told the four-melee rule in words but nothing scores it. Without an Interrupt button the healer sees every cast land (read those as the raid's missed kicks). Earth Shock: only `conditional: meleeEmpty` tests for a tank in melee, so it is a 1.1 s debuff on whoever tanks, with the tank taking it instead of the real 'top threat' target, and only for the real Skeram. Images cast Arcane Explosion (`offBoss`) but never Earth Shock, True Fulfillment or Blink. True Fulfillment: a `debuff` with `stun: 20` on a random melee or ranged player (`playerChance` 0.3), the real 20 s charm as a loss of control. It cannot hurt the raid, take a Polymorph or follow the 'closest non-tank' rule, so the +300% damage and the sheep are not represented. It never targets healers: at 20 s a healer cast would take the tank off the raid's healing, and guides put the nearest non-tank at the melee. Images are `killFirst` adds on the 75% and 50% splits, burned over a 24 s `lifetime` estimate (real image HP is unknown, 'far fewer' than the boss); the 25% split uses `killable` images with no priority, so attacking one is scored by `attacksOnAdds` and the raid burns the real boss; images vanish with him at the end. One off-tank role is the left-platform tank: the player holds the left image, a ghost group holds the others (`playerFrom`).",
+ "sources": [
+  "docs/research/temple-of-ahnqiraj/skeram.md",
+  "https://warcraft.wiki.gg/wiki/The_Prophet_Skeram",
+  "https://www.wowhead.com/classic/npc=15263/the-prophet-skeram",
+  "https://www.wowhead.com/classic/spell=26192/arcane-explosion",
+  "https://www.wowhead.com/classic/spell=26194/earth-shock",
+  "https://www.wowhead.com/classic/spell=785/true-fulfillment",
+  "https://www.wowhead.com/classic/guide/the-prophet-skeram-temple-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/temple-of-ahnqiraj-aq40",
+  "https://www.tentonhammer.com/guides/tentonhammer-s-guide-to-aq40-skeram.amp",
+  "https://us.millenium.gg/guide/7179.html?page=2",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/AQ40/Skeram.lua",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/AQ40/Skeram.lua"
+ ],
+ "arena": {
+  "name": "The Prophet's Stairs",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "court",
+    "poly": [
+     [
+      -46,
+      -44
+     ],
+     [
+      46,
+      -44
+     ],
+     [
+      46,
+      32
+     ],
+     [
+      -46,
+      32
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -72
+     ],
+     [
+      10,
+      -72
+     ],
+     [
+      10,
+      -40
+     ],
+     [
+      -10,
+      -40
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "courtWall",
+    "points": [
+     [
+      -10,
+      -44
+     ],
+     [
+      -46,
+      -44
+     ],
+     [
+      -46,
+      32
+     ],
+     [
+      46,
+      32
+     ],
+     [
+      46,
+      -44
+     ],
+     [
+      10,
+      -44
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -44
+     ],
+     [
+      -10,
+      -72
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -44
+     ],
+     [
+      10,
+      -72
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -66
+    ]
+   },
+   {
+    "text": "Middle platform",
+    "at": [
+     0,
+     26
+    ]
+   },
+   {
+    "text": "Left platform",
+    "at": [
+     -30,
+     12
+    ]
+   },
+   {
+    "text": "Right platform",
+    "at": [
+     30,
+     12
+    ]
+   },
+   {
+    "text": "Rails: ranged and healers",
+    "at": [
+     0,
+     -24
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -66,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 14,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -38,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 22,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 14,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Skeram"
+  },
+  "tankMid": {
+   "x": 0,
+   "y": 22,
+   "tolerance": 4,
+   "label": "Tank: middle platform"
+  },
+  "bossMid": {
+   "x": 0,
+   "y": 14,
+   "heading": 90,
+   "tolerance": 8,
+   "headingTolerance": 80,
+   "label": "Skeram, middle"
+  },
+  "tankLeft": {
+   "x": -30,
+   "y": 4,
+   "tolerance": 4,
+   "label": "Tank: left platform"
+  },
+  "bossLeft": {
+   "x": -22,
+   "y": 4,
+   "heading": 180,
+   "tolerance": 8,
+   "headingTolerance": 80,
+   "label": "Skeram, left"
+  },
+  "tankRight": {
+   "x": 30,
+   "y": 4,
+   "tolerance": 4,
+   "label": "Tank: right platform"
+  },
+  "bossRight": {
+   "x": 22,
+   "y": 4,
+   "heading": 0,
+   "tolerance": 8,
+   "headingTolerance": 80,
+   "label": "Skeram, right"
+  },
+  "raidSpot": {
+   "x": 0,
+   "y": -14,
+   "spread": 13,
+   "label": "Raid, on the rails"
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": -16,
+   "tolerance": 8,
+   "label": "Rails: ranged"
+  },
+  "healerSpot": {
+   "x": 0,
+   "y": -12,
+   "tolerance": 8,
+   "label": "Rails: healers"
+  },
+  "otLeft": {
+   "x": -26,
+   "y": 0,
+   "tolerance": 6,
+   "label": "Off-tank: left platform"
+  },
+  "imageMid": {
+   "x": 0,
+   "y": 8,
+   "label": "Image spawn, middle"
+  },
+  "imageLeft": {
+   "x": -20,
+   "y": 4,
+   "label": "Image spawn, left"
+  },
+  "imageRight": {
+   "x": 20,
+   "y": 4,
+   "label": "Image spawn, right"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 520,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 500,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 3,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 850,
+  "meleeInterval": 2,
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 450,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.7
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold Skeram against a wall on his platform. He Blinks without warning: Taunt the moment he appears and be in melee fast, because Earth Shock chains on whoever he has while nobody melees him.",
+   "abilities": [
+    "taunt",
+    "interrupt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Platform tank",
+   "short": "Off-tank",
+   "description": "You own the left platform. Every split an image lands there: pick it up and hold it while the raid kills it. On the last split, hold it and let the raid burn the real Skeram.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay on him, but keep to four melee or fewer on any one Skeram: a fifth makes him cast Arcane Explosion. Kick the casts that do come. Swap to the images on the 75% and 50% splits; on the 25% split ignore them and burn him.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Work from the rails. Kick Arcane Explosion with Counterspell, swap to the images on the first two splits, ignore them on the last.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Heal through melee and the Earth Shocks that follow a late Blink. You have nothing to dispel: True Fulfillment cannot be removed.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 8,
+   "gcd": false,
+   "range": 36,
+   "icon": "interrupt",
+   "tip": "Kick, Pummel, Shield Bash or Counterspell. One button covers them all here, so it reaches the whole room, and it is ready for every other cast."
+  }
+ },
+ "actions": {
+  "arcaneExplosion": {
+   "label": "Arcane Explosion",
+   "kind": "aoe",
+   "cast": 1,
+   "radius": 30,
+   "damage": 1500,
+   "tankDamage": 1500,
+   "interruptible": true,
+   "completedMetric": "castsLanded",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "One second to kick it, or 1,500 on everyone within 30 yards."
+  },
+  "imageExplosion": {
+   "label": "Image: Arcane Explosion",
+   "kind": "aoe",
+   "cast": 1,
+   "radius": 0,
+   "damage": 1200,
+   "tankDamage": 1200,
+   "interruptible": true,
+   "offBoss": true,
+   "completedMetric": "castsLanded",
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "An image casts it too. Kick the cast: if you are not sure which Skeram, kick anyway."
+  },
+  "earthShock": {
+   "label": "Earth Shock",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 1.1,
+   "tickDamage": 1100,
+   "conditional": "meleeEmpty",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Nobody is in melee, so he shocks his target over and over. Get in melee."
+  },
+  "trueFulfillment": {
+   "label": "True Fulfillment",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.3,
+   "roles": "dps",
+   "dispel": "none",
+   "duration": 20,
+   "stun": 20,
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "A 20 second charm on the closest non-tank. In the raid a mage would sheep you; here you simply lose your character for it."
+  },
+  "blinkLeft": {
+   "label": "Blink: left platform",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossLeft",
+   "toast": "He Blinked left: threat wiped!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He teleports and clears his threat table. The tank at that platform must take him now."
+  },
+  "blinkRight": {
+   "label": "Blink: right platform",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossRight",
+   "toast": "He Blinked right: threat wiped!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He teleports and clears his threat table. The tank at that platform must take him now."
+  },
+  "blinkMid": {
+   "label": "Blink: middle platform",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossMid",
+   "toast": "He Blinked to the middle: threat wiped!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He teleports and clears his threat table. The tank at that platform must take him now."
+  },
+  "splitRight": {
+   "label": "Summon Images: he appears right",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossRight",
+   "toast": "Split! He is on the right platform",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He splits into three. This one is the real Skeram, and his threat is empty."
+  },
+  "splitMid": {
+   "label": "Summon Images: he appears in the middle",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossMid",
+   "toast": "Split! He is on the middle platform",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "He splits into three. This one is the real Skeram, and his threat is empty."
+  },
+  "imageMid1": {
+   "label": "Image of Skeram",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "imageMid"
+   ],
+   "playerFrom": [],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 24,
+   "heldLifetime": 30,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "imageMid",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Two images appear on the empty platforms. The raid kills them first."
+  },
+  "imageMid3": {
+   "label": "Image of Skeram",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "imageMid"
+   ],
+   "playerFrom": [],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 48,
+   "heldLifetime": 60,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "imageMid",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The last split. Tanks hold the images; the raid burns the real Skeram."
+  },
+  "imageLeft1": {
+   "label": "Image of Skeram",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "imageLeft"
+   ],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 24,
+   "heldLifetime": 30,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "imageLeft",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Two images appear on the empty platforms. The raid kills them first."
+  },
+  "imageLeft2": {
+   "label": "Image of Skeram",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "imageLeft"
+   ],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 24,
+   "heldLifetime": 30,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "imageLeft",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Two images appear on the empty platforms. The raid kills them first."
+  },
+  "imageLeft3": {
+   "label": "Image of Skeram",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "imageLeft"
+   ],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 48,
+   "heldLifetime": 60,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "imageLeft",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The last split. Tanks hold the images; the raid burns the real Skeram."
+  },
+  "imageRight2": {
+   "label": "Image of Skeram",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "imageRight"
+   ],
+   "playerFrom": [],
+   "speed": 5,
+   "aggroRange": 14,
+   "lifetime": 24,
+   "heldLifetime": 30,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "imageRight",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Two images appear on the empty platforms. The raid kills them first."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Middle platform",
+   "subtitle": "Pull him off the steps",
+   "hpFrom": 1,
+   "hpTo": 0.86,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankMid",
+    "boss": "bossMid",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "arcaneExplosion",
+     "first": 7,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 14,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossMid",
+     "within": 14,
+     "grace": 8,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Hold him on the middle platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "He Blinks left",
+   "subtitle": "left platform",
+   "hpFrom": 0.86,
+   "hpTo": 0.75,
+   "duration": 26,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankLeft",
+    "boss": "bossLeft",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "blinkLeft",
+     "first": 0.2
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 7,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 10,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossLeft",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the left platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "meleeBack",
+     "type": "afterEvent",
+     "event": "blinkLeft",
+     "check": "inRange",
+     "within": 9,
+     "grace": 6,
+     "role": "melee",
+     "label": "Be back on him within seconds of a Blink",
+     "tip": "He only just left. Run to the new platform and get in melee, or the Earth Shocks will start."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "blinkLeft",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Split at 75%",
+   "subtitle": "right",
+   "hpFrom": 0.75,
+   "hpTo": 0.72,
+   "duration": 24,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRight",
+    "boss": "bossRight",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "splitRight",
+     "first": 0.2
+    },
+    {
+     "id": "imageMid1",
+     "first": 1
+    },
+    {
+     "id": "imageLeft1",
+     "first": 1.3
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 9,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "imageExplosion",
+     "first": 14,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 11,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossRight",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the right platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "splitRight",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the images before the real Skeram",
+     "tip": "The images have far less health than he does. Turn and burn them. Attacks into the real one while an image lives are wasted."
+    },
+    {
+     "id": "grabImage",
+     "type": "afterEvent",
+     "event": "imageLeft1",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the image on your platform",
+     "tip": "The image appears on your platform. Be on it before it reaches the raid."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "He Blinks right",
+   "subtitle": "right platform",
+   "hpFrom": 0.72,
+   "hpTo": 0.6,
+   "duration": 28,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRight",
+    "boss": "bossRight",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "blinkRight",
+     "first": 0.2
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 7,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 10,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossRight",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the right platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "meleeBack",
+     "type": "afterEvent",
+     "event": "blinkRight",
+     "check": "inRange",
+     "within": 9,
+     "grace": 6,
+     "role": "melee",
+     "label": "Be back on him within seconds of a Blink",
+     "tip": "He only just left. Run to the new platform and get in melee, or the Earth Shocks will start."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "blinkRight",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "He Blinks to the middle",
+   "subtitle": "middle platform",
+   "hpFrom": 0.6,
+   "hpTo": 0.5,
+   "duration": 24,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankMid",
+    "boss": "bossMid",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "blinkMid",
+     "first": 0.2
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 7,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 10,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossMid",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the middle platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "meleeBack",
+     "type": "afterEvent",
+     "event": "blinkMid",
+     "check": "inRange",
+     "within": 9,
+     "grace": 6,
+     "role": "melee",
+     "label": "Be back on him within seconds of a Blink",
+     "tip": "He only just left. Run to the new platform and get in melee, or the Earth Shocks will start."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "blinkMid",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Split at 50%",
+   "subtitle": "middle",
+   "hpFrom": 0.5,
+   "hpTo": 0.47,
+   "duration": 24,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankMid",
+    "boss": "bossMid",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "splitMid",
+     "first": 0.2
+    },
+    {
+     "id": "imageLeft2",
+     "first": 1
+    },
+    {
+     "id": "imageRight2",
+     "first": 1.3
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 9,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "imageExplosion",
+     "first": 14,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 11,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossMid",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the middle platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "splitMid",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the images before the real Skeram",
+     "tip": "The images have far less health than he does. Turn and burn them. Attacks into the real one while an image lives are wasted."
+    },
+    {
+     "id": "grabImage",
+     "type": "afterEvent",
+     "event": "imageLeft2",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the image on your platform",
+     "tip": "The image appears on your platform. Be on it before it reaches the raid."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "He Blinks left",
+   "subtitle": "left platform",
+   "hpFrom": 0.47,
+   "hpTo": 0.36,
+   "duration": 28,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankLeft",
+    "boss": "bossLeft",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "blinkLeft",
+     "first": 0.2
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 7,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 10,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossLeft",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the left platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "meleeBack",
+     "type": "afterEvent",
+     "event": "blinkLeft",
+     "check": "inRange",
+     "within": 9,
+     "grace": 6,
+     "role": "melee",
+     "label": "Be back on him within seconds of a Blink",
+     "tip": "He only just left. Run to the new platform and get in melee, or the Earth Shocks will start."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "blinkLeft",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "He Blinks right",
+   "subtitle": "right platform",
+   "hpFrom": 0.36,
+   "hpTo": 0.25,
+   "duration": 24,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRight",
+    "boss": "bossRight",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "blinkRight",
+     "first": 0.2
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 7,
+     "every": 16,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 10,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossRight",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the right platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "meleeBack",
+     "type": "afterEvent",
+     "event": "blinkRight",
+     "check": "inRange",
+     "within": 9,
+     "grace": 6,
+     "role": "melee",
+     "label": "Be back on him within seconds of a Blink",
+     "tip": "He only just left. Run to the new platform and get in melee, or the Earth Shocks will start."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "blinkRight",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Split at 25%: burn the real one",
+   "subtitle": "right",
+   "hpFrom": 0.25,
+   "hpTo": 0,
+   "duration": 50,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRight",
+    "boss": "bossRight",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otLeft"
+   },
+   "actions": [
+    {
+     "id": "splitRight",
+     "first": 0.2
+    },
+    {
+     "id": "imageMid3",
+     "first": 1
+    },
+    {
+     "id": "imageLeft3",
+     "first": 1.3
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 9,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "imageExplosion",
+     "first": 14,
+     "every": 18,
+     "jitter": 2
+    },
+    {
+     "id": "trueFulfillment",
+     "first": 11,
+     "every": 28,
+     "jitter": 3
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "platform",
+     "type": "bossAtSpot",
+     "spot": "bossRight",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold him on the right platform",
+     "tip": "Get to him the second he appears and pin him against the wall. Never drag him off a platform."
+    },
+    {
+     "id": "otWait",
+     "type": "playerAtSpotBy",
+     "spot": "otLeft",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Stay on the left platform",
+     "tip": "Your platform stays covered the whole fight. If he or an image lands on it, you are already there."
+    },
+    {
+     "id": "railRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the rails",
+     "tip": "From the rails you reach all three platforms. Do not be the closest player to him or you are the next charm."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "castsLanded",
+     "role": [
+      "dps",
+      "tanks"
+     ],
+     "label": "Nobody finishes an Arcane Explosion",
+     "tip": "Every Arcane Explosion is 1,500 on everyone within 30 yards. Kick the cast the moment you see the bar."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "A fresh Skeram after a Blink has no target and throws Earth Shocks at whoever is top threat. Top the tank up the moment he moves."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Melee is 700 to 1,000 a hit. Keep the tank high going into a Blink."
+    },
+    {
+     "id": "meleeBack",
+     "type": "afterEvent",
+     "event": "splitRight",
+     "check": "inRange",
+     "within": 9,
+     "grace": 6,
+     "role": "melee",
+     "label": "Be back on him within seconds of a Blink",
+     "tip": "He only just left. Run to the new platform and get in melee, or the Earth Shocks will start."
+    },
+    {
+     "id": "regain",
+     "type": "afterEvent",
+     "event": "splitRight",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Be on him seconds after he Blinks",
+     "tip": "His table is empty after a Blink. Run to the platform, Taunt on arrival, get in melee: the longer nobody melees him, the more Earth Shocks somebody eats."
+    },
+    {
+     "id": "grabImage",
+     "type": "afterEvent",
+     "event": "imageLeft3",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the image on your platform",
+     "tip": "The image appears on your platform. Be on it before it reaches the raid."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "castsLanded": {
+   "label": "Arcane Explosions that went off",
+   "unit": "count",
+   "penaltyPerUnit": 2.5,
+   "severe": 2,
+   "roles": [
+    "dps",
+    "tanks"
+   ],
+   "tip": "Every completed cast is 1,500 on the raid. Kick on the cast bar."
+  },
+  "attacksOnAdds": {
+   "label": "Attacks wasted on images in the last split",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 6,
+   "roles": "dps",
+   "phases": [
+    9
+   ],
+   "tip": "On the 25% split the images vanish when he dies. Everything into the real Skeram."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Kick Arcane Explosion on the bar; tank Taunts after every Blink; off-tank grabs the left image.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Skeram turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "kickArcane",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:arcaneExplosion",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 0.7,
+    "role": [
+     "dps",
+     "tanks"
+    ],
+    "short": "KICK",
+    "label": "Kick Arcane Explosion",
+    "tip": "One second. Kick it the moment the bar appears.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "kickImage",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:imageExplosion",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 0.7,
+    "role": [
+     "dps",
+     "tanks"
+    ],
+    "short": "KICK",
+    "label": "Kick the image",
+    "tip": "The images cast it too. Kick anything that casts.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "grabImageCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "imageLeft1",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "IMAGE",
+    "label": "Pick up the image on your platform",
+    "tip": "Taunt it or stand on it as it appears.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabImageCue2",
+    "ability": "taunt",
+    "on": "event",
+    "event": "imageLeft2",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "IMAGE",
+    "label": "Pick up the image on your platform",
+    "tip": "Taunt it or stand on it as it appears.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabImageCue3",
+    "ability": "taunt",
+    "on": "event",
+    "event": "imageLeft3",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "IMAGE",
+    "label": "Pick up the image on your platform",
+    "tip": "Taunt it or stand on it as it appears.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "blinkDrill",
+   "name": "After every Blink",
+   "description": "He Blinks every 18 s between the left and right platforms. Taunt on arrival and get in melee before the Earth Shocks stack up.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 70,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "blinkLeft",
+     "first": 4,
+     "every": 36
+    },
+    {
+     "id": "blinkRight",
+     "first": 22,
+     "every": 36
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    }
+   ]
+  },
+  {
+   "id": "kickDrill",
+   "name": "Kick the Explosion",
+   "description": "He casts Arcane Explosion every 9 s: one second to kick it. Ranged and melee both have the button.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "arcaneExplosion",
+     "first": 3,
+     "every": 9,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "imageDrill",
+   "name": "Grab the image",
+   "description": "An image appears on your platform every 16 s. Be on it before it walks to the raid.",
+   "roles": "offtank",
+   "startPhase": 3,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "imageLeft1",
+     "first": 3,
+     "every": 16
+    }
+   ]
+  },
+  {
+   "id": "healDrill",
+   "name": "Heal through a Blink",
+   "description": "A Blink every 16 s with Arcane Explosions landing: keep the tank above half through the shocks.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "blinkLeft",
+     "first": 4,
+     "every": 32
+    },
+    {
+     "id": "blinkRight",
+     "first": 20,
+     "every": 32
+    },
+    {
+     "id": "earthShock",
+     "first": 1,
+     "every": 1.5
+    },
+    {
+     "id": "arcaneExplosion",
+     "first": 8,
+     "every": 11
+    }
+   ]
+  }
+ ]
+}

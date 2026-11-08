@@ -276,8 +276,11 @@ export function updateRaid(state, script, dt) {
       const p = state.world.player;
       if (dist(d.tx, d.ty, p.x, p.y) < r.spacing * 0.99) {
         // Someone's cell is too close to the player: they take a free cell outside the formation.
-        const c = hexCell(r.dots.length + spare++);
-        d.tx = r.anchor.x + c.gx * r.spacing; d.ty = r.anchor.y + c.gy * r.spacing;
+        for (let tries = 0; tries < 12; tries++) {
+          const c = hexCell(r.dots.length + spare++);
+          d.tx = r.anchor.x + c.gx * r.spacing; d.ty = r.anchor.y + c.gy * r.spacing;
+          if (dist(d.tx, d.ty, p.x, p.y) >= r.spacing) break;
+        }
       }
     } else {
       const s = d.melee ? r.spread * 0.6 : r.spread;
@@ -399,7 +402,7 @@ export function updateWhelps(state, script, dt) {
       wh.x += Math.cos(a) * step; wh.y += Math.sin(a) * step;
     }
     wh.onRaid = false;
-    if (wh.target === 'player') continue;   // someone has it: holding adds near the raid is not losing them
+    if (wh.target !== 'raid') continue;     // someone has it: adds being held near the raid are not loose
     for (const dot of w.raid.dots) {
       if (dist(wh.x, wh.y, dot.x, dot.y) <= script.raid.whelpContactRange) { wh.onRaid = true; onRaid = true; break; }
     }

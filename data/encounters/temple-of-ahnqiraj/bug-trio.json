@@ -1,0 +1,1796 @@
+{
+ "id": "bug-trio",
+ "name": "Bug Trio",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "temple-of-ahnqiraj",
+  "name": "Temple of Ahn'Qiraj",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/bug-trio.md. The engine has one boss, so the three bugs are three phases of one boss in the standard kill order Kri > Yauj > Vem: HP is a clock over 210 s (real values are unknown, Wowhead shows 'Seasonal 40 Player' only and Era pools may be lower). ESTIMATES: the room is a 46 yd round chamber with named alcoves, phase lengths (80, 70, 60 s) and the Yauj Brood count (4 adds, real count unknown) are placeholders. The boss's melee is one value (800 per 2 s, under the wiki's ~1,000 because Cleave and Volley add to it) for all three bugs, so Kri's Thrash and Yauj's Ravage are folded into it; a 10,000 HP tank lives on the raid's passive healing and is lost inside 30 s if a player healer ignores him (only 140 per second of healing). Kill order: Kri first while Yauj (a `killable`, non-priority add parked in her alcove; hits on her score `attacksOnAdds`) and Vem (an add the off-tank holds, not attackable) wait. Each change of target is a `threatWipe` with `teleportBossTo` at the next phase start, the player tank walks to the next bug and Taunts. In the real fight three tank teams hold their own bugs; here the tank role follows the kill order instead. Yauj's real Great Heal also dispels and heals the other two bugs if they are in her line of sight, and Vem can devour Kri's corpse: neither is simulated, so the instruction to keep them apart is tips only. Summon Player is not modelled. Toxic Volley: 450 direct as an `aoe` plus three separate poison debuffs of 16 s (75 per second each, the 150 per 2 s of spell data) on random raiders, the engine's stand-in for 'cleanse every global' since `target: all` cannot put a debuff on the whole raid. Its 8 to 35 s DBM spread is modelled as 22 s with 8 s of jitter. Fear (DBM 20.3 to 29.4 s) is 8 s; the real spell hits everyone within 45 yd (this room), but `playerChance` 0.4 stands in for Tremor Totem and Fear Ward coverage, and only non-tanks can be hit since the tank roles are assumed to have Fear Ward, Tremor Totem or Berserker Rage. A separate `threatWipe` models her aggro loss. Great Heal's 69,375 is not simulated (a heal has no effect on the health clock), so `completedMetric` is the cost: 2 s cast, interruptible, Yauj casting (`offBoss`) while Kri is the target. Kri's Toxic Vapors cloud is an 8 yd `hazard` at his death spot with 2,000 tick damage for 120 s, modelled at phase 2's first moment (no telegraph is real). Vem's Berserker Charge is a 2,400 `debuff` with `stun: 2` on a random non-tank (`playerChance` 0.3), since the LoS rule cannot be expressed. Knock Away is a frontal `knockback` on the tank. Vengeance is Vem's death effect on any surviving bugs (wiki, Wowhead, cmangos emulator). It is not simulated because this kill order never reaches it: Vem dies last. What phase 3 models is the separate Wowhead claim that Vem goes berserk when he is the last bug alive (`vemBerserk`, at the start of phase 3). That claim has a single source and cmangos has no such spell, so it could not be verified. Its strength is unknown: `enrageMultiplier` 1.4 is a placeholder, scaled so a 10,000 HP tank survives normal play and an idle healer still loses him fast. If the raid killed Vem first, Vengeance would land on Kri or Yauj; that order is not simulated. Vem's Knockdown on his tank (2 s stun every 15 to 20 s) comes from cmangos only and is not in the wiki or Wowhead text. A 15 minute hard enrage is in the research but the fight here is 3.5 minutes, so it is never reached.",
+ "sources": [
+  "docs/research/temple-of-ahnqiraj/bug-trio.md",
+  "https://warcraft.wiki.gg/wiki/Bug_Trio",
+  "https://www.wowhead.com/classic/guide/bug-trio-temple-of-ahnqiraj-strategy",
+  "https://www.wowhead.com/classic/spell=26580/fear",
+  "https://www.wowhead.com/classic/spell=25807/great-heal",
+  "https://www.wowhead.com/classic/spell=25812/toxic-volley",
+  "https://www.wowhead.com/classic/spell=25786/toxic-vapors",
+  "https://www.wowhead.com/classic/spell=18670/knock-away",
+  "https://www.wowhead.com/classic/spell=25790/vengeance",
+  "https://www.wowhead.com/classic/spell=26561/berserker-charge",
+  "https://www.warcrafttavern.com/wow-classic/guides/temple-of-ahnqiraj-aq40",
+  "https://us.millenium.gg/guide/7179.html?page=8",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/AQ40/BugFamily.lua",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/AQ40/ThreeBugs.lua"
+ ],
+ "arena": {
+  "name": "The Hive Chamber",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      46,
+      0
+     ],
+     [
+      45.3,
+      8
+     ],
+     [
+      43.2,
+      15.7
+     ],
+     [
+      39.8,
+      23
+     ],
+     [
+      35.2,
+      29.6
+     ],
+     [
+      29.6,
+      35.2
+     ],
+     [
+      23,
+      39.8
+     ],
+     [
+      15.7,
+      43.2
+     ],
+     [
+      8,
+      45.3
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -8,
+      45.3
+     ],
+     [
+      -15.7,
+      43.2
+     ],
+     [
+      -23,
+      39.8
+     ],
+     [
+      -29.6,
+      35.2
+     ],
+     [
+      -35.2,
+      29.6
+     ],
+     [
+      -39.8,
+      23
+     ],
+     [
+      -43.2,
+      15.7
+     ],
+     [
+      -45.3,
+      8
+     ],
+     [
+      -46,
+      0
+     ],
+     [
+      -45.3,
+      -8
+     ],
+     [
+      -43.2,
+      -15.7
+     ],
+     [
+      -39.8,
+      -23
+     ],
+     [
+      -35.2,
+      -29.6
+     ],
+     [
+      -29.6,
+      -35.2
+     ],
+     [
+      -23,
+      -39.8
+     ],
+     [
+      -15.7,
+      -43.2
+     ],
+     [
+      -8,
+      -45.3
+     ],
+     [
+      0,
+      -46
+     ],
+     [
+      8,
+      -45.3
+     ],
+     [
+      15.7,
+      -43.2
+     ],
+     [
+      23,
+      -39.8
+     ],
+     [
+      29.6,
+      -35.2
+     ],
+     [
+      35.2,
+      -29.6
+     ],
+     [
+      39.8,
+      -23
+     ],
+     [
+      43.2,
+      -15.7
+     ],
+     [
+      45.3,
+      -8
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -42
+     ],
+     [
+      9,
+      -42
+     ],
+     [
+      9,
+      -70
+     ],
+     [
+      -9,
+      -70
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      19.7,
+      -41.6
+     ],
+     [
+      29.2,
+      -35.5
+     ],
+     [
+      37,
+      -27.4
+     ],
+     [
+      42.5,
+      -17.6
+     ],
+     [
+      45.5,
+      -6.7
+     ],
+     [
+      45.8,
+      4.5
+     ],
+     [
+      43.3,
+      15.5
+     ],
+     [
+      38.2,
+      25.6
+     ],
+     [
+      30.9,
+      34.1
+     ],
+     [
+      21.7,
+      40.6
+     ],
+     [
+      11.2,
+      44.6
+     ],
+     [
+      0,
+      46
+     ],
+     [
+      -11.2,
+      44.6
+     ],
+     [
+      -21.7,
+      40.6
+     ],
+     [
+      -30.9,
+      34.1
+     ],
+     [
+      -38.2,
+      25.6
+     ],
+     [
+      -43.3,
+      15.5
+     ],
+     [
+      -45.8,
+      4.5
+     ],
+     [
+      -45.5,
+      -6.7
+     ],
+     [
+      -42.5,
+      -17.6
+     ],
+     [
+      -37,
+      -27.4
+     ],
+     [
+      -29.2,
+      -35.5
+     ],
+     [
+      -19.7,
+      -41.6
+     ],
+     [
+      -9,
+      -45.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -45.1
+     ],
+     [
+      -9,
+      -70
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -45.1
+     ],
+     [
+      9,
+      -70
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -64
+    ]
+   },
+   {
+    "text": "Lord Kri",
+    "at": [
+     -10,
+     2
+    ]
+   },
+   {
+    "text": "Princess Yauj",
+    "at": [
+     30,
+     4
+    ]
+   },
+   {
+    "text": "Vem",
+    "at": [
+     -2,
+     26
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -62,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": -10,
+   "y": 10,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -38,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": -10,
+   "y": 18,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": -10,
+   "y": 10,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Kri, facing north"
+  },
+  "tankKri": {
+   "x": -10,
+   "y": 18,
+   "tolerance": 4,
+   "label": "Tank Kri"
+  },
+  "bossKri": {
+   "x": -10,
+   "y": 10,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 60,
+   "label": "Kri"
+  },
+  "tankYauj": {
+   "x": 36,
+   "y": 14,
+   "tolerance": 4,
+   "label": "Tank Yauj"
+  },
+  "bossYauj": {
+   "x": 28,
+   "y": 14,
+   "heading": 0,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Yauj"
+  },
+  "tankVem": {
+   "x": -2,
+   "y": 40,
+   "tolerance": 4,
+   "label": "Tank Vem, back to the wall"
+  },
+  "bossVem": {
+   "x": -2,
+   "y": 32,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Vem, facing the wall"
+  },
+  "raidKri": {
+   "x": -2,
+   "y": -8,
+   "spread": 13,
+   "label": "Raid: on Kri"
+  },
+  "raidYauj": {
+   "x": 8,
+   "y": -2,
+   "spread": 13,
+   "label": "Raid: on Yauj"
+  },
+  "raidVem": {
+   "x": 2,
+   "y": 12,
+   "spread": 13,
+   "label": "Raid: on Vem"
+  },
+  "rangedKri": {
+   "x": -2,
+   "y": -10,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerKri": {
+   "x": 2,
+   "y": -6,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "rangedYauj": {
+   "x": 8,
+   "y": -4,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerYauj": {
+   "x": 12,
+   "y": 0,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "rangedVem": {
+   "x": 2,
+   "y": 10,
+   "tolerance": 8,
+   "label": "Ranged"
+  },
+  "healerVem": {
+   "x": 6,
+   "y": 14,
+   "tolerance": 8,
+   "label": "Healers"
+  },
+  "otVem": {
+   "x": -2,
+   "y": 38,
+   "tolerance": 7,
+   "label": "Off-tank: Vem in his alcove"
+  },
+  "vemSpawn": {
+   "x": -2,
+   "y": 28,
+   "label": "Vem"
+  },
+  "vemHold": {
+   "x": -2,
+   "y": 34,
+   "label": "Vem held"
+  },
+  "yaujHold": {
+   "x": 28,
+   "y": 14,
+   "label": "Yauj (not yet)"
+  },
+  "otBrood": {
+   "x": 26,
+   "y": 13,
+   "tolerance": 7,
+   "label": "Off-tank: catch the Brood"
+  },
+  "broodHold": {
+   "x": 24,
+   "y": 13,
+   "label": "Brood held"
+  },
+  "brood1": {
+   "x": 24,
+   "y": 8,
+   "label": "Brood"
+  },
+  "brood2": {
+   "x": 30,
+   "y": 10,
+   "label": "Brood"
+  },
+  "brood3": {
+   "x": 24,
+   "y": 20,
+   "label": "Brood"
+  },
+  "brood4": {
+   "x": 30,
+   "y": 18,
+   "label": "Brood"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 600,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 640,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 4,
+  "speed": 7,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 800,
+  "meleeInterval": 2,
+  "cones": {
+   "cleave": {
+    "angle": 120,
+    "range": 11,
+    "label": "Cleave",
+    "facing": "front",
+    "style": "cleave"
+   }
+  },
+  "facingCone": "cleave",
+  "enrageMultiplier": 1.4
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 450,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5,
+  "dangerBandDps": 0.7
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Follow the kill order: Kri first facing north, then Yauj, then Vem. Each one is a new target with an empty threat table, so Taunt the moment she or he arrives. Yauj's Fear wipes her threat: Taunt her back the moment it goes out.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Vem and Brood tank",
+   "short": "Off-tank",
+   "description": "Your job is Vem and then Yauj's Brood. Hold Vem in his alcove facing the wall with your back to it. When Yauj dies, catch the Brood before they reach the raid.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Stay behind whichever bug is the target. Kick Great Heal. When Kri dies, leave his cloud immediately. Do not hit the wrong bug.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Same target as the melee, from range. Kick Great Heal. Stay out of where Kri's cloud will land.",
+   "abilities": [
+    "attack",
+    "interrupt"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Toxic Volley is the fight. Cleanse every global, heal the tank through the hand-offs, and expect to be feared every twenty-odd seconds.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Cleanse poison",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "poison"
+   ],
+   "tip": "Cure Poison, Abolish Poison or Cleanse. Removes one Toxic Volley poison from the raid."
+  },
+  "interrupt": {
+   "kind": "interrupt",
+   "label": "Interrupt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 34,
+   "icon": "interrupt",
+   "tip": "Kick, Pummel, Shield Bash or Counterspell on Great Heal. Yauj is immune to Silence, so it has to be a real interrupt."
+  }
+ },
+ "actions": {
+  "cleave": {
+   "label": "Cleave",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "cleave",
+   "damage": 900,
+   "hitsMelee": false,
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Kri cleaves whoever stands in front of him. Only the tank belongs there."
+  },
+  "toxicVolley": {
+   "label": "Toxic Volley",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 450,
+   "tankDamage": 450,
+   "follow": [
+    {
+     "id": "toxicDot",
+     "delay": 0.1
+    },
+    {
+     "id": "toxicDot",
+     "delay": 0.2
+    },
+    {
+     "id": "toxicDot",
+     "delay": 0.3
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Instant, the whole room, and it stacks. Cleanse it off the raid."
+  },
+  "toxicDot": {
+   "label": "Toxic Volley poison",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.35,
+   "dispel": "poison",
+   "duration": 16,
+   "tickDamage": 75,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "Poison that stacks if it is left on you."
+  },
+  "yaujFear": {
+   "label": "Fear",
+   "kind": "fear",
+   "cast": 0,
+   "targets": "random",
+   "playerChance": 0.4,
+   "duration": 8,
+   "roles": "nontank",
+   "warn": true,
+   "cue": "roar",
+   "icon": "fear",
+   "requires": "grounded",
+   "follow": [
+    {
+     "id": "yaujWipe",
+     "delay": 0.05
+    }
+   ],
+   "tip": "Eight seconds, instant, the whole room. Tanks are assumed to have Fear Ward or Tremor Totem."
+  },
+  "yaujFearFar": {
+   "label": "Fear (from Yauj)",
+   "kind": "fear",
+   "cast": 0,
+   "targets": "random",
+   "playerChance": 0.4,
+   "duration": 8,
+   "roles": "nontank",
+   "warn": true,
+   "cue": "roar",
+   "icon": "fear",
+   "requires": "grounded",
+   "tip": "Yauj fears the room while you are on Kri. Tanks are assumed to have Fear Ward or Tremor Totem."
+  },
+  "yaujWipe": {
+   "label": "Yauj wipes her threat",
+   "kind": "threatWipe",
+   "cast": 0,
+   "toast": "Fear wiped her threat. Tank, Taunt her!",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Her threat table resets when she fears, even if the fear itself is warded."
+  },
+  "greatHeal": {
+   "label": "Great Heal (Yauj)",
+   "kind": "aoe",
+   "cast": 2,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "interruptible": true,
+   "offBoss": true,
+   "completedMetric": "healsLanded",
+   "warn": true,
+   "cue": "roar",
+   "icon": "heal",
+   "requires": "grounded",
+   "tip": "Two second cast on a bug about 13 seconds apart. Kick it. If it lands she heals for thousands."
+  },
+  "greatHealSelf": {
+   "label": "Great Heal",
+   "kind": "aoe",
+   "cast": 2,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 0,
+   "interruptible": true,
+   "completedMetric": "healsLanded",
+   "warn": true,
+   "cue": "roar",
+   "icon": "heal",
+   "requires": "grounded",
+   "tip": "Two second cast. Kick it before it heals her."
+  },
+  "kriCloud": {
+   "label": "Toxic Vapors",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "boss",
+   "radius": 8,
+   "warning": 1.2,
+   "active": 120,
+   "damage": 2000,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Kri dies and leaves a two minute cloud at 2,000 per second. Get out now and never walk back through it."
+  },
+  "yaujPickup": {
+   "label": "Yauj is next",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossYauj",
+   "toast": "Kri is dead. Yauj next: tank, take her.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Kri is down. Yauj's tank team takes her, the raid switches."
+  },
+  "vemPickup": {
+   "label": "Vem is next",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "bossVem",
+   "toast": "Yauj is dead. Vem next: tank, take him.",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Yauj is down and her Brood are loose. Vem is the last target."
+  },
+  "vemBerserk": {
+   "label": "Berserk",
+   "kind": "enrage",
+   "cast": 0,
+   "toast": "Vem is the last one left: he berserks!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "Vem goes berserk when he is the last bug alive. Tank and healers, this is the part that needs your big cooldowns."
+  },
+  "vemKnockdown": {
+   "label": "Knockdown",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 2,
+   "stun": 2,
+   "warn": false,
+   "cue": null,
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Vem knocks his tank down for two seconds."
+  },
+  "vemCharge": {
+   "label": "Berserker Charge",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 1.1,
+   "tickDamage": 2400,
+   "stun": 2,
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Vem charges someone he can see, knocks them down for two seconds and hits like a truck."
+  },
+  "knockAway": {
+   "label": "Knock Away",
+   "kind": "knockback",
+   "cast": 0,
+   "knockback": 8,
+   "knockbackRange": 10,
+   "damage": 900,
+   "threatCut": 0,
+   "warn": false,
+   "cue": "buffet",
+   "icon": "buffet",
+   "requires": "grounded",
+   "tip": "Vem knocks his tank back. Against the wall it does nothing."
+  },
+  "vemAdd": {
+   "label": "Vem",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "vemSpawn"
+   ],
+   "speed": 5,
+   "aggroRange": 16,
+   "lifetime": 148,
+   "heldLifetime": 148,
+   "pickup": "offtank",
+   "holdSpot": "vemHold",
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Vem is the off-tank's job until he is the last one left."
+  },
+  "yaujDummy": {
+   "label": "Princess Yauj (not yet)",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "yaujHold"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "aggroRange": 8,
+   "lifetime": 80,
+   "heldLifetime": 80,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "yaujHold",
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "Yauj waits in her alcove with her own tanks. She is not the target yet."
+  },
+  "yaujBrood": {
+   "label": "Yauj Brood",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "brood1",
+    "brood2",
+    "brood3",
+    "brood4"
+   ],
+   "speed": 6,
+   "aggroRange": 14,
+   "lifetime": 18,
+   "heldLifetime": 30,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "broodHold",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Her Brood swarms out when she dies. Off-tank grabs them, casters AoE them."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Kill Lord Kri",
+   "subtitle": "Yauj and Vem wait",
+   "hpFrom": 1,
+   "hpTo": 0.66,
+   "duration": 80,
+   "bossState": "grounded",
+   "raidSpot": "raidKri",
+   "spots": {
+    "tank": "tankKri",
+    "boss": "bossKri",
+    "ranged": "rangedKri",
+    "healer": "healerKri",
+    "offtank": "otVem"
+   },
+   "actions": [
+    {
+     "id": "cleave",
+     "first": 6,
+     "every": 8,
+     "jitter": 1
+    },
+    {
+     "id": "toxicVolley",
+     "first": 16,
+     "every": 22,
+     "jitter": 8
+    },
+    {
+     "id": "yaujFearFar",
+     "first": 14,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "greatHeal",
+     "first": 9,
+     "every": 13,
+     "jitter": 1
+    },
+    {
+     "id": "vemAdd",
+     "first": 1
+    },
+    {
+     "id": "yaujDummy",
+     "first": 0.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "kriPull",
+     "type": "bossAtSpot",
+     "spot": "bossKri",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Pull Kri to the west side, facing north",
+     "tip": "Keep his front off the raid and off the melee. Remember where he dies: you will be leaving that spot in a hurry."
+    },
+    {
+     "id": "kriSideRanged",
+     "type": "playerAtSpotBy",
+     "spot": "rangedKri",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stand clear of where Kri will die",
+     "tip": "Stack near the entrance. His cloud lands where he dies and you are not going to be there."
+    },
+    {
+     "id": "grabVem",
+     "type": "afterEvent",
+     "event": "vemAdd",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 8,
+     "role": "offtank",
+     "label": "Pick up Vem",
+     "tip": "Run him into his alcove, back against the wall, facing the wall. Nobody should be in his line of sight."
+    },
+    {
+     "id": "holdVem",
+     "type": "playerAtSpotBy",
+     "spot": "otVem",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Hold Vem in his alcove",
+     "tip": "Back to the wall so Knock Away does nothing. Do not walk him into the raid or Kri's cloud."
+    },
+    {
+     "id": "kriCleaveMelee",
+     "type": "continuous",
+     "metric": "playerInFront",
+     "role": "melee",
+     "label": "Stay out of Kri's front",
+     "tip": "Cleave and Thrash hit anyone in front of him. Stand behind him the whole time."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill Kri first, then Yauj, then Vem",
+     "tip": "Kri's poison is what kills the raid. He goes first, Yauj second, Vem last. Do not spread your damage onto the wrong bug."
+    },
+    {
+     "id": "wrongBug",
+     "type": "continuous",
+     "metric": "attacksOnAdds",
+     "role": "dps",
+     "label": "Stay on Kri",
+     "tip": "Yauj heals and fears the raid but she is not the target yet. Every hit on her is wasted until Kri is dead."
+    },
+    {
+     "id": "kicks",
+     "type": "continuous",
+     "metric": "healsLanded",
+     "role": "dps",
+     "label": "Yauj never finishes a Great Heal",
+     "tip": "Two second cast every thirteen seconds. Kick it, rotate with the other interrupts."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cleanse",
+     "type": "afterEvent",
+     "event": "toxicVolley",
+     "check": "noDispellable",
+     "within": 8,
+     "grace": 6,
+     "role": "healer",
+     "label": "Clear the Toxic Volley poison",
+     "tip": "It stacks if you leave it. Cleanse every global until the raid is clean."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Kri's Thrash spikes. Top up after every Cleave and every volley."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Over half before the next Fear. If you get feared you cannot save him."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Kill Princess Yauj",
+   "subtitle": "Move: Kri's cloud",
+   "hpFrom": 0.66,
+   "hpTo": 0.34,
+   "duration": 70,
+   "bossState": "grounded",
+   "raidSpot": "raidYauj",
+   "spots": {
+    "tank": "tankYauj",
+    "boss": "bossYauj",
+    "ranged": "rangedYauj",
+    "healer": "healerYauj",
+    "offtank": "otVem"
+   },
+   "actions": [
+    {
+     "id": "kriCloud",
+     "first": 0.1
+    },
+    {
+     "id": "yaujPickup",
+     "first": 0.5
+    },
+    {
+     "id": "yaujFear",
+     "first": 11,
+     "every": 24,
+     "jitter": 3
+    },
+    {
+     "id": "greatHealSelf",
+     "first": 8,
+     "every": 13,
+     "jitter": 1
+    }
+   ],
+   "expectations": [
+    {
+     "id": "yaujAt",
+     "type": "bossAtSpot",
+     "spot": "bossYauj",
+     "within": 12,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Yauj in her alcove",
+     "tip": "Far away from Vem so she cannot dispel or heal him."
+    },
+    {
+     "id": "yaujTaunt",
+     "type": "afterEvent",
+     "event": "yaujFear",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt Yauj the moment she fears",
+     "tip": "Fear wiped her table. Whoever taunts first keeps her in her alcove; if she runs she is on the raid."
+    },
+    {
+     "id": "kriCloudOut",
+     "type": "afterEvent",
+     "event": "kriCloud",
+     "check": "outsideHazard",
+     "within": 3,
+     "grace": 3,
+     "notBefore": 1.6,
+     "label": "Leave the cloud where Kri died",
+     "tip": "Two thousand a second, eight yards wide. If you are in it you have seconds. Everyone moves, now."
+    },
+    {
+     "id": "holdVem2",
+     "type": "playerAtSpotBy",
+     "spot": "otVem",
+     "grace": 3,
+     "role": "offtank",
+     "label": "Keep Vem in his alcove",
+     "tip": "Back to the wall, facing the wall. The raid is about to move across the room, so hold him where you are."
+    },
+    {
+     "id": "kicks2",
+     "type": "continuous",
+     "metric": "healsLanded",
+     "role": "dps",
+     "label": "She never finishes a Great Heal",
+     "tip": "Same deal on the target as off it: two seconds, kick it."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "New target, new tank spot. Keep him high through the hand-off."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Over half before the next Fear. If you get feared you cannot save him."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Kill Vem",
+   "subtitle": "Brood and Berserk",
+   "hpFrom": 0.34,
+   "hpTo": 0,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidVem",
+   "spots": {
+    "tank": "tankVem",
+    "boss": "bossVem",
+    "ranged": "rangedVem",
+    "healer": "healerVem",
+    "offtank": "otBrood"
+   },
+   "actions": [
+    {
+     "id": "vemPickup",
+     "first": 0.2
+    },
+    {
+     "id": "yaujBrood",
+     "first": 3.5
+    },
+    {
+     "id": "vemBerserk",
+     "first": 2
+    },
+    {
+     "id": "vemCharge",
+     "first": 8,
+     "every": 14,
+     "jitter": 3
+    },
+    {
+     "id": "knockAway",
+     "first": 12,
+     "every": 18,
+     "jitter": 3
+    },
+    {
+     "id": "vemKnockdown",
+     "first": 10,
+     "every": 18,
+     "jitter": 3
+    }
+   ],
+   "expectations": [
+    {
+     "id": "vemTaunt",
+     "type": "afterEvent",
+     "event": "vemPickup",
+     "check": "hasAggro",
+     "within": 8,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Take Vem the moment Yauj is down",
+     "tip": "Run over and Taunt. He comes with a full threat wipe and his Berserk is about to land."
+    },
+    {
+     "id": "vemWall",
+     "type": "bossAtSpot",
+     "spot": "bossVem",
+     "within": 14,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold Vem facing the wall",
+     "tip": "Back to the wall so Knock Away cannot move you. He is the kill target now, so the raid is in his sight and his charges will land."
+    },
+    {
+     "id": "broodGrab",
+     "type": "afterEvent",
+     "event": "yaujBrood",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Brood",
+     "tip": "They run for the raid. Catch them near the middle and hold them while the casters AoE them."
+    },
+    {
+     "id": "otBroodSpot",
+     "type": "playerAtSpotBy",
+     "spot": "otBrood",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Hold the Brood in the middle",
+     "tip": "Stay between them and the raid until they are dead."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill the Brood, then Vem",
+     "tip": "The Brood are on the raid. Clear them quickly, then everything into Vem."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "New target, new tank spot. Keep him high through the hand-off."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Over half before the next Fear. If you get feared you cannot save him."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ],
+   "phases": [
+    1
+   ]
+  },
+  "healsLanded": {
+   "label": "Great Heals that finished",
+   "unit": "count",
+   "penaltyPerUnit": 2.5,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Kick her heal the moment it starts."
+  },
+  "attacksOnAdds": {
+   "label": "Attacks on the wrong bug",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "phases": [
+    1
+   ],
+   "tip": "Yauj is not the target yet. Face Kri and stay on him."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ]
+ },
+ "cues": {
+  "notes": "Kick Great Heal on the bar; cleanse every poison; Taunt each new bug.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when the bug turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "kickHeal",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:greatHeal",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 1.5,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Kick Great Heal",
+    "tip": "Two second cast from Yauj. Kick it.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "kickHealSelf",
+    "ability": "interrupt",
+    "on": "event",
+    "event": "cast:greatHealSelf",
+    "offset": 0.3,
+    "early": 0.3,
+    "late": 1.5,
+    "role": "dps",
+    "short": "KICK",
+    "label": "Kick Great Heal",
+    "tip": "Yauj is the target now and she still heals. Kick it.",
+    "doneBy": "interrupted"
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Cleanse Toxic Volley poison every global until the raid is clean."
+   },
+   {
+    "id": "grabVemCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "vemAdd",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "VEM",
+    "label": "Pick up Vem",
+    "tip": "Run in and Taunt him.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "grabBroodCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "yaujBrood",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "BROOD",
+    "label": "Pick up the Brood",
+    "tip": "Catch them before they reach the raid.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "fearDrill",
+   "name": "Yauj Fear and the Taunt back",
+   "description": "Fear wipes her table every 14 s. Taunt her back and stay in melee.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "yaujFear",
+     "first": 5,
+     "every": 14
+    }
+   ]
+  },
+  {
+   "id": "kickDrill",
+   "name": "Kick the heal",
+   "description": "Great Heal every 9 s, Kick it inside the two-second cast.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "greatHeal",
+     "first": 3,
+     "every": 9
+    }
+   ]
+  },
+  {
+   "id": "cloudDrill",
+   "name": "Leave the cloud",
+   "description": "A cloud lands on the boss's spot every 16 s, just like Kri's death. Melee out, then back in.",
+   "roles": "melee",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "kriCloud",
+     "first": 4,
+     "every": 16
+    }
+   ]
+  },
+  {
+   "id": "broodDrill",
+   "name": "Catch the Brood",
+   "description": "Four Brood every 18 s. Grab them and hold them for the casters.",
+   "roles": "offtank",
+   "startPhase": 3,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "yaujBrood",
+     "first": 4,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "volleyDrill",
+   "name": "Toxic Volley",
+   "description": "Volleys come every 9 s, three poisons each. Cleanse every global and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "toxicVolley",
+     "first": 3,
+     "every": 9
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1908 @@
+{
+ "id": "viscidus",
+ "name": "Viscidus",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "temple-of-ahnqiraj",
+  "name": "Temple of Ahn'Qiraj",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/viscidus.md (Wowhead's 5,329,600 HP is 'Seasonal 40 Player', and he takes 50% reduced damage, so HP here is a clock). ESTIMATES: the room is a 40 yd round pool from prose; three freeze cycles (wiki and Tavern say 3 or 4) of 30 s poison, 15 s frozen and 20 s of globs, with HP stepping 100 to 94, 94 to 70, 70 to 64, 64 to 40, 40 to 34, 34 to 0 across the 195 s model. Melee 800 per 2 s (near the wiki's ~1,000 on a nature-geared tank) plus Volley and Poison Shock is ~635 per second: a 10,000 HP tank lives on passive healing (`healPerSecond` 700 for a ghost or player tank) and is lost inside 30 s if a player healer ignores him (140 per second). Freezing and shattering are the fight but only partly simulate: the real counters (170 to 200 frost hits to freeze, 75 to 100 melee hits to shatter within 15 s) cannot be expressed, because attacks do not count toward anything but the HP clock and no event fires on a hit count. The script runs the cycles on a clock: `frozenSolid` is a 15 s `transition` cast that keeps him still and mute (`cast` blocks melee and movement, and a cast boss is still attackable), and the shatter itself is the end of that phase. A failed shatter, and the slowing at 100 and 150 hits, do not exist. Everyone runs in and swings while he is frozen (a `playerAtSpotBy` for ranged and healers); only the frozen-phase position is checked, not who actually lands the hits. Melee wait outside Poison Shock through each poison phase, the approach the wiki says most guilds use (`skipActivity: 'melee'` keeps that from costing them uptime); the wiki's alternative of high-Nature-Resistance melee staying on him with frost oil is not modelled. The ghost raid's melee dots still flank him through the poison phases, because the engine always keeps them on a grounded boss. Frost Oil, frost wands, Wand of Biting Cold and Rank 1 Frostbolt are tips only. Globs: a shatter is a `submerged` phase (no boss, nothing to melee) with eight `killFirst` adds spawning around the room's edge and crawling to the reform point (`holdSpot`), 16 s `lifetime` standing for the raid's burn (real 16.5 s DBM rejoin timer; real HP per glob 24,416 Wowhead or 10-15k wiki; real count 1 to 20, here always 8 so HP steps are fixed instead of following the kills). Killing more globs does not change the next phase's HP; that is the biggest gap against the real fight, where the number you kill IS the fight's clock. Rejoin is `threatWipe` plus `teleportBossTo` the centre at each poison phase's start. The tank has to be at the reform point and pick him up (the wiki's three post-reform theories are not modelled beyond this). He cannot be taunted (the wiki and viscidus.md say so; no spell or log data was fetched, so that is unverified), so the Taunt button is relabelled Build threat and stands in for building threat fast as he reforms. Volley (1,300 direct every 10 s plus three 250-per-second poison debuffs for 10 s, standing in for 'cleanse every target'), Poison Shock (1,050 within 15 yd every 10 s), and Toxin (telegraphed `hazard` 750 per second, 9 s, one per poison phase; wiki's 30 to 40 s cadence would mostly miss a 30 s phase, so this is an estimate) are live only during the poison phases as the spell data says.",
+ "sources": [
+  "docs/research/temple-of-ahnqiraj/viscidus.md",
+  "https://warcraft.wiki.gg/wiki/Viscidus",
+  "https://www.wowhead.com/classic/npc=15299/viscidus",
+  "https://www.wowhead.com/classic/npc=15667/glob-of-viscidus",
+  "https://www.wowhead.com/classic/guide/viscidus-temple-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/temple-of-ahnqiraj-aq40",
+  "https://www.tentonhammer.com/guides/tentonhammer-s-guide-to-aq40-viscidus.amp",
+  "https://us.millenium.gg/guide/7179.html?page=9",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/AQ40/Viscidus.lua",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/AQ40/Viscidus.lua"
+ ],
+ "arena": {
+  "name": "Viscidus' Pool",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      40,
+      0
+     ],
+     [
+      39.4,
+      6.9
+     ],
+     [
+      37.6,
+      13.7
+     ],
+     [
+      34.6,
+      20
+     ],
+     [
+      30.6,
+      25.7
+     ],
+     [
+      25.7,
+      30.6
+     ],
+     [
+      20,
+      34.6
+     ],
+     [
+      13.7,
+      37.6
+     ],
+     [
+      6.9,
+      39.4
+     ],
+     [
+      0,
+      40
+     ],
+     [
+      -6.9,
+      39.4
+     ],
+     [
+      -13.7,
+      37.6
+     ],
+     [
+      -20,
+      34.6
+     ],
+     [
+      -25.7,
+      30.6
+     ],
+     [
+      -30.6,
+      25.7
+     ],
+     [
+      -34.6,
+      20
+     ],
+     [
+      -37.6,
+      13.7
+     ],
+     [
+      -39.4,
+      6.9
+     ],
+     [
+      -40,
+      0
+     ],
+     [
+      -39.4,
+      -6.9
+     ],
+     [
+      -37.6,
+      -13.7
+     ],
+     [
+      -34.6,
+      -20
+     ],
+     [
+      -30.6,
+      -25.7
+     ],
+     [
+      -25.7,
+      -30.6
+     ],
+     [
+      -20,
+      -34.6
+     ],
+     [
+      -13.7,
+      -37.6
+     ],
+     [
+      -6.9,
+      -39.4
+     ],
+     [
+      0,
+      -40
+     ],
+     [
+      6.9,
+      -39.4
+     ],
+     [
+      13.7,
+      -37.6
+     ],
+     [
+      20,
+      -34.6
+     ],
+     [
+      25.7,
+      -30.6
+     ],
+     [
+      30.6,
+      -25.7
+     ],
+     [
+      34.6,
+      -20
+     ],
+     [
+      37.6,
+      -13.7
+     ],
+     [
+      39.4,
+      -6.9
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -36
+     ],
+     [
+      9,
+      -36
+     ],
+     [
+      9,
+      -62
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -39
+     ],
+     [
+      18.1,
+      -35.7
+     ],
+     [
+      26.2,
+      -30.3
+     ],
+     [
+      32.7,
+      -23.1
+     ],
+     [
+      37.3,
+      -14.6
+     ],
+     [
+      39.7,
+      -5.2
+     ],
+     [
+      39.7,
+      4.5
+     ],
+     [
+      37.5,
+      14
+     ],
+     [
+      33,
+      22.6
+     ],
+     [
+      26.6,
+      29.8
+     ],
+     [
+      18.7,
+      35.4
+     ],
+     [
+      9.6,
+      38.8
+     ],
+     [
+      0,
+      40
+     ],
+     [
+      -9.6,
+      38.8
+     ],
+     [
+      -18.7,
+      35.4
+     ],
+     [
+      -26.6,
+      29.8
+     ],
+     [
+      -33,
+      22.6
+     ],
+     [
+      -37.5,
+      14
+     ],
+     [
+      -39.7,
+      4.5
+     ],
+     [
+      -39.7,
+      -5.2
+     ],
+     [
+      -37.3,
+      -14.6
+     ],
+     [
+      -32.7,
+      -23.1
+     ],
+     [
+      -26.2,
+      -30.3
+     ],
+     [
+      -18.1,
+      -35.7
+     ],
+     [
+      -9,
+      -39
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -39
+     ],
+     [
+      -9,
+      -62
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -39
+     ],
+     [
+      9,
+      -62
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -56
+    ]
+   },
+   {
+    "text": "Viscidus",
+    "at": [
+     0,
+     0
+    ]
+   },
+   {
+    "text": "Reform point",
+    "at": [
+     0,
+     11
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -56,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 2,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -33,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 11,
+   "tolerance": 4,
+   "label": "Tank, north of him"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 3,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Viscidus"
+  },
+  "tankReform": {
+   "x": 0,
+   "y": 11,
+   "tolerance": 4,
+   "label": "Tank: on the reform point"
+  },
+  "raidSpot": {
+   "x": 0,
+   "y": -27,
+   "spread": 9,
+   "label": "Raid: more than 15 yd from him"
+  },
+  "rangedSpot": {
+   "x": -2,
+   "y": -22,
+   "tolerance": 5,
+   "label": "Ranged: more than 15 yd from him"
+  },
+  "healerSpot": {
+   "x": 4,
+   "y": -22,
+   "tolerance": 5,
+   "label": "Healers"
+  },
+  "meleeWait": {
+   "x": 14,
+   "y": -20,
+   "tolerance": 5,
+   "label": "Melee: wait outside Poison Shock"
+  },
+  "frozenRanged": {
+   "x": -6,
+   "y": -4,
+   "tolerance": 8,
+   "label": "Run in and swing"
+  },
+  "frozenMelee": {
+   "x": 3,
+   "y": -4,
+   "tolerance": 7,
+   "label": "Melee him: every swing counts"
+  },
+  "frozenHealer": {
+   "x": 6,
+   "y": -6,
+   "tolerance": 8,
+   "label": "Healers close in"
+  },
+  "globRanged": {
+   "x": 0,
+   "y": -12,
+   "tolerance": 8,
+   "label": "Kill the globs as they crawl"
+  },
+  "globMelee": {
+   "x": 3,
+   "y": -2,
+   "tolerance": 8,
+   "label": "Meet the globs"
+  },
+  "reformCenter": {
+   "x": 0,
+   "y": 3,
+   "label": "Reform point"
+  },
+  "g1": {
+   "x": 34,
+   "y": 2,
+   "label": "Glob"
+  },
+  "g2": {
+   "x": 24,
+   "y": 24,
+   "label": "Glob"
+  },
+  "g3": {
+   "x": 2,
+   "y": 34,
+   "label": "Glob"
+  },
+  "g4": {
+   "x": -24,
+   "y": 24,
+   "label": "Glob"
+  },
+  "g5": {
+   "x": -34,
+   "y": 2,
+   "label": "Glob"
+  },
+  "g6": {
+   "x": -24,
+   "y": -22,
+   "label": "Glob"
+  },
+  "g7": {
+   "x": 2,
+   "y": -32,
+   "label": "Glob"
+  },
+  "g8": {
+   "x": 24,
+   "y": -22,
+   "label": "Glob"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 700,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 700,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "looseHint": "The boss is on the raid. Rebuild threat",
+  "radius": 5,
+  "speed": 6,
+  "turnRate": 260,
+  "meleeRange": 7,
+  "meleeDamage": 800,
+  "meleeInterval": 2,
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Hold him in the middle while the frost hits add up. He freezes, shatters, and every glob that survives makes him whole again: be on the reform point before he comes back and build threat the moment he does: he cannot be taunted.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Most raids keep melee out of Poison Shock until he freezes: wait outside its 15 yards through each poison phase and step out of Toxin. When he freezes, run in and hit him with everything: he shatters on number of swings. Then every glob you kill takes 5% off him for good.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Rank 1 Frostbolt or frost wand: only the number of hits matters. Stay out of Poison Shock (15 yards), step out of Toxin, run in and swing when he freezes, and kill globs on the way in.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Poison Bolt Volley every 10 seconds needs cleansing every global. Keep the tank up through the poison phase; the frozen windows are your only breathers.",
+   "abilities": [
+    "heal",
+    "dispel"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Build threat",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Viscidus cannot be taunted in the real fight. This button stands in for building threat fast as he reforms."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0.1
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  },
+  "dispel": {
+   "kind": "dispel",
+   "label": "Cleanse poison",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 30,
+   "icon": "dispel",
+   "threat": 10,
+   "dispels": [
+    "poison"
+   ],
+   "tip": "Abolish Poison, Cleanse or Poison Cleansing Totem. Removes one Poison Bolt Volley poison."
+  }
+ },
+ "actions": {
+  "volley": {
+   "label": "Poison Bolt Volley",
+   "kind": "aoe",
+   "cast": 0,
+   "damage": 1300,
+   "tankDamage": 1300,
+   "follow": [
+    {
+     "id": "volleyDot",
+     "delay": 0.1
+    },
+    {
+     "id": "volleyDot",
+     "delay": 0.2
+    },
+    {
+     "id": "volleyDot",
+     "delay": 0.3
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Hits everyone in the room, every ten seconds. Poison follows it. Cleanse it."
+  },
+  "volleyDot": {
+   "label": "Poison Bolt",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.35,
+   "roles": "healer",
+   "dispel": "poison",
+   "duration": 10,
+   "tickDamage": 250,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "grounded",
+   "tip": "A poison ticking 500 every two seconds. Cleanse it."
+  },
+  "poisonShock": {
+   "label": "Poison Shock",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 15,
+   "damage": 1050,
+   "tankDamage": 1050,
+   "playerMetric": "poisonShockHits",
+   "warn": false,
+   "cue": "buffet",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Fifteen yards around him, every ten seconds or so. Only the tank belongs inside it."
+  },
+  "toxin": {
+   "label": "Toxin",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "radius": 6,
+   "warning": 1.5,
+   "active": 9,
+   "damage": 750,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A poison cloud under a random player. Move out; it is bigger than it looks."
+  },
+  "frozenSolid": {
+   "label": "Frozen solid",
+   "kind": "transition",
+   "cast": 15,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "He is frozen for fifteen seconds. Everyone in the room swings."
+  },
+  "shatter": {
+   "label": "Viscidus explodes!",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "He shatters. Globs crawl back toward the middle: kill as many as you can before they reach it."
+  },
+  "glob": {
+   "label": "Globs of Viscidus",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "g1",
+    "g2",
+    "g3",
+    "g4",
+    "g5",
+    "g6",
+    "g7",
+    "g8"
+   ],
+   "playerFrom": [],
+   "speed": 2.5,
+   "aggroRange": 6,
+   "lifetime": 16,
+   "heldLifetime": 16,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "reformCenter",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Eight globs crawl to the middle. Each one that dies takes 5% off him."
+  },
+  "rejoin": {
+   "label": "Viscidus reforms",
+   "kind": "threatWipe",
+   "cast": 0,
+   "teleportBossTo": "reformCenter",
+   "toast": "He reforms: threat wiped. Tank, build threat now!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "What is left of him comes back together in the middle, with an empty threat table."
+  },
+  "emerge": {
+   "label": "Viscidus reforms",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "He comes back together."
+  },
+  "submerge": {
+   "label": "Shatter",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "whelps",
+   "requires": "any",
+   "tip": "He shatters into globs."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "First poison phase",
+   "subtitle": "Frost hits: freeze him",
+   "hpFrom": 1,
+   "hpTo": 0.94,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeWait"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "volley",
+     "first": 8.8,
+     "every": 10
+    },
+    {
+     "id": "poisonShock",
+     "first": 5,
+     "every": 10
+    },
+    {
+     "id": "toxin",
+     "first": 12,
+     "every": 40,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Hold him in the middle of the pool",
+     "tip": "He reforms in the middle after every shatter. Keep him near it, facing away from the raid."
+    },
+    {
+     "id": "rangedStand",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay out of Poison Shock",
+     "tip": "More than 15 yards from him the whole poison phase. Frost casters keep hitting him from there."
+    },
+    {
+     "id": "meleeWait",
+     "type": "playerAtSpotBy",
+     "spot": "meleeWait",
+     "grace": 4,
+     "role": "melee",
+     "label": "Wait outside Poison Shock",
+     "tip": "Most raids keep melee away from him until he freezes. Fifteen yards out, step out of Toxin, and be ready to run in."
+    },
+    {
+     "id": "healerStand",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 4,
+     "role": "healer",
+     "label": "Stay out of Poison Shock",
+     "tip": "More than 15 yards from him, and still inside 40 yards of the tank."
+    },
+    {
+     "id": "toxinDodge",
+     "type": "afterEvent",
+     "event": "toxin",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 2,
+     "notBefore": 1.6,
+     "role": "nontank",
+     "label": "Move out of Toxin",
+     "tip": "A cloud lands on someone. Step out and keep going: it is bigger than it looks and you will be slowed."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "ranged",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cleanse",
+     "type": "afterEvent",
+     "event": "volley",
+     "check": "noDispellable",
+     "within": 9,
+     "grace": 6,
+     "role": "healer",
+     "label": "Cleanse the Volley poison",
+     "tip": "Every Volley leaves a poison on the raid. Cleanse every global."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Viscidus is fast and his Volley goes on the tank as well. Heal early."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A tank below half with the next Volley coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Frozen solid",
+   "subtitle": "Everyone swings",
+   "hpFrom": 0.94,
+   "hpTo": 0.94,
+   "duration": 15,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "frozenRanged",
+    "melee": "frozenMelee",
+    "healer": "frozenHealer"
+   },
+   "actions": [
+    {
+     "id": "frozenSolid",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "frozenSpot",
+     "type": "playerAtSpotBy",
+     "spot": "frozenRanged",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Run in and swing while he is frozen",
+     "tip": "Everyone melees a frozen Viscidus. Fifteen seconds to land enough hits: fastest weapon you have."
+    },
+    {
+     "id": "frozenMeleeHits",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Every swing counts: do not stand idle",
+     "tip": "He shatters on hit count, not damage. Fast weapons and every swing."
+    },
+    {
+     "id": "frozenHold",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 15,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Keep him in place",
+     "tip": "He cannot act while he is frozen. Stay on him and swing with everyone."
+    },
+    {
+     "id": "frozenHealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "frozenHealer",
+     "grace": 3,
+     "role": "healer",
+     "label": "Run in with the raid",
+     "tip": "Everyone swings at a frozen Viscidus, healers too: he shatters on hit count. Nothing is hitting the tank for these seconds."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He is frozen: a breather before the shatter. Top the tank up now."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "First shatter",
+   "subtitle": "Kill as many as you can",
+   "hpFrom": 0.94,
+   "hpTo": 0.7,
+   "duration": 20,
+   "bossState": "submerged",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankReform",
+    "boss": "bossSpot",
+    "ranged": "globRanged",
+    "melee": "globMelee",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "shatter",
+     "first": 0.1
+    },
+    {
+     "id": "glob",
+     "first": 0.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "reformSpot",
+     "type": "playerAtSpotBy",
+     "spot": "tankReform",
+     "grace": 3,
+     "role": "tanks",
+     "label": "Be on the reform point before he comes back",
+     "tip": "Every glob that reaches the middle becomes part of him again. The tank waits there for what comes next."
+    },
+    {
+     "id": "globAway",
+     "type": "playerAtSpotBy",
+     "spot": "globRanged",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the globs, not in the middle",
+     "tip": "Kill them as they crawl in, on the way, not after they have stacked on the reform point."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill as many globs as you can",
+     "tip": "Every glob is 5% of his health. Kill more of them and the next cycle starts lower."
+    },
+    {
+     "id": "globUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "dps",
+     "label": "Keep swinging on the globs",
+     "tip": "There is no boss to wait for: every global goes into a glob."
+    },
+    {
+     "id": "globHealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Back out to your healing spot",
+     "tip": "Get out of the middle before he reforms: outside Poison Shock, and inside 40 yards of the tank on the reform point."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Nothing to heal for a moment. Be full when he comes back."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Second poison phase",
+   "subtitle": "Frost hits: freeze him",
+   "hpFrom": 0.7,
+   "hpTo": 0.64,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeWait"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "rejoin",
+     "first": 0.05
+    },
+    {
+     "id": "volley",
+     "first": 8.8,
+     "every": 10
+    },
+    {
+     "id": "poisonShock",
+     "first": 5,
+     "every": 10
+    },
+    {
+     "id": "toxin",
+     "first": 12,
+     "every": 40,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "reformTaunt",
+     "type": "afterEvent",
+     "event": "rejoin",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Take him the moment he reforms",
+     "tip": "Be on the reform point and hit him as he comes back together. He cannot be taunted, so healers hold back for a few seconds."
+    },
+    {
+     "id": "rangedStand",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay out of Poison Shock",
+     "tip": "More than 15 yards from him the whole poison phase. Frost casters keep hitting him from there."
+    },
+    {
+     "id": "meleeWait",
+     "type": "playerAtSpotBy",
+     "spot": "meleeWait",
+     "grace": 4,
+     "role": "melee",
+     "label": "Wait outside Poison Shock",
+     "tip": "Most raids keep melee away from him until he freezes. Fifteen yards out, step out of Toxin, and be ready to run in."
+    },
+    {
+     "id": "healerStand",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 4,
+     "role": "healer",
+     "label": "Stay out of Poison Shock",
+     "tip": "More than 15 yards from him, and still inside 40 yards of the tank."
+    },
+    {
+     "id": "toxinDodge",
+     "type": "afterEvent",
+     "event": "toxin",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 2,
+     "notBefore": 1.6,
+     "role": "nontank",
+     "label": "Move out of Toxin",
+     "tip": "A cloud lands on someone. Step out and keep going: it is bigger than it looks and you will be slowed."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "ranged",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cleanse",
+     "type": "afterEvent",
+     "event": "volley",
+     "check": "noDispellable",
+     "within": 9,
+     "grace": 6,
+     "role": "healer",
+     "label": "Cleanse the Volley poison",
+     "tip": "Every Volley leaves a poison on the raid. Cleanse every global."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "After he reforms he may charge someone: the tank needs a full health bar."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A tank below half with the next Volley coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Frozen solid again",
+   "subtitle": "Everyone swings",
+   "hpFrom": 0.64,
+   "hpTo": 0.64,
+   "duration": 15,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "frozenRanged",
+    "melee": "frozenMelee",
+    "healer": "frozenHealer"
+   },
+   "actions": [
+    {
+     "id": "frozenSolid",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "frozenSpot",
+     "type": "playerAtSpotBy",
+     "spot": "frozenRanged",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Run in and swing while he is frozen",
+     "tip": "Everyone melees a frozen Viscidus. Fifteen seconds to land enough hits: fastest weapon you have."
+    },
+    {
+     "id": "frozenMeleeHits",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Every swing counts: do not stand idle",
+     "tip": "He shatters on hit count, not damage. Fast weapons and every swing."
+    },
+    {
+     "id": "frozenHold",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 15,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Keep him in place",
+     "tip": "He cannot act while he is frozen. Stay on him and swing with everyone."
+    },
+    {
+     "id": "frozenHealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "frozenHealer",
+     "grace": 3,
+     "role": "healer",
+     "label": "Run in with the raid",
+     "tip": "Everyone swings at a frozen Viscidus, healers too: he shatters on hit count. Nothing is hitting the tank for these seconds."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He is frozen: a breather before the shatter. Top the tank up now."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Second shatter",
+   "subtitle": "Kill as many as you can",
+   "hpFrom": 0.64,
+   "hpTo": 0.4,
+   "duration": 20,
+   "bossState": "submerged",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankReform",
+    "boss": "bossSpot",
+    "ranged": "globRanged",
+    "melee": "globMelee",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "shatter",
+     "first": 0.1
+    },
+    {
+     "id": "glob",
+     "first": 0.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "reformSpot",
+     "type": "playerAtSpotBy",
+     "spot": "tankReform",
+     "grace": 3,
+     "role": "tanks",
+     "label": "Be on the reform point before he comes back",
+     "tip": "Every glob that reaches the middle becomes part of him again. The tank waits there for what comes next."
+    },
+    {
+     "id": "globAway",
+     "type": "playerAtSpotBy",
+     "spot": "globRanged",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the globs, not in the middle",
+     "tip": "Kill them as they crawl in, on the way, not after they have stacked on the reform point."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill as many globs as you can",
+     "tip": "Every glob is 5% of his health. Kill more of them and the next cycle starts lower."
+    },
+    {
+     "id": "globUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "dps",
+     "label": "Keep swinging on the globs",
+     "tip": "There is no boss to wait for: every global goes into a glob."
+    },
+    {
+     "id": "globHealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Back out to your healing spot",
+     "tip": "Get out of the middle before he reforms: outside Poison Shock, and inside 40 yards of the tank on the reform point."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Nothing to heal for a moment. Be full when he comes back."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Last poison phase",
+   "subtitle": "Frost hits: freeze him",
+   "hpFrom": 0.4,
+   "hpTo": 0.34,
+   "duration": 30,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "melee": "meleeWait"
+   },
+   "skipActivity": "melee",
+   "actions": [
+    {
+     "id": "rejoin",
+     "first": 0.05
+    },
+    {
+     "id": "volley",
+     "first": 8.8,
+     "every": 10
+    },
+    {
+     "id": "poisonShock",
+     "first": 5,
+     "every": 10
+    },
+    {
+     "id": "toxin",
+     "first": 12,
+     "every": 40,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "reformTaunt",
+     "type": "afterEvent",
+     "event": "rejoin",
+     "check": "hasAggro",
+     "within": 6,
+     "grace": 5,
+     "role": "tanks",
+     "label": "Take him the moment he reforms",
+     "tip": "Be on the reform point and hit him as he comes back together. He cannot be taunted, so healers hold back for a few seconds."
+    },
+    {
+     "id": "rangedStand",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay out of Poison Shock",
+     "tip": "More than 15 yards from him the whole poison phase. Frost casters keep hitting him from there."
+    },
+    {
+     "id": "meleeWait",
+     "type": "playerAtSpotBy",
+     "spot": "meleeWait",
+     "grace": 4,
+     "role": "melee",
+     "label": "Wait outside Poison Shock",
+     "tip": "Most raids keep melee away from him until he freezes. Fifteen yards out, step out of Toxin, and be ready to run in."
+    },
+    {
+     "id": "healerStand",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 4,
+     "role": "healer",
+     "label": "Stay out of Poison Shock",
+     "tip": "More than 15 yards from him, and still inside 40 yards of the tank."
+    },
+    {
+     "id": "toxinDodge",
+     "type": "afterEvent",
+     "event": "toxin",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 2,
+     "notBefore": 1.6,
+     "role": "nontank",
+     "label": "Move out of Toxin",
+     "tip": "A cloud lands on someone. Step out and keep going: it is bigger than it looks and you will be slowed."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "ranged",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "cleanse",
+     "type": "afterEvent",
+     "event": "volley",
+     "check": "noDispellable",
+     "within": 9,
+     "grace": 6,
+     "role": "healer",
+     "label": "Cleanse the Volley poison",
+     "tip": "Every Volley leaves a poison on the raid. Cleanse every global."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "After he reforms he may charge someone: the tank needs a full health bar."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "A tank below half with the next Volley coming is a dead tank."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Frozen for the last time",
+   "subtitle": "Everyone swings",
+   "hpFrom": 0.34,
+   "hpTo": 0.34,
+   "duration": 15,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "frozenRanged",
+    "melee": "frozenMelee",
+    "healer": "frozenHealer"
+   },
+   "actions": [
+    {
+     "id": "frozenSolid",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "frozenSpot",
+     "type": "playerAtSpotBy",
+     "spot": "frozenRanged",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Run in and swing while he is frozen",
+     "tip": "Everyone melees a frozen Viscidus. Fifteen seconds to land enough hits: fastest weapon you have."
+    },
+    {
+     "id": "frozenMeleeHits",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "melee",
+     "label": "Every swing counts: do not stand idle",
+     "tip": "He shatters on hit count, not damage. Fast weapons and every swing."
+    },
+    {
+     "id": "frozenHold",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 15,
+     "grace": 6,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Keep him in place",
+     "tip": "He cannot act while he is frozen. Stay on him and swing with everyone."
+    },
+    {
+     "id": "frozenHealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "frozenHealer",
+     "grace": 3,
+     "role": "healer",
+     "label": "Run in with the raid",
+     "tip": "Everyone swings at a frozen Viscidus, healers too: he shatters on hit count. Nothing is hitting the tank for these seconds."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "He is frozen: a breather before the shatter. Top the tank up now."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Final shatter",
+   "subtitle": "Finish him: kill every glob",
+   "hpFrom": 0.34,
+   "hpTo": 0,
+   "duration": 20,
+   "bossState": "submerged",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankReform",
+    "boss": "bossSpot",
+    "ranged": "globRanged",
+    "melee": "globMelee",
+    "healer": "healerSpot"
+   },
+   "actions": [
+    {
+     "id": "shatter",
+     "first": 0.1
+    },
+    {
+     "id": "glob",
+     "first": 0.5
+    }
+   ],
+   "expectations": [
+    {
+     "id": "reformSpot",
+     "type": "playerAtSpotBy",
+     "spot": "tankReform",
+     "grace": 3,
+     "role": "tanks",
+     "label": "Stand on the reform point",
+     "tip": "Every glob that reaches the middle becomes part of him again. The tank waits there for what comes next."
+    },
+    {
+     "id": "globAway",
+     "type": "playerAtSpotBy",
+     "spot": "globRanged",
+     "grace": 3,
+     "role": "ranged",
+     "label": "Stay on the globs, not in the middle",
+     "tip": "Kill them as they crawl in, on the way, not after they have stacked on the reform point."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Kill as many globs as you can",
+     "tip": "Every glob you kill is 5% gone for good, and any left alive reform him. Kill them all."
+    },
+    {
+     "id": "globUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "dps",
+     "label": "Keep swinging on the globs",
+     "tip": "There is no boss to wait for: every global goes into a glob."
+    },
+    {
+     "id": "globHealerSpot",
+     "type": "playerAtSpotBy",
+     "spot": "healerSpot",
+     "grace": 3,
+     "role": "healer",
+     "label": "Back out to your healing spot",
+     "tip": "Get out of the middle before he reforms: outside Poison Shock, and inside 40 yards of the tank on the reform point."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Nothing to heal for a moment. Be full when he comes back."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.15,
+   "severe": 12,
+   "roles": "dps",
+   "phases": [
+    2,
+    3,
+    5,
+    6,
+    8,
+    9
+   ]
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "debuffSeconds": {
+   "label": "Seconds with a dispellable debuff up",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "Dispel the moment it lands."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "poisonShockHits": {
+   "label": "Poison Shocks you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 2.5,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Fifteen yards from his edge. Melee wait outside it until he freezes."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.55
+ },
+ "cues": {
+  "notes": "Cleanse Volley, build threat when he reforms, heal when the tank drops.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Build threat when Viscidus turns on the raid",
+    "tip": "He cannot be taunted. The moment he turns, press this and hit him: every second he is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "dispelIt",
+    "ability": "dispel",
+    "on": "event",
+    "event": "debuffApplied",
+    "offset": 0,
+    "early": 0,
+    "late": 6,
+    "role": "healer",
+    "short": "DISPEL",
+    "label": "Dispel it",
+    "tip": "Cleanse Volley poison every global until the raid is clean."
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "reformDrill",
+   "name": "Reforming",
+   "description": "He reforms every 12 s with an empty threat table. Build threat the moment he appears.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "rejoin",
+     "first": 4,
+     "every": 12
+    }
+   ]
+  },
+  {
+   "id": "toxinDrill",
+   "name": "Toxin footwork",
+   "description": "A cloud under someone every 8 s. Step out and keep attacking.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 28,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "toxin",
+     "first": 3,
+     "every": 8
+    },
+    {
+     "id": "volley",
+     "first": 6,
+     "every": 10
+    }
+   ]
+  },
+  {
+   "id": "globDrill",
+   "name": "Kill the globs",
+   "description": "A glob wave. Kill as many as you can before they reach the middle.",
+   "roles": "dps",
+   "startPhase": 3,
+   "duration": 18,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "glob",
+     "first": 1
+    }
+   ]
+  },
+  {
+   "id": "volleyDrill",
+   "name": "Cleanse the Volley",
+   "description": "Volley every 8 s, three poisons each. Cleanse every global and keep the tank up.",
+   "roles": "healer",
+   "startPhase": 1,
+   "duration": 28,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "volley",
+     "first": 2,
+     "every": 8
+    },
+    {
+     "id": "poisonShock",
+     "first": 5,
+     "every": 10
+    }
+   ]
+  }
+ ]
+}

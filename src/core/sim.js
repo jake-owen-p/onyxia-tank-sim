@@ -902,7 +902,7 @@ export function createSim(script, options = {}) {
     if (ideal.reason === 'dodgeZone' || fb.inHazard) return set(fb.inHazard ? 'Get out of it' : 'Move away from the hazard', 'fix');
     if (tankRole) {
       if (fb.facingWrong) return set('Turn the boss away from the raid', 'fix');
-      if (bossLive() && b.target !== 'player') return set('Taunt. The boss is on the raid', 'fix');
+      if (bossLive() && b.target !== 'player') return set(script.boss.looseHint || 'Taunt. The boss is on the raid', 'fix');
       if (ideal.reason === 'whelps') return set('Pick up the adds', 'fix');
       if (soon) { state.nextExpected = expectation; return; }
       if (ideal.reason === 'approach') return set('Taunt the boss and pull it into position', 'hint');

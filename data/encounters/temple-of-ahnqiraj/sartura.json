@@ -1,0 +1,1524 @@
+{
+ "id": "sartura",
+ "name": "Battleguard Sartura",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "temple-of-ahnqiraj",
+  "name": "Temple of Ahn'Qiraj",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/sartura.md. Wowhead's 4,330,300 HP is a 'Seasonal 40 Player' value, so HP here is a clock over 240 s (real kills run 5 to 8 min, the 10 min Berserk is not reached and not simulated). ESTIMATES: the hall is a 44 yd round room from the guides' prose. Whirlwind comes every 23 s (jitter 2) cast to cast, from cmangos (emulator, `urand(20, 25)`), with a 15 s aura (BigWigs bar). No boss mod carries a timer, so that interval rests on the emulator alone and could not be verified. Melee who correctly walk out of 15 of every 23 s have well under half uptime, which is why `grading.fullActivity` is 0.2 (the 5 s she spends on the raid after each reset takes more of the rest). Aggro resets are caused by Whirlwind (Warcraft Tavern, TenTonHammer, cmangos): each spin ends with an `aggroReset` 0.2 s after its Sundering Cleave. Phase 1 also keeps an `aggroReset` on its own 23 s clock, standing in for the three guards' spins, offset about 12 s from hers so one Taunt's 10 s cooldown can answer both. Wowhead says resets are 'random' and the wiki 'occasional'; neither gives a cause. Melee 850 per 2 s is ~425 per second: a 10,000 HP tank lives on passive healing (`healPerSecond` 1400 for a player tank, 800 for the ghost, both placeholders raised for a 23 s Whirlwind cycle that lands five ticks plus her swings) and is lost quickly if a player healer ignores him (140 per second of healing while a player heals). Whirlwind: the real aura is a 15 s spin hitting everyone within 10 yd each second, and she walks while spinning. Here it is five 3 s casts chained with `follow`, 1,500 per cast within 10 yd, `moveOut: melee` so the marker walks melee out and `playerMetric` scores each tick they eat. The casts are `offBoss` so she keeps walking through the spin, as the real one does not root her, and the tank can bring her back; the engine then also keeps her swinging, which the real spin replaces, so a ghost tank's tick is only 450 and her swing carries most of the damage. A single cast cannot be stunned as the spell text says. 1,500 sits between the 680 weapon base and the guides' 2,500 to 3,500. Sundering Cleave (the real -240 armor debuff stacking to 3 per Wowhead's guide) is a frontal `cone` after each Whirlwind plus a `debuff` on the tank with `damageTakenMult` 1.1 per stack, 30 s, `maxStacks: 3`. The aggro-reset charge is a `targetSwitch` (engine's 'she goes for someone else'), 5 s in the real fight; the tank must Taunt. Stuns (Kidney Shot, Hammer of Justice) have no button here: resets end on the ghost tank's taunt or the player's. Royal Guards: three `killFirst` adds, 40, 62 and 88 s of burn (`lifetime`; real HP 707,400 each, Wowhead 'Seasonal 40'). The player off-tank holds the west guard (`playerFrom`), a ghost group the other two. Guards' own Whirlwind (real: walks through the raid, 1,000 to 1,500 on tanks, up to 3,000 on cloth) is a telegraphed `hazard` under two random raiders (`playerChance` 0.3 each) placed twice per 60 s; the guards do not actually walk or spin at their spots. Guards' Knockback and Summon Player are not modelled. Enrage at 25% (BigWigs and cmangos; the wiki and Wowhead's guide say 20%, DBM pre-warns at 35%, so it is not settled) is `enrage` with a 120 s duration, +60% attack speed and +50 damage folded into `enrageMultiplier` 1.5 on melee. No poison or magic, so the healer has only the tank; DPS interrupts and stuns do not exist here, so melee react by moving, not pressing.",
+ "sources": [
+  "docs/research/temple-of-ahnqiraj/sartura.md",
+  "https://warcraft.wiki.gg/wiki/Battleguard_Sartura",
+  "https://www.wowhead.com/classic/npc=15516/battleguard-sartura",
+  "https://www.wowhead.com/classic/npc=15984/sarturas-royal-guard",
+  "https://www.wowhead.com/classic/spell=26083/whirlwind",
+  "https://www.wowhead.com/classic/spell=26084/whirlwind",
+  "https://www.wowhead.com/classic/spell=25174/sundering-cleave",
+  "https://www.wowhead.com/classic/spell=8269/frenzy",
+  "https://www.wowhead.com/classic/spell=26027/knockback",
+  "https://www.wowhead.com/classic/guide/battleguard-sartura-temple-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/temple-of-ahnqiraj-aq40",
+  "https://www.tentonhammer.com/guides/tentonhammer-s-guide-to-aq40-sartura.amp",
+  "https://us.millenium.gg/guide/7179.html?page=3",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/AQ40/Sartura.lua",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/AQ40/Sartura.lua"
+ ],
+ "arena": {
+  "name": "The Battleguard's Hall",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      44,
+      0
+     ],
+     [
+      43.3,
+      7.6
+     ],
+     [
+      41.3,
+      15
+     ],
+     [
+      38.1,
+      22
+     ],
+     [
+      33.7,
+      28.3
+     ],
+     [
+      28.3,
+      33.7
+     ],
+     [
+      22,
+      38.1
+     ],
+     [
+      15,
+      41.3
+     ],
+     [
+      7.6,
+      43.3
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -7.6,
+      43.3
+     ],
+     [
+      -15,
+      41.3
+     ],
+     [
+      -22,
+      38.1
+     ],
+     [
+      -28.3,
+      33.7
+     ],
+     [
+      -33.7,
+      28.3
+     ],
+     [
+      -38.1,
+      22
+     ],
+     [
+      -41.3,
+      15
+     ],
+     [
+      -43.3,
+      7.6
+     ],
+     [
+      -44,
+      0
+     ],
+     [
+      -43.3,
+      -7.6
+     ],
+     [
+      -41.3,
+      -15
+     ],
+     [
+      -38.1,
+      -22
+     ],
+     [
+      -33.7,
+      -28.3
+     ],
+     [
+      -28.3,
+      -33.7
+     ],
+     [
+      -22,
+      -38.1
+     ],
+     [
+      -15,
+      -41.3
+     ],
+     [
+      -7.6,
+      -43.3
+     ],
+     [
+      0,
+      -44
+     ],
+     [
+      7.6,
+      -43.3
+     ],
+     [
+      15,
+      -41.3
+     ],
+     [
+      22,
+      -38.1
+     ],
+     [
+      28.3,
+      -33.7
+     ],
+     [
+      33.7,
+      -28.3
+     ],
+     [
+      38.1,
+      -22
+     ],
+     [
+      41.3,
+      -15
+     ],
+     [
+      43.3,
+      -7.6
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -9,
+      -40
+     ],
+     [
+      9,
+      -40
+     ],
+     [
+      9,
+      -68
+     ],
+     [
+      -9,
+      -68
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      19.2,
+      -39.6
+     ],
+     [
+      28.2,
+      -33.8
+     ],
+     [
+      35.5,
+      -26
+     ],
+     [
+      40.8,
+      -16.6
+     ],
+     [
+      43.6,
+      -6.2
+     ],
+     [
+      43.8,
+      4.5
+     ],
+     [
+      41.4,
+      15
+     ],
+     [
+      36.5,
+      24.6
+     ],
+     [
+      29.5,
+      32.7
+     ],
+     [
+      20.7,
+      38.8
+     ],
+     [
+      10.7,
+      42.7
+     ],
+     [
+      0,
+      44
+     ],
+     [
+      -10.7,
+      42.7
+     ],
+     [
+      -20.7,
+      38.8
+     ],
+     [
+      -29.5,
+      32.7
+     ],
+     [
+      -36.5,
+      24.6
+     ],
+     [
+      -41.4,
+      15
+     ],
+     [
+      -43.8,
+      4.5
+     ],
+     [
+      -43.6,
+      -6.2
+     ],
+     [
+      -40.8,
+      -16.6
+     ],
+     [
+      -35.5,
+      -26
+     ],
+     [
+      -28.2,
+      -33.8
+     ],
+     [
+      -19.2,
+      -39.6
+     ],
+     [
+      -9,
+      -43.1
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -9,
+      -43.1
+     ],
+     [
+      -9,
+      -68
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      9,
+      -43.1
+     ],
+     [
+      9,
+      -68
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -62
+    ]
+   },
+   {
+    "text": "Sartura",
+    "at": [
+     0,
+     24
+    ]
+   },
+   {
+    "text": "Tunnel to Fankriss (do not pull toward it)",
+    "at": [
+     36,
+     -18
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -62,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 24,
+   "heading": 270
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -36,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 34,
+   "tolerance": 4,
+   "label": "Tank, back to the wall"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 26,
+   "heading": 90,
+   "tolerance": 7,
+   "headingTolerance": 70,
+   "label": "Sartura"
+  },
+  "raidCenter": {
+   "x": 0,
+   "y": 4,
+   "spread": 13,
+   "label": "Raid"
+  },
+  "rangedSpot": {
+   "x": 0,
+   "y": 4,
+   "tolerance": 8,
+   "label": "Ranged: middle of the room"
+  },
+  "healerSpot": {
+   "x": 4,
+   "y": 2,
+   "tolerance": 8,
+   "label": "Healers: middle of the room"
+  },
+  "guardA": {
+   "x": -28,
+   "y": 4,
+   "label": "Royal Guard, west"
+  },
+  "guardB": {
+   "x": 28,
+   "y": 4,
+   "label": "Royal Guard, east"
+  },
+  "guardC": {
+   "x": -24,
+   "y": 20,
+   "label": "Royal Guard, north-west"
+  },
+  "guardAHold": {
+   "x": -28,
+   "y": 4,
+   "label": "West guard held"
+  },
+  "guardBHold": {
+   "x": 28,
+   "y": 4,
+   "label": "East guard held"
+  },
+  "guardCHold": {
+   "x": -24,
+   "y": 20,
+   "label": "North-west guard held"
+  },
+  "otGuard": {
+   "x": -34,
+   "y": 6,
+   "tolerance": 7,
+   "label": "Off-tank: west guard, back to the wall"
+  },
+  "ringSpot": {
+   "x": 9,
+   "y": 22,
+   "tolerance": 7,
+   "label": "Off-tank: ring around her"
+  }
+ },
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 1400,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 800,
+  "healPerSecondWithPlayerHealer": 140,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 10,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 9,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 3.5,
+  "speed": 7.5,
+  "turnRate": 300,
+  "meleeRange": 6,
+  "meleeDamage": 850,
+  "meleeInterval": 2,
+  "cones": {
+   "cleave": {
+    "angle": 120,
+    "range": 10,
+    "label": "Sundering Cleave",
+    "facing": "front",
+    "style": "cleave"
+   }
+  },
+  "facingCone": "cleave",
+  "enrageMultiplier": 1.5
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "Pull her to the back wall facing north and stay there. Every Whirlwind tick hits you, and when a spin ends her threat table is empty and she runs at the raid: Taunt the moment she turns.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Guard tank",
+   "short": "Off-tank",
+   "description": "You hold the west Royal Guard. Pick it up as the fight starts, keep your back to the wall. When your guard is dead, move in and stand by Sartura so the taunt ring has you.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Kill the guards first. Then walk out of every Whirlwind when the bar starts and come back when it stops.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 5
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stay in the middle, away from the guards and from Sartura. Kill the guards first. Guards can spin through you: step out of any ring under your feet.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 30
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Only the tank matters here. Every Whirlwind tick lands on Sartura's tank, and at 25% she enrages. Stay ahead of it.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 16,
+   "icon": "taunt",
+   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank."
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 40,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+  }
+ },
+ "actions": {
+  "whirlwind": {
+   "label": "Whirlwind",
+   "kind": "aoe",
+   "cast": 3,
+   "offBoss": true,
+   "radius": 10,
+   "damage": 1500,
+   "tankDamage": 450,
+   "moveOut": "melee",
+   "playerMetric": "whirlwindHits",
+   "follow": [
+    {
+     "id": "whirlwind2",
+     "delay": 0
+    }
+   ],
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Whirlwind hits everyone within 10 yards. Melee, walk out as the bar starts and come back when it ends. Tanks stay and take it."
+  },
+  "whirlwind2": {
+   "label": "Whirlwind",
+   "kind": "aoe",
+   "cast": 3,
+   "offBoss": true,
+   "radius": 10,
+   "damage": 1500,
+   "tankDamage": 450,
+   "moveOut": "melee",
+   "playerMetric": "whirlwindHits",
+   "follow": [
+    {
+     "id": "whirlwind3",
+     "delay": 0
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Whirlwind continues. Stay out."
+  },
+  "whirlwind3": {
+   "label": "Whirlwind",
+   "kind": "aoe",
+   "cast": 3,
+   "offBoss": true,
+   "radius": 10,
+   "damage": 1500,
+   "tankDamage": 450,
+   "moveOut": "melee",
+   "playerMetric": "whirlwindHits",
+   "follow": [
+    {
+     "id": "whirlwind4",
+     "delay": 0
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Whirlwind continues. Stay out."
+  },
+  "whirlwind4": {
+   "label": "Whirlwind",
+   "kind": "aoe",
+   "cast": 3,
+   "offBoss": true,
+   "radius": 10,
+   "damage": 1500,
+   "tankDamage": 450,
+   "moveOut": "melee",
+   "playerMetric": "whirlwindHits",
+   "follow": [
+    {
+     "id": "whirlwind5",
+     "delay": 0
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Whirlwind continues. Stay out."
+  },
+  "whirlwind5": {
+   "label": "Whirlwind",
+   "kind": "aoe",
+   "cast": 3,
+   "offBoss": true,
+   "radius": 10,
+   "damage": 1500,
+   "tankDamage": 450,
+   "moveOut": "melee",
+   "playerMetric": "whirlwindHits",
+   "follow": [
+    {
+     "id": "sunderingCleave",
+     "delay": 0.1
+    },
+    {
+     "id": "aggroReset",
+     "delay": 0.2
+    }
+   ],
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "hidden": true,
+   "tip": "Whirlwind continues. Stay out."
+  },
+  "sunderingCleave": {
+   "label": "Sundering Cleave",
+   "kind": "cone",
+   "cast": 0,
+   "cone": "cleave",
+   "damage": 900,
+   "hitsMelee": false,
+   "follow": [
+    {
+     "id": "sunderArmor",
+     "delay": 0
+    }
+   ],
+   "warn": false,
+   "cue": "cleave",
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Right after every Whirlwind. It shreds the tank's armor."
+  },
+  "sunderArmor": {
+   "label": "Sundering Cleave armor",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "tank",
+   "dispel": "none",
+   "duration": 30,
+   "damageTakenMult": 1.1,
+   "maxStacks": 3,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "cleave",
+   "requires": "grounded",
+   "tip": "Armor gone for 30 seconds, stacking to three."
+  },
+  "aggroReset": {
+   "label": "Aggro reset",
+   "kind": "targetSwitch",
+   "cast": 0,
+   "duration": 5,
+   "toast": "She dropped her table: Taunt her!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "A Whirlwind just ended: her table is empty and she runs at a random raider for 5 seconds. Taunt immediately."
+  },
+  "guardSpin": {
+   "label": "Royal Guard: Whirlwind",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 2,
+   "playerChance": 0.3,
+   "roles": "nontank",
+   "radius": 9,
+   "warning": 1.8,
+   "active": 4,
+   "damage": 1400,
+   "tick": true,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A guard spins toward you. Step out of the ring."
+  },
+  "enrage20": {
+   "label": "Enrage",
+   "kind": "enrage",
+   "cast": 0,
+   "duration": 120,
+   "toast": "Enrage at 25%!",
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "At 25% she enrages. Tank and healers spend everything now."
+  },
+  "guardA": {
+   "label": "Royal Guard",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardA"
+   ],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 40,
+   "heldLifetime": 50,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "guardAHold",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The west guard is the off-tank's. Kill it first."
+  },
+  "guardB": {
+   "label": "Royal Guard",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardB"
+   ],
+   "playerFrom": [],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 62,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "guardBHold",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Another guard tank holds this one. Kill order is guards, then her."
+  },
+  "guardC": {
+   "label": "Royal Guard",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "guardC"
+   ],
+   "playerFrom": [],
+   "speed": 7,
+   "aggroRange": 14,
+   "lifetime": 88,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "guardCHold",
+   "warn": false,
+   "cue": null,
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Another guard tank holds this one. Kill order is guards, then her."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Guards first",
+   "subtitle": "Three Royal Guards, then her",
+   "hpFrom": 1,
+   "hpTo": 0.82,
+   "duration": 110,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otGuard"
+   },
+   "actions": [
+    {
+     "id": "guardA",
+     "first": 2
+    },
+    {
+     "id": "guardB",
+     "first": 3
+    },
+    {
+     "id": "guardC",
+     "first": 4
+    },
+    {
+     "id": "whirlwind",
+     "first": 14,
+     "every": 23,
+     "jitter": 2
+    },
+    {
+     "id": "aggroReset",
+     "first": 41,
+     "every": 23,
+     "jitter": 1
+    },
+    {
+     "id": "guardSpin",
+     "first": 34,
+     "every": 60,
+     "jitter": 2
+    },
+    {
+     "id": "guardSpin",
+     "first": 48,
+     "every": 60,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "pull",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 10,
+     "from": "engage",
+     "role": "tanks",
+     "label": "Drag her to the back wall",
+     "tip": "Pull her north, turn her to face the wall, and stand with your back against it."
+    },
+    {
+     "id": "resetTaunt",
+     "type": "afterEvent",
+     "event": "aggroReset",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt her back on every aggro reset",
+     "tip": "She drops her table and charges a random raider. Taunt the moment she turns or she chews through the ranged."
+    },
+    {
+     "id": "wwOut",
+     "type": "continuous",
+     "metric": "whirlwindHits",
+     "role": "melee",
+     "label": "Melee out of every Whirlwind",
+     "tip": "Walk out when the bar appears and come back when it stops. If you are still in melee at the end of a spin you have taken 1,500 three to five times."
+    },
+    {
+     "id": "grabGuard",
+     "type": "afterEvent",
+     "event": "guardA",
+     "check": "whelpsPicked",
+     "within": 10,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the west guard",
+     "tip": "It runs for the raid the moment it spawns. Be on it before it gets there."
+    },
+    {
+     "id": "guardWall",
+     "type": "playerAtSpotBy",
+     "spot": "otGuard",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Hold the guard at the west wall",
+     "tip": "Back to the wall so its Knockback does not throw you around."
+    },
+    {
+     "id": "guardSpinDodge",
+     "type": "afterEvent",
+     "event": "guardSpin",
+     "check": "outsideHazard",
+     "within": 2.5,
+     "grace": 2,
+     "notBefore": 1.6,
+     "role": "nontank",
+     "label": "Step out of a guard's spin",
+     "tip": "A ring means a guard is spinning through you. Step out before it starts."
+    },
+    {
+     "id": "rangedMid",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay in the middle of the room",
+     "tip": "Away from the walls where the guards are and away from her."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Guards first, then her",
+     "tip": "All three guards die before anyone touches Sartura. Attacks on her now are wasted."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Sartura's tank takes melee and every Whirlwind tick. Heal early."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Armor is shredded after each Cleave. Be ahead of the next Whirlwind."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Sartura alone",
+   "subtitle": "The taunt ring",
+   "hpFrom": 0.82,
+   "hpTo": 0.25,
+   "duration": 90,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ringSpot"
+   },
+   "actions": [
+    {
+     "id": "whirlwind",
+     "first": 8,
+     "every": 23,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "spot2",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Keep her on the back wall",
+     "tip": "The ring of tanks is around her at the wall."
+    },
+    {
+     "id": "resetTaunt",
+     "type": "afterEvent",
+     "event": "aggroReset",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt her back on every aggro reset",
+     "tip": "She drops her table and charges a random raider. Taunt the moment she turns or she chews through the ranged."
+    },
+    {
+     "id": "wwOut",
+     "type": "continuous",
+     "metric": "whirlwindHits",
+     "role": "melee",
+     "label": "Melee out of every Whirlwind",
+     "tip": "Walk out when the bar appears and come back when it stops. If you are still in melee at the end of a spin you have taken 1,500 three to five times."
+    },
+    {
+     "id": "ringSpot",
+     "type": "playerAtSpotBy",
+     "spot": "ringSpot",
+     "grace": 5,
+     "role": "offtank",
+     "label": "Get into the taunt ring",
+     "tip": "With your guard dead, join the ring around her so someone has Taunt on every reset."
+    },
+    {
+     "id": "rangedMid2",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay in the middle of the room",
+     "tip": "When she charges a raider the tank needs her to run the shortest way back to the wall."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Sartura's tank takes melee and every Whirlwind tick. Heal early."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Armor is shredded after each Cleave. Be ahead of the next Whirlwind."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Enrage at 25%",
+   "subtitle": "Last push",
+   "hpFrom": 0.25,
+   "hpTo": 0,
+   "duration": 40,
+   "bossState": "grounded",
+   "raidSpot": "raidCenter",
+   "spots": {
+    "tank": "tankSpot",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "ringSpot"
+   },
+   "actions": [
+    {
+     "id": "enrage20",
+     "first": 0.5
+    },
+    {
+     "id": "whirlwind",
+     "first": 12,
+     "every": 23,
+     "jitter": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "spot3",
+     "type": "bossAtSpot",
+     "spot": "bossSpot",
+     "within": 20,
+     "grace": 8,
+     "from": "phaseStart",
+     "role": "tanks",
+     "label": "Hold her through the Enrage",
+     "tip": "She has +60% attack speed now. Stay on the wall, use every defensive cooldown."
+    },
+    {
+     "id": "resetTaunt",
+     "type": "afterEvent",
+     "event": "aggroReset",
+     "check": "hasAggro",
+     "within": 4,
+     "grace": 4,
+     "role": "tanks",
+     "label": "Taunt her back on every aggro reset",
+     "tip": "She drops her table and charges a random raider. Taunt the moment she turns or she chews through the ranged."
+    },
+    {
+     "id": "wwOut",
+     "type": "continuous",
+     "metric": "whirlwindHits",
+     "role": "melee",
+     "label": "Melee out of every Whirlwind",
+     "tip": "Walk out when the bar appears and come back when it stops. If you are still in melee at the end of a spin you have taken 1,500 three to five times."
+    },
+    {
+     "id": "ringSpot3",
+     "type": "playerAtSpotBy",
+     "spot": "ringSpot",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Stay in the taunt ring",
+     "tip": "She is at her most dangerous now. Taunt rotations matter more, not less."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Enrage at 25%. Pre-heal him and spend every cooldown you have."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Armor is shredded after each Cleave. Be ahead of the next Whirlwind."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 25,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 4,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.2,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you."
+  },
+  "bossFacingRaid": {
+   "label": "Facing the raid",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 4,
+   "roles": "tanks"
+  },
+  "playerInFront": {
+   "label": "Standing in the front",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 3,
+   "roles": "melee",
+   "bossStates": [
+    "grounded"
+   ]
+  },
+  "whirlwindHits": {
+   "label": "Whirlwind ticks you stood in",
+   "unit": "count",
+   "penaltyPerUnit": 2.5,
+   "severe": 3,
+   "roles": "melee",
+   "tip": "Melee leaves the spin. Walk out when the bar starts and come back when it stops."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.2
+ },
+ "cues": {
+  "notes": "Taunt her back on every reset; heal through Whirlwind; off-tank grabs the guard.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "tauntLost",
+    "ability": "taunt",
+    "on": "event",
+    "event": "threatLost",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "tanks",
+    "short": "ON RAID",
+    "label": "Taunt when Sartura turns on the raid",
+    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+   },
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "TANK LOW",
+    "label": "Heal the tank when they drop low",
+    "tip": "Under half with a spike coming is where tanks die. Heal now."
+   },
+   {
+    "id": "grabGuardCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "guardA",
+    "offset": 2,
+    "early": 2,
+    "late": 9,
+    "role": "offtank",
+    "short": "GUARD",
+    "label": "Pick up the west guard",
+    "tip": "Run to it, stand on it, or Taunt it.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "resetDrill",
+   "name": "Aggro resets",
+   "description": "She drops her table and turns on the raid every 12 s. Taunt her back and get her onto the wall.",
+   "roles": "tanks",
+   "startPhase": 2,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "aggroReset",
+     "first": 4,
+     "every": 12,
+     "jitter": 2
+    }
+   ]
+  },
+  {
+   "id": "whirlDrill",
+   "name": "Walk out of Whirlwind",
+   "description": "Whirlwind every 23 s. Walk out when the bar starts, come back when it stops.",
+   "roles": "melee",
+   "startPhase": 2,
+   "duration": 75,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "whirlwind",
+     "first": 4,
+     "every": 23
+    }
+   ]
+  },
+  {
+   "id": "guardDrill",
+   "name": "Guards spinning through",
+   "description": "A guard spin lands under someone every 9 s. Step out and keep hitting.",
+   "roles": "ranged",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "guardSpin",
+     "first": 3,
+     "every": 9,
+     "jitter": 1
+    }
+   ]
+  },
+  {
+   "id": "grabDrill",
+   "name": "Pick up the guard",
+   "description": "A guard spawns every 18 s. Get on it before it reaches the raid.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "guardA",
+     "first": 3,
+     "every": 18
+    }
+   ]
+  },
+  {
+   "id": "spikeDrill",
+   "name": "Heal through the spin",
+   "description": "Enraged, Whirlwind every 23 s, and each spin ends with her table empty. Stay ahead of the tank.",
+   "roles": "healer",
+   "startPhase": 3,
+   "duration": 38,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "enrage20",
+     "first": 1
+    },
+    {
+     "id": "whirlwind",
+     "first": 3,
+     "every": 23
+    }
+   ]
+  }
+ ]
+}

@@ -676,11 +676,16 @@ function drawTimeline(ctx, view, script, settings, pal, u, w, h, y, th, narrow) 
     const ex = nowX + Math.max(0, up.in) * pxPerSec;
     const color = up.warn ? actionColor(pal, up.id) : pal.textDim;
     drawIcon(ctx, up.icon, ex, y + th * 0.5, iconSize, color, color);
-    if (up.warn && ex - lastLabelX > u * 3.2) {
+    if (up.warn) {
+      // Only label an event if its text clears the one before it.
       font(ctx, pal, u * 0.46, 700);
-      ctx.fillStyle = color;
-      text(ctx, up.label.toUpperCase(), ex, y + th * 0.86, 'center');
-      lastLabelX = ex;
+      const label = up.label.toUpperCase();
+      const halfW = ((ctx.measureText ? ctx.measureText(label).width : 0) || label.length * u * 0.3) / 2;
+      if (ex - halfW > lastLabelX + u * 0.4) {
+        ctx.fillStyle = color;
+        text(ctx, label, ex, y + th * 0.86, 'center');
+        lastLabelX = ex + halfW;
+      }
     }
   }
   ctx.restore();

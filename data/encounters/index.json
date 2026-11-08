@@ -267,7 +267,62 @@
       "id": "temple-of-ahnqiraj",
       "name": "Temple of Ahn'Qiraj",
       "size": 40,
-      "bosses": []
+      "bosses": [
+        {
+          "id": "skeram",
+          "name": "The Prophet Skeram",
+          "file": "skeram.json",
+          "status": "ready"
+        },
+        {
+          "id": "bug-trio",
+          "name": "Bug Trio",
+          "file": "bug-trio.json",
+          "status": "ready"
+        },
+        {
+          "id": "sartura",
+          "name": "Battleguard Sartura",
+          "file": "sartura.json",
+          "status": "ready"
+        },
+        {
+          "id": "fankriss",
+          "name": "Fankriss the Unyielding",
+          "file": "fankriss.json",
+          "status": "ready"
+        },
+        {
+          "id": "viscidus",
+          "name": "Viscidus",
+          "file": "viscidus.json",
+          "status": "ready"
+        },
+        {
+          "id": "huhuran",
+          "name": "Princess Huhuran",
+          "file": "huhuran.json",
+          "status": "ready"
+        },
+        {
+          "id": "twin-emperors",
+          "name": "Twin Emperors",
+          "file": "twin-emperors.json",
+          "status": "ready"
+        },
+        {
+          "id": "ouro",
+          "name": "Ouro",
+          "file": "ouro.json",
+          "status": "ready"
+        },
+        {
+          "id": "cthun",
+          "name": "C'Thun",
+          "file": "cthun.json",
+          "status": "ready"
+        }
+      ]
     },
     {
       "id": "naxxramas",

@@ -1,0 +1,2827 @@
+{
+ "id": "cthun",
+ "name": "C'Thun",
+ "version": "1.1.0",
+ "raidInfo": {
+  "id": "temple-of-ahnqiraj",
+  "name": "Temple of Ahn'Qiraj",
+  "size": 40
+ },
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/cthun.md. HP is a clock over 425 s, with Eye HP and C'Thun HP sharing one bar (real pools 4,996,500 and 6,328,900, both 'Seasonal 40 Player'): Phase 1 is 180 s (real kills are 3 to 5 min) and Phase 2 is two carapace cycles (first surface 60 s, stomach 25 s, Weakened 45 s, second surface 45 s, stomach 25 s, Weakened 45 s; a typical raid needs 2 or 3 Weakened). ESTIMATES: the room is a 50 yd circle, spawn spots and the tentacle ring are placed from prose. The 10,000 HP tank model does not really apply: C'Thun has no melee and no tank in Phase 1, so the ghost tank's health is a stand-in for the raid's healing demand: `eyeBeamRaid` (1,500 every 3 s on the ghost) is scaled so passive healing (`healPerSecond` 600) holds it and a player healer doing nothing loses it inside 30 s (150 per second). Eye Beam is a `carried` `hazard` with `stayPut` (`radius` 9.5, `placement: random`, 2 s warning, every 3 s from 9 s in, so the ghost raid has finished walking to its formation) that lands on a random raider, a third of the time you (`playerChance` 0.33). The raid holds a real hexagonal formation (`raidSpot.spacing` 10) and raiders step aside for the player, so the right play is to pre-spread and stand still, as every guide says; `chainedBeams` counts each detonation with another raider inside. Radius 9.5 rather than the real 10 so a raider exactly on the next lattice cell is not counted. `raid.melee` is 1 so nobody stands on the formation's centre cell, which is under the Eye; the real melee ring is the rest of the lattice. Real chain range is 10 yd and the real Eye Beam doubles or multiplies by 1.5 per jump; the engine has no chain, so the penalty is the metric. Beams stop for Dark Glare via `conditional: debuff:beamWindow`, a debuff whose window is the gap between sweeps. Dark Glare: the research-accurate timer (first at 48 s, every 86 s, 40 s long) on nine `lane` hazards stepping 20 degrees every 4.4 s, the first sweep from south around the east side and the second mirrored around the west, starting 10 yd out at the Eye's edge (the wiki says clockwise or counterclockwise; the real start direction follows the Eye's target, which the engine cannot express; Dark Glare's beam width, spell 26029, could not be verified, so the 12 yd lanes are unconfirmed) (`placement: lanes`, 12 yd wide, 2 s telegraph, 2.4 s active so one lane burns at a time, lethal 12,000, standing in for the real 43,750 to 56,250). ENGINE GAP: a real rotating `cone` cannot be built because the `cone` kind resolves instantly around the boss's current heading and the marker cannot dodge it, and a heading that sweeps on a timer has no field. Stepped lanes give the same footwork and scoring (`deepBreath`, `outsideLane`) but a `lane` is a rectangle, not a wedge. Tentacles are adds with fixed spawn spots, not 'under a random player' as in the real fight. Claw Tentacles: four `killable` (non-`killFirst`) adds spawning at known corners; the Offtank picks up the two on the west side by proximity (the research has tanks take the Claws that spawn near them) and ghosts handle the east pair, and a separate `hazard` (`groundRupture`, 1,350) marks 'under a random player' for the knockback the real Claw brings. Claws never Hamstring or melee; only one Offtank role plays. Eye Tentacles: 8 in a ring on BW/DBM timers (45 s P1, then one wave per Phase 2 surface), `killFirst`, `lifetime` 12, a placeholder for how fast the raid burns them; Mind Flay cannot be tied to the tentacles' being alive (`adds` cannot act), so it is a separate `debuff` on the raid at spawn. Giant Claw and Giant Eye Tentacles: `adds`; the giant claw must be picked up by a tank; the giant eye is `killFirst`; Thrash, Ground Tremor and the Giant Eye's Eye Beam are simplified to the same carried-bomb Eye Beam, with `conditional: debuff:gEyeUp`. Digestive Acid is a stacking `debuff` (`tickDamage` 35 per stack, 12 stacks) during the stomach phase. `whelpsOnRaid` is informational here: the engine also counts tentacles a ghost group holds, and the formation puts a raider near every spawn. The stomach is `bossState: submerged` for 25 s: melee, ranged and healers walk to two Flesh Tentacle islands in the middle of the same room and kill them (`killFirst`, 18 s `lifetime`), and tanks leave at once and wait on the surface, as Wowhead and Warcraft Tavern say (they are off the acid's `roles` for the same reason); no one is Devoured one by one, no acid pool exit exists, and the 'leave by 10 stacks' rule is shown by a rising acid debuff and the phase timer. Real Devour (one player every ~10 s) and the Stomach team's exit are not modelled, so a healer or ranged role playing C'Thun practises the surface and the kills but not being eaten. Weakened: the 45 s window has no spawns and is the only time the ghost raid is meant to hit C'Thun. The Carapace is a `bossOnly` `shield` (`carapace`, `carapace2`, 99% reduction in the real fight) that runs for each surface phase: tentacles are still hit and the DPS target while it holds, and any attack on C'Thun meanwhile counts as `attacksIntoShield`. HP still moves by phase, so the reduction is a scored behaviour and not real damage. Tentacle HP gaps stand as `cthun.md` lists them ('Seasonal 40 Player' values).",
+ "sources": [
+  "docs/research/temple-of-ahnqiraj/cthun.md",
+  "https://warcraft.wiki.gg/wiki/C'Thun_(tactics)",
+  "https://warcraft.wiki.gg/wiki/C%27Thun",
+  "https://www.wowhead.com/classic/npc=15727/cthun",
+  "https://www.wowhead.com/classic/npc=15589/eye-of-cthun",
+  "https://www.wowhead.com/classic/spell=26139/ground-rupture",
+  "https://www.wowhead.com/classic/spell=26141/hamstring",
+  "https://www.wowhead.com/classic/guide/cthun-temple-of-ahnqiraj-strategy",
+  "https://www.warcrafttavern.com/wow-classic/guides/temple-of-ahnqiraj-aq40",
+  "https://www.tentonhammer.com/guides/tentonhammer-s-guide-to-aq40-cthun",
+  "https://us.millenium.gg/guide/7179.html?page=7",
+  "https://raw.githubusercontent.com/BigWigsMods/BigWigs_Classic/master/AQ40/Cthun.lua",
+  "https://raw.githubusercontent.com/DeadlyBossMods/DBM-Vanilla/master/DBM-Raids-Vanilla/AQ40/CThun.lua"
+ ],
+ "arena": {
+  "name": "C'Thun's Chamber",
+  "wallHeight": 10,
+  "floor": [
+   {
+    "id": "clearing",
+    "poly": [
+     [
+      50,
+      0
+     ],
+     [
+      49.2,
+      8.7
+     ],
+     [
+      47,
+      17.1
+     ],
+     [
+      43.3,
+      25
+     ],
+     [
+      38.3,
+      32.1
+     ],
+     [
+      32.1,
+      38.3
+     ],
+     [
+      25,
+      43.3
+     ],
+     [
+      17.1,
+      47
+     ],
+     [
+      8.7,
+      49.2
+     ],
+     [
+      0,
+      50
+     ],
+     [
+      -8.7,
+      49.2
+     ],
+     [
+      -17.1,
+      47
+     ],
+     [
+      -25,
+      43.3
+     ],
+     [
+      -32.1,
+      38.3
+     ],
+     [
+      -38.3,
+      32.1
+     ],
+     [
+      -43.3,
+      25
+     ],
+     [
+      -47,
+      17.1
+     ],
+     [
+      -49.2,
+      8.7
+     ],
+     [
+      -50,
+      0
+     ],
+     [
+      -49.2,
+      -8.7
+     ],
+     [
+      -47,
+      -17.1
+     ],
+     [
+      -43.3,
+      -25
+     ],
+     [
+      -38.3,
+      -32.1
+     ],
+     [
+      -32.1,
+      -38.3
+     ],
+     [
+      -25,
+      -43.3
+     ],
+     [
+      -17.1,
+      -47
+     ],
+     [
+      -8.7,
+      -49.2
+     ],
+     [
+      0,
+      -50
+     ],
+     [
+      8.7,
+      -49.2
+     ],
+     [
+      17.1,
+      -47
+     ],
+     [
+      25,
+      -43.3
+     ],
+     [
+      32.1,
+      -38.3
+     ],
+     [
+      38.3,
+      -32.1
+     ],
+     [
+      43.3,
+      -25
+     ],
+     [
+      47,
+      -17.1
+     ],
+     [
+      49.2,
+      -8.7
+     ]
+    ]
+   },
+   {
+    "id": "entrance",
+    "poly": [
+     [
+      -10,
+      -46
+     ],
+     [
+      10,
+      -46
+     ],
+     [
+      10,
+      -72
+     ],
+     [
+      -10,
+      -72
+     ]
+    ]
+   }
+  ],
+  "walls": [
+   {
+    "id": "clearingWall",
+    "points": [
+     [
+      10,
+      -49
+     ],
+     [
+      21.6,
+      -45.1
+     ],
+     [
+      31.9,
+      -38.5
+     ],
+     [
+      40.3,
+      -29.6
+     ],
+     [
+      46.3,
+      -19
+     ],
+     [
+      49.5,
+      -7.2
+     ],
+     [
+      49.7,
+      5
+     ],
+     [
+      47,
+      16.9
+     ],
+     [
+      41.5,
+      27.8
+     ],
+     [
+      33.5,
+      37.1
+     ],
+     [
+      23.5,
+      44.1
+     ],
+     [
+      12.1,
+      48.5
+     ],
+     [
+      0,
+      50
+     ],
+     [
+      -12.1,
+      48.5
+     ],
+     [
+      -23.5,
+      44.1
+     ],
+     [
+      -33.5,
+      37.1
+     ],
+     [
+      -41.5,
+      27.8
+     ],
+     [
+      -47,
+      16.9
+     ],
+     [
+      -49.7,
+      5
+     ],
+     [
+      -49.5,
+      -7.2
+     ],
+     [
+      -46.3,
+      -19
+     ],
+     [
+      -40.3,
+      -29.6
+     ],
+     [
+      -31.9,
+      -38.5
+     ],
+     [
+      -21.6,
+      -45.1
+     ],
+     [
+      -10,
+      -49
+     ]
+    ]
+   },
+   {
+    "id": "entranceWest",
+    "points": [
+     [
+      -10,
+      -49
+     ],
+     [
+      -10,
+      -72
+     ]
+    ]
+   },
+   {
+    "id": "entranceEast",
+    "points": [
+     [
+      10,
+      -49
+     ],
+     [
+      10,
+      -72
+     ]
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Entrance",
+    "at": [
+     0,
+     -66
+    ]
+   },
+   {
+    "text": "The Eye",
+    "at": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "positions": {
+  "playerStart": {
+   "x": 0,
+   "y": -66,
+   "heading": 90
+  },
+  "bossStart": {
+   "x": 0,
+   "y": 0,
+   "heading": 90
+  },
+  "raidWait": {
+   "x": 0,
+   "y": -44,
+   "spread": 8
+  },
+  "tankSpot": {
+   "x": 0,
+   "y": 17,
+   "tolerance": 4,
+   "label": "Tank"
+  },
+  "bossSpot": {
+   "x": 0,
+   "y": 0,
+   "heading": 90,
+   "tolerance": 10,
+   "headingTolerance": 180,
+   "label": "The Eye"
+  },
+  "tankRing": {
+   "x": 0,
+   "y": 17,
+   "tolerance": 6,
+   "label": "Tank: your spot"
+  },
+  "gClawTank": {
+   "x": 0,
+   "y": 30,
+   "tolerance": 7,
+   "label": "Tank: catch the Giant Claw"
+  },
+  "raidSpot": {
+   "x": 0,
+   "y": 0,
+   "spread": 40,
+   "spacing": 10,
+   "label": "Raid: spread, ten yards apart"
+  },
+  "rangedSpot": {
+   "x": -8,
+   "y": -24,
+   "tolerance": 7,
+   "label": "Ranged: your spot"
+  },
+  "rangedSurface": {
+   "x": -12,
+   "y": 8,
+   "tolerance": 7,
+   "label": "Ranged: in reach of the Giant Claw"
+  },
+  "healerSpot": {
+   "x": 9,
+   "y": -22,
+   "tolerance": 7,
+   "label": "Healers: your spot"
+  },
+  "otRing": {
+   "x": -22,
+   "y": -6,
+   "tolerance": 8,
+   "label": "Off-tank: Claw duty"
+  },
+  "meleeRing": {
+   "x": -5,
+   "y": -13,
+   "tolerance": 6,
+   "label": "Melee: your spot on the ring"
+  },
+  "stomachSpot": {
+   "x": 0,
+   "y": -14,
+   "tolerance": 8,
+   "label": "Stomach: the Flesh Tentacles"
+  },
+  "clawA": {
+   "x": 20,
+   "y": 10,
+   "label": "Claw Tentacle"
+  },
+  "clawB": {
+   "x": -20,
+   "y": 10,
+   "label": "Claw Tentacle"
+  },
+  "clawC": {
+   "x": 20,
+   "y": -14,
+   "label": "Claw Tentacle"
+  },
+  "clawD": {
+   "x": -20,
+   "y": -14,
+   "label": "Claw Tentacle"
+  },
+  "ring0": {
+   "x": 40,
+   "y": 0,
+   "label": "Eye Tentacle"
+  },
+  "ring1": {
+   "x": 28.3,
+   "y": 28.3,
+   "label": "Eye Tentacle"
+  },
+  "ring2": {
+   "x": 0,
+   "y": 40,
+   "label": "Eye Tentacle"
+  },
+  "ring3": {
+   "x": -28.3,
+   "y": 28.3,
+   "label": "Eye Tentacle"
+  },
+  "ring4": {
+   "x": -40,
+   "y": 0,
+   "label": "Eye Tentacle"
+  },
+  "ring5": {
+   "x": -28.3,
+   "y": -28.3,
+   "label": "Eye Tentacle"
+  },
+  "ring6": {
+   "x": 0,
+   "y": -40,
+   "label": "Eye Tentacle"
+  },
+  "ring7": {
+   "x": 28.3,
+   "y": -28.3,
+   "label": "Eye Tentacle"
+  },
+  "gClawSpawn": {
+   "x": 0,
+   "y": 24,
+   "label": "Giant Claw"
+  },
+  "gEyeSpawn": {
+   "x": -26,
+   "y": 4,
+   "label": "Giant Eye"
+  },
+  "fleshA": {
+   "x": -8,
+   "y": -14,
+   "label": "Flesh Tentacle"
+  },
+  "fleshB": {
+   "x": 8,
+   "y": -14,
+   "label": "Flesh Tentacle"
+  }
+ },
+ "glareLanes0": [
+  {
+   "id": "glare0",
+   "from": [
+    0,
+    -10
+   ],
+   "to": [
+    0,
+    -58
+   ]
+  }
+ ],
+ "glareLanes1": [
+  {
+   "id": "glare1",
+   "from": [
+    3.4,
+    -9.4
+   ],
+   "to": [
+    19.8,
+    -54.5
+   ]
+  }
+ ],
+ "glareLanes2": [
+  {
+   "id": "glare2",
+   "from": [
+    6.4,
+    -7.7
+   ],
+   "to": [
+    37.3,
+    -44.4
+   ]
+  }
+ ],
+ "glareLanes3": [
+  {
+   "id": "glare3",
+   "from": [
+    8.7,
+    -5
+   ],
+   "to": [
+    50.2,
+    -29
+   ]
+  }
+ ],
+ "glareLanes4": [
+  {
+   "id": "glare4",
+   "from": [
+    9.8,
+    -1.7
+   ],
+   "to": [
+    57.1,
+    -10.1
+   ]
+  }
+ ],
+ "glareLanes5": [
+  {
+   "id": "glare5",
+   "from": [
+    9.8,
+    1.7
+   ],
+   "to": [
+    57.1,
+    10.1
+   ]
+  }
+ ],
+ "glareLanes6": [
+  {
+   "id": "glare6",
+   "from": [
+    8.7,
+    5
+   ],
+   "to": [
+    50.2,
+    29
+   ]
+  }
+ ],
+ "glareLanes7": [
+  {
+   "id": "glare7",
+   "from": [
+    6.4,
+    7.7
+   ],
+   "to": [
+    37.3,
+    44.4
+   ]
+  }
+ ],
+ "glareLanes8": [
+  {
+   "id": "glare8",
+   "from": [
+    3.4,
+    9.4
+   ],
+   "to": [
+    19.8,
+    54.5
+   ]
+  }
+ ],
+ "glareLanesM0": [
+  {
+   "id": "glareM0",
+   "from": [
+    0,
+    -10
+   ],
+   "to": [
+    0,
+    -58
+   ]
+  }
+ ],
+ "glareLanesM1": [
+  {
+   "id": "glareM1",
+   "from": [
+    -3.4,
+    -9.4
+   ],
+   "to": [
+    -19.8,
+    -54.5
+   ]
+  }
+ ],
+ "glareLanesM2": [
+  {
+   "id": "glareM2",
+   "from": [
+    -6.4,
+    -7.7
+   ],
+   "to": [
+    -37.3,
+    -44.4
+   ]
+  }
+ ],
+ "glareLanesM3": [
+  {
+   "id": "glareM3",
+   "from": [
+    -8.7,
+    -5
+   ],
+   "to": [
+    -50.2,
+    -29
+   ]
+  }
+ ],
+ "glareLanesM4": [
+  {
+   "id": "glareM4",
+   "from": [
+    -9.8,
+    -1.7
+   ],
+   "to": [
+    -57.1,
+    -10.1
+   ]
+  }
+ ],
+ "glareLanesM5": [
+  {
+   "id": "glareM5",
+   "from": [
+    -9.8,
+    1.7
+   ],
+   "to": [
+    -57.1,
+    10.1
+   ]
+  }
+ ],
+ "glareLanesM6": [
+  {
+   "id": "glareM6",
+   "from": [
+    -8.7,
+    5
+   ],
+   "to": [
+    -50.2,
+    29
+   ]
+  }
+ ],
+ "glareLanesM7": [
+  {
+   "id": "glareM7",
+   "from": [
+    -6.4,
+    7.7
+   ],
+   "to": [
+    -37.3,
+    44.4
+   ]
+  }
+ ],
+ "glareLanesM8": [
+  {
+   "id": "glareM8",
+   "from": [
+    -3.4,
+    9.4
+   ],
+   "to": [
+    -19.8,
+    54.5
+   ]
+  }
+ ],
+ "player": {
+  "speed": 7,
+  "turnRate": 200,
+  "radius": 0.8,
+  "hp": 10000,
+  "healPerSecond": 800,
+  "fearDuration": 3,
+  "fearSpeed": 4,
+  "jump": {
+   "height": 1.4,
+   "duration": 0.8
+  }
+ },
+ "ghostTank": {
+  "speed": 7.6,
+  "turnRate": 360,
+  "hp": 10000,
+  "healPerSecond": 600,
+  "healPerSecondWithPlayerHealer": 150,
+  "lowHp": 0.5
+ },
+ "raid": {
+  "size": 40,
+  "melee": 1,
+  "threatPerSecond": 40,
+  "meleeFlankDistance": 11,
+  "whelpContactRange": 5,
+  "holdAfterPull": 5
+ },
+ "boss": {
+  "radius": 8,
+  "speed": 0,
+  "turnRate": 180,
+  "meleeRange": 9,
+  "meleeDamage": 0,
+  "meleeInterval": 2,
+  "stationary": true,
+  "cones": {}
+ },
+ "threat": {
+  "autoAttackPerSecond": 80,
+  "ghostTankPerSecond": 70,
+  "tauntBonus": 200,
+  "tauntDuration": 3,
+  "tauntLead": 1.6,
+  "buffetCut": 0,
+  "pullMultiplier": 1.1,
+  "dangerBand": 0.8,
+  "resetOnLanding": false,
+  "landingRaidThreat": 200,
+  "turnGrace": 2,
+  "ghostTauntDelay": 2.5,
+  "ghostPickupDelay": 1.5
+ },
+ "gcd": 1.5,
+ "roles": {
+  "tank": {
+   "label": "Main tank",
+   "short": "Tank",
+   "description": "No boss to tank in Phase 1: stand on your spot and stay out of Dark Glare. In Phase 2 you catch every Giant Claw Tentacle the second it surfaces.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6
+  },
+  "offtank": {
+   "label": "Claw and Giant Eye tank",
+   "short": "Off-tank",
+   "description": "Claw Tentacles erupt around the raid: be on them first. In Phase 2, take the Giant Eye Tentacle.",
+   "abilities": [
+    "taunt"
+   ],
+   "attackRange": 6,
+   "holdsBoss": false
+  },
+  "melee": {
+   "label": "Melee DPS",
+   "short": "Melee",
+   "description": "Tentacles first, then the boss. Eye Tentacles, then Claws, then the Eye. In the stomach kill the Flesh Tentacles. Hold your ten-yard spacing; if a beam lands on you, step away only if someone is inside the circle.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 7
+  },
+  "ranged": {
+   "label": "Ranged DPS",
+   "short": "Ranged",
+   "description": "Stay on your spot, ten yards from everyone. Eye Tentacles die first. Hold your ten-yard spacing; if a beam lands on you, step away only if someone is inside the circle. Rotate with the Dark Glare.",
+   "abilities": [
+    "attack"
+   ],
+   "attackRange": 34
+  },
+  "healer": {
+   "label": "Healer",
+   "short": "Healer",
+   "description": "Heal the raid through the Eye Beams and Mind Flay. Hold your ten-yard spacing; if a beam lands on you, step away only if someone is inside the circle.",
+   "abilities": [
+    "heal"
+   ],
+   "attackRange": 40
+  }
+ },
+ "playerAbilities": {
+  "taunt": {
+   "kind": "taunt",
+   "label": "Taunt",
+   "cooldown": 10,
+   "gcd": false,
+   "range": 20,
+   "icon": "taunt",
+   "tip": "Used only to pick up tentacles."
+  },
+  "attack": {
+   "kind": "attack",
+   "label": "Attack",
+   "cooldown": 0,
+   "gcd": true,
+   "icon": "attack",
+   "threat": 140,
+   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "addDamage": 0.12
+  },
+  "heal": {
+   "kind": "heal",
+   "label": "Heal the tank",
+   "cooldown": 0,
+   "gcd": true,
+   "range": 60,
+   "icon": "heal",
+   "amount": 2500,
+   "threat": 25,
+   "tip": "A big heal. In this simulation one button covers the raid-wide healing C'Thun demands, so the range is the room."
+  }
+ },
+ "actions": {
+  "glare0": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes0",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare1": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes1",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare2": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes2",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare3": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes3",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare4": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes4",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare5": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes5",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare6": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes6",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare7": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes7",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glare8": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanes8",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM0": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM0",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM1": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM1",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM2": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM2",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM3": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM3",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM4": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM4",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM5": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM5",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM6": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM6",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM7": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM7",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "glareM8": {
+   "label": "Dark Glare",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "lanes",
+   "lanes": "glareLanesM8",
+   "laneWidth": 12,
+   "warning": 2,
+   "active": 2.4,
+   "damage": 12000,
+   "hoverAtStart": false,
+   "warn": true,
+   "cue": "breath",
+   "icon": "breath",
+   "requires": "grounded",
+   "tip": "A beam sweeps the chamber. Step out of the marked lane and keep moving with it."
+  },
+  "beamWindow": {
+   "label": "Eye Beam phase",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0,
+   "dispel": "none",
+   "duration": 45,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Eye Beams every 3 seconds until Dark Glare."
+  },
+  "eyeBeam": {
+   "label": "Eye Beam",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.33,
+   "radius": 9.5,
+   "warning": 2,
+   "active": 0.1,
+   "damage": 3000,
+   "carried": true,
+   "stayPut": true,
+   "raidMetric": "chainedBeams",
+   "conditional": "debuff:beamWindow",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The Eye is casting at you. If you already hold ten yards, stay where you are. Move only if someone is inside the circle, and never toward another player."
+  },
+  "eyeBeamP2": {
+   "label": "Eye Beam (Giant Eye)",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.33,
+   "radius": 9.5,
+   "warning": 2,
+   "active": 0.1,
+   "damage": 3000,
+   "carried": true,
+   "stayPut": true,
+   "raidMetric": "chainedBeams",
+   "conditional": "debuff:gEyeUp",
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The Giant Eye is casting at you. If you already hold ten yards, stay where you are. Move only if someone is inside the circle, and never toward another player."
+  },
+  "carapace": {
+   "label": "Carapace of C'Thun",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 60,
+   "reflectDamage": 0,
+   "roles": "dps",
+   "bossOnly": true,
+   "toast": "Carapace up: hit the tentacles, not C'Thun",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "99% damage reduction until both Flesh Tentacles die."
+  },
+  "carapace2": {
+   "label": "Carapace of C'Thun",
+   "kind": "shield",
+   "cast": 0,
+   "duration": 45,
+   "reflectDamage": 0,
+   "roles": "dps",
+   "bossOnly": true,
+   "toast": "Carapace back up: hit the tentacles",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "aggro",
+   "requires": "grounded",
+   "tip": "99% damage reduction until both Flesh Tentacles die."
+  },
+  "eyeBeamRaid": {
+   "label": "Eye Beam on the raid",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 1500,
+   "conditional": "debuff:beamWindow",
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Eye Beams are hitting someone in the raid. The raid's health bar is what you keep up."
+  },
+  "tentaclePressure": {
+   "label": "Tentacle damage",
+   "kind": "aoe",
+   "cast": 0,
+   "radius": 0,
+   "damage": 0,
+   "tankDamage": 1300,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "Tentacles are chewing on the raid."
+  },
+  "groundRupture": {
+   "label": "Claw Tentacle: Ground Rupture",
+   "kind": "hazard",
+   "cast": 0,
+   "placement": "random",
+   "count": 1,
+   "playerChance": 0.25,
+   "roles": "nontank",
+   "radius": 8,
+   "warning": 1.2,
+   "active": 0.4,
+   "damage": 1350,
+   "warn": true,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "A tentacle erupts at someone's feet. Step away from the ring."
+  },
+  "clawA": {
+   "label": "Claw Tentacle",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "clawA"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "aggroRange": 15,
+   "lifetime": 12,
+   "heldLifetime": 14,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "clawA",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Claw Tentacle. Off-tank takes it; casters kill it."
+  },
+  "clawB": {
+   "label": "Claw Tentacle",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "clawB"
+   ],
+   "speed": 0,
+   "aggroRange": 15,
+   "lifetime": 12,
+   "heldLifetime": 14,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "clawB",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Claw Tentacle. Off-tank takes it; casters kill it."
+  },
+  "clawC": {
+   "label": "Claw Tentacle",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "clawC"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "aggroRange": 15,
+   "lifetime": 12,
+   "heldLifetime": 14,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "clawC",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Claw Tentacle. Off-tank takes it; casters kill it."
+  },
+  "clawD": {
+   "label": "Claw Tentacle",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "clawD"
+   ],
+   "speed": 0,
+   "aggroRange": 15,
+   "lifetime": 12,
+   "heldLifetime": 14,
+   "killable": true,
+   "pickup": "offtank",
+   "holdSpot": "clawD",
+   "warn": false,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "A Claw Tentacle. Off-tank takes it; casters kill it."
+  },
+  "eyeTentacles": {
+   "label": "Eye Tentacles",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "ring0",
+    "ring1",
+    "ring2",
+    "ring3",
+    "ring4",
+    "ring5",
+    "ring6",
+    "ring7"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "aggroRange": 1,
+   "lifetime": 12,
+   "heldLifetime": 12,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "ring0",
+   "follow": [
+    {
+     "id": "mindFlay",
+     "delay": 2
+    }
+   ],
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "Eight Eye Tentacles at the ring. Everything on them, right now."
+  },
+  "mindFlay": {
+   "label": "Mind Flay",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0.25,
+   "roles": "nontank",
+   "dispel": "none",
+   "duration": 6,
+   "tickDamage": 600,
+   "warn": false,
+   "cue": "eruption",
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "An Eye Tentacle channels Mind Flay on someone. Kill it."
+  },
+  "gClaw": {
+   "label": "Giant Claw Tentacle",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "gClawSpawn"
+   ],
+   "speed": 0,
+   "aggroRange": 16,
+   "lifetime": 24,
+   "heldLifetime": 28,
+   "killable": true,
+   "pickup": "tanks",
+   "holdSpot": "gClawSpawn",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The Giant Claw needs a tank, right now."
+  },
+  "gEye": {
+   "label": "Giant Eye Tentacle",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "gEyeSpawn"
+   ],
+   "speed": 0,
+   "aggroRange": 14,
+   "lifetime": 18,
+   "heldLifetime": 20,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "gEyeSpawn",
+   "follow": [
+    {
+     "id": "gEyeUp",
+     "delay": 0
+    }
+   ],
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "grounded",
+   "tip": "The Giant Eye beams the raid. Stun and burn it."
+  },
+  "gEyeUp": {
+   "label": "Giant Eye is up",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "random",
+   "playerChance": 0,
+   "dispel": "none",
+   "duration": 18,
+   "hidden": true,
+   "warn": false,
+   "cue": null,
+   "icon": "eruption",
+   "requires": "grounded",
+   "tip": "The Giant Eye is up and beaming."
+  },
+  "fleshTentacle": {
+   "label": "Flesh Tentacles",
+   "kind": "adds",
+   "cast": 0,
+   "count": 1,
+   "from": [
+    "fleshA",
+    "fleshB"
+   ],
+   "playerFrom": [],
+   "speed": 0,
+   "aggroRange": 1,
+   "lifetime": 18,
+   "heldLifetime": 20,
+   "killFirst": true,
+   "pickup": "offtank",
+   "holdSpot": "stomachSpot",
+   "warn": true,
+   "cue": "whelps",
+   "icon": "whelps",
+   "requires": "submerged",
+   "tip": "Two Flesh Tentacles in the stomach. Both must die to break the Carapace."
+  },
+  "digestiveAcid": {
+   "label": "Digestive Acid",
+   "kind": "debuff",
+   "cast": 0,
+   "target": "all",
+   "roles": [
+    "melee",
+    "ranged",
+    "healer"
+   ],
+   "dispel": "none",
+   "duration": 5,
+   "tickDamage": 35,
+   "maxStacks": 12,
+   "warn": false,
+   "cue": null,
+   "icon": "dispel",
+   "requires": "any",
+   "tip": "It ticks harder the longer you stay. Leave the stomach before it reaches ten stacks."
+  },
+  "weakened": {
+   "label": "Weakened",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "grounded",
+   "tip": "The carapace is gone. 45 seconds. Everything on C'Thun."
+  },
+  "submerge": {
+   "label": "The Stomach",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "Everyone in the stomach kills the Flesh Tentacles."
+  },
+  "emerge": {
+   "label": "C'Thun weakened",
+   "kind": "transition",
+   "cast": 0,
+   "warn": true,
+   "cue": "roar",
+   "icon": "roar",
+   "requires": "any",
+   "tip": "Both Flesh Tentacles are dead. He is weakened."
+  }
+ },
+ "phases": [
+  {
+   "id": 1,
+   "name": "Eye of C'Thun",
+   "subtitle": "100% to 60%",
+   "hpFrom": 1,
+   "hpTo": 0.6,
+   "duration": 180,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRing",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otRing",
+    "melee": "meleeRing"
+   },
+   "actions": [
+    {
+     "id": "beamWindow",
+     "first": 0.1
+    },
+    {
+     "id": "beamWindow",
+     "first": 88
+    },
+    {
+     "id": "eyeBeam",
+     "first": 9,
+     "every": 3
+    },
+    {
+     "id": "eyeBeamRaid",
+     "first": 3,
+     "every": 3
+    },
+    {
+     "id": "glare0",
+     "first": 48
+    },
+    {
+     "id": "glare1",
+     "first": 52.4
+    },
+    {
+     "id": "glare2",
+     "first": 56.8
+    },
+    {
+     "id": "glare3",
+     "first": 61.2
+    },
+    {
+     "id": "glare4",
+     "first": 65.6
+    },
+    {
+     "id": "glare5",
+     "first": 70
+    },
+    {
+     "id": "glare6",
+     "first": 74.4
+    },
+    {
+     "id": "glare7",
+     "first": 78.80000000000001
+    },
+    {
+     "id": "glare8",
+     "first": 83.2
+    },
+    {
+     "id": "glareM0",
+     "first": 134
+    },
+    {
+     "id": "glareM1",
+     "first": 138.4
+    },
+    {
+     "id": "glareM2",
+     "first": 142.8
+    },
+    {
+     "id": "glareM3",
+     "first": 147.2
+    },
+    {
+     "id": "glareM4",
+     "first": 151.6
+    },
+    {
+     "id": "glareM5",
+     "first": 156
+    },
+    {
+     "id": "glareM6",
+     "first": 160.4
+    },
+    {
+     "id": "glareM7",
+     "first": 164.8
+    },
+    {
+     "id": "glareM8",
+     "first": 169.2
+    },
+    {
+     "id": "clawA",
+     "first": 8,
+     "every": 32
+    },
+    {
+     "id": "clawB",
+     "first": 16,
+     "every": 32
+    },
+    {
+     "id": "clawC",
+     "first": 24,
+     "every": 32
+    },
+    {
+     "id": "clawD",
+     "first": 32,
+     "every": 32
+    },
+    {
+     "id": "groundRupture",
+     "first": 8.5,
+     "every": 8
+    },
+    {
+     "id": "eyeTentacles",
+     "first": 45,
+     "every": 45
+    }
+   ],
+   "expectations": [
+    {
+     "id": "tankSpot",
+     "type": "playerAtSpotBy",
+     "spot": "tankRing",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Hold your spot",
+     "tip": "There is no boss to tank. Stay ten yards from everyone and out of the Glare."
+    },
+    {
+     "id": "otRing",
+     "type": "playerAtSpotBy",
+     "spot": "otRing",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Stay where the Claws spawn",
+     "tip": "Be on the Claws before they reach the casters."
+    },
+    {
+     "id": "claw_clawB",
+     "type": "afterEvent",
+     "event": "clawB",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Claw Tentacle",
+     "tip": "Claw Tentacles erupt near the raid. Be on them first and hold them off the casters."
+    },
+    {
+     "id": "claw_clawD",
+     "type": "afterEvent",
+     "event": "clawD",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Claw Tentacle",
+     "tip": "Claw Tentacles erupt near the raid. Be on them first and hold them off the casters."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Eye Tentacles before anything else",
+     "tip": "Eye Tentacles first, every time. Mind Flay will melt whoever it is on otherwise."
+    },
+    {
+     "id": "rangedRing",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSpot",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on your spot, ten yards from everyone",
+     "tip": "Eye Beam chains to anyone within ten yards. Your spot is your job."
+    },
+    {
+     "id": "beamSpread",
+     "type": "continuous",
+     "metric": "chainedBeams",
+     "label": "Keep ten yards when the beam lands",
+     "tip": "Spacing is set before the beam, not during it. If anyone is inside the circle when it goes off, it chains."
+    },
+    {
+     "id": "glareDodge",
+     "type": "onEvent",
+     "event": "deepBreath",
+     "check": "outsideLane",
+     "grace": 1.5,
+     "label": "Stay out of the Dark Glare beam",
+     "tip": "The beam sweeps with the telegraph. Move with it, ahead of the next lane."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Eye Beams, Ground Rupture and Mind Flay all land on the raid. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Anything that chains does double damage. Top up before the next beam."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "C'Thun: first surface",
+   "subtitle": "Carapace up: tentacles",
+   "hpFrom": 0.6,
+   "hpTo": 0.6,
+   "duration": 60,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "gClawTank",
+    "boss": "bossSpot",
+    "ranged": "rangedSurface",
+    "healer": "healerSpot",
+    "offtank": "otRing",
+    "melee": "meleeRing"
+   },
+   "actions": [
+    {
+     "id": "carapace",
+     "first": 0.1
+    },
+    {
+     "id": "gClaw",
+     "first": 11
+    },
+    {
+     "id": "eyeTentacles",
+     "first": 40.5
+    },
+    {
+     "id": "gEye",
+     "first": 42
+    },
+    {
+     "id": "tentaclePressure",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "eyeBeamP2",
+     "first": 44,
+     "every": 3
+    },
+    {
+     "id": "groundRupture",
+     "first": 13,
+     "every": 12
+    }
+   ],
+   "expectations": [
+    {
+     "id": "gClawCatch",
+     "type": "afterEvent",
+     "event": "gClaw",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Catch the Giant Claw",
+     "tip": "It goes for the group the moment it surfaces. Be on it, and hold it off the raid."
+    },
+    {
+     "id": "gClawSpot",
+     "type": "playerAtSpotBy",
+     "spot": "gClawTank",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Hold the Giant Claw north",
+     "tip": "Ground Tremor stuns whoever is close. Keep it on you and away from the raid."
+    },
+    {
+     "id": "gEyeCatch",
+     "type": "afterEvent",
+     "event": "gEye",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Giant Eye",
+     "tip": "Silence and stun it the moment it surfaces."
+    },
+    {
+     "id": "otRingS",
+     "type": "playerAtSpotBy",
+     "spot": "otRing",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Hold your side of the room",
+     "tip": "Tentacles spawn around the room. Be near the next one."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Eye Tentacles first, then the Giant Eye",
+     "tip": "Tentacle priority: Eye, Giant Eye, Giant Claw. C'Thun himself waits for Weakened."
+    },
+    {
+     "id": "rangedRing",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSurface",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on your spot, ten yards from everyone",
+     "tip": "Eye Beam chains to anyone within ten yards. From here you reach the Giant Claw and the nearest tentacles."
+    },
+    {
+     "id": "beamSpread",
+     "type": "continuous",
+     "metric": "chainedBeams",
+     "label": "Keep ten yards when the beam lands",
+     "tip": "Spacing is set before the beam, not during it. If anyone is inside the circle when it goes off, it chains."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Eye Beams, Ground Rupture and Mind Flay all land on the raid. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Anything that chains does double damage. Top up before the next beam."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "The Stomach",
+   "subtitle": "Kill both Flesh Tentacles",
+   "hpFrom": 0.6,
+   "hpTo": 0.6,
+   "duration": 25,
+   "bossState": "submerged",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRing",
+    "boss": "bossSpot",
+    "ranged": "stomachSpot",
+    "healer": "stomachSpot",
+    "melee": "stomachSpot",
+    "offtank": "otRing"
+   },
+   "actions": [
+    {
+     "id": "fleshTentacle",
+     "first": 1
+    },
+    {
+     "id": "digestiveAcid",
+     "first": 2,
+     "every": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "stomachIn",
+     "type": "playerAtSpotBy",
+     "spot": "stomachSpot",
+     "grace": 4,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Get to the Flesh Tentacles",
+     "tip": "Both die for the Carapace to break. Stay on them until around ten stacks, then leave."
+    },
+    {
+     "id": "tankOut",
+     "type": "playerAtSpotBy",
+     "spot": "tankRing",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tanks leave the stomach at once",
+     "tip": "Tanks are not needed inside. If you are eaten, get out between the Flesh Tentacles and back to the surface."
+    },
+    {
+     "id": "otOut",
+     "type": "playerAtSpotBy",
+     "spot": "otRing",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Tanks leave the stomach at once",
+     "tip": "Tanks are not needed inside. If you are eaten, get out between the Flesh Tentacles and back to the surface."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Both Flesh Tentacles, fast",
+     "tip": "The acid ramps every tick. Kill them both."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Acid is on the group. Top up whoever needs it."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Weakened",
+   "subtitle": "45 seconds: everything on him",
+   "hpFrom": 0.6,
+   "hpTo": 0.3,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRing",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otRing",
+    "melee": "meleeRing"
+   },
+   "actions": [
+    {
+     "id": "weakened",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "weakenedUptime",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "dps",
+     "label": "Every global on C'Thun now",
+     "tip": "Forty-five seconds of Weakened and no tentacles. Cooldowns, potions, everything."
+    },
+    {
+     "id": "tankHere",
+     "type": "playerAtSpotBy",
+     "spot": "tankRing",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Stand ready for the next wave",
+     "tip": "The next Giant Claw comes about six seconds after this ends."
+    },
+    {
+     "id": "otHere",
+     "type": "playerAtSpotBy",
+     "spot": "otRing",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Stand ready for the next wave",
+     "tip": "Tentacles come back the moment this ends."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Nothing to heal for a moment; drink and be ready."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "C'Thun: second surface",
+   "subtitle": "Carapace back on",
+   "hpFrom": 0.3,
+   "hpTo": 0.3,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "gClawTank",
+    "boss": "bossSpot",
+    "ranged": "rangedSurface",
+    "healer": "healerSpot",
+    "offtank": "otRing",
+    "melee": "meleeRing"
+   },
+   "actions": [
+    {
+     "id": "carapace2",
+     "first": 0.1
+    },
+    {
+     "id": "gClaw",
+     "first": 7
+    },
+    {
+     "id": "eyeTentacles",
+     "first": 36
+    },
+    {
+     "id": "gEye",
+     "first": 38
+    },
+    {
+     "id": "tentaclePressure",
+     "first": 2,
+     "every": 3
+    },
+    {
+     "id": "eyeBeamP2",
+     "first": 40,
+     "every": 3
+    },
+    {
+     "id": "groundRupture",
+     "first": 10,
+     "every": 12
+    }
+   ],
+   "expectations": [
+    {
+     "id": "gClawCatch2",
+     "type": "afterEvent",
+     "event": "gClaw",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "tanks",
+     "label": "Catch the Giant Claw",
+     "tip": "It is back. Same job."
+    },
+    {
+     "id": "gClawSpot2",
+     "type": "playerAtSpotBy",
+     "spot": "gClawTank",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Hold the Giant Claw north",
+     "tip": "Away from the raid. Ground Tremor stuns whoever is close."
+    },
+    {
+     "id": "gEyeCatch2",
+     "type": "afterEvent",
+     "event": "gEye",
+     "check": "whelpsPicked",
+     "within": 8,
+     "grace": 6,
+     "role": "offtank",
+     "label": "Pick up the Giant Eye",
+     "tip": "Silence and stun it the moment it surfaces."
+    },
+    {
+     "id": "otRingS2",
+     "type": "playerAtSpotBy",
+     "spot": "otRing",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Hold your side of the room",
+     "tip": "Tentacles spawn around the room. Be near the next one."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Eye Tentacles first, then the Giant Eye",
+     "tip": "Same priority as before."
+    },
+    {
+     "id": "rangedRing",
+     "type": "playerAtSpotBy",
+     "spot": "rangedSurface",
+     "grace": 4,
+     "role": "ranged",
+     "label": "Stay on your spot, ten yards from everyone",
+     "tip": "Eye Beam chains to anyone within ten yards. From here you reach the Giant Claw and the nearest tentacles."
+    },
+    {
+     "id": "beamSpread",
+     "type": "continuous",
+     "metric": "chainedBeams",
+     "label": "Keep ten yards when the beam lands",
+     "tip": "Spacing is set before the beam, not during it. If anyone is inside the circle when it goes off, it chains."
+    },
+    {
+     "id": "threatDps",
+     "type": "continuous",
+     "metric": "aggroPulls",
+     "role": "dps",
+     "label": "Never pull aggro off the tank",
+     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Eye Beams, Ground Rupture and Mind Flay all land on the raid. Keep ahead of it."
+    },
+    {
+     "id": "tankLow",
+     "type": "continuous",
+     "metric": "tankLowSeconds",
+     "role": "healer",
+     "label": "Keep the tank above half",
+     "tip": "Anything that chains does double damage. Top up before the next beam."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "The Stomach again",
+   "subtitle": "Kill both Flesh Tentacles",
+   "hpFrom": 0.3,
+   "hpTo": 0.3,
+   "duration": 25,
+   "bossState": "submerged",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRing",
+    "boss": "bossSpot",
+    "ranged": "stomachSpot",
+    "healer": "stomachSpot",
+    "melee": "stomachSpot",
+    "offtank": "otRing"
+   },
+   "actions": [
+    {
+     "id": "fleshTentacle",
+     "first": 1
+    },
+    {
+     "id": "digestiveAcid",
+     "first": 2,
+     "every": 2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "stomachIn2",
+     "type": "playerAtSpotBy",
+     "spot": "stomachSpot",
+     "grace": 4,
+     "role": [
+      "melee",
+      "ranged",
+      "healer"
+     ],
+     "label": "Get to the Flesh Tentacles",
+     "tip": "Both die for the Carapace to break. Stay on them until around ten stacks, then leave."
+    },
+    {
+     "id": "tankOut",
+     "type": "playerAtSpotBy",
+     "spot": "tankRing",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Tanks leave the stomach at once",
+     "tip": "Tanks are not needed inside. If you are eaten, get out between the Flesh Tentacles and back to the surface."
+    },
+    {
+     "id": "otOut",
+     "type": "playerAtSpotBy",
+     "spot": "otRing",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Tanks leave the stomach at once",
+     "tip": "Tanks are not needed inside. If you are eaten, get out between the Flesh Tentacles and back to the surface."
+    },
+    {
+     "id": "killOrder",
+     "type": "continuous",
+     "metric": "attacksOffPriority",
+     "role": "dps",
+     "label": "Both Flesh Tentacles, fast",
+     "tip": "The acid ramps every tick. Kill them both."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Acid is on the group. Top up whoever needs it."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Weakened: finish him",
+   "subtitle": "30% to dead",
+   "hpFrom": 0.3,
+   "hpTo": 0,
+   "duration": 45,
+   "bossState": "grounded",
+   "raidSpot": "raidSpot",
+   "spots": {
+    "tank": "tankRing",
+    "boss": "bossSpot",
+    "ranged": "rangedSpot",
+    "healer": "healerSpot",
+    "offtank": "otRing",
+    "melee": "meleeRing"
+   },
+   "actions": [
+    {
+     "id": "weakened",
+     "first": 0.2
+    }
+   ],
+   "expectations": [
+    {
+     "id": "weakenedUptime2",
+     "type": "continuous",
+     "metric": "dpsIdle",
+     "role": "dps",
+     "label": "Every global on C'Thun now",
+     "tip": "This is the kill. Do not stop."
+    },
+    {
+     "id": "tankHere2",
+     "type": "playerAtSpotBy",
+     "spot": "tankRing",
+     "grace": 4,
+     "role": "tanks",
+     "label": "Hold your spot to the end",
+     "tip": "Do not chase anything. Your job here is to be alive."
+    },
+    {
+     "id": "otHere2",
+     "type": "playerAtSpotBy",
+     "spot": "otRing",
+     "grace": 4,
+     "role": "offtank",
+     "label": "Hold your spot to the end",
+     "tip": "Do not chase anything. Your job here is to be alive."
+    },
+    {
+     "id": "tankUp",
+     "type": "continuous",
+     "metric": "tankDeaths",
+     "role": "healer",
+     "label": "Keep the tank alive",
+     "tip": "Almost there. Keep the raid up."
+    }
+   ]
+  }
+ ],
+ "continuousMetrics": {
+  "deaths": {
+   "label": "Deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1
+  },
+  "threatLostCount": {
+   "label": "Times the boss turned on the raid",
+   "unit": "count",
+   "info": true,
+   "roles": "tanks"
+  },
+  "aggroPulls": {
+   "label": "Times you pulled aggro",
+   "unit": "count",
+   "penaltyPerUnit": 15,
+   "severe": 1,
+   "roles": "nontank",
+   "tip": "Stop attacking when the threat bar turns red."
+  },
+  "attacksInRed": {
+   "label": "Attacks in the red band",
+   "unit": "count",
+   "penaltyPerUnit": 2,
+   "severe": 3,
+   "roles": "dps",
+   "tip": "In the red band one more hit can pull. Wait for the tank."
+  },
+  "earlyAttacks": {
+   "label": "Attacks before the tank had the boss",
+   "unit": "count",
+   "penaltyPerUnit": 3,
+   "severe": 2,
+   "roles": "dps",
+   "tip": "Give the tank a few seconds after the pull."
+  },
+  "earlyPulls": {
+   "label": "You pulled before the tank",
+   "unit": "count",
+   "penaltyPerUnit": 20,
+   "severe": 1,
+   "roles": "nontank"
+  },
+  "dpsIdle": {
+   "label": "Seconds not attacking when you could",
+   "unit": "s",
+   "penaltyPerSecond": 0.3,
+   "severe": 15,
+   "roles": "dps",
+   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+  },
+  "outOfRange": {
+   "label": "Seconds out of range",
+   "unit": "s",
+   "penaltyPerSecond": 0.1,
+   "severe": 12,
+   "roles": "dps"
+  },
+  "playerInHazard": {
+   "label": "Seconds standing in something bad",
+   "unit": "s",
+   "penaltyPerSecond": 2,
+   "severe": 1,
+   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+  },
+  "tankDeaths": {
+   "label": "Tank deaths",
+   "unit": "count",
+   "penaltyPerUnit": 30,
+   "severe": 1,
+   "roles": "healer"
+  },
+  "tankLowSeconds": {
+   "label": "Seconds with the tank under half",
+   "unit": "s",
+   "penaltyPerSecond": 1,
+   "severe": 8,
+   "roles": "healer",
+   "tip": "Top the tank up before the spike lands, not after."
+  },
+  "overheals": {
+   "label": "Wasted heals",
+   "unit": "count",
+   "penaltyPerUnit": 0.4,
+   "severe": 12,
+   "roles": "healer",
+   "tip": "A heal on a full tank is a heal you did not have for the spike."
+  },
+  "attacksOffPriority": {
+   "label": "Attacks on the boss while a priority add lived",
+   "unit": "count",
+   "penaltyPerUnit": 0.6,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "Face the add and kill it first. The boss can wait."
+  },
+  "whelpsOnRaid": {
+   "label": "Adds loose on the raid",
+   "unit": "s",
+   "penaltyPerSecond": 0.03,
+   "severe": 10,
+   "roles": "offtank",
+   "tip": "Grab the adds before they reach a raid member and keep them on you.",
+   "info": true
+  },
+  "chainedBeams": {
+   "label": "Beams that went off inside the raid",
+   "unit": "count",
+   "penaltyPerUnit": 1.5,
+   "severe": 3,
+   "roles": [
+    "tank",
+    "melee",
+    "ranged",
+    "healer",
+    "offtank"
+   ],
+   "tip": "Spacing is set before the beam, not during it. If anyone is inside the circle when it goes off, it chains."
+  },
+  "attacksIntoShield": {
+   "label": "Attacks into the Carapace",
+   "unit": "count",
+   "penaltyPerUnit": 1,
+   "severe": 4,
+   "roles": "dps",
+   "tip": "C'Thun takes 99% less damage with the Carapace up. Hit tentacles."
+  }
+ },
+ "grading": {
+  "expectationWeights": {
+   "ontime": 1,
+   "late": 0.5,
+   "missed": 0
+  },
+  "expectationPoints": 50,
+  "metricPoints": 30,
+  "cuePoints": 20,
+  "cueWeights": {
+   "perfect": 1,
+   "good": 0.6,
+   "missed": 0
+  },
+  "grades": [
+   {
+    "min": 95,
+    "grade": "S"
+   },
+   {
+    "min": 85,
+    "grade": "A"
+   },
+   {
+    "min": 72,
+    "grade": "B"
+   },
+   {
+    "min": 58,
+    "grade": "C"
+   },
+   {
+    "min": 40,
+    "grade": "D"
+   },
+   {
+    "min": 0,
+    "grade": "F"
+   }
+  ],
+  "fullActivity": 0.5
+ },
+ "cues": {
+  "notes": "Hold your ten yards through the beams, dodge the Glare, kill the priority tentacles.",
+  "windows": {
+   "perfect": 0.3
+  },
+  "list": [
+   {
+    "id": "healLow",
+    "ability": "heal",
+    "on": "event",
+    "event": "tankLow",
+    "offset": 0,
+    "early": 0,
+    "late": 4,
+    "role": "healer",
+    "short": "RAID LOW",
+    "label": "Heal when the raid drops",
+    "tip": "One bar stands in for the raid here. Keep it high."
+   },
+   {
+    "id": "clawCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "clawB",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "CLAW",
+    "label": "Pick up the Claw Tentacle",
+    "tip": "Run in and Taunt it.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "gClawCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "gClaw",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "tanks",
+    "short": "GIANT CLAW",
+    "label": "Catch the Giant Claw",
+    "tip": "Run in and pick it up. It goes for the raid otherwise.",
+    "doneBy": "whelpPickup"
+   },
+   {
+    "id": "gEyeCue",
+    "ability": "taunt",
+    "on": "event",
+    "event": "gEye",
+    "offset": 2,
+    "early": 2,
+    "late": 8,
+    "role": "offtank",
+    "short": "GIANT EYE",
+    "label": "Pick up the Giant Eye",
+    "tip": "Silence and stun it the moment it surfaces.",
+    "doneBy": "whelpPickup"
+   }
+  ]
+ },
+ "drills": [
+  {
+   "id": "beamDrill",
+   "name": "Hold your ten yards",
+   "description": "A beam lands on someone every 4 s. Hold your spot: if you already keep ten yards, stay put, and move only if someone is inside the circle.",
+   "roles": "nontank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "beamWindow",
+     "first": 0.1,
+     "every": 44
+    },
+    {
+     "id": "eyeBeam",
+     "first": 1,
+     "every": 4
+    }
+   ]
+  },
+  {
+   "id": "glareDrill",
+   "name": "Dark Glare footwork",
+   "description": "A full Dark Glare sweep. Step out of each lane as it comes.",
+   "roles": "nontank",
+   "startPhase": 1,
+   "duration": 46,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "glare0",
+     "first": 2
+    },
+    {
+     "id": "glare1",
+     "first": 6.4
+    },
+    {
+     "id": "glare2",
+     "first": 10.8
+    },
+    {
+     "id": "glare3",
+     "first": 15.200000000000001
+    },
+    {
+     "id": "glare4",
+     "first": 19.6
+    },
+    {
+     "id": "glare5",
+     "first": 24
+    },
+    {
+     "id": "glare6",
+     "first": 28.400000000000002
+    },
+    {
+     "id": "glare7",
+     "first": 32.800000000000004
+    },
+    {
+     "id": "glare8",
+     "first": 37.2
+    }
+   ]
+  },
+  {
+   "id": "glareDrillTank",
+   "name": "Dark Glare footwork",
+   "description": "A full Dark Glare sweep. Step out of each lane as it comes.",
+   "roles": "tanks",
+   "startPhase": 1,
+   "duration": 46,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "glare0",
+     "first": 2
+    },
+    {
+     "id": "glare1",
+     "first": 6.4
+    },
+    {
+     "id": "glare2",
+     "first": 10.8
+    },
+    {
+     "id": "glare3",
+     "first": 15.200000000000001
+    },
+    {
+     "id": "glare4",
+     "first": 19.6
+    },
+    {
+     "id": "glare5",
+     "first": 24
+    },
+    {
+     "id": "glare6",
+     "first": 28.400000000000002
+    },
+    {
+     "id": "glare7",
+     "first": 32.800000000000004
+    },
+    {
+     "id": "glare8",
+     "first": 37.2
+    }
+   ]
+  },
+  {
+   "id": "tentacleDrill",
+   "name": "Eye Tentacles first",
+   "description": "A ring of Eye Tentacles every 22 s. Everything on them.",
+   "roles": "dps",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "eyeTentacles",
+     "first": 2,
+     "every": 22
+    },
+    {
+     "id": "mindFlay",
+     "first": 4,
+     "every": 22
+    }
+   ]
+  },
+  {
+   "id": "clawDrill",
+   "name": "Claw and Giant Eye pickups",
+   "description": "Claws every 10 s and a Giant Eye: be on them first.",
+   "roles": "offtank",
+   "startPhase": 1,
+   "duration": 60,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "clawB",
+     "first": 2,
+     "every": 20
+    },
+    {
+     "id": "clawD",
+     "first": 12,
+     "every": 20
+    },
+    {
+     "id": "gEye",
+     "first": 6,
+     "every": 30
+    }
+   ]
+  },
+  {
+   "id": "healDrill",
+   "name": "Keep the raid up",
+   "description": "Beams and tentacle damage: keep the bar high.",
+   "roles": "healer",
+   "startPhase": 2,
+   "duration": 55,
+   "loop": true,
+   "start": "wall",
+   "actions": [
+    {
+     "id": "tentaclePressure",
+     "first": 1,
+     "every": 2
+    },
+    {
+     "id": "mindFlay",
+     "first": 6,
+     "every": 12
+    }
+   ]
+  }
+ ]
+}

@@ -231,7 +231,8 @@
   "pickupGrace": 5,
   "settleAfterLanding": 2.5,
   "facingCone": "breath",
-  "shape": "dragon"
+  "shape": "dragon",
+  "looseHint": "She is on the raid. Burst threat"
  },
  "threat": {
   "autoAttackPerSecond": 80,

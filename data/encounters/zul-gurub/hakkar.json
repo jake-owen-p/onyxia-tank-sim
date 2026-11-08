@@ -471,6 +471,7 @@
   "holdAfterPull": 5
  },
  "boss": {
+  "looseHint": "The boss is on the raid. Rebuild threat",
   "radius": 4,
   "speed": 7,
   "turnRate": 240,
