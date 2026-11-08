@@ -424,3 +424,63 @@ test('any role can dispel what its own list allows, and pulses can depend on a d
   s.pendingTrigger = null;
   assert.equal(sim.triggerAction('nova'), false, 'no pulses once it is gone');
 });
+
+test('Hakkar pattern: a cloud gives the debuff that protects you, the marker sends you to it, and it is not dodged', () => {
+  const s2 = structuredClone(script);
+  s2.positions.cloud = { x: 10, y: 12 };
+  Object.assign(s2.actions, {
+    poison: { label: 'Poisonous Blood', kind: 'debuff', cast: 0, target: 'player', dispel: 'none', duration: 30, warn: false, icon: 'roar' },
+    cloud: { label: 'Poison Cloud', kind: 'hazard', placement: 'spots', spots: ['cloud'], radius: 6, warning: 0, active: 60, damage: 0, applies: 'poison', cast: 0, warn: false, icon: 'roar' },
+    siphon: { label: 'Blood Siphon', kind: 'aoe', cast: 0, damage: 2000, safeIfDebuff: 'poison', seekLead: 15, playerMetric: 'siphons', warn: true, icon: 'roar' },
+  });
+  s2.continuousMetrics.siphons = { label: 's', unit: 'count', penaltyPerUnit: 1 };
+  const sim = createSim(s2, { role: 'ranged', start: 'wall', seed: 5, actions: [{ id: 'cloud', first: 1 }, { id: 'siphon', first: 12, every: 200 }] });
+  const s = sim.state;
+  run(sim, 3, roleBot('ranged'));
+  assert.equal(s.world.idealPlayer.reason, 'los', 'heading for the cloud ahead of the siphon');
+  run(sim, 7, roleBot('ranged'));
+  assert.ok(s.debuffs.some((d) => d.actionId === 'poison'), 'standing in it gives the debuff');
+  assert.equal(s.metrics.playerInHazard, undefined, 'and it does not count as standing in fire');
+  run(sim, 4, roleBot('ranged'));
+  assert.equal(s.metrics.siphons, undefined, 'protected from the siphon');
+});
+
+test('forbidden actions are scored; a timed enrage ends; a spot deadline at the end of the last phase is judged', () => {
+  const s2 = structuredClone(script);
+  Object.assign(s2.actions, {
+    gaze: { label: 'Threatening Gaze', kind: 'debuff', cast: 0, target: 'player', dispel: 'none', duration: 6, forbidAbilities: true, breakMetric: 'gazeBreaks', breakDamage: 500, warn: false, icon: 'roar' },
+    rage: { label: 'Rage', kind: 'enrage', cast: 0, duration: 2, warn: false, icon: 'roar' },
+  });
+  const sim = createSim(s2, { role: 'melee', start: 'wall', manual: true, seed: 5 });
+  const s = sim.state;
+  sim.triggerAction('gaze');
+  const hp = s.world.player.hp;
+  run(sim, FIXED_DT, press('attack'));
+  assert.equal(s.metrics.gazeBreaks, 1);
+  assert.ok(s.world.player.hp < hp);
+  sim.triggerAction('rage');
+  assert.equal(s.enraged, true);
+  run(sim, 2.2);
+  assert.equal(s.enraged, false);
+
+  const s3 = structuredClone(script);
+  s3.phases = [{ id: 1, name: 'A', subtitle: '', hpFrom: 1, hpTo: 0, duration: 3, bossState: 'grounded', raidSpot: 'raidSpotP1', actions: [], expectations: [
+    { id: 'beThere', type: 'playerAtSpotBy', spot: 'tankSpot', grace: 0, label: 'L', tip: 'T' },
+  ] }];
+  s3.positions.tankSpot.tolerance = 200;
+  const end = createSim(s3, { role: 'tank', start: 'wall', seed: 5 });
+  const ev = run(end, 5);
+  assert.equal(ev.find((e) => e.type === 'expectation' && e.id === 'beThere').status, 'ontime');
+});
+
+test('dodging keeps going until the marker is clear of every overlapping zone', () => {
+  const s2 = structuredClone(script);
+  s2.actions.z1 = { label: 'Fire', kind: 'hazard', placement: 'spots', spots: ['healerSpot'], radius: 8, warning: 1, active: 10, damage: 0, cast: 0, warn: false, icon: 'roar' };
+  s2.positions.nearby = { x: s2.positions.healerSpot.x + 10, y: s2.positions.healerSpot.y };
+  s2.actions.z2 = { ...s2.actions.z1, spots: ['nearby'] };
+  const sim = createSim(s2, { role: 'healer', start: 'wall', manual: true, seed: 5 });
+  sim.triggerAction('z1'); sim.triggerAction('z2');
+  sim.step(idle(), FIXED_DT);
+  const { x, y } = sim.state.world.idealPlayer;
+  for (const h of sim.state.world.hazards.filter((z) => z.kind === 'zone')) assert.ok(Math.hypot(x - h.centroid.x, y - h.centroid.y) >= h.radius, 'outside every zone');
+});

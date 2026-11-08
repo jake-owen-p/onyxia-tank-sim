@@ -21,19 +21,31 @@ function spot(state, script, key, fallback) {
   return name ? script.positions[name] : null;
 }
 
-/** Keep a point out of every telegraphed or active hazard. */
+/** Keep a point out of every telegraphed or active hazard. Moving out of one can land in another, so it repeats until clear. */
 export function dodgeHazards(x, y, state, reason) {
+  for (let pass = 0; pass < 4; pass++) {
+    const r = dodgeOnce(x, y, state, reason);
+    const settled = r.x === x && r.y === y;
+    x = r.x; y = r.y; reason = r.reason;
+    if (settled) break;
+  }
+  return { x, y, reason };
+}
+
+function dodgeOnce(x, y, state, reason) {
   const w = state.world;
   for (const h of w.hazards) {
-    if (h.carried) continue;                                  // you cannot step out of the bomb you are carrying
+    if (h.carried || h.applies) continue;                                  // you cannot step out of the bomb you are carrying
     if (h.state === 'idle' && h.kind !== 'crack') continue;   // idle cracks are still not a place to stand
     if (h.kind === 'lane') {
       const e = escapeLane(x, y, h.from, h.to, h.width, 4);
       if (e.moved) {
-        // Pick the side the player is already on so the dodge is a short sidestep.
-        const mirror = { x: 2 * x - e.x, y: 2 * y - e.y };
-        const d1 = dist(w.player.x, w.player.y, e.x, e.y), d2 = dist(w.player.x, w.player.y, mirror.x, mirror.y);
-        const pick = d2 < d1 ? mirror : e;
+        // The lane has two edges. Take whichever exit is the shorter walk for the player.
+        const shift = Math.hypot(e.x - x, e.y - y) || 1;
+        const across = h.width + 8;   // edge to edge, plus the 4 yd margin on each side
+        const other = { x: e.x - ((e.x - x) / shift) * across, y: e.y - ((e.y - y) / shift) * across };
+        const d1 = dist(w.player.x, w.player.y, e.x, e.y), d2 = dist(w.player.x, w.player.y, other.x, other.y);
+        const pick = d2 < d1 ? other : e;
         x = pick.x; y = pick.y; reason = 'dodgeLane';
       }
     } else if (h.kind === 'zone') {
@@ -141,6 +153,15 @@ export function idealPlayerPos(state, script) {
     let best = null, bd = Infinity;
     for (const n of hideFrom) { const s = script.positions[n]; if (!s) continue; const d = dist(w.player.x, w.player.y, s.x, s.y); if (d < bd) { bd = d; best = s; } }
     if (best) return { x: best.x, y: best.y, reason: 'los' };
+  }
+  // Something coming that a debuff protects you from: go and get it from its cloud.
+  for (const u of state.upcoming) {
+    const def = script.actions[u.id];
+    if (!def || !def.safeIfDebuff || u.in > (def.seekLead ?? 12)) continue;
+    if (state.debuffs.some((d) => d.on === 'player' && d.actionId === def.safeIfDebuff)) continue;
+    let best = null, bd = Infinity;
+    for (const h of w.hazards) { if (h.applies !== def.safeIfDebuff || h.state !== 'active') continue; const d = dist(w.player.x, w.player.y, h.centroid.x, h.centroid.y); if (d < bd) { bd = d; best = h; } }
+    if (best) return { x: best.centroid.x, y: best.centroid.y, reason: 'los' };
   }
   // A telegraphed pulse around the boss: walk out of its radius for the cast.
   if (castDef && castDef.moveOut && castDef.radius && roleMatches(castDef.moveOut === true ? null : castDef.moveOut, state.role, state.tankRole)) {

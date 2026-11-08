@@ -96,6 +96,7 @@ export function createSim(script, options = {}) {
     duration: opts.duration,
     pendingTrigger: null,   // { id, until } action requested while the boss was mid-transition
     enraged: false,
+    enragedUntil: Infinity,
     shieldUntil: -Infinity,  // a reflect or damage shield: attacks are wasted and scored until this time
     shieldDamage: 0,
     shieldRoles: null,
@@ -182,6 +183,7 @@ export function createSim(script, options = {}) {
   /** Is the player behind cover from this action (out of its line of sight)? */
   function sheltered(def) {
     const p = state.world.player;
+    if (def.safeIfDebuff && state.debuffs.some((d) => d.on === 'player' && d.actionId === def.safeIfDebuff)) return true;
     return (def.safeSpots || []).some((n) => P[n] && dist(p.x, p.y, P[n].x, P[n].y) <= (def.safeRadius ?? P[n].tolerance ?? 6));
   }
 
@@ -290,6 +292,7 @@ export function createSim(script, options = {}) {
     state.ended = true;
     state.result = result;
     state.endedAt = state.t;
+    updateExpectations();   // a deadline at the end of the last phase is judged, not skipped
     // Anything still pending past its deadline is missed; a window the run ended inside is dropped, not scored.
     for (const i of state.expectations) {
       if (i.status !== 'pending') continue;
@@ -539,6 +542,7 @@ export function createSim(script, options = {}) {
       }
       case 'enrage': {
         state.enraged = true;
+        state.enragedUntil = def.duration ? state.t + def.duration : Infinity;
         toast(def.toast || `${def.label}!`, 'bad');
         break;
       }
@@ -602,6 +606,7 @@ export function createSim(script, options = {}) {
     for (const c of centres) {
       const z = createZone(circlePoints(c.x, c.y, r, 20), def, state.t, def.label, { radius: r, id: `${id}:${++uid}` });
       z.source = id;
+      z.applies = def.applies || null;
       if (def.carried && c.onPlayer) { z.carried = true; z.raidMetric = def.raidMetric || null; z.runTo = runOutPoint(r); toast(`${def.label} on you. Run out of the raid!`, 'bad'); }
       w.hazards.push(z);
     }
@@ -654,6 +659,7 @@ export function createSim(script, options = {}) {
       tickDamage: def.tickDamage || 0, nextTickAt: state.t + 1, actionId: id, tip: def.tip || '',
       stacks: 1, damageTakenMult: def.damageTakenMult ?? null, healingMult: def.healingMult ?? null,
       safeSpots: def.safeSpots || null, shelterAt: def.shelterAt ?? null,
+      forbidAbilities: !!def.forbidAbilities, breakDamage: def.breakDamage || 0, breakMetric: def.breakMetric || null,
     };
     state.debuffs.push(d);
     emit('debuffApplied', { uid: d.uid, name: d.name, dispel: d.dispel, on, duration: def.duration || 10 });
@@ -703,6 +709,13 @@ export function createSim(script, options = {}) {
       onCuePress(state, script, id, state.t, reason);
     };
     if (!A.list.includes(id)) return fail('role');
+    const watched = state.debuffs.find((d) => d.on === 'player' && d.forbidAbilities);
+    if (watched) {
+      // Pressing anything under a debuff like Threatening Gaze is the mistake being rehearsed.
+      if (watched.breakMetric) addMetric(watched.breakMetric, 1);
+      if (watched.breakDamage) damagePlayer(watched.breakDamage, watched.actionId);
+      toast(`You acted under ${watched.name}`, 'bad');
+    }
     if (p.fearedUntil > state.t) return fail('feared', 'Feared');
     if (p.stunnedUntil > state.t) return fail('stunned', 'Stunned');
     if (A.readyAt[id] > state.t) return fail('cooldown');
@@ -923,6 +936,7 @@ export function createSim(script, options = {}) {
       }
     }
 
+    if (state.enraged && state.t >= state.enragedUntil) state.enraged = false;
     p.healMult = debuffMult('player', 'healingMult');
     g.healMult = debuffMult('ghost', 'healingMult');
 
@@ -1027,6 +1041,11 @@ export function createSim(script, options = {}) {
       if (h.state !== 'active' && h.kind !== 'crack') continue;
       const inside = hazardAt([h], p.x, p.y);
       if (!inside) continue;
+      if (h.applies) {
+        // A cloud you stand in on purpose: Hakkar's poison.
+        if (script.actions[h.applies] && !state.debuffs.some((d) => d.on === 'player' && d.actionId === h.applies)) applyDebuff(script.actions[h.applies], h.applies);
+        continue;
+      }
       if (h.kind === 'crack') {
         addMetric('playerInCrack', dt);
         inHazard = true;

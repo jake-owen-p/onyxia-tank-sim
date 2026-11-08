@@ -180,9 +180,9 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
     } else if (hz.state === 'active') {
       const pulse = 0.75 + 0.25 * Math.sin(now * 14);
       ctx.globalAlpha = hazAlpha * pulse;
-      ctx.fillStyle = pal.hazardActiveFill;
+      ctx.fillStyle = hz.applies ? withAlpha(pal.good, 0.28) : pal.hazardActiveFill;
       ctx.beginPath(); tracePoly(ctx, hz.poly); ctx.fill();
-      ctx.strokeStyle = pal.hazardActive; ctx.lineWidth = lw(2.5);
+      ctx.strokeStyle = hz.applies ? pal.good : pal.hazardActive; ctx.lineWidth = lw(2.5);
       ctx.stroke();
       ctx.globalAlpha = 1;
     }

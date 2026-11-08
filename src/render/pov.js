@@ -162,10 +162,10 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
     } else if (hz.state === 'active') {
       const pulse = 0.75 + 0.25 * Math.sin(now * 14);
       ctx.globalAlpha = hazAlpha * pulse;
-      floorPoly(ctx, cam, poly3, w, h, pal.hazardActiveFill, pal.hazardActive, 2.5);
+      floorPoly(ctx, cam, poly3, w, h, hz.applies ? withAlpha(pal.good, 0.28) : pal.hazardActiveFill, hz.applies ? pal.good : pal.hazardActive, 2.5);
       // low flame wall along the edge: a second polygon raised slightly, translucent
       ctx.globalAlpha = hazAlpha * 0.35;
-      floorPoly(ctx, cam, hz.poly.map(([x, y]) => [x, y, 2.5]), w, h, withAlpha(pal.hazardActive, 0.35), null);
+      floorPoly(ctx, cam, hz.poly.map(([x, y]) => [x, y, 2.5]), w, h, withAlpha(hz.applies ? pal.good : pal.hazardActive, 0.35), null);
       ctx.globalAlpha = 1;
     }
   }
