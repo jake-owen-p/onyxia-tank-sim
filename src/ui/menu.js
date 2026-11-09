@@ -2,6 +2,7 @@
 // cards, drill list, Settings / History. Also the History screen and the Pause menu.
 
 import { h, button, arrowNav } from './overlay.js';
+import { bossPortrait, abilityIcon } from './art.js';
 import { drillsForRole, tutorialForRole, resolveRole } from '../app/modes.js';
 
 const HINTS = [['WASD', 'move'], ['Q / E', 'strafe'], ['Space', 'jump'], ['Right-drag', 'turn'], ['1–5', 'abilities'], ['Tab', 'view'], ['Esc', 'menu']];
@@ -26,7 +27,8 @@ function bestChip(history, key) {
 /** Segmented control for the roles this encounter offers. */
 function roleSwitch(script, settings, onChange) {
   const roles = Object.entries(script.roles || { tank: { label: 'Main tank', short: 'Tank' } });
-  const btns = roles.map(([id, r]) => button(r.short || r.label, () => { settings.role = id; sync(); onChange(); }, { class: 'seg-btn', title: r.description || r.label }));
+  const icons = { tank: 'taunt', offtank: 'taunt', melee: 'attack', ranged: 'dispel', healer: 'heal' };
+  const btns = roles.map(([id, r]) => button(h('span', { class: 'role-choice' }, abilityIcon(icons[id] || 'attack', 30), h('span', { text: r.short || r.label })), () => { settings.role = id; sync(); onChange(); }, { class: 'seg-btn', title: r.description || r.label }));
   function sync() { const cur = resolveRole(script, settings.role); btns.forEach((b, i) => { b.classList.toggle('on', roles[i][0] === cur); b.setAttribute('aria-pressed', roles[i][0] === cur); }); }
   sync();
   return h('div', { class: 'seg', role: 'group', 'aria-label': 'Role' }, ...btns);
@@ -38,12 +40,14 @@ function encounterPicker(index, current, onPick) {
   const curRaid = raids.find((r) => r.id === current.raid) || raids[0];
   const tabs = raids.map((r) => {
     const ready = r.bosses.filter((b) => b.status === 'ready').length;
-    return button(h('span', { class: 'raid-tab-inner' }, h('span', { class: 'raid-name', text: r.name }), h('span', { class: 'raid-count', text: ready ? `${ready}/${r.bosses.length}` : 'soon' })),
+    return button(h('span', { class: 'raid-tab-inner' }, bossPortrait(r.id, r.bosses[0]?.id, 30), h('span', { class: 'raid-name', text: r.name }), h('span', { class: 'raid-count', text: ready ? `${ready}/${r.bosses.length}` : 'soon' })),
       () => onPick(r.id, (r.bosses.find((b) => b.status === 'ready') || r.bosses[0] || {}).id), { class: 'raid-tab' + (curRaid && r.id === curRaid.id ? ' on' : '') + (ready ? '' : ' empty') });
   });
-  const bosses = curRaid ? curRaid.bosses.map((b) => button(b.name, () => onPick(curRaid.id, b.id), { class: 'boss-chip' + (b.id === current.boss ? ' on' : '') + (b.status === 'ready' ? '' : ' draft'), title: b.status === 'ready' ? b.name : `${b.name}: encounter data still being researched` })) : [];
+  const bosses = curRaid ? curRaid.bosses.map((b) => button(h('span', { class: 'boss-item' }, bossPortrait(curRaid.id, b.id, 30), h('span', { text: b.name })), () => onPick(curRaid.id, b.id), { class: 'boss-chip' + (b.id === current.boss ? ' on' : '') + (b.status === 'ready' ? '' : ' draft'), title: b.status === 'ready' ? b.name : `${b.name}: encounter data still being researched` })) : [];
   return h('section', { class: 'picker' },
-    h('div', { class: 'raid-tabs' }, ...tabs),
+    h('h3', { class: 'list-heading', text: 'Raids' }),
+    h('div', { class: 'raid-tabs', role: 'group', 'aria-label': 'Raids' }, ...tabs),
+    h('h3', { class: 'list-heading encounter-heading', text: 'Encounters' }),
     h('div', { class: 'boss-chips' }, ...(bosses.length ? bosses : [h('span', { class: 'muted', text: 'Encounters for this raid are being researched. Pick another raid for now.' })])),
   );
 }
@@ -76,45 +80,64 @@ export function menuScreen({ script, index, current, settings, history, actions 
   const hasTutorial = tutorialForRole(script, role);
 
   const el = h('div', { class: 'panel panel-menu' },
-    h('header', { class: 'menu-top' },
-      h('div', { class: 'brand' },
-        h('div', { class: 'brand-kicker', text: `${(script.raidInfo && script.raidInfo.name) || 'Raid rehearsal'} · ${script.raidInfo && script.raidInfo.size ? script.raidInfo.size + '-man' : ''}` }),
-        h('h1', { class: 'brand-title', text: script.name }),
-        h('p', { class: 'brand-sub', text: `${script.arena.name} · script v${script.version}` }),
-      ),
-      h('div', { class: 'menu-tools' },
-        button('Settings', actions.settings, { class: 'btn-ghost' }),
-        button('History', actions.history, { class: 'btn-ghost' }),
+    h('header', { class: 'journal-header' },
+      h('span', { class: 'journal-seal' }, abilityIcon('taunt', 34)),
+      h('div', {}, h('h1', { text: 'Encounter Journal' }), h('div', { class: 'journal-sub', text: 'Classic raid rehearsal' })),
+      h('span', { class: 'journal-level', text: 'Level 60' }),
+    ),
+    h('div', { class: 'journal-body' },
+      encounterPicker(index, current, actions.pick),
+      h('main', { class: 'encounter-page' },
+        h('header', { class: 'boss-hero' },
+          bossPortrait(current.raid, current.boss, 124),
+          h('div', { class: 'brand' },
+            h('div', { class: 'brand-kicker', text: `${script.raidInfo?.name || 'Raid'} · ${script.raidInfo?.size || 40} players` }),
+            h('h2', { class: 'brand-title', text: script.name }),
+            h('p', { class: 'brand-sub', text: script.arena.name }),
+            h('div', { class: 'boss-status', text: `${script.phases.length} ${script.phases.length === 1 ? 'phase' : 'phases'} · ${drillList.length} ${drillList.length === 1 ? 'drill' : 'drills'}` }),
+          ),
+        ),
+        h('div', { class: 'journal-paper' },
+          h('section', { class: 'role-row' },
+            h('h3', { class: 'section-label-inline', text: 'Choose your role' }),
+            roleSwitch(script, settings, () => { actions.settingsChanged && actions.settingsChanged(); actions.pick(current.raid, current.boss); }),
+            h('p', { class: 'role-desc', text: roleDef.description || '' }),
+          ),
+          h('div', { class: 'hero' + (hasTutorial ? '' : ' single') },
+            button(h('span', { class: 'card-inner' },
+              h('span', { class: 'card-kicker', text: 'Enter encounter' }),
+              h('span', { class: 'card-title', text: 'Full fight' }),
+              h('span', { class: 'card-sub', text: `${script.phases.length === 1 ? 'The whole pull' : `All ${script.phases.length} phases`}, start to finish` }),
+              bestChip(history, key('full')) || h('span', { class: 'best-chip empty', text: 'No run yet' }),
+            ), actions.full, { class: 'card card-primary', autofocus: true }),
+            hasTutorial ? button(h('span', { class: 'card-inner' },
+              h('span', { class: 'card-kicker', text: 'Learn the encounter' }),
+              h('span', { class: 'card-title', text: 'Tutorial' }),
+              h('span', { class: 'card-sub', text: 'One mechanic at a time' }),
+              h('span', { class: 'best-chip empty', text: `${script.tutorial.steps.length} steps` }),
+            ), actions.tutorial, { class: 'card' }) : null,
+          ),
+          h('section', { class: 'drills' },
+            h('div', { class: 'section-row' },
+              h('h3', { class: 'section-label', text: 'Practice drills' }),
+              h('span', { class: 'section-note', text: drillList.length ? 'One mechanic at a time' : 'No drills for this role yet' }),
+            ),
+            h('ul', { class: 'drill-list' }, ...drills),
+          ),
+        ),
       ),
     ),
-    encounterPicker(index, current, actions.pick),
-    h('div', { class: 'role-row' },
-      h('div', {}, h('div', { class: 'section-label-inline', text: 'Play as' }), roleSwitch(script, settings, () => { actions.settingsChanged && actions.settingsChanged(); actions.pick(current.raid, current.boss); })),
-      h('p', { class: 'role-desc', text: roleDef.description || '' }),
-    ),
-    h('div', { class: 'hero' + (hasTutorial ? '' : ' single') },
-      button(h('span', { class: 'card-inner' },
-        h('span', { class: 'card-kicker', text: 'Play' }),
-        h('span', { class: 'card-title', text: 'Full fight' }),
-        h('span', { class: 'card-sub', text: `${script.phases.length === 1 ? 'The whole pull' : `All ${script.phases.length} phases`}, start to finish` }),
-        bestChip(history, key('full')) || h('span', { class: 'best-chip empty', text: 'No run yet' }),
-      ), actions.full, { class: 'card card-primary', autofocus: true }),
-      hasTutorial ? button(h('span', { class: 'card-inner' },
-        h('span', { class: 'card-kicker', text: 'Learn' }),
-        h('span', { class: 'card-title', text: 'Tutorial' }),
-        h('span', { class: 'card-sub', text: 'One mechanic at a time' }),
-        h('span', { class: 'best-chip empty', text: `${script.tutorial.steps.length} steps` }),
-      ), actions.tutorial, { class: 'card' }) : null,
-    ),
-    h('section', { class: 'drills' },
-      h('div', { class: 'section-row' },
-        h('h3', { class: 'section-label', text: 'Drills' }),
-        h('span', { class: 'section-note', text: drillList.length ? 'Short loops of one mechanic' : 'No drills for this role yet' }),
-      ),
-      h('ul', { class: 'drill-list' }, ...drills),
+    h('nav', { class: 'journal-tabs', 'aria-label': 'Journal pages' },
+      h('span', { class: 'journal-tab active', text: 'Raids', 'aria-current': 'page' }),
+      button('History', actions.history, { class: 'journal-tab' }),
+      button('Settings', actions.settings, { class: 'journal-tab' }),
     ),
     hintBar(HINTS),
   );
+  requestAnimationFrame(() => {
+    const selected = el.querySelector('.boss-chip.on');
+    if (selected && el.isConnected) selected.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
   return arrowNav(el);
 }
 
@@ -163,7 +186,7 @@ export function pauseScreen({ settings, onResume, onRestart, onSettings, onQuit,
   speed.addEventListener('input', () => { settings.speed = parseFloat(speed.value); speedVal.textContent = pct(settings.speed); if (onSpeed) onSpeed(settings.speed); });
   const el = h('div', { class: 'panel panel-pause' },
     h('div', { class: 'kicker', text: 'Run paused' }),
-    h('h2', { text: 'Paused' }),
+    h('h2', { text: 'Game Menu' }),
     h('div', { class: 'actions stack' },
       button('Resume', onResume, { primary: true, autofocus: true, title: 'Esc' }),
       button('Restart', onRestart),

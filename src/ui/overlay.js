@@ -33,7 +33,7 @@ export function createOverlay(root) {
       root.classList.add('has-screen');
       // Focus the first focusable element so keyboard users can act immediately.
       requestAnimationFrame(() => {
-        const f = panelEl.querySelector('[autofocus], button, [href], input, select, [tabindex]:not([tabindex="-1"])');
+        const f = panelEl.querySelector('[autofocus]') || panelEl.querySelector('button, [href], input, select, [tabindex]:not([tabindex="-1"])');
         if (f) f.focus({ preventScroll: true });
       });
       return panelEl;
@@ -68,7 +68,12 @@ export function h(tag, attrs = {}, ...children) {
     else if (k === 'text') el.textContent = v;
     else if (k === 'html') el.innerHTML = v;
     else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v);
-    else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+    else if (k === 'style' && typeof v === 'object') {
+      for (const [name, value] of Object.entries(v)) {
+        if (name.startsWith('--')) el.style.setProperty(name, value);
+        else el.style[name] = value;
+      }
+    }
     else if (k in el && typeof v !== 'string') el[k] = v;
     else el.setAttribute(k, v === true ? '' : v);
   }

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+<defs><linearGradient id="stone" x2="1" y2="1"><stop stop-color="#c4c2ab"/><stop offset=".18" stop-color="#575e5c"/><stop offset=".5" stop-color="#333b3d"/><stop offset=".73" stop-color="#939787"/><stop offset="1" stop-color="#252d2f"/></linearGradient><linearGradient id="gold" x2=".2" y2="1"><stop stop-color="#ecd48c"/><stop offset=".4" stop-color="#9c8247"/><stop offset="1" stop-color="#554126"/></linearGradient><g id="corner"><path d="M2 2H23L18 7 20 17 15 21 6 18 2 23Z" fill="url(#stone)" stroke="#101719"/><path d="M4 4H18L15 7 17 14 13 17 7 15 4 18Z" fill="none" stroke="#b1a575"/><path d="M8 6L15 9 13 15 7 12Z" fill="url(#gold)" stroke="#191c19"/><circle cx="11" cy="10" r="2.3" fill="#d5c48a" stroke="#4a442f"/><path d="M5 22L9 20 18 23M22 5L20 9 23 18" fill="none" stroke="#0b1112" stroke-width="1.5"/></g></defs>
+<path d="M1 1H119V119H1ZM20 20V100H100V20Z" fill="url(#stone)" fill-rule="evenodd" stroke="#0c1011" stroke-width="2"/>
+<path d="M3 3H117V117H3Z" fill="none" stroke="#c0ad76"/><path d="M6 6H114V114H6Z" fill="none" stroke="#202727" stroke-width="3"/>
+<path d="M12 12H108V108H12Z" fill="none" stroke="#858b7f" stroke-width="6"/>
+<path d="M15 15H105V105H15Z" fill="none" stroke="#2c3333" stroke-width="2"/>
+<path d="M19 19H101V101H19Z" fill="none" stroke="url(#gold)" stroke-width="2"/>
+<path d="M22 22H98V98H22Z" fill="none" stroke="#050809" stroke-width="3"/>
+<g stroke="#b5b8a4" stroke-opacity=".28" fill="none"><path d="M26 8L30 11 36 9 42 14 46 10 53 13 59 9 64 13 69 10 75 14 80 11 87 12 94 8M26 111L33 107 39 111 47 107 52 111 59 108 64 111 71 106 77 109 85 108 94 112M9 26L12 33 9 40 13 48 10 54 13 60 9 67 12 75 9 81 12 88 8 95M110 26L107 34 111 41 107 47 112 55 108 62 111 68 107 75 111 81 108 88 111 94"/></g>
+<use href="#corner"/><use href="#corner" transform="translate(120 0) rotate(90)"/><use href="#corner" transform="translate(120 120) rotate(180)"/><use href="#corner" transform="translate(0 120) rotate(270)"/>
+</svg>

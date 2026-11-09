@@ -1,731 +1,1430 @@
-// Shared HUD layer drawn over either view. Reads only the view object and
-// settings; never mutates them. Layout scales with the base unit `u`.
+// Classic-inspired HUD. Pure view reader; only presentation history is retained.
+// Static chrome and original artwork are cached by ui/art.js.
+import { getBossPortrait } from './portraits.js';
+import {
+  C,
+  UI_FONT,
+  TITLE_FONT,
+  frame,
+  statusBar,
+  socket,
+  icon,
+  portrait,
+  portraitRing,
+  wing,
+  elite,
+  label,
+  wrapped,
+  fit,
+  gradient,
+  circle,
+  poly,
+} from './ui/art.js';
 
-import { roundRect, drawIcon, drawTick, drawCross } from './shapes.js';
-import { withAlpha, actionColor } from './palette.js';
+const SHORT = {
+  taunt: 'Taunt',
+  attack: 'Attack',
+  heal: 'Heal',
+  dispel: 'Dispel',
+  interrupt: 'Interrupt',
+};
+const ROLE = {
+  tank: 'Main tank',
+  offtank: 'Off-tank',
+  melee: 'Melee',
+  ranged: 'Ranged',
+  healer: 'Healer',
+};
+const history = new WeakMap();
+const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const formatTime = (t) =>
+  `${Math.floor(Math.max(0, t) / 60)}:${String(Math.floor(Math.max(0, t) % 60)).padStart(2, '0')}`;
+const good = (settings) => (settings.colorblind ? '#75d9ff' : '#6df176');
 
-const SHORT_LABEL = { taunt: 'Taunt', attack: 'Attack', heal: 'Heal', dispel: 'Dispel', interrupt: 'Kick' };
-const abilityOrder = (view) => (view.abilities && view.abilities.list ? view.abilities.list : ['taunt']);
-
-function font(ctx, pal, px, weight = 600, display = false) {
-  ctx.font = `${weight} ${Math.round(px)}px ${display ? pal.fontDisplay : pal.font}`;
-}
-
-function text(ctx, str, x, y, align = 'left', baseline = 'middle') {
-  ctx.textAlign = align;
-  ctx.textBaseline = baseline;
-  ctx.fillText(str, x, y);
-}
-
-/** Stroke width that scales with the HUD unit (1px at 13", ~2px at 4K). */
-const lw = (u, k = 1) => Math.max(1, (u / 16) * k);
-
-function panel(ctx, pal, x, y, w, h, r = 8, u = 16) {
-  roundRect(ctx, x, y, w, h, r);
-  ctx.fillStyle = pal.panel; ctx.fill();
-  ctx.strokeStyle = pal.panelEdge; ctx.lineWidth = lw(u); ctx.stroke();
-}
-
-function bar(ctx, x, y, w, h, frac, fg, bg, r = 4) {
-  roundRect(ctx, x, y, w, h, r);
-  ctx.fillStyle = bg; ctx.fill();
-  if (frac > 0) {
-    ctx.save();
-    roundRect(ctx, x, y, w, h, r); ctx.clip();
-    ctx.fillStyle = fg;
-    ctx.fillRect(x, y, w * Math.min(1, frac), h);
-    ctx.restore();
-  }
-}
-
-/**
- * Draw the HUD.
- * @param threatRatioFn (threat) -> 0..1 danger fill
- */
-export function drawHUD(ctx, view, script, settings, pal, w, h, now, abilityKeys = {}, overlay = {}, threatRatioFn = null) {
-  if (overlay.idle) return;   // menu backdrop: world only, no HUD
-  const u = Math.max(12, Math.min(32, Math.min(w, h) / 45));
-  const t = view.t;
-  const wd = view.world;
-  const narrow = w < h;
-
+export function drawHUD(
+  ctx,
+  view,
+  script,
+  settings,
+  pal,
+  w,
+  h,
+  now,
+  abilityKeys = {},
+  overlay = {},
+  threatRatioFn = null,
+) {
+  if (overlay.idle) return;
+  const mobile = w < 680;
+  const s = mobile ? 0.8 : clamp(Math.min(w / 1440, h / 900), 0.82, 1.5);
+  const state = track(ctx, view, script, !!overlay.replay);
   ctx.save();
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
-
-  drawEdgeFeedback(ctx, view, pal, w, h, now);
-  drawPhaseBlock(ctx, view, script, pal, u, w, h, t);
-  drawCastBar(ctx, view, pal, u, w, h, t);
-  drawWarnings(ctx, view, script, settings, pal, u, w, h, t, now);
-  drawFeedbackTick(ctx, view, pal, u, w, h, t);
-  drawToast(ctx, view, pal, u, w, h, t);
-  drawCorner(ctx, view, settings, pal, u, w, h, overlay);
-
-  // bottom stack: timeline, abilities, threat, hp. In replay the DOM scrubber
-  // owns the bottom of the screen, so only the threat bar and HP remain.
-  let threatY;
-  const threatH = u * 0.95;
+  edgeFeedback(ctx, view, w, h, now);
+  unitFrames(ctx, view, script, settings, w, s, mobile);
+  raidFrames(ctx, view, script, settings, s, mobile);
+  debuffs(ctx, view, s, mobile, w);
+  const objectiveBottom = objective(
+    ctx,
+    view,
+    script,
+    settings,
+    w,
+    h,
+    s,
+    mobile,
+  );
+  timers(ctx, view, settings, w, h, s, mobile, objectiveBottom, !!overlay.replay);
+  threat(
+    ctx,
+    view,
+    script,
+    settings,
+    w,
+    h,
+    s,
+    mobile,
+    threatRatioFn,
+    !!overlay.replay,
+  );
+  chat(ctx, state, view, w, h, s, mobile, !!overlay.replay);
+  const layout = actionLayout(w, h, s, mobile, overlay);
+  if (!overlay.replay) {
+    actionChrome(ctx, layout);
+    if (settings.cueLane !== false && view.cues)
+      noteLane(ctx, view, script, settings, layout, now);
+    abilities(ctx, view, script, settings, layout, abilityKeys);
+  }
+  warnings(ctx, view, settings, w, h, s, mobile, now, state);
+  floating(ctx, view, state, settings, w, h, s, mobile);
+  if (view.world.player.fearedUntil > view.t) {
+    label(
+      ctx,
+      'FEARED',
+      w / 2 + Math.sin(now * 30) * 2,
+      h * (mobile ? 0.47 : 0.39),
+      30 * s,
+      '#dfb3ff',
+      'center',
+      true,
+    );
+    label(
+      ctx,
+      `${(view.world.player.fearedUntil - view.t).toFixed(1)}s`,
+      w / 2,
+      h * (mobile ? 0.47 : 0.39) + 30 * s,
+      14 * s,
+      '#dfb3ff',
+      'center',
+    );
+  }
   if (overlay.replay) {
-    threatY = h - u * 9 - threatH;   // clear of the ~7u DOM replay bar
+    const rx = mobile ? w / 2 : w * 0.64;
+    label(
+      ctx,
+      `Replay  ${formatTime(overlay.replay.t)} / ${formatTime(overlay.replay.duration)}${overlay.replay.playing ? '' : '  ·  Paused'}`,
+      rx,
+      mobile ? h - 190 : 24 * s,
+      13 * s,
+      C.gold,
+      'center',
+      true,
+    );
+    label(
+      ctx,
+      'Space: play/pause · Tab: view · Esc: scorecard',
+      rx,
+      mobile ? h - 169 : 45 * s,
+      10 * s,
+      C.muted,
+      'center',
+    );
   } else {
-    const timelineH = u * 2.2;
-    const timelineY = h - u * 0.9 - timelineH;
-    drawTimeline(ctx, view, script, settings, pal, u, w, h, timelineY, timelineH, narrow);
-    const iconSize = u * 2.7;
-    const abilityY = timelineY - u * 0.7 - iconSize;
-    const lay = abilityLayout(u, w, iconSize, abilityOrder(view));
-    if (settings.cueLane !== false && view.cues) {
-      const laneH = u * 5.5;
-      const laneY = abilityY - u * 0.3 - laneH;
-      drawLane(ctx, view, script, settings, pal, u, w, lay, laneY, abilityY, t, now);
-      threatY = laneY - u * 0.55 - threatH;
-    } else {
-      threatY = abilityY - u * 0.6 - threatH;
-    }
-    drawAbilities(ctx, view, script, pal, u, lay, abilityY, abilityKeys, t);
+    const mode = `${settings.view === 'topdown' ? 'Map' : 'POV'}  ·  Tab: view  ·  Esc: menu${settings.speed !== 1 && settings.speed ? `  ·  ${Math.round(settings.speed * 100)}% speed` : ''}`;
+    label(ctx, mode, w / 2, h - 9 * s, mobile ? 9 : 10 * s, C.muted, 'center');
   }
-  drawThreat(ctx, view, script, pal, u, w, threatY, threatH, threatRatioFn, t);
-  drawPlayerHp(ctx, view, pal, u, w, threatY - u * 0.35 - u * 0.4, u * 0.4);
-  if (view.tankRole === false && view.world.ghost && view.world.ghost.tanking) drawTankHp(ctx, view, script, pal, u, w, threatY - u * 0.35 - u * 0.4 - u * 0.95, u * 0.6);
-  if (view.debuffs && view.debuffs.length) drawDebuffTray(ctx, view, pal, u, w, h, t);
-
-  if (wd.player.fearedUntil > t) drawFeared(ctx, pal, u, w, h, now);
-  if (overlay.replay) drawReplayHud(ctx, overlay.replay, pal, u, w, h);
-  if (overlay.paused) drawPaused(ctx, pal, u, w, h);
+  // DOM pause owns its window. A small status stays clear of it on a split HUD canvas.
+  if (overlay.paused)
+    label(
+      ctx,
+      'Paused  ·  Esc to resume',
+      w / 2,
+      h - 95 * s,
+      15 * s,
+      C.gold,
+      'center',
+      true,
+    );
   ctx.restore();
 }
 
-// ------------------------------------------------------------------ edges
+function unitFrames(c, v, script, settings, w, s, mobile) {
+  const x = 18 * s,
+    y = 24 * s,
+    pw = (mobile ? 230 : 250) * s,
+    ph = 72 * s;
+  frame(c, x + 43 * s, y + 7 * s, pw - 43 * s, 57 * s, true);
+  const ps = 64 * s;
+  portrait(c, `player:${v.role}`, x, y, ps);
+  portraitRing(c, x, y, ps);
+  const bx = x + 67 * s,
+    bw = pw - 73 * s;
+  c.fillStyle = '#171a15';
+  c.fillRect(bx, y + 12 * s, bw, 16 * s);
+  label(
+    c,
+    ROLE[v.role] || 'Adventurer',
+    bx + bw / 2,
+    y + 20 * s,
+    13 * s,
+    C.light,
+    'center',
+    true,
+  );
+  const p = v.world.player,
+    pct = Math.round((100 * p.hp) / p.maxHp);
+  statusBar(
+    c,
+    bx,
+    y + 31 * s,
+    bw,
+    17 * s,
+    p.hp / p.maxHp,
+    settings.colorblind ? '#228ac7' : C.green,
+  );
+  label(
+    c,
+    `${Math.ceil(p.hp)} / ${p.maxHp}  (${pct}%)`,
+    bx + bw / 2,
+    y + 39 * s,
+    10 * s,
+    '#fff',
+    'center',
+  );
+  // There is no mana in this simulation: blue strip represents actual GCD recovery.
+  const gcd = Math.max(0, (v.abilities.gcdUntil || 0) - v.t),
+    recovery = 1 - clamp(gcd / (script.gcd || 1.5), 0, 1);
+  statusBar(c, bx, y + 49 * s, bw, 9 * s, recovery, C.blue);
+  circle(c, x + 9 * s, y + 59 * s, 10 * s, '#1e2325', '#b2a16c', 2 * s);
+  label(c, '60', x + 9 * s, y + 59 * s, 10 * s, C.light, 'center');
+  label(
+    c,
+    gcd ? `Recovering ${gcd.toFixed(1)}s` : 'Ready',
+    bx + bw / 2,
+    y + 54 * s,
+    8 * s,
+    '#c6dcff',
+    'center',
+  );
 
-function drawEdgeFeedback(ctx, view, pal, w, h, now) {
-  const fb = view.feedback;
-  let color = null, strength = 0;
-  if (fb.facingWrong) { color = pal.vignetteBad; strength = 0.55 + 0.45 * Math.sin(now * 5); }
-  else if (fb.inHazard) { color = pal.vignetteHazard; strength = 0.6 + 0.4 * Math.sin(now * 8); }
-  if (!color) return;
-  const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.max(w, h) * 0.75);
-  g.addColorStop(0, 'rgba(0,0,0,0)');
-  g.addColorStop(1, color);
-  ctx.globalAlpha = 0.35 + 0.4 * strength;
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, w, h);
-  ctx.globalAlpha = 1;
+  const tx = mobile ? 16 * s : x + pw + 30 * s,
+    ty = mobile ? 108 * s : y,
+    tw = (mobile ? 230 : 280) * s;
+  const ts = 63 * s,
+    px = tx + tw - ts - 3 * s;
+  frame(c, tx, ty + 10 * s, tw - 35 * s, 57 * s, true);
+  c.fillStyle = gradient(c, tx, ty, tw, 0, [
+    [0, '#311315'],
+    [1, '#642024'],
+  ]);
+  c.fillRect(tx + 7 * s, ty + 16 * s, tw - ts - 9 * s, 17 * s);
+  label(
+    c,
+    fitName(c, script.name, tw - ts - 16 * s, 13 * s),
+    tx + 13 * s,
+    ty + 24 * s,
+    13 * s,
+    C.light,
+    'left',
+    true,
+  );
+  const hpw = tw - ts - 12 * s;
+  statusBar(c, tx + 7 * s, ty + 35 * s, hpw, 21 * s, v.hp ?? 1, '#b82625');
+  label(
+    c,
+    `${Math.round((v.hp ?? 1) * 100)}%`,
+    tx + 7 * s + hpw / 2,
+    ty + 45 * s,
+    12 * s,
+    '#fff',
+    'center',
+  );
+  const source = getBossPortrait(
+    script.raidInfo?.id,
+    script.id,
+    Math.ceil(ts * 2),
+  );
+  c.save();
+  circle(c, px + ts / 2, ty + ts / 2 + 6 * s, ts / 2);
+  c.clip();
+  if (source && c.drawImage) c.drawImage(source, px, ty + 6 * s, ts, ts);
+  else portrait(c, `${script.raidInfo?.id}:${script.id}`, px, ty + 6 * s, ts);
+  c.restore();
+  portraitRing(c, px, ty + 6 * s, ts);
+  elite(c, tx - 5 * s, ty - 4 * s, tw + 18 * s, 85 * s);
+  // Skull level badge uses original skull art at a readable size.
+  circle(c, px + ts - 5 * s, ty + 65 * s, 12 * s, '#241a15', '#b59a57', 2 * s);
+  skull(c, px + ts - 5 * s, ty + 65 * s, 15 * s);
+  label(
+    c,
+    'Elite',
+    tx + hpw / 2 + 6 * s,
+    ty + 63 * s,
+    9 * s,
+    C.gold,
+    'center',
+    true,
+  );
+  const cast = v.world.boss.cast;
+  if (cast) {
+    const cy = ty + 84 * s,
+      ch = 20 * s,
+      iw = 24 * s,
+      ww = tw - 15 * s;
+    socket(c, tx, cy - 3 * s, iw);
+    icon(c, cast.icon || cast.id, tx + 3 * s, cy, iw - 6 * s);
+    frame(c, tx + iw + 3 * s, cy, ww - iw, ch);
+    statusBar(
+      c,
+      tx + iw + 6 * s,
+      cy + 3 * s,
+      ww - iw - 6 * s,
+      ch - 6 * s,
+      clamp((v.t - cast.start) / Math.max(0.01, cast.end - cast.start), 0, 1),
+      '#caa43c',
+    );
+    label(
+      c,
+      fitName(c, cast.label, ww - iw - 47 * s, 10 * s),
+      tx + iw + 9 * s,
+      cy + ch / 2,
+      10 * s,
+      '#fff',
+    );
+    label(
+      c,
+      `${Math.max(0, cast.end - v.t).toFixed(1)}s`,
+      tx + ww - 6 * s,
+      cy + ch / 2,
+      10 * s,
+      C.light,
+      'right',
+    );
+  }
+}
+function fitName(c, str, width, size) {
+  size = Math.max(9, size);
+  c.font = `400 ${size}px ${TITLE_FONT}`;
+  return fit(c, str, width);
+}
+function skull(c, x, y, size) {
+  c.save();
+  c.translate(x - size / 2, y - size / 2);
+  c.scale(size / 20, size / 20);
+  circle(c, 10, 8, 7, '#e5ddc2', '#29241c', 1);
+  poly(
+    c,
+    [
+      [5, 10],
+      [15, 10],
+      [14, 18],
+      [6, 18],
+    ],
+    '#d8cfb0',
+  );
+  circle(c, 7, 8, 2, '#151515');
+  circle(c, 13, 8, 2, '#151515');
+  poly(
+    c,
+    [
+      [10, 10],
+      [8, 13],
+      [12, 13],
+    ],
+    '#191918',
+  );
+  for (let i = 0; i < 3; i++) {
+    c.fillStyle = '#615b4c';
+    c.fillRect(7 + i * 3, 15, 1, 3);
+  }
+  c.restore();
 }
 
-// ------------------------------------------------------------------ phase + next expected
-
-function drawPhaseBlock(ctx, view, script, pal, u, w, h, t) {
-  const x = u, y = u, pw = Math.min(u * 15, w * 0.42), ph = u * 4.3;
-  panel(ctx, pal, x, y, pw, ph, u * 0.5, u);
-  font(ctx, pal, u * 1.05, 700, true);
-  ctx.fillStyle = pal.text;
-  text(ctx, fit(ctx, (view.phaseName || 'Phase').toUpperCase(), pw - u * 1.6), x + u * 0.8, y + u * 0.95);
-  const nameW = ctx.measureText ? measure(ctx, pal, u, (view.phaseName || 'Phase').toUpperCase()) : u * 5;
-  font(ctx, pal, u * 0.72, 500);
-  ctx.fillStyle = pal.textDim;
-  const subRoom = pw - u * 1.6 - nameW - u * 0.5;
-  if (subRoom > u * 2) text(ctx, fit(ctx, view.phaseSubtitle || '', subRoom), x + u * 0.8 + nameW + u * 0.5, y + u * 1.0);
-  // boss hp
-  const hpPct = Math.max(0, Math.min(100, Math.round((view.hp ?? 1) * 100)));
-  const bx = x + u * 0.8, by = y + u * 1.75, bw = pw - u * 1.6, bh = u * 0.75;
-  bar(ctx, bx, by, bw, bh, view.hp ?? 1, pal.hp, pal.hpBg, bh / 2);
-  font(ctx, pal, u * 0.62, 700);
-  ctx.fillStyle = pal.text;
-  text(ctx, fit(ctx, `${(script.name || 'Boss').toUpperCase()}  ${hpPct}%`, bw - u), bx + bw / 2, by + bh / 2, 'center');
-  // next expected
-  const ne = view.nextExpected;
-  if (ne) {
-    const ny = y + u * 3.45;
-    const color = ne.kind === 'fix' ? pal.bad : ne.kind === 'expectation' ? pal.accent : ne.kind === 'hint' ? pal.warn : pal.textDim;
-    ctx.fillStyle = color;
-    ctx.beginPath(); ctx.arc(bx + u * 0.3, ny, u * 0.22, 0, Math.PI * 2); ctx.fill();
-    font(ctx, pal, u * 0.72, 600);
-    let label = ne.label;
-    if (ne.deadline != null) {
-      const left = ne.deadline - t;
-      label += left >= 0 ? `  ·  ${Math.max(0, Math.ceil(left))}s` : `  ·  +${Math.ceil(-left)}s`;
+function raidFrames(c, v, script, settings, s, mobile) {
+  const x = 18 * s,
+    y = (mobile ? 230 : 155) * s,
+    ww = (mobile ? 153 : 192) * s;
+  label(c, 'Raid', x, y, 13 * s, C.gold, 'left', true);
+  const tank = v.tankRole !== false ? v.world.player : v.world.ghost;
+  if (tank) {
+    const frac = clamp(tank.hp / tank.maxHp, 0, 1),
+      low = frac < (script.ghostTank?.lowHp ?? 0.5),
+      yy = y + 14 * s;
+    frame(c, x, yy, ww, 45 * s);
+    statusBar(
+      c,
+      x + 4 * s,
+      yy + 4 * s,
+      ww - 8 * s,
+      35 * s,
+      frac,
+      low ? '#c52d26' : settings.colorblind ? '#228ac7' : '#27993a',
+    );
+    label(
+      c,
+      v.tankRole !== false ? 'Main tank · You' : 'Main tank',
+      x + 9 * s,
+      yy + 14 * s,
+      11 * s,
+      '#fff',
+    );
+    label(
+      c,
+      `${Math.round(frac * 100)}%${low ? '  HEAL' : ''}`,
+      x + ww - 8 * s,
+      yy + 31 * s,
+      14 * s,
+      low ? '#ffe08c' : '#fff',
+      'right',
+    );
+    if (low) {
+      c.strokeStyle = '#ff4a32';
+      c.lineWidth = 2 * s;
+      c.strokeRect(x, yy, ww, 45 * s);
     }
-    ctx.fillStyle = ne.kind === 'fix' ? pal.bad : pal.text;
-    text(ctx, fit(ctx, label, bw - u * 0.9), bx + u * 0.8, ny);
+    const tankDebuffs = (v.debuffs || [])
+      .filter((d) => d.on === (v.tankRole !== false ? 'player' : 'ghost'))
+      .slice(0, 3);
+    tankDebuffs.forEach((d, i) => {
+      const ix = x + ww + 5 * s + i * 24 * s;
+      socket(c, ix, yy, 22 * s);
+      icon(c, d.dispel || d.name, ix + 3 * s, yy + 3 * s, 16 * s);
+      label(
+        c,
+        `${Math.ceil(Math.max(0, d.until - v.t))}`,
+        ix + 11 * s,
+        yy + 30 * s,
+        10 * s,
+        C.light,
+        'center',
+      );
+    });
   }
-}
-
-function measure(ctx, pal, u, s) {
-  font(ctx, pal, u * 1.05, 700, true);
-  const m = ctx.measureText(s);
-  return m && typeof m.width === 'number' ? m.width : u * 5;
-}
-
-/** Truncate a string with an ellipsis to fit `maxW` at the current font. */
-function fit(ctx, s, maxW) {
-  if (!ctx.measureText) return s;
-  let m = ctx.measureText(s);
-  if (!m || typeof m.width !== 'number' || m.width <= maxW) return s;
-  let lo = 0, hi = s.length;
-  while (lo < hi) {
-    const mid = (lo + hi + 1) >> 1;
-    if (ctx.measureText(s.slice(0, mid) + '…').width <= maxW) lo = mid; else hi = mid - 1;
+  // The contract supplies roster positions, not individual raid health. Show a
+  // compact roster and debuff count instead of painting fictional health bars.
+  const dots = v.world.raid?.dots || [],
+    rosterY = y + 70 * s;
+  label(c, `Raid roster · ${dots.length}`, x, rosterY, 10 * s, C.muted);
+  if (mobile) {
+    const melee = dots.filter((d) => d.melee).length;
+    label(
+      c,
+      `Melee ${melee} · Ranged ${dots.length - melee}`,
+      x,
+      rosterY + 15 * s,
+      11 * s,
+      '#b8c8d1',
+    );
+    const afflicted = (v.debuffs || []).filter((d) => d.on === 'raid').length;
+    if (afflicted)
+      label(
+        c,
+        `Raid debuffs: ${afflicted}`,
+        x,
+        rosterY + 31 * s,
+        11 * s,
+        '#dbafed',
+      );
+    return;
   }
-  return s.slice(0, lo) + '…';
-}
-
-// ------------------------------------------------------------------ cast bar
-
-function drawCastBar(ctx, view, pal, u, w, h, t) {
-  const cast = view.world.boss.cast;
-  if (!cast) return;
-  const prog = Math.max(0, Math.min(1, (t - cast.start) / Math.max(0.01, cast.end - cast.start)));
-  const left = Math.max(0, cast.end - t);
-  const bw = Math.min(u * 18, w * 0.4), bh = u * 1.4;
-  const x = w / 2 - bw / 2, y = u * 1.1;
-  panel(ctx, pal, x - u * 0.3, y - u * 0.3, bw + u * 0.6, bh + u * 0.6, u * 0.4, u);
-  bar(ctx, x + bh + u * 0.3, y + bh * 0.25, bw - bh - u * 0.3, bh * 0.5, prog, pal.castBar, pal.hpBg, bh * 0.25);
-  // icon
-  roundRect(ctx, x, y, bh, bh, u * 0.25);
-  ctx.fillStyle = pal.iconBg; ctx.fill();
-  drawIcon(ctx, cast.icon || cast.id, x + bh / 2, y + bh / 2, bh * 0.7, pal.text, pal.accent);
-  font(ctx, pal, u * 0.78, 700);
-  ctx.fillStyle = pal.text;
-  text(ctx, cast.label.toUpperCase(), x + bh + u * 0.5, y + bh * 0.5 - u * 0.02, 'left');
-  font(ctx, pal, u * 0.72, 600);
-  ctx.fillStyle = pal.textDim;
-  text(ctx, `${left.toFixed(1)}s`, x + bw, y + bh * 0.5, 'right');
-}
-
-// ------------------------------------------------------------------ warnings
-
-function drawWarnings(ctx, view, script, settings, pal, u, w, h, t, now) {
-  const lead = settings.warningLead ?? 5;
-  const list = [];
-  for (const up of view.upcoming) {
-    if (!up.warn) continue;
-    if (up.in <= lead && up.in > -0.2) list.push({ label: `${up.label.toUpperCase()} IN ${Math.max(1, Math.ceil(up.in))}`, color: actionColor(pal, up.id), icon: up.icon, frac: (Math.ceil(up.in) - up.in) });
-  }
-  // Just-happened flashes: hazards that went active, landing, takeoff.
-  for (const hz of view.world.hazards) {
-    if (hz.state === 'active' && t - hz.activeAt < 1.5) {
-      if (hz.applies) continue;                                 // a beneficial cloud is not an alarm
-      const label = (hz.label || 'Hazard').toUpperCase();
-      if (!list.some((l) => l.label === label)) list.unshift({ label, color: pal.hazardActive, icon: hz.kind === 'lane' ? 'deepbreath' : 'eruption', flash: 1 - (t - hz.activeAt) / 1.5 });
-    }
-  }
-  const boss = view.world.boss;
-  if (boss.state === 'landing') list.unshift({ label: 'LANDING', color: pal.accent, icon: 'landing', flash: 0.5 });
-  if (boss.state === 'takeoff') list.unshift({ label: 'TAKEOFF', color: pal.accent, icon: 'takeoff', flash: 0.5 });
-  if (boss.target === 'raid' && boss.engaged && boss.state === 'grounded') list.unshift({ label: 'BOSS ON THE RAID', color: pal.bad, icon: 'taunt', flash: 0.6 + 0.4 * Math.sin(now * 6) });
-  if (!list.length) return;
-
-  let y = h * 0.27;
-  list.slice(0, 3).forEach((item, i) => {
-    const big = i === 0;
-    const px = big ? u * 2.1 : u * 1.25;
-    // pop on each integer change, then settle
-    const pop = item.frac != null ? Math.max(0, 1 - item.frac * 4) * 0.12 : 0;
-    const scale = 1 + pop;
-    font(ctx, pal, px, 800, true);
-    const label = item.label;
-    const tw = ctx.measureText ? (ctx.measureText(label).width || px * label.length * 0.6) : px * label.length * 0.6;
-    const bw = tw + px * 2.2, bh = px * 1.55;
-    ctx.save();
-    ctx.translate(w / 2, y);
-    ctx.scale(scale, scale);
-    ctx.globalAlpha = item.flash != null ? 0.55 + 0.45 * item.flash : 1;
-    roundRect(ctx, -bw / 2, -bh / 2, bw, bh, bh / 2);
-    ctx.fillStyle = withAlpha(pal.panel, 0.85); ctx.fill();
-    ctx.strokeStyle = withAlpha(item.color, 0.8); ctx.lineWidth = lw(u, 2); ctx.stroke();
-    drawIcon(ctx, item.icon, -bw / 2 + px * 0.95, 0, px * 0.9, item.color, item.color);
-    font(ctx, pal, px, 800, true);
-    ctx.fillStyle = item.color;
-    text(ctx, label, px * 0.5, px * 0.05, 'center');
-    ctx.restore();
-    y += bh * 1.15;
+  const cols = 10,
+    cell = 17 * s;
+  dots.slice(0, 40).forEach((d, i) => {
+    const xx = x + (i % cols) * (cell + 2 * s),
+      yy = rosterY + 10 * s + Math.floor(i / cols) * 14 * s;
+    c.fillStyle = '#0c1012';
+    c.fillRect(xx, yy, cell, 12 * s);
+    c.fillStyle = d.melee ? '#b28e67' : '#78a5cc';
+    c.fillRect(xx + 2 * s, yy + 2 * s, 3 * s, 8 * s);
+    label(
+      c,
+      d.melee ? 'M' : 'R',
+      xx + cell * 0.68,
+      yy + 6 * s,
+      8 * s,
+      '#d8d9cb',
+      'center',
+    );
   });
+  const n = (v.debuffs || []).filter((d) => d.on === 'raid').length;
+  if (n)
+    label(
+      c,
+      `Raid debuffs: ${n}`,
+      x,
+      rosterY + 17 * s + Math.ceil(dots.length / cols) * 14 * s,
+      11 * s,
+      '#dbafed',
+    );
 }
-
-// ------------------------------------------------------------------ feedback tick + toast
-
-function drawFeedbackTick(ctx, view, pal, u, w, h, t) {
-  const lt = view.feedback.lastTick;
-  if (!lt || t - lt.t > 1.6) return;
-  const k = (t - lt.t) / 1.6;
-  const a = k < 0.15 ? k / 0.15 : k > 0.75 ? 1 - (k - 0.75) / 0.25 : 1;
-  const y = h * 0.44;
-  const size = u * 2;
-  ctx.save();
-  ctx.globalAlpha = Math.max(0, a);
-  let color, label;
-  if (lt.status === 'ontime') { color = pal.good; label = 'ON TIME'; }
-  else if (lt.status === 'late') { color = pal.warn; label = `LATE +${(lt.lateBy || 0).toFixed(1)}s`; }
-  else { color = pal.bad; label = 'MISSED'; }
-  if (lt.status === 'ontime') drawTick(ctx, w / 2, y, size, color);
-  else drawCross(ctx, w / 2, y, size, color);
-  font(ctx, pal, u * 0.95, 800, true);
-  ctx.fillStyle = color;
-  text(ctx, label, w / 2, y + size * 0.95, 'center');
-  font(ctx, pal, u * 0.72, 600);
-  ctx.fillStyle = pal.textDim;
-  text(ctx, lt.label, w / 2, y + size * 0.95 + u * 1.0, 'center');
-  ctx.restore();
-}
-
-function drawToast(ctx, view, pal, u, w, h, t) {
-  const ts = view.feedback.toast;
-  if (!ts || t - ts.t > 2.2) return;
-  const k = (t - ts.t) / 2.2;
-  const a = k > 0.75 ? 1 - (k - 0.75) / 0.25 : 1;
-  const color = ts.kind === 'bad' ? pal.bad : ts.kind === 'warn' ? pal.warn : pal.text;
-  font(ctx, pal, u * 0.85, 700);
-  ctx.save();
-  ctx.globalAlpha = a;
-  ctx.fillStyle = color;
-  text(ctx, ts.text, w / 2, h * 0.58, 'center');
-  ctx.restore();
-}
-
-// ------------------------------------------------------------------ corner
-
-function drawCorner(ctx, view, settings, pal, u, w, h, overlay) {
-  font(ctx, pal, u * 0.68, 600);
-  ctx.fillStyle = pal.textMuted;
-  const viewName = (settings.view === 'topdown') ? 'TOP-DOWN' : 'POV';
-  let s = `${viewName}  ·  Tab: switch view`;
-  if (settings.speed && settings.speed !== 1) s += `  ·  ${Math.round(settings.speed * 100)}% speed`;
-  const roleName = { tank: 'MAIN TANK', offtank: 'OFF-TANK', melee: 'MELEE DPS', ranged: 'RANGED DPS', healer: 'HEALER' }[view.role];
-  if (roleName) s += `  ·  ${roleName}`;
-  text(ctx, s, w - u, u * 1.2, 'right');
-}
-
-// ------------------------------------------------------------------ threat + hp
-
-function drawThreat(ctx, view, script, pal, u, w, y, bh, threatRatioFn, t) {
-  const bw = Math.min(u * 24, w * 0.6);
-  const x = w / 2 - bw / 2;
-  const th = view.threat;
-  const ratio = threatRatioFn ? threatRatioFn(th) : (th.player > 0 ? Math.min(1, th.raid / th.player) : th.raid > 0 ? 1 : 0);
-  const b = view.world.boss;
-  const tankIsPlayer = view.tankRole !== false;
-  const band = tankIsPlayer ? (script.threat.dangerBand ?? 0.8) : (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8);
-  const onRaid = tankIsPlayer ? b.target === 'raid' && b.engaged && b.state === 'grounded' : b.target === 'player' && b.engaged && b.state === 'grounded';
-  const danger = ratio >= band || onRaid;
-  roundRect(ctx, x, y, bw, bh, bh / 2);
-  ctx.fillStyle = pal.hpBg; ctx.fill();
-  // danger band
-  ctx.save();
-  roundRect(ctx, x, y, bw, bh, bh / 2); ctx.clip();
-  ctx.fillStyle = pal.threatBand;
-  ctx.fillRect(x + bw * band, y, bw * (1 - band), bh);
-  // fill: how close the raid is to pulling
-  ctx.fillStyle = danger ? pal.threatDanger : pal.threatOk;
-  ctx.fillRect(x, y, bw * (onRaid ? 1 : ratio), bh);
-  ctx.restore();
-  ctx.strokeStyle = withAlpha(danger ? pal.threatDanger : pal.panelEdge, 0.9); ctx.lineWidth = lw(u);
-  roundRect(ctx, x, y, bw, bh, bh / 2); ctx.stroke();
-  font(ctx, pal, u * 0.62, 700);
-  ctx.fillStyle = pal.text;
-  const label = tankIsPlayer
-    ? (onRaid ? 'BOSS ON THE RAID  ·  TAUNT' : th.tauntUntil > t ? 'THREAT  ·  TAUNTED' : `THREAT  ·  RAID AT ${Math.round(ratio * 100)}%`)
-    : (onRaid ? 'BOSS ON YOU  ·  STOP' : b.target === 'raid' && b.engaged && b.state === 'grounded' ? 'BOSS LOOSE  ·  HOLD' : th.ghostTauntUntil > t ? 'TANK TAUNTED  ·  HOLD' : `YOUR THREAT  ·  ${Math.round(ratio * 100)}% OF THE TANK`);
-  text(ctx, label, x + bw / 2, y + bh / 2, 'center');
-}
-
-function drawPlayerHp(ctx, view, pal, u, w, y, bh) {
-  const p = view.world.player;
-  const bw = Math.min(u * 24, w * 0.6);
-  const x = w / 2 - bw / 2;
-  bar(ctx, x, y, bw, bh, p.hp / p.maxHp, pal.playerHp, pal.hpBg, bh / 2);
-}
-
-/** The ghost tank's health, for the roles that depend on it (the healer most of all). */
-function drawTankHp(ctx, view, script, pal, u, w, y, bh) {
-  const g = view.world.ghost;
-  const bw = Math.min(u * 24, w * 0.6);
-  const x = w / 2 - bw / 2;
-  const frac = g.hp / g.maxHp;
-  const low = frac < ((script.ghostTank && script.ghostTank.lowHp) ?? 0.5);
-  bar(ctx, x, y, bw, bh, frac, low ? pal.bad : pal.ok, pal.hpBg, bh / 2);
-  font(ctx, pal, u * 0.55, 700);
-  ctx.fillStyle = pal.text;
-  text(ctx, `TANK  ${Math.round(frac * 100)}%${low ? '  ·  HEAL' : ''}`, x + bw / 2, y + bh / 2, 'center');
-}
-
-/** Outstanding debuffs on you, the tank or the raid: what a healer must dispel. */
-function drawDebuffTray(ctx, view, pal, u, w, h, t) {
-  const x = u, y = u + u * 4.3 + u * 0.4;
-  const pw = Math.min(u * 15, w * 0.42);
-  const rows = view.debuffs.slice(0, 4);
-  const ph = u * 1.1 + rows.length * u * 1.05;
-  panel(ctx, pal, x, y, pw, ph, u * 0.5, u);
-  font(ctx, pal, u * 0.42, 700);
-  ctx.fillStyle = pal.textMuted;
-  text(ctx, 'DEBUFFS', x + u * 0.8, y + u * 0.5, 'left');
+function debuffs(c, v, s, mobile, w) {
+  const rows = (v.debuffs || []).slice(0, 8);
+  if (!rows.length) return;
+  // Individual names, affected unit, stacks, dispel type and expiry remain visible.
+  const x = mobile ? w - 185 * s : 290 * s,
+    y = (mobile ? 335 : 147) * s,
+    size = 27 * s,
+    cols = mobile ? 1 : 2;
+  const colors = {
+    magic: '#669dff',
+    curse: '#c36cff',
+    poison: '#65c942',
+    disease: '#d7a45e',
+    enrage: '#f15036',
+    none: '#9a9691',
+  };
   rows.forEach((d, i) => {
-    const ry = y + u * 1.25 + i * u * 1.05;
-    const dispellable = d.dispel && d.dispel !== 'none';
-    ctx.fillStyle = dispellable ? pal.warn : pal.textDim;
-    ctx.beginPath(); ctx.arc(x + u * 1.05, ry, u * 0.22, 0, Math.PI * 2); ctx.fill();
-    font(ctx, pal, u * 0.62, 600);
-    ctx.fillStyle = pal.text;
-    const who = d.on === 'player' ? 'you' : d.on === 'ghost' ? 'tank' : 'raid';
-    text(ctx, fit(ctx, `${d.name}${d.stacks > 1 ? ` x${d.stacks}` : ''} on ${who}`, pw - u * 4.2), x + u * 1.5, ry, 'left');
-    font(ctx, pal, u * 0.5, 600);
-    ctx.fillStyle = pal.textDim;
-    text(ctx, `${Math.max(0, Math.ceil(d.until - t))}s`, x + pw - u * 0.8, ry, 'right');
+    const xx = x + (i % cols) * 174 * s,
+      yy = y + Math.floor(i / cols) * 45 * s;
+    socket(c, xx, yy, size);
+    icon(c, d.dispel || d.name, xx + 3 * s, yy + 3 * s, size - 6 * s);
+    c.strokeStyle = colors[d.dispel] || colors.none;
+    c.lineWidth = 2 * s;
+    c.strokeRect(xx + 0.5, yy + 0.5, size - 1, size - 1);
+    label(
+      c,
+      `${Math.ceil(Math.max(0, d.until - v.t))}s`,
+      xx + size / 2,
+      yy + size + 8 * s,
+      10 * s,
+      '#fff',
+      'center',
+    );
+    label(
+      c,
+      fitName(c, d.name, mobile ? 147 * s : 132 * s, 10 * s),
+      xx + size + 5 * s,
+      yy + 7 * s,
+      10 * s,
+      C.text,
+    );
+    label(
+      c,
+      `${d.on === 'ghost' ? 'Tank' : d.on === 'player' ? 'You' : 'Raid'} · ${d.dispel || 'none'}${d.stacks > 1 ? ` ×${d.stacks}` : ''}`,
+      xx + size + 5 * s,
+      yy + 22 * s,
+      9 * s,
+      colors[d.dispel] || C.muted,
+    );
+  });
+  if ((v.debuffs || []).length > rows.length)
+    label(
+      c,
+      `+${v.debuffs.length - rows.length} more`,
+      x,
+      y + Math.ceil(rows.length / cols) * 45 * s,
+      10 * s,
+      C.gold,
+    );
+}
+function objective(c, v, script, settings, w, h, s, mobile) {
+  const ww = (mobile ? 180 : 242) * s,
+    x = w - ww - 21 * s,
+    y = (mobile ? 207 : 258) * s;
+  label(c, 'Objectives', x, y, 15 * s, C.gold, 'left', true);
+  c.strokeStyle = '#b99b5266';
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(x, y + 13 * s);
+  c.lineTo(x + ww, y + 13 * s);
+  c.stroke();
+  let yy = y + 30 * s;
+  yy += wrapped(
+    c,
+    `${v.phaseName || 'Phase'}${v.phaseSubtitle ? ' — ' + v.phaseSubtitle : ''}`,
+    x,
+    yy,
+    ww,
+    12 * s,
+    C.yellow,
+    16 * s,
+  );
+  const ne = v.nextExpected;
+  if (ne) {
+    yy += 10 * s;
+    label(c, '◆', x, yy, 11 * s, ne.kind === 'fix' ? '#ff6254' : C.gold);
+    yy += wrapped(
+      c,
+      ne.label,
+      x + 15 * s,
+      yy,
+      ww - 15 * s,
+      12 * s,
+      ne.kind === 'fix' ? '#ff7764' : C.text,
+      17 * s,
+    );
+    if (ne.deadline != null) {
+      const left = ne.deadline - v.t;
+      label(
+        c,
+        left >= 0
+          ? `Time remaining: ${Math.ceil(left)}s`
+          : `Overdue: +${Math.ceil(-left)}s`,
+        x + 15 * s,
+        yy + 4 * s,
+        10 * s,
+        left < 0 ? '#ff7664' : C.gold,
+      );
+    }
+  }
+  return yy + (ne?.deadline != null ? 18 : 8) * s;
+}
+function timers(c, v, settings, w, h, s, mobile, objectiveBottom, replay) {
+  // Same 20 second horizon as the old timeline; ordered farthest first so
+  // the imminent event always occupies the bottom of the stack.
+  const events = (v.upcoming || [])
+    .filter((e) => e.in <= 20 && e.in >= -0.5)
+    .slice(0, mobile ? 4 : 6)
+    .reverse();
+  if (!events.length) return;
+  const ww = (mobile ? 178 : 245) * s,
+    x = w - ww - 22 * s - (replay && !mobile ? 240 * s : 0),
+    bottom = mobile ? h * 0.62 : h * 0.7;
+  let yy = Math.max(
+    objectiveBottom + 26 * s,
+    bottom - events.reduce((n, e) => n + (e.in < 3 ? 30 : 24) * s, 0),
+  );
+  label(c, 'Boss timers', x, yy - 13 * s, 11 * s, C.muted, 'left', true);
+  events.forEach((up) => {
+    const urgent = up.in < 3,
+      hh = (urgent ? 27 : 21) * s,
+      ex = urgent ? x - 8 * s : x,
+      ew = urgent ? ww + 8 * s : ww,
+      iz = hh;
+    socket(c, ex, yy, iz);
+    icon(c, up.icon || up.id, ex + 3 * s, yy + 3 * s, iz - 6 * s);
+    frame(c, ex + iz + 2 * s, yy, ew - iz, hh);
+    const color = urgent ? '#c73028' : up.warn ? '#a4822c' : '#496d99';
+    statusBar(
+      c,
+      ex + iz + 5 * s,
+      yy + 3 * s,
+      ew - iz - 6 * s,
+      hh - 6 * s,
+      Math.max(0.025, up.in / 20),
+      color,
+    );
+    label(
+      c,
+      fitName(c, up.label, ew - iz - 43 * s, urgent ? 12 * s : 11 * s),
+      ex + iz + 9 * s,
+      yy + hh / 2,
+      urgent ? 12 * s : 11 * s,
+      '#fff',
+    );
+    label(
+      c,
+      `${Math.max(0, up.in).toFixed(1)}`,
+      ex + ew - 3 * s,
+      yy + hh / 2,
+      urgent ? 13 * s : 11 * s,
+      urgent ? '#fff1bc' : C.text,
+      'right',
+    );
+    yy += hh + 3 * s;
   });
 }
-
-// ------------------------------------------------------------------ abilities
-
-/** Column positions of the ability row; the press-cue lane uses the same columns. */
-function abilityLayout(u, w, size, order) {
-  const gap = u * 0.45;
-  const n = order.length;
-  const total = n * size + (n - 1) * gap;
-  const x0 = w / 2 - total / 2;
-  return { size, gap, order, xs: order.map((_, i) => x0 + i * (size + gap)), x0, x1: x0 + total };
+function threat(c, v, script, settings, w, h, s, mobile, ratioFn, replay) {
+  const th = v.threat,
+    b = v.world.boss,
+    tank = v.tankRole !== false;
+  const ratio = ratioFn
+    ? ratioFn(th)
+    : th.player > 0
+      ? Math.min(1, th.raid / th.player)
+      : th.raid > 0
+        ? 1
+        : 0;
+  const band = tank
+    ? (script.threat.dangerBand ?? 0.8)
+    : (script.threat.dangerBandDps ?? script.threat.dangerBand ?? 0.8);
+  const loose =
+    b.engaged &&
+    b.state === 'grounded' &&
+    (tank ? b.target === 'raid' : b.target === 'player');
+  const danger = loose || ratio >= band,
+    ww = (mobile ? 148 : 220) * s,
+    x = w - ww - 20 * s,
+    y = replay
+      ? h - (mobile ? 230 : 155) - 96 * s
+      : h - (mobile ? 305 : 132) * s;
+  frame(c, x, y, ww, 96 * s);
+  c.fillStyle = '#272827';
+  c.fillRect(x + 4 * s, y + 4 * s, ww - 8 * s, 17 * s);
+  label(c, 'Threat', x + 10 * s, y + 12 * s, 11 * s, C.gold, 'left', true);
+  label(c, '%', x + ww - 10 * s, y + 12 * s, 10 * s, C.muted, 'right');
+  const rows = tank
+    ? [
+        ['You', 1, '#96734f'],
+        ['Raid', ratio, danger ? '#c32e23' : '#577faa'],
+      ]
+    : [
+        ['Tank', 1, '#96734f'],
+        ['You', ratio, danger ? '#c32e23' : '#577faa'],
+      ];
+  rows.forEach(([name, frac, color], i) => {
+    const yy = y + 25 * s + i * 20 * s;
+    statusBar(c, x + 7 * s, yy, ww - 14 * s, 17 * s, frac, color);
+    label(c, name, x + 12 * s, yy + 8 * s, 10 * s, '#fff');
+    label(
+      c,
+      `${Math.round(frac * 100)}`,
+      x + ww - 12 * s,
+      yy + 8 * s,
+      10 * s,
+      '#fff',
+      'right',
+    );
+  });
+  const msg = tank
+    ? loose
+      ? 'BOSS ON RAID · TAUNT'
+      : th.tauntUntil > v.t
+        ? 'Taunted'
+        : `Raid at ${Math.round(ratio * 100)}%`
+    : loose
+      ? 'BOSS ON YOU · STOP'
+      : b.target === 'raid' && b.engaged && b.state === 'grounded'
+        ? 'BOSS LOOSE · HOLD'
+        : th.ghostTauntUntil > v.t
+          ? 'TANK TAUNTED · HOLD'
+          : `${Math.round(ratio * 100)}% of the tank`;
+  label(
+    c,
+    fitName(c, msg, ww - 12 * s, 10 * s),
+    x + ww / 2,
+    y + 82 * s,
+    10 * s,
+    danger ? '#ff8b6e' : C.muted,
+    'center',
+  );
+  // Pull threshold is visible even before danger state.
+  c.fillStyle = C.gold;
+  c.fillRect(x + 7 * s + (ww - 14 * s) * band, y + 45 * s, 1, 17 * s);
 }
 
-function drawAbilities(ctx, view, script, pal, u, lay, y, abilityKeys, t) {
-  const { size, gap } = lay;
-  const A = view.abilities;
-  const hit = view.cues && view.cues.lastHit;
-  const order = lay.order;
-  for (let i = 0; i < order.length; i++) {
-    const id = order[i];
-    const x = lay.xs[i];
-    const def = script.playerAbilities[id];
-    if (!def) continue;
-    const readyAt = A.readyAt[id] ?? -Infinity;
-    const cdLeft = Math.max(0, readyAt - t);
-    const onGcd = def.gcd && A.gcdUntil > t;
-    const active = id === 'taunt' && view.threat && view.threat.tauntUntil > t;   // she is held on you
-    const hold = id === 'attack' && view.feedback && view.feedback.holdAttack;      // one more hit pulls her
-    roundRect(ctx, x, y, size, size, u * 0.35);
-    ctx.fillStyle = pal.iconBg; ctx.fill();
-    const onCd = cdLeft > 0 && def.cooldown > 0;
-    ctx.save();
-    if (onCd) ctx.globalAlpha = 0.25;
-    drawIcon(ctx, def.icon, x + size / 2, y + size / 2, size * 0.62, active ? pal.iconActive : pal.text, pal.accent);
-    ctx.restore();
-    // cooldown sweep (clockwise from 12 o'clock) for the remaining fraction
-    if (onCd) {
-      const frac = Math.min(1, cdLeft / def.cooldown);
-      ctx.save();
-      roundRect(ctx, x, y, size, size, u * 0.35); ctx.clip();
-      ctx.fillStyle = pal.cooldown;
-      ctx.beginPath();
-      ctx.moveTo(x + size / 2, y + size / 2);
-      ctx.arc(x + size / 2, y + size / 2, size, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac, false);
-      ctx.closePath(); ctx.fill();
-      ctx.restore();
-      const num = cdLeft >= 10 ? `${Math.ceil(cdLeft)}` : cdLeft.toFixed(1);
-      font(ctx, pal, size * 0.34, 800, true);
-      const nw = (ctx.measureText ? (ctx.measureText(num).width || size * 0.5) : size * 0.5) + size * 0.3;
-      roundRect(ctx, x + size / 2 - nw / 2, y + size / 2 - size * 0.22, nw, size * 0.44, size * 0.22);
-      ctx.fillStyle = withAlpha(pal.bg, 0.85); ctx.fill();
-      ctx.fillStyle = pal.text;
-      text(ctx, num, x + size / 2, y + size / 2, 'center');
-    } else if (onGcd) {
-      const frac = Math.min(1, (A.gcdUntil - t) / (script.gcd || 1.5));
-      ctx.save();
-      roundRect(ctx, x, y, size, size, u * 0.35); ctx.clip();
-      ctx.fillStyle = pal.gcd;
-      ctx.beginPath();
-      ctx.moveTo(x + size / 2, y + size / 2);
-      ctx.arc(x + size / 2, y + size / 2, size, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac, false);
-      ctx.closePath(); ctx.fill();
-      ctx.restore();
+function actionLayout(w, h, s, mobile, overlay) {
+  const size = mobile ? Math.min(42, (w - 49) / 6) : 43 * s,
+    gap = mobile ? 3 : 4 * s,
+    cols = mobile ? 6 : 12;
+  const total = cols * size + (cols - 1) * gap,
+    x = (w - total) / 2,
+    y = h - (mobile ? size * 2 + 42 : 73 * s);
+  return {
+    w,
+    h,
+    s,
+    mobile,
+    size,
+    gap,
+    cols,
+    x,
+    y,
+    total,
+    order: [],
+    xs: [],
+    replay: overlay.replay,
+  };
+}
+function actionChrome(c, l) {
+  const { x, y, total, size, gap, mobile, s, cols } = l;
+  frame(
+    c,
+    x - 9 * s,
+    y - 9 * s,
+    total + 18 * s,
+    mobile ? size * 2 + gap + 16 * s : size + 18 * s,
+    true,
+  );
+  if (!mobile) {
+    wing(c, x - 90 * s, y - 51 * s, 90 * s, 100 * s);
+    wing(c, x + total, y - 51 * s, 90 * s, 100 * s, true);
+  } else if (x >= 47) {
+    wing(c, x - 46, y + 38, 45, 52);
+    wing(c, x + total + 1, y + 38, 45, 52, true);
+  }
+  for (let i = 0; i < 12; i++)
+    socket(
+      c,
+      x + (i % cols) * (size + gap),
+      y + Math.floor(i / cols) * (size + gap),
+      size,
+    );
+  // Segmented experience-style rail is ornamental: no invented XP number.
+  c.fillStyle = '#060708';
+  c.fillRect(x, y + size + (mobile ? size + gap : 0) + 12 * s, total, 5 * s);
+  for (let i = 0; i < 20; i++) {
+    c.fillStyle = i < 20 ? '#586d94' : '#1b1b1b';
+    c.fillRect(
+      x + (i * total) / 20 + 1,
+      y + size + (mobile ? size + gap : 0) + 13 * s,
+      total / 20 - 2,
+      2 * s,
+    );
+  }
+}
+function abilities(c, v, script, settings, l, keys) {
+  const { x, y, size, gap, s, cols } = l,
+    order = v.abilities?.list || ['taunt'];
+  order.forEach((id, i) => {
+    const xx = x + (i % cols) * (size + gap),
+      yy = y + Math.floor(i / cols) * (size + gap),
+      def = script.playerAbilities[id];
+    if (!def) return;
+    icon(c, id, xx + 4 * s, yy + 4 * s, size - 8 * s);
+    const cd = Math.max(0, (v.abilities.readyAt[id] ?? -Infinity) - v.t),
+      onCd = cd > 0 && def.cooldown > 0;
+    const gcd = def.gcd ? Math.max(0, v.abilities.gcdUntil - v.t) : 0;
+    if (onCd || gcd) {
+      const frac = clamp(
+        onCd ? cd / def.cooldown : gcd / (script.gcd || 1.5),
+        0,
+        1,
+      );
+      c.save();
+      c.beginPath();
+      c.rect(xx + 3 * s, yy + 3 * s, size - 6 * s, size - 6 * s);
+      c.clip();
+      c.fillStyle = 'rgba(0,0,0,.72)';
+      c.beginPath();
+      c.moveTo(xx + size / 2, yy + size / 2);
+      c.arc(
+        xx + size / 2,
+        yy + size / 2,
+        size,
+        -Math.PI / 2,
+        -Math.PI / 2 + Math.PI * 2 * frac,
+      );
+      c.closePath();
+      c.fill();
+      c.restore();
+      if (onCd)
+        label(
+          c,
+          cd >= 10 ? Math.ceil(cd) : cd.toFixed(1),
+          xx + size / 2,
+          yy + size / 2,
+          18 * s,
+          '#fff',
+          'center',
+        );
     }
-    // border / active ring
-    roundRect(ctx, x, y, size, size, u * 0.35);
-    ctx.strokeStyle = active ? pal.iconActive : pal.iconEdge;
-    ctx.lineWidth = active ? lw(u, 2.5) : lw(u);
-    ctx.stroke();
+    const active = id === 'taunt' && v.threat.tauntUntil > v.t,
+      hold = id === 'attack' && v.feedback.holdAttack;
     if (active) {
-      ctx.save(); ctx.globalAlpha = 0.5; ctx.shadowBlur = u; ctx.shadowColor = pal.iconActive; ctx.stroke(); ctx.restore();
-      // remaining hold time as a thin bar at the bottom
-      const frac = Math.min(1, (view.threat.tauntUntil - t) / (script.threat.tauntDuration || 1));
-      ctx.fillStyle = pal.iconActive;
-      ctx.fillRect(x + u * 0.25, y + size - u * 0.3, (size - u * 0.5) * frac, u * 0.12);
+      c.strokeStyle = '#ffe068';
+      c.lineWidth = 2 * s;
+      c.strokeRect(xx - 1, yy - 1, size + 2, size + 2);
+      statusBar(
+        c,
+        xx + 4 * s,
+        yy + size - 6 * s,
+        size - 8 * s,
+        3 * s,
+        (v.threat.tauntUntil - v.t) / (script.threat.tauntDuration || 1),
+        '#ffdc56',
+      );
     }
     if (hold) {
-      ctx.save();
-      roundRect(ctx, x, y, size, size, u * 0.35); ctx.clip();
-      ctx.fillStyle = withAlpha(pal.bad, 0.55); ctx.fillRect(x, y, size, size);
-      ctx.restore();
-      font(ctx, pal, size * 0.3, 900, true);
-      ctx.fillStyle = pal.text;
-      text(ctx, 'HOLD', x + size / 2, y + size / 2, 'center');
-      roundRect(ctx, x, y, size, size, u * 0.35);
-      ctx.strokeStyle = pal.bad; ctx.lineWidth = lw(u, 2.5); ctx.stroke();
+      c.fillStyle = '#980800aa';
+      c.fillRect(xx + 3 * s, yy + 3 * s, size - 6 * s, size - 6 * s);
+      label(
+        c,
+        'HOLD',
+        xx + size / 2,
+        yy + size / 2,
+        13 * s,
+        '#fff0cb',
+        'center',
+      );
+      c.strokeStyle = '#ff4b35';
+      c.lineWidth = 2 * s;
+      c.strokeRect(xx, yy, size, size);
     }
-    // key label
-    const key = abilityKeys[id] || '';
-    if (key) {
-      font(ctx, pal, u * 0.6, 700);
-      roundRect(ctx, x + size - u * 1.0, y - u * 0.2, u * 1.1, u * 0.8, u * 0.2);
-      ctx.fillStyle = withAlpha(pal.bg, 0.9); ctx.fill();
-      ctx.fillStyle = pal.textDim;
-      text(ctx, key, x + size - u * 0.45, y + u * 0.2, 'center');
+    label(
+      c,
+      keys[id] || '',
+      xx + size - 5 * s,
+      yy + 8 * s,
+      12 * s,
+      '#fff',
+      'right',
+    );
+    label(
+      c,
+      SHORT[id] || def.label,
+      xx + size / 2,
+      yy + size + 7 * s,
+      8 * s,
+      C.muted,
+      'center',
+    );
+    const hit = v.cues?.lastHit;
+    if (hit && hit.ability === id && v.t - hit.t < 0.4) {
+      const age = clamp((v.t - hit.t) / 0.4, 0, 1);
+      c.save();
+      c.globalAlpha = 1 - age;
+      c.strokeStyle =
+        hit.status === 'perfect'
+          ? good(settings)
+          : hit.status === 'good'
+            ? C.yellow
+            : '#ff5545';
+      c.lineWidth = 2 * s;
+      c.strokeRect(
+        xx - age * 8 * s,
+        yy - age * 8 * s,
+        size + age * 16 * s,
+        size + age * 16 * s,
+      );
+      c.restore();
     }
-    // name under the icon
-    font(ctx, pal, u * 0.5, 600);
-    ctx.fillStyle = pal.textMuted;
-    text(ctx, fit(ctx, SHORT_LABEL[id] || def.label, size + gap * 0.8), x + size / 2, y + size + u * 0.35, 'center');
-    // press-cue hit flash: a ring bursting out of the icon
-    if (hit && hit.ability === id && t - hit.t < 0.4) {
-      const k = (t - hit.t) / 0.4;
-      ctx.save();
-      ctx.globalAlpha = 1 - k;
-      ctx.strokeStyle = hit.status === 'perfect' ? pal.good : hit.status === 'good' ? pal.warn : pal.bad;
-      ctx.lineWidth = lw(u, 3 - 2 * k);
-      roundRect(ctx, x - k * u * 0.6, y - k * u * 0.6, size + k * u * 1.2, size + k * u * 1.2, u * 0.35 + k * u * 0.4);
-      ctx.stroke();
-      ctx.restore();
-    }
-  }
+  });
+  // Empty sockets intentionally have no bindings; only usable abilities advertise a key.
 }
-
-// ------------------------------------------------------------------ press-cue lane
-
-const BEAT_WORD = { perfect: 'PERFECT', good: 'GOOD', missed: 'MISS' };
-
-function drawLane(ctx, view, script, settings, pal, u, w, lay, laneY, abilityY, t, now) {
-  const rot = view.cues;
-  const lead = settings.laneLead || 3;
-  const { size, gap, xs } = lay;
-  // The lane is at least wide enough for its header even with a single key column.
-  const laneW = Math.max(lay.x1 - lay.x0 + gap * 2, Math.min(u * 15, w * 0.5));
-  const x0 = (lay.x0 + lay.x1) / 2 - laneW / 2, x1 = x0 + laneW;
-  const hitY = abilityY - u * 0.15;
-  const travel = hitY - laneY - u * 0.9;     // notes spawn below the header
-  const yFor = (dtv) => hitY - (Math.max(0, dtv) / lead) * travel;
-  ctx.save();
-  roundRect(ctx, x0, laneY, x1 - x0, abilityY - laneY, u * 0.4);
-  ctx.fillStyle = pal.lane; ctx.fill();
-  ctx.save();
-  roundRect(ctx, x0, laneY, x1 - x0, abilityY - laneY, u * 0.4); ctx.clip();
-  // columns with a note on the way light up
-  const hot = new Set();
-  const ABILITY_ORDER = lay.order;
-  for (const b of rot.beats) if (b.status === 'pending' && b.at - t <= lead) hot.add(b.ability);
-  for (let i = 0; i < ABILITY_ORDER.length; i++) {
-    if (!hot.has(ABILITY_ORDER[i])) continue;
-    const g = ctx.createLinearGradient(0, laneY, 0, abilityY);
-    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, pal.laneHot);
-    ctx.fillStyle = g;
-    ctx.fillRect(xs[i], laneY, size, abilityY - laneY);
+function noteLane(c, v, script, settings, l, now) {
+  const { x, y, size, gap, s, mobile } = l,
+    order = v.abilities?.list || ['taunt'],
+    rot = v.cues;
+  const lead = settings.laneLead || 3,
+    hitY = y - 4 * s,
+    travel = (mobile ? 125 : 155) * s,
+    top = hitY - travel - 19 * s;
+  const laneW = Math.max(order.length * (size + gap) - gap, 200 * s),
+    x0 = x - 4 * s;
+  const yFor = (dt) => hitY - clamp(dt / lead, 0, 1) * travel;
+  c.save();
+  c.fillStyle = gradient(c, 0, top, 0, hitY - top, [
+    [0, '#070a0d00'],
+    [0.25, '#070a0d45'],
+    [1, '#070a0dc9'],
+  ]);
+  c.fillRect(x0, top, laneW + 8 * s, hitY - top);
+  label(
+    c,
+    'Press as the note reaches its key',
+    x0,
+    top + 3 * s,
+    10 * s,
+    C.gold,
+    'left',
+    true,
+  );
+  for (let i = 0; i < order.length; i++) {
+    const xx = x + i * (size + gap);
+    const hot = rot.beats.some(
+      (b) =>
+        b.status === 'pending' && b.ability === order[i] && b.at - v.t <= lead,
+    );
+    c.fillStyle = gradient(c, 0, top, 0, hitY - top, [
+      [0, '#dec26a00'],
+      [1, hot ? '#dec26a40' : '#dec26a08'],
+    ]);
+    c.fillRect(xx, top + 18 * s, size, hitY - top - 18 * s);
+    c.strokeStyle = '#d7ba7430';
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(xx, top + 18 * s);
+    c.lineTo(xx, hitY);
+    c.moveTo(xx + size, top + 18 * s);
+    c.lineTo(xx + size, hitY);
+    c.stroke();
   }
-  // header and second marks
-  font(ctx, pal, u * 0.42, 700);
-  ctx.fillStyle = pal.textMuted;
-  text(ctx, 'PRESS WHEN THE NOTE LANDS ON ITS KEY', x0 + u * 0.4, laneY + u * 0.45, 'left');
-  for (let s = 1; s <= lead; s++) {
-    const y = yFor(s);
-    ctx.fillStyle = withAlpha(pal.text, 0.18);
-    ctx.fillRect(x0, y - lw(u) / 2, u * 0.3, lw(u));
-    ctx.fillStyle = pal.textMuted;
-    font(ctx, pal, u * 0.4, 600);
-    text(ctx, `${s}s`, x0 + u * 0.4, y, 'left');
+  for (let sec = 1; sec <= lead; sec++) {
+    const yy = yFor(sec);
+    c.fillStyle = '#baaa7538';
+    c.fillRect(x0, yy, laneW + 8 * s, 1);
+    label(c, `${sec}s`, x0 - 5 * s, yy, 9 * s, C.muted, 'right');
   }
-  // hit line
-  ctx.strokeStyle = pal.laneLine; ctx.lineWidth = lw(u, 1.5);
-  ctx.setLineDash([u * 0.35, u * 0.3]);
-  ctx.beginPath(); ctx.moveTo(x0 + u * 0.3, hitY); ctx.lineTo(x1 - u * 0.3, hitY); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.restore();
-
-  // notes first, then the hit feedback on top of them
-  const ns = size * 0.74;
-  const ordered = [...rot.beats].sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1));
+  c.fillStyle = '#ebd487';
+  c.fillRect(x0, hitY, laneW + 8 * s, 2 * s);
+  // Preserve precise late rings, NOW-only beats, early misses and hit deltas.
+  const ns = size * 0.8;
+  const ordered = [...rot.beats].sort(
+    (a, b) =>
+      (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1),
+  );
   for (const b of ordered) {
-    const col = ABILITY_ORDER.indexOf(b.ability);
+    const col = order.indexOf(b.ability);
     if (col < 0) continue;
-    const cx = xs[col] + size / 2;
-    const def = script.playerAbilities[b.ability];
+    const cx = x + col * (size + gap) + size / 2;
     if (b.status === 'pending') {
-      const dtv = b.at - t;
-      if (dtv > lead) continue;
-      const y = yFor(dtv);
-      const color = pal.note;
-      ctx.save();
-      roundRect(ctx, cx - ns / 2, y - ns / 2, ns, ns, u * 0.3);
-      ctx.fillStyle = pal.iconBg; ctx.fill();
-      ctx.strokeStyle = color; ctx.lineWidth = lw(u, 2); ctx.stroke();
-      drawIcon(ctx, def ? def.icon : b.ability, cx, y, ns * 0.6, color, pal.accent);
-      if (dtv <= 0) {
-        // inside the late window: a ring that shrinks as the window closes
-        const frac = Math.max(0, 1 + dtv / b.late);
-        ctx.strokeStyle = pal.warn; ctx.lineWidth = lw(u, 2.2);
-        ctx.beginPath(); ctx.arc(cx, y, ns * 0.68, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac); ctx.stroke();
+      const dt = b.at - v.t;
+      if (dt > lead) continue;
+      const yy = yFor(dt);
+      socket(c, cx - ns / 2, yy - ns / 2, ns);
+      icon(c, b.ability, cx - ns / 2 + 3 * s, yy - ns / 2 + 3 * s, ns - 6 * s);
+      c.strokeStyle = '#f9dd83';
+      c.lineWidth = 2 * s;
+      c.strokeRect(cx - ns / 2, yy - ns / 2, ns, ns);
+      if (dt <= 0) {
+        const frac = clamp(1 + dt / Math.max(0.01, b.late), 0, 1);
+        c.strokeStyle = C.yellow;
+        c.lineWidth = 2.5 * s;
+        c.beginPath();
+        c.arc(
+          cx,
+          yy,
+          ns * 0.7,
+          -Math.PI / 2,
+          -Math.PI / 2 + Math.PI * 2 * frac,
+        );
+        c.stroke();
         if (b.early === 0) {
-          const pulse = 0.5 + 0.5 * Math.sin(now * 12);
-          ctx.globalAlpha = 0.35 + 0.45 * pulse;
-          ctx.strokeStyle = pal.bad; ctx.lineWidth = lw(u, 2);
-          roundRect(ctx, cx - ns / 2 - u * 0.25, y - ns / 2 - u * 0.25, ns + u * 0.5, ns + u * 0.5, u * 0.45); ctx.stroke();
-          ctx.globalAlpha = 1;
-          font(ctx, pal, u * 0.5, 800, true);
-          ctx.fillStyle = pal.bad;
-          text(ctx, 'NOW', cx, y - ns / 2 - u * 0.55, 'center');
+          c.strokeStyle = `rgba(255,65,40,${0.55 + 0.4 * Math.sin(now * 12)})`;
+          c.strokeRect(
+            cx - ns / 2 - 4 * s,
+            yy - ns / 2 - 4 * s,
+            ns + 8 * s,
+            ns + 8 * s,
+          );
+          label(
+            c,
+            'NOW',
+            cx,
+            yy - ns / 2 - 11 * s,
+            11 * s,
+            '#ff6655',
+            'center',
+          );
         }
       }
       if (b.short) {
-        font(ctx, pal, u * 0.48, 800);
-        ctx.fillStyle = pal.accent;
-        const rightSide = ABILITY_ORDER.length === 1 || col < ABILITY_ORDER.length - 1;
-        text(ctx, b.short, rightSide ? cx + ns / 2 + u * 0.25 : cx - ns / 2 - u * 0.25, y, rightSide ? 'left' : 'right');
+        const right = col === order.length - 1;
+        label(
+          c,
+          b.short,
+          right ? cx + ns / 2 + 5 * s : cx,
+          right ? yy : yy - ns / 2 - (dt <= 0 && b.early === 0 ? 29 : 9) * s,
+          10 * s,
+          C.yellow,
+          right ? 'left' : 'center',
+        );
       }
-      ctx.restore();
     } else {
-      const age = t - b.resolvedAt;
-      if (age > 0.9) continue;
-      const a = age < 0.08 ? age / 0.08 : 1 - (age - 0.08) / 0.82;
-      const color = b.status === 'perfect' ? pal.good : b.status === 'good' ? pal.warn : pal.bad;
-      const pop = 1 + Math.max(0, 0.22 - age) * 1.4;
-      const y = hitY - u * 1.3 - age * u * 1.4;
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, a);
-      ctx.translate(cx, y); ctx.scale(pop, pop);
-      font(ctx, pal, u * 0.62, 900, true);
-      ctx.fillStyle = color;
-      text(ctx, BEAT_WORD[b.status] || b.status.toUpperCase(), 0, 0, 'center');
-      if (b.status !== 'missed') {
-        font(ctx, pal, u * 0.42, 700);
-        ctx.fillStyle = pal.textDim;
-        text(ctx, `${b.delta > 0 ? '+' : ''}${b.delta.toFixed(2)}s`, 0, u * 0.6, 'center');
+      const age = v.t - b.resolvedAt;
+      if (age < 0 || age > 0.9) continue;
+      c.save();
+      c.globalAlpha = clamp(
+        age < 0.08 ? age / 0.08 : 1 - (age - 0.08) / 0.82,
+        0,
+        1,
+      );
+      const yy = hitY - 31 * s - age * 28 * s,
+        color =
+          b.status === 'perfect'
+            ? good(settings)
+            : b.status === 'good'
+              ? C.yellow
+              : '#ff6251';
+      label(
+        c,
+        { perfect: 'PERFECT', good: 'GOOD', missed: 'MISS' }[b.status] ||
+          b.status,
+        cx,
+        yy,
+        13 * s,
+        color,
+        'center',
+        true,
+      );
+      if (b.status !== 'missed')
+        label(
+          c,
+          `${b.delta > 0 ? '+' : ''}${b.delta.toFixed(2)}s`,
+          cx,
+          yy + 14 * s,
+          10 * s,
+          C.text,
+          'center',
+        );
+      else {
+        c.strokeStyle = '#fa6250';
+        c.lineWidth = 2 * s;
+        c.strokeRect(cx - ns / 2, hitY + age * 28 * s - ns / 2, ns, ns);
       }
-      ctx.restore();
-      if (b.status === 'missed') {
-        // the note sinks through the bar
-        ctx.save();
-        ctx.globalAlpha = 0.5 * (1 - age / 0.9);
-        roundRect(ctx, cx - ns / 2, hitY + age * u * 1.5 - ns / 2, ns, ns, u * 0.3);
-        ctx.strokeStyle = pal.bad; ctx.lineWidth = lw(u, 2); ctx.stroke();
-        ctx.restore();
-      }
+      c.restore();
     }
   }
-  // pressed before the note landed
   const early = rot.lastEarly;
-  if (early && t - early.t < 0.6) {
-    const col = ABILITY_ORDER.indexOf(early.ability);
+  if (early && v.t - early.t < 0.6) {
+    const col = order.indexOf(early.ability);
     if (col >= 0) {
-      ctx.save();
-      ctx.globalAlpha = 1 - (t - early.t) / 0.6;
-      font(ctx, pal, u * 0.55, 800, true);
-      ctx.fillStyle = pal.textDim;
-      text(ctx, 'EARLY', xs[col] + size / 2, hitY - u * 1.3, 'center');
-      ctx.restore();
+      c.save();
+      c.globalAlpha = 1 - (v.t - early.t) / 0.6;
+      label(
+        c,
+        'EARLY',
+        x + col * (size + gap) + size / 2,
+        hitY - 32 * s,
+        13 * s,
+        C.text,
+        'center',
+        true,
+      );
+      c.restore();
     }
   }
-  // combo, to the right of the lane
   if (rot.combo >= 2 || rot.bestCombo > 0) {
-    const cxr = x1 + u * 0.6;
-    const cy = abilityY - u * 1.2;
+    const xx = Math.min(l.w - 70 * s, x0 + laneW + 20 * s);
     if (rot.combo >= 2) {
-      const since = rot.lastHit ? t - rot.lastHit.t : 1;
-      const pop = 1 + Math.max(0, 0.2 - since) * 1.5;
-      ctx.save();
-      ctx.translate(cxr, cy); ctx.scale(pop, pop);
-      font(ctx, pal, u * 1.5, 900, true);
-      ctx.fillStyle = rot.combo >= 10 ? pal.accent : pal.text;
-      text(ctx, `${rot.combo}×`, 0, 0, 'left');
-      ctx.restore();
-      font(ctx, pal, u * 0.45, 800);
-      ctx.fillStyle = pal.textDim;
-      text(ctx, 'COMBO', cxr + u * 0.05, cy + u * 1.0, 'left');
+      label(
+        c,
+        `${rot.combo}×`,
+        xx,
+        hitY - 42 * s,
+        25 * s,
+        C.light,
+        'left',
+        true,
+      );
+      label(c, 'Combo', xx, hitY - 20 * s, 10 * s, C.gold);
     }
-    if (rot.bestCombo > rot.combo) {
-      font(ctx, pal, u * 0.42, 600);
-      ctx.fillStyle = pal.textMuted;
-      text(ctx, `best ${rot.bestCombo}`, cxr + u * 0.05, cy + (rot.combo >= 2 ? u * 1.6 : u * 1.0), 'left');
+    if (rot.bestCombo > rot.combo)
+      label(c, `Best ${rot.bestCombo}`, xx, hitY - 7 * s, 10 * s, C.muted);
+  }
+  c.restore();
+}
+
+function warnings(c, v, settings, w, h, s, mobile, now, state) {
+  const list = [],
+    lead = settings.warningLead ?? 5;
+  for (const up of v.upcoming || [])
+    if (up.warn && up.in <= lead && up.in > -0.2)
+      list.push({
+        text: `${up.label} in ${Math.max(1, Math.ceil(up.in))}`,
+        red: up.in <= 2,
+      });
+  for (const hz of v.world.hazards || [])
+    if (hz.state === 'active' && v.t - hz.activeAt < 1.5 && !hz.applies)
+      list.unshift({
+        text: hz.label || 'Hazard',
+        red: true,
+        age: v.t - hz.activeAt,
+      });
+  const b = v.world.boss;
+  if (b.state === 'landing' || b.state === 'takeoff')
+    list.unshift({ text: b.state === 'landing' ? 'LANDING' : 'TAKEOFF' });
+  if (b.target === 'raid' && b.engaged && b.state === 'grounded')
+    list.unshift({ text: 'BOSS ON THE RAID', red: true });
+  for (const alert of state.alerts) {
+    const age = v.t - alert.t;
+    if (age >= 0 && age < 2 && !list.some((it) => it.text === alert.text))
+      list.push({ text: alert.text, red: true, age: age * 0.75 });
+  }
+  let yy = h * (mobile ? 0.38 : 0.245);
+  list.slice(0, 3).forEach((it, i) => {
+    const sz = (mobile ? 18 : i ? 22 : 29) * s;
+    c.save();
+    if (it.age != null) c.globalAlpha = clamp(1 - it.age / 1.5, 0.15, 1);
+    c.font = `400 ${sz}px ${TITLE_FONT}`;
+    const width = c.measureText ? c.measureText(it.text).width : 0;
+    const k = Math.min(1, (w - 30) / Math.max(1, width));
+    label(
+      c,
+      it.text,
+      w / 2,
+      yy - (it.age || 0) * 12 * s,
+      sz * k,
+      it.red ? '#ff4e35' : C.yellow,
+      'center',
+      true,
+    );
+    c.restore();
+    yy += 31 * s;
+  });
+}
+function floating(c, v, state, settings, w, h, s, mobile) {
+  const tick = v.feedback.lastTick;
+  if (tick && v.t - tick.t >= 0 && v.t - tick.t < 1.6) {
+    const age = v.t - tick.t;
+    c.save();
+    c.globalAlpha = clamp(1 - (age - 1) / 0.6, 0, 1);
+    const yy = h * (mobile ? 0.52 : 0.44) - age * 12 * s;
+    label(
+      c,
+      tick.status === 'ontime'
+        ? 'ON TIME'
+        : tick.status === 'late'
+          ? `LATE +${(tick.lateBy || 0).toFixed(1)}s`
+          : 'MISSED',
+      w / 2,
+      yy,
+      21 * s,
+      tick.status === 'ontime'
+        ? good(settings)
+        : tick.status === 'late'
+          ? C.yellow
+          : '#ff5e50',
+      'center',
+      true,
+    );
+    c.font = `600 ${12 * s}px ${UI_FONT}`;
+    label(
+      c,
+      fit(c, tick.label, w - 40),
+      w / 2,
+      yy + 23 * s,
+      12 * s,
+      C.text,
+      'center',
+    );
+    c.restore();
+  }
+  const toast = v.feedback.toast;
+  if (toast && v.t - toast.t >= 0 && v.t - toast.t < 2.2) {
+    const age = v.t - toast.t;
+    c.save();
+    c.globalAlpha = clamp(1 - (age - 1.65) / 0.55, 0, 1);
+    c.font = `600 ${14 * s}px ${UI_FONT}`;
+    const color =
+      toast.kind === 'bad'
+        ? '#ff6552'
+        : toast.kind === 'warn'
+          ? C.yellow
+          : C.text;
+    if (mobile)
+      wrapped(
+        c,
+        toast.text,
+        18 * s,
+        h * 0.57 - age * 10 * s,
+        w * 0.49,
+        14 * s,
+        color,
+        18 * s,
+      );
+    else
+      label(
+        c,
+        fit(c, toast.text, w - 25),
+        w / 2,
+        h * 0.57 - age * 10 * s,
+        14 * s,
+        color,
+        'center',
+      );
+    c.restore();
+  }
+  state.float
+    .filter((f) => v.t - f.t < 1.4)
+    .forEach((f, i) => {
+      const age = v.t - f.t;
+      c.save();
+      c.globalAlpha = clamp(1 - age / 1.4, 0, 1);
+      label(
+        c,
+        f.text,
+        (mobile ? w * 0.3 : w / 2) + (i % 2 ? 1 : -1) * (mobile ? 20 : 60) * s,
+        h * 0.53 - age * 50 * s,
+        20 * s,
+        f.color,
+        'center',
+        true,
+      );
+      c.restore();
+    });
+}
+function edgeFeedback(c, v, w, h, now) {
+  const fb = v.feedback;
+  if (!fb.facingWrong && !fb.inHazard) return;
+  const color = fb.inHazard ? '#df5915' : '#bc241b';
+  if (c.createRadialGradient) {
+    const g = c.createRadialGradient(
+      w / 2,
+      h / 2,
+      Math.min(w, h) * 0.43,
+      w / 2,
+      h / 2,
+      Math.max(w, h) * 0.7,
+    );
+    g.addColorStop(0, '#00000000');
+    g.addColorStop(1, color + '9a');
+    c.save();
+    c.globalAlpha = 0.4 + 0.15 * Math.sin(now * 6);
+    c.fillStyle = g;
+    c.fillRect(0, 0, w, h);
+    c.restore();
+  }
+}
+function track(c, v, script, replay) {
+  let st = history.get(c);
+  const key = `${script.id}:${v.role}:${replay}`;
+  if (!st || st.key !== key || v.t < st.t - 0.05 || v.t - st.t > 0.5) {
+    st = {
+      key,
+      t: v.t,
+      lines: [],
+      float: [],
+      alerts: [],
+      healthGain: 0,
+      healthLoss: 0,
+      healthAt: v.t,
+      phase: null,
+      cast: null,
+      hp: v.world.player.hp,
+      ready: {},
+      deb: new Set(),
+      tick: null,
+      toast: null,
+      hit: null,
+      early: null,
+    };
+    history.set(c, st);
+  }
+  const add = (text, color = C.text) => {
+    st.lines.push({ text, color, t: v.t });
+    if (st.lines.length > 30) st.lines.shift();
+  };
+  if (st.phase !== v.phase) {
+    add(
+      `[Raid] ${v.phaseName}${v.phaseSubtitle ? ' — ' + v.phaseSubtitle : ''}`,
+      '#ffce54',
+    );
+    st.phase = v.phase;
+  }
+  const cast = v.world.boss.cast,
+    castKey = cast ? `${cast.id}:${cast.start}` : null;
+  if (castKey && castKey !== st.cast) {
+    add(`${script.name} begins to cast ${cast.label}.`, '#ffb259');
+    st.alerts.push({ text: cast.label, t: v.t });
+  }
+  st.cast = castKey;
+  st.alerts = st.alerts.filter((a) => v.t - a.t < 2).slice(-3);
+  const tick = v.feedback.lastTick;
+  if (tick && st.tick !== tick.t) {
+    add(
+      `${tick.status === 'ontime' ? 'On time' : tick.status === 'late' ? `Late +${(tick.lateBy || 0).toFixed(1)}s` : 'Missed'}: ${tick.label}`,
+      tick.status === 'ontime' ? '#76e385' : '#ff8874',
+    );
+    st.tick = tick.t;
+  }
+  const toast = v.feedback.toast;
+  if (toast && st.toast !== toast.t) {
+    add(toast.text, toast.kind === 'bad' ? '#ff7564' : '#f3e5bf');
+    st.toast = toast.t;
+  }
+  const hit = v.cues?.lastHit;
+  if (hit && st.hit !== hit.t) {
+    add(
+      `${SHORT[hit.ability] || hit.ability}: ${hit.status}${hit.delta != null ? ` (${hit.delta > 0 ? '+' : ''}${hit.delta.toFixed(2)}s)` : ''}`,
+      hit.status === 'missed' ? '#ff7c6d' : '#91dbff',
+    );
+    st.hit = hit.t;
+  }
+  const early = v.cues?.lastEarly;
+  if (early && st.early !== early.t) {
+    add(`${SHORT[early.ability] || early.ability}: too early.`, '#c2c1ee');
+    st.early = early.t;
+  }
+  for (const [id, at] of Object.entries(v.abilities?.readyAt || {})) {
+    if (st.ready[id] != null && at > st.ready[id] && at > v.t)
+      add(`You use ${SHORT[id] || id}.`, '#e8dfa9');
+    st.ready[id] = at;
+  }
+  for (const d of v.debuffs || []) {
+    if (!st.deb.has(d.uid))
+      add(
+        `${d.on === 'ghost' ? 'Tank' : d.on === 'player' ? 'You' : 'Raid'} afflicted by ${d.name}${d.dispel && d.dispel !== 'none' ? ` (${d.dispel})` : ''}.`,
+        '#ce9ff0',
+      );
+  }
+  st.deb = new Set((v.debuffs || []).map((d) => d.uid));
+  const delta = v.world.player.hp - st.hp;
+  if (Math.abs(delta) > 0.1 && v.t > st.t) {
+    if (delta > 0) st.healthGain += delta;
+    else st.healthLoss -= delta;
+    // Passive regeneration is continuous. Coalesce adjacent health changes so
+    // they cannot drown out spell messages or spawn sixty floaters per second.
+    const tag = delta > 0 ? 'heal' : 'damage',
+      amount = Math.abs(delta),
+      previous = st.lines.at(-1);
+    const line =
+      previous?.tag === tag
+        ? previous
+        : { tag, amount: 0, t: v.t, color: delta > 0 ? '#69ef72' : '#ff8070' };
+    line.amount += amount;
+    line.t = v.t;
+    line.text =
+      delta > 0
+        ? `You recover ${Math.round(line.amount)} health.`
+        : `You take ${Math.round(line.amount)} damage.`;
+    if (line !== previous) {
+      st.lines.push(line);
+      if (st.lines.length > 30) st.lines.shift();
     }
   }
-  ctx.restore();
-}
-
-// ------------------------------------------------------------------ timeline
-
-function drawTimeline(ctx, view, script, settings, pal, u, w, h, y, th, narrow) {
-  const span = 20;
-  const tw = narrow ? w - u * 2 : Math.min(u * 40, w * 0.6);
-  const x = w / 2 - tw / 2;
-  const nowX = x + tw * 0.08;
-  const pxPerSec = (tw - (nowX - x)) / span;
-  roundRect(ctx, x, y, tw, th, u * 0.3);
-  ctx.fillStyle = pal.panel; ctx.fill();
-  ctx.strokeStyle = pal.panelEdge; ctx.lineWidth = 1; ctx.stroke();
-  ctx.save();
-  roundRect(ctx, x, y, tw, th, u * 0.3); ctx.clip();
-  // ticks every 5s: small muted labels along the top edge, "20s" kept inside
-  font(ctx, pal, u * 0.42, 600);
-  ctx.fillStyle = pal.textMuted;
-  ctx.strokeStyle = withAlpha(pal.text, 0.12); ctx.lineWidth = lw(u);
-  for (let s = 5; s <= span; s += 5) {
-    const tx = nowX + s * pxPerSec;
-    ctx.beginPath(); ctx.moveTo(tx, y); ctx.lineTo(tx, y + th * 0.3); ctx.stroke();
-    const align = s === span ? 'right' : 'center';
-    text(ctx, `${s}s`, s === span ? tx - u * 0.2 : tx, y + u * 0.42, align);
+  if (
+    v.t - st.healthAt >= 0.75 ||
+    Math.abs(delta) > v.world.player.maxHp * 0.05
+  ) {
+    if (st.healthGain > 1)
+      st.float.push({
+        t: v.t,
+        text: `+${Math.round(st.healthGain)}`,
+        color: '#69ef72',
+      });
+    if (st.healthLoss > 1)
+      st.float.push({
+        t: v.t,
+        text: `-${Math.round(st.healthLoss)}`,
+        color: '#ff6860',
+      });
+    st.healthGain = 0;
+    st.healthLoss = 0;
+    st.healthAt = v.t;
   }
-  // now marker
-  ctx.strokeStyle = pal.accent; ctx.lineWidth = lw(u, 2);
-  ctx.beginPath(); ctx.moveTo(nowX, y); ctx.lineTo(nowX, y + th); ctx.stroke();
-  // events: icon in the middle band, label underneath
-  const iconSize = th * 0.5;
-  let lastLabelX = -Infinity;
-  for (const up of view.upcoming) {
-    if (up.in > span || up.in < -0.5) continue;
-    const ex = nowX + Math.max(0, up.in) * pxPerSec;
-    const color = up.warn ? actionColor(pal, up.id) : pal.textDim;
-    drawIcon(ctx, up.icon, ex, y + th * 0.5, iconSize, color, color);
-    if (up.warn) {
-      // Only label an event if its text clears the one before it.
-      font(ctx, pal, u * 0.46, 700);
-      const label = up.label.toUpperCase();
-      const halfW = ((ctx.measureText ? ctx.measureText(label).width : 0) || label.length * u * 0.3) / 2;
-      if (ex - halfW > lastLabelX + u * 0.4) {
-        ctx.fillStyle = color;
-        text(ctx, label, ex, y + th * 0.86, 'center');
-        lastLabelX = ex + halfW;
-      }
-    }
-  }
-  ctx.restore();
+  st.float = st.float.filter((f) => v.t - f.t < 1.4).slice(-8);
+  st.hp = v.world.player.hp;
+  st.t = v.t;
+  return st;
 }
-
-// ------------------------------------------------------------------ overlays
-
-function drawFeared(ctx, pal, u, w, h, now) {
-  ctx.fillStyle = pal.fear;
-  ctx.fillRect(0, 0, w, h);
-  const shake = Math.sin(now * 30) * u * 0.15;
-  font(ctx, pal, u * 2.4, 900, true);
-  ctx.fillStyle = withAlpha(pal.text, 0.85);
-  text(ctx, 'FEARED', w / 2 + shake, h * 0.36, 'center');
-}
-
-function drawPaused(ctx, pal, u, w, h) {
-  ctx.fillStyle = pal.pause;
-  ctx.fillRect(0, 0, w, h);
-  font(ctx, pal, u * 2.2, 900, true);
-  ctx.fillStyle = pal.text;
-  text(ctx, 'PAUSED', w / 2, h / 2 - u * 0.8, 'center');
-  font(ctx, pal, u * 0.85, 600);
-  ctx.fillStyle = pal.textDim;
-  text(ctx, 'Esc to resume', w / 2, h / 2 + u * 1.0, 'center');
-}
-
-function drawReplayHud(ctx, replay, pal, u, w, h) {
-  const s = `REPLAY  ${fmt(replay.t)} / ${fmt(replay.duration)}${replay.playing ? '' : '  ·  paused'}`;
-  font(ctx, pal, u * 0.8, 700, true);
-  ctx.fillStyle = pal.accent;
-  text(ctx, s, w / 2, u * 1.1, 'center', 'top');
-  font(ctx, pal, u * 0.6, 600);
-  ctx.fillStyle = pal.textMuted;
-  text(ctx, 'Drag the scrubber below  ·  Space play/pause  ·  Tab switch view', w / 2, u * 2.3, 'center', 'top');
-}
-
-function fmt(s) {
-  s = Math.max(0, s || 0);
-  const m = Math.floor(s / 60), r = Math.floor(s % 60);
-  return `${m}:${r < 10 ? '0' : ''}${r}`;
+function chat(c, st, v, w, h, s, mobile, replay) {
+  const x = 18 * s,
+    bottom =
+      replay && mobile ? h - 225 : h - (replay ? 175 : mobile ? 315 : 93) * s,
+    ww = mobile ? Math.min(w * 0.5, 215 * s) : Math.min(350 * s, w * 0.28),
+    height = (mobile ? 77 : 132) * s;
+  // No frame: translucent Classic chat anchored at the lower left.
+  c.fillStyle = gradient(c, x, bottom - height, ww, 0, [
+    [0, '#090a0a90'],
+    [1, '#090a0a00'],
+  ]);
+  c.fillRect(x - 5 * s, bottom - height, ww + 10 * s, height);
+  label(c, 'General', x, bottom - height + 9 * s, 11 * s, C.gold, 'left', true);
+  label(
+    c,
+    'Combat Log',
+    x + 66 * s,
+    bottom - height + 9 * s,
+    11 * s,
+    C.muted,
+    'left',
+    true,
+  );
+  const max = mobile ? 3 : 6,
+    visible = st.lines.slice(-max),
+    lineH = 17 * s;
+  visible.forEach((ln, i) => {
+    c.font = `500 ${11 * s}px ${UI_FONT}`;
+    label(
+      c,
+      fit(c, ln.text, ww),
+      x,
+      bottom - (visible.length - 1 - i) * lineH,
+      11 * s,
+      ln.color,
+    );
+  });
 }

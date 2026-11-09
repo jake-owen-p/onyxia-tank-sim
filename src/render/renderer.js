@@ -10,12 +10,15 @@ import { drawHUD } from './hud.js';
 import { drawMinimap } from './minimap.js';
 import { threatRatio } from '../core/threat.js';
 import { clamp } from '../core/geometry.js';
+import { acquireWorld } from './gl/world.js';
+import { drawWorldOverlay } from './gl/overlay.js';
 
 const FADE_SECONDS = 0.25;
 
 export function createRenderer(canvas, script) {
   const ctx = canvas.getContext('2d');
   const cam = createCamera();
+  const world = acquireWorld();          // null without WebGL2: the 2D views below take over
   const threatCfg = { pullMultiplier: script.threat.pullMultiplier };
   let ratioRole = true;
   const ratioFn = (threat) => threatRatio(threat, threatCfg, ratioRole);
@@ -51,6 +54,14 @@ export function createRenderer(canvas, script) {
     cam.distance = clamp(cam.distance + delta * 0.01, ZOOM_MIN, ZOOM_MAX);
   }
 
+  function drawWorld3D(which, v, settings, pal, now, dtReal, overlay) {
+    ctx.clearRect(0, 0, width, height);
+    const mode = overlay.idle ? 'hero' : which === 'topdown' ? 'map' : 'pov';
+    const used = world.draw({ view: v, script, settings, pal, cam, w: width, h: height, dpr, now, dtReal, mode });
+    if (mode !== 'hero') drawWorldOverlay(ctx, v, script, settings, pal, used, width, height, now, mode, world.bossTop(v));
+    if (mode === 'pov' && settings.minimap !== false) drawMinimap(ctx, v, script, settings, pal, width, height, now);
+  }
+
   function drawWorld(which, v, settings, pal, now, dtReal) {
     if (which === 'topdown') drawTopDown(ctx, v, script, settings, pal, width, height, now);
     else {
@@ -82,7 +93,10 @@ export function createRenderer(canvas, script) {
     // Camera follows the player in both views so switching to POV is seamless.
     updateChaseCamera(cam, v.world.player, { distance: cam.distance, dtReal });
 
-    if (fade) {
+    if (world) {
+      fade = null;
+      drawWorld3D(view, v, settings, pal, now, dtReal, overlay);
+    } else if (fade) {
       const k = (now - fade.start) / FADE_SECONDS;
       if (k >= 1) fade = null;
       else {
@@ -93,11 +107,11 @@ export function createRenderer(canvas, script) {
         ctx.globalAlpha = 1;
       }
     }
-    if (!fade) drawWorld(view, v, settings, pal, now, dtReal);
+    if (!world && !fade) drawWorld(view, v, settings, pal, now, dtReal);
 
     ratioRole = v.tankRole !== false;
     if (!overlay.idle) drawHUD(ctx, v, script, { ...settings, view }, pal, width, height, now, abilityKeys, overlay, ratioFn);
-    if (overlay.dim) {
+    if (overlay.dim && !(world && overlay.idle)) {
       ctx.fillStyle = pal.pause;
       ctx.fillRect(0, 0, width, height);
     }

@@ -70,6 +70,7 @@ export function replayScreen({ snapshots, expectations = [], renderer, settings,
       if (t >= duration) { t = duration; playing = false; playBtn.textContent = 'Play'; }
       scrub.value = t.toFixed(2);
     }
+    scrub.value = t.toFixed(2);
     timeEl.textContent = `${formatTime(t)} / ${formatTime(duration)}`;
     const view = snapshots.length ? findSnapshot(t) : null;
     if (view) {
