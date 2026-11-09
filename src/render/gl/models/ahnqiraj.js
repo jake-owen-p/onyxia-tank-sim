@@ -1618,6 +1618,45 @@ const obsidianMat = { noise: 0.14, scales: 0.55, cracks: 0, rim: 0.3, paintF: 1.
 const slimeMat = { noise: 0.1, scales: 0, cracks: 0, rim: 0.55, paintF: 0.7, scaleF: 1, gloss: 0.95, crackF: 1 };
 const fleshMat = { noise: 0.22, scales: 0, cracks: 0, rim: 0.28, paintF: 0.9, scaleF: 1, gloss: 0.3, crackF: 1 };
 
+/** Phase one: the great Eye on its stalk, staring out from the pit. */
+function buildCThunEye() {
+  const m = new ModelBuilder();
+  const flesh = '#b98f88', dark = '#5a3a55', lid = '#8d6a68';
+  m.bone('root', null, [0, 0, 0]);
+  const zs = [0, 4, 8, 12];
+  zs.forEach((z, i) => m.bone(`stalk${i}`, i ? `stalk${i - 1}` : 'root', [0, 0, z]));
+  m.bone('eye', 'stalk3', [0, 0, 19.5]);
+  m.bone('mouth', 'eye', [11, 0, 19.5]);
+  m.ell('root', [0, 0, 1], [11, 11, 3.4], dark, { k: 2 });
+  for (let i = 0; i < 3; i++) m.blob(`stalk${i}`, [0, 0, zs[i]], [0, 0, zs[i + 1]], 4.6 - i * 0.7, 3.9 - i * 0.7, i ? flesh : dark, { k: 1 });
+  m.blob('stalk3', [0, 0, 12], [0, 0, 16], 2.8, 3.4, flesh, { k: 0.9 });
+  m.ell('eye', [0, 0, 19.5], [9.4, 9.8, 9.4], flesh, { k: 0.8 });
+  // Heavy upper and lower lids frame the stare.
+  m.ell('eye', [6.6, 0, 24.8], [3.6, 7.2, 1.9], lid, { k: 0.8 });
+  m.ell('eye', [6.8, 0, 14.3], [3.2, 6.6, 1.5], lid, { k: 0.8 });
+  m.ell('eye', [9, 0, 19.5], [1.25, 6.2, 5.4], '#f0e2c8', { k: 0.2 });
+  m.ell('eye', [9.9, 0, 19.5], [0.75, 4.3, 4.3], '#9d2fa6', { k: 0.1, em: 0.8 });
+  m.ball('eye', [10.5, 0, 19.5], 2.15, '#190612', { sides: 12, rings: 8 });
+  m.ball('eye', [11.6, 0.7, 20.5], 0.45, '#ffd6ff', { em: 4, sides: 6, rings: 3 });
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2, r = 9.7;
+    m.spike('eye', [Math.cos(a) * 2 - 1, Math.cos(a) * r * 0.86, 19.5 + Math.sin(a) * r * 0.86], [-6, Math.cos(a) * (r + 5), 19.5 + Math.sin(a) * (r + 5)], 0.85, '#d8c8a8', { sides: 5, bend: [0.8, 0, 0] });
+  }
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * Math.PI * 2, x = Math.cos(a) * 12.5, y = Math.sin(a) * 12.5;
+    m.tube('root', [[x * 0.72, y * 0.72, 1.6], [x, y, 5.5], [x * 1.08, y * 1.08, 10.4], [x * 0.94, y * 0.94, 14]], [1.4, 1, 0.6, 0.1], [dark, dark, flesh, flesh], { sides: 6 });
+  }
+  return m.build({ cell: 0.3, smooth: 1, ao: 1, aoReach: 2.2 });
+}
+function animateCThunEye(p, s) {
+  p.reset();
+  const t = s.t, m = s.mem;
+  m.c = (m.c ?? 0) + ((s.cast ? 1 : 0) - (m.c ?? 0)) * Math.min(1, s.dt * 6);
+  for (let i = 1; i < 4; i++) p.r(`stalk${i}`, 0.04 * Math.sin(t * 0.6 + i), 0.05 * Math.sin(t * 0.7 + i * 1.3), 0);
+  p.r('eye', 0, -0.08 * m.c + 0.03 * Math.sin(t * 0.9), 0.05 * Math.sin(t * 0.5));
+  p.evaluate();
+}
+
 export const BOSSES = {
   'ruins-of-ahnqiraj/kurinnaxx': () => boss(buildKurinnaxx(), animateCrawler, shellMat, 0.78, 'poison', 10, 46),
   'ruins-of-ahnqiraj/general-rajaxx': () => boss(buildRajaxx(), animateBiped, clothMat, 1, 'shadow', 15, 24),
@@ -1633,7 +1672,10 @@ export const BOSSES = {
   'temple-of-ahnqiraj/huhuran': () => boss(buildHuhuran(), animateWasp, shellMat, 0.95, 'poison', 20, 30),
   'temple-of-ahnqiraj/twin-emperors': makeTwins,
   'temple-of-ahnqiraj/ouro': () => boss(buildOuro(), animateOuro, shellMat, 1, 'physical', 22, 36),
-  'temple-of-ahnqiraj/cthun': () => boss(buildCThun(), animateCThun, fleshMat, 1, 'shadow', 28, 62, { glow: [1, 0.55, 2.2], glowR: 60, fx: cthunFX }),
+  'temple-of-ahnqiraj/cthun': () => boss(buildCThun(), animateCThun, fleshMat, 1, 'shadow', 28, 62, {
+    glow: [1, 0.55, 2.2], glowR: 60, fx: cthunFX,
+    variants: [{ key: 'eye', match: /^eye/i, make: () => boss(buildCThunEye(), animateCThunEye, fleshMat, 0.72, 'shadow', 28, 62, { glow: [1.4, 0.4, 2.6], glowR: 60, facePlayer: true }) }],
+  }),
 };
 
 // One mesh per encounter serves every add it spawns.

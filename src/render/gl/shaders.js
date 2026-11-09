@@ -319,10 +319,10 @@ void main(){
     h=edge*(.6+.4*fine);
   } else if(uKind==3){     // rippled sand
     float d=fb(uv,3.,3);
-    float ripple=sin((uv.y+d*.22)*135.+fine*3.)*.5+.5;
+    float ripple=sin((uv.y+d*.3)*62.+fine*4.)*.5+.5;
     col=mix(uA,uB,mid)*(.85+.3*fine);
-    col=mix(col,uC,ripple*.16+smoothstep(.6,.85,d)*.2);
-    h=ripple*.3+d*.55+fine*.15;
+    col=mix(col,uC,ripple*.07+smoothstep(.6,.85,d)*.2);
+    h=ripple*.1+d*.72+fine*.12;
   } else if(uKind==4){     // living hive wall
     vec2 w=uv+.05*(vec2(fb(uv,5.,3),fb(uv+.5,5.,3))-.5);
     vec3 v=vor(w,7.);
@@ -335,14 +335,14 @@ void main(){
     vec2 g=uv*4.;
     vec2 cell=fract(g);
     vec2 d=min(cell,1.-cell);
-    float edge=smoothstep(.008,.035,min(d.x,d.y)+.012*(fine-.5));
+    float edge=smoothstep(.004,.02,min(d.x,d.y)+.012*(fine-.5));
     float id=hp(floor(g),4.);
     vec3 b=mix(uA,uB,id*.6+fine*.4)*(.72+.56*mid);
     float inner=smoothstep(.09,.1,min(d.x,d.y))*smoothstep(.13,.12,min(d.x,d.y));
-    b=mix(b,uC,inner*.55);
+    b=mix(b,uC,inner*.16);
     b=mix(b,b*.5,smoothstep(.62,.9,fb(uv,8.,4))*.6);
-    col=mix(uA*.15,b,edge);
-    h=edge*(.58+.34*fine);
+    col=mix(uA*.46,b,edge);
+    h=edge*(.68+.24*fine);
   } else {                 // jungle floor
     vec3 v=vor(uv,26.);
     float leaf=smoothstep(.0,.25,v.y);

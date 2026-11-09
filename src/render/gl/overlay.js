@@ -14,7 +14,7 @@ function outlined(ctx, text, x, y, fill, width) {
   ctx.fillStyle = fill; ctx.fillText(text, x, y);
 }
 
-export function drawWorldOverlay(ctx, view, script, settings, pal, cam, w, h, now, mode, bossTop = null) {
+export function drawWorldOverlay(ctx, view, script, settings, pal, cam, w, h, now, mode, bossTop = null, staysVisible = false) {
   const wd = view.world, t = view.t, boss = wd.boss;
   const u = Math.max(12, Math.min(32, Math.min(w, h) / 45));
   ctx.save();
@@ -58,7 +58,7 @@ export function drawWorldOverlay(ctx, view, script, settings, pal, cam, w, h, no
   }
 
   // Boss states and the name over its head.
-  const tag = boss.state === 'submerged' ? 'SUBMERGED' : boss.state === 'airborne' ? 'AIRBORNE' : null;
+  const tag = boss.state === 'submerged' ? (staysVisible ? 'OUT OF REACH' : 'SUBMERGED') : boss.state === 'airborne' ? 'AIRBORNE' : null;
   const s = project(cam, boss.x, boss.y, (bossTop ?? (boss.z || 0) + script.boss.radius * 1.5) + 1.5, w, h);
   if (s && s.y > u * 2) {
     const px = Math.max(12, Math.min(u, s.scale * 1.6));

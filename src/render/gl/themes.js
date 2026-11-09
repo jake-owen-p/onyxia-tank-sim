@@ -43,7 +43,7 @@ export const THEMES = {
     lights: 'hive', torchCol: [3.6, 1.2, 4.2], props: ['hivePods', 'tentaclesWall'], ambient: 'spores', wallStyle: 'rock', wallMult: 2.3,
   },
   naxxramas: {
-    floor: { kind: 5, a: '#3b3042', b: '#5a4b62', c: '#2f7a3a', scale: 0.08 }, wall: { kind: 2, a: '#3a2f55', b: '#5b4a7a', c: '#274a2f', scale: 0.12 },
+    floor: { kind: 5, a: '#3b3042', b: '#5a4b62', c: '#2f7a3a', scale: 0.05 }, wall: { kind: 2, a: '#3a2f55', b: '#5b4a7a', c: '#274a2f', scale: 0.12 },
     bump: 1.9, ambUp: [0.40, 0.31, 0.58], ambDown: [0.15, 0.17, 0.20], key: [-0.3, 0.45, 0.8], keyCol: [0.52, 0.48, 0.80], fog: [0.075, 0.05, 0.14], fogD: 0.0068,
     dome: false, glow: [0.5, 1.9, 0.5], glowB: [1.2, 4, 1.2], grade: [0.98, 0.99, 1.06], exposure: 1.3,
     lights: 'torches', torchCol: [1.5, 5.2, 1.7], props: ['pillars', 'iron', 'braziers'], ambient: 'motes', wallStyle: 'block', wallMult: 2.1, banner: ['#3a2a66', '#6fd08a'],
@@ -63,7 +63,7 @@ const OVERRIDES = {
   'naxxramas/maexxna': { props: ['pillars', 'webs'], fog: [0.09, 0.06, 0.16] },
   'naxxramas/anubrekhan': { props: ['pillars', 'webs'] },
   'naxxramas/faerlina': { props: ['pillars', 'webs', 'braziers'] },
-  'naxxramas/patchwerk': { floor: { kind: 5, a: '#34353c', b: '#4e505a', c: '#3b8a3f', scale: 0.08 }, ambUp: [0.36, 0.40, 0.46] },
+  'naxxramas/patchwerk': { floor: { kind: 5, a: '#34353c', b: '#4e505a', c: '#3b8a3f', scale: 0.05 }, ambUp: [0.32, 0.34, 0.4] },
   'naxxramas/grobbulus': { outer: 'slime', floor: { kind: 5, a: '#34353c', b: '#4e505a', c: '#3b8a3f', scale: 0.08 }, ambient: 'plague' },
   'naxxramas/gluth': { outer: 'slime', floor: { kind: 5, a: '#34353c', b: '#4e505a', c: '#3b8a3f', scale: 0.08 } },
   'naxxramas/thaddius': { props: ['pillars', 'coils'], torchCol: [1.4, 3.6, 6.5], fog: [0.04, 0.06, 0.14] },

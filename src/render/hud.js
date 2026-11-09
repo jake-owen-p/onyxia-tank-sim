@@ -1,6 +1,6 @@
 // Classic-inspired HUD. Pure view reader; only presentation history is retained.
 // Static chrome and original artwork are cached by ui/art.js.
-import { getBossPortrait } from './portraits.js';
+import { getBossPortrait, getPlayerPortrait } from './portraits.js';
 import {
   C,
   UI_FONT,
@@ -166,7 +166,13 @@ function unitFrames(c, v, script, settings, w, s, mobile) {
     ph = 72 * s;
   frame(c, x + 43 * s, y + 7 * s, pw - 43 * s, 57 * s, true);
   const ps = 64 * s;
-  portrait(c, `player:${v.role}`, x, y, ps);
+  const playerSource = getPlayerPortrait(v.role, Math.ceil(ps * 2));
+  c.save();
+  circle(c, x + ps / 2, y + ps / 2, ps / 2);
+  c.clip();
+  if (playerSource && c.drawImage) c.drawImage(playerSource, x, y, ps, ps);
+  else portrait(c, `player:${v.role}`, x, y, ps);
+  c.restore();
   portraitRing(c, x, y, ps);
   const bx = x + 67 * s,
     bw = pw - 73 * s;
@@ -746,13 +752,14 @@ function actionChrome(c, l) {
     total + 18 * s,
     mobile ? size * 2 + gap + 16 * s : size + 18 * s,
     true,
+    true,
   );
   if (!mobile) {
-    wing(c, x - 90 * s, y - 51 * s, 90 * s, 100 * s);
-    wing(c, x + total, y - 51 * s, 90 * s, 100 * s, true);
+    wing(c, x - 79 * s, y - 23 * s, 80 * s, 74 * s);
+    wing(c, x + total - s, y - 23 * s, 80 * s, 74 * s, true);
   } else if (x >= 47) {
-    wing(c, x - 46, y + 38, 45, 52);
-    wing(c, x + total + 1, y + 38, 45, 52, true);
+    wing(c, x - 46, y + size + gap - 8, 46, 43);
+    wing(c, x + total, y + size + gap - 8, 46, 43, true);
   }
   for (let i = 0; i < 12; i++)
     socket(
@@ -760,6 +767,7 @@ function actionChrome(c, l) {
       x + (i % cols) * (size + gap),
       y + Math.floor(i / cols) * (size + gap),
       size,
+      true,
     );
   // Segmented experience-style rail is ornamental: no invented XP number.
   c.fillStyle = '#060708';

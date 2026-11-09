@@ -129,20 +129,20 @@ export function cached(c, key, x, y, w, h, paint) {
   }
   c.drawImage(cv, x, y, w, h);
 }
-export function frame(c, x, y, w, h, heavy = false) {
-  cached(c, `frame:${heavy}`, x, y, w, h, (p) => {
+export function frame(c, x, y, w, h, heavy = false, subdued = false) {
+  cached(c, `frame:${heavy}:${subdued}`, x, y, w, h, (p) => {
     p.fillStyle = '#080909';
     p.fillRect(0, 0, w, h);
     p.fillStyle = gradient(p, 0, 0, 0, h, [
-      [0, '#8b8980'],
+      [0, subdued ? '#626564' : '#8b8980'],
       [0.1, '#444646'],
       [0.48, '#252829'],
       [0.9, '#3b3c3d'],
-      [1, '#68645b'],
+      [1, subdued ? '#414644' : '#68645b'],
     ]);
     p.fillRect(1, 1, w - 2, h - 2);
     const b = heavy ? 7 : 4;
-    p.strokeStyle = '#ad9a6c';
+    p.strokeStyle = subdued ? '#626358' : '#ad9a6c';
     p.lineWidth = 1;
     p.strokeRect(2.5, 2.5, w - 5, h - 5);
     p.strokeStyle = '#161718';
@@ -153,7 +153,7 @@ export function frame(c, x, y, w, h, heavy = false) {
       [1, '#080909'],
     ]);
     p.fillRect(b, b, w - 2 * b, h - 2 * b);
-    p.strokeStyle = '#575043';
+    p.strokeStyle = subdued ? '#363b39' : '#575043';
     p.strokeRect(b + 0.5, b + 0.5, w - 2 * b - 1, h - 2 * b - 1);
     // Fine carved stone veins, deterministic and cached.
     p.save();
@@ -177,7 +177,7 @@ export function frame(c, x, y, w, h, heavy = false) {
         [5, h - 5],
         [w - 5, h - 5],
       ])
-        circle(p, xx, yy, 2.2, '#aa9870', '#181615');
+        circle(p, xx, yy, 2.2, subdued ? '#696b62' : '#aa9870', '#181615');
   });
 }
 export function statusBar(c, x, y, w, h, f, color) {
@@ -197,8 +197,8 @@ export function statusBar(c, x, y, w, h, f, color) {
   c.lineWidth = 1;
   c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 }
-export function socket(c, x, y, size) {
-  cached(c, 'socket', x, y, size, size, (p) => {
+export function socket(c, x, y, size, subdued = false) {
+  cached(c, `socket:${subdued}`, x, y, size, size, (p) => {
     p.fillStyle = '#050607';
     p.fillRect(0, 0, size, size);
     poly(
@@ -210,7 +210,7 @@ export function socket(c, x, y, size) {
         [5, size - 5],
         [1, size - 1],
       ],
-      '#8d8b7e',
+      subdued ? '#515653' : '#8d8b7e',
     );
     poly(
       p,
@@ -221,13 +221,13 @@ export function socket(c, x, y, size) {
         [5, size - 5],
         [size - 5, 5],
       ],
-      '#34332d',
+      subdued ? '#252a29' : '#34332d',
     );
-    p.strokeStyle = '#c0ab73';
+    p.strokeStyle = subdued ? '#68695d' : '#c0ab73';
     p.strokeRect(0.5, 0.5, size - 1, size - 1);
     p.fillStyle = gradient(p, 0, 4, size, size, [
       [0, '#050607'],
-      [1, '#232525'],
+      [1, subdued ? '#141819' : '#232525'],
     ]);
     p.fillRect(4, 4, size - 8, size - 8);
     p.strokeStyle = '#090a0b';
@@ -963,129 +963,100 @@ export function portraitRing(c, x, y, size) {
 export function wing(c, x, y, w, h, flip = false) {
   cached(c, `gryphon:${flip}`, x, y, w, h, (p) => {
     p.save();
-    p.scale(w / 100, h / 110);
+    p.scale(w / 112, h / 104);
     if (flip) {
-      p.translate(100, 0);
+      p.translate(112, 0);
       p.scale(-1, 1);
     }
-    const stone = gradient(p, 10, 0, 75, 100, [
-      [0, '#b8b5a3'],
-      [0.22, '#777e7a'],
-      [0.5, '#343b3c'],
-      [0.75, '#858b80'],
-      [1, '#252b2b'],
+    p.lineJoin = 'round';
+    p.lineCap = 'round';
+    // Original pewter relief: a low shoulder, a folded wing, and a lion's haunch.
+    // Two/four/six coordinates describe lines/quadratics/cubics respectively.
+    const carve = (points, fill, stroke = '#15171a', width = 1.6, close = true) => {
+      p.beginPath();
+      p.moveTo(...points[0]);
+      for (const pt of points.slice(1)) {
+        if (pt.length === 6) p.bezierCurveTo(...pt);
+        else if (pt.length === 4) p.quadraticCurveTo(...pt);
+        else p.lineTo(...pt);
+      }
+      if (close) p.closePath();
+      if (fill) { p.fillStyle = fill; p.fill(); }
+      if (stroke) { p.strokeStyle = stroke; p.lineWidth = width; p.stroke(); }
+    };
+    const pewter = gradient(p, 12, 8, 55, 82, [
+      [0, '#939792'], [0.23, '#676c6b'], [0.52, '#3d4244'],
+      [0.76, '#555a59'], [1, '#272b2e'],
     ]);
-    // Fan of individually engraved feathers; original crouched gryphon.
-    for (let i = 0; i < 10; i++) {
-      const x0 = 11 + i * 6.2,
-        y0 = 4 + Math.sin(i * 0.23) * 9;
-      poly(
-        p,
-        [
-          [78, 88],
-          [x0 + 8, y0 + 35],
-          [x0, y0],
-          [x0 - 6, y0 + 20],
-          [x0 - 3, y0 + 49],
-          [42, 89],
-        ],
-        stone,
-        '#141a1b',
-        1.4,
-      );
-      p.strokeStyle = '#c1bfa076';
-      p.lineWidth = 0.7;
-      p.beginPath();
-      p.moveTo(x0, y0 + 8);
-      p.lineTo(x0 + 5, y0 + 40);
-      p.lineTo(65, 87);
-      p.stroke();
+    const raised = gradient(p, 25, 13, 30, 58, [
+      [0, '#b1b3aa'], [0.22, '#858a83'], [0.48, '#555c5c'], [1, '#282d32'],
+    ]);
+    const feather = gradient(p, 18, 27, 40, 55, [
+      [0, '#777d7b'], [0.45, '#545b5b'], [0.8, '#353b3f'], [1, '#6d726e'],
+    ]);
+    // Tail curls beneath the rump, keeping the entire silhouette close to the bar.
+    carve([[34,61], [2,58,-3,88,15,97], [28,105,42,94,33,86],
+      [26,79,17,84,21,90], [12,88,13,77,23,76], [41,80]], pewter, '#101215', 2.6);
+    carve([[12,78], [4,88,15,99,26,94]], null, '#8a8e86', 1.2, false);
+    // Broad body and tucked rear leg; no free-standing feather tips.
+    carve([[14,72], [9,51,18,22,38,13], [53,6,72,17,79,38],
+      [91,57,87,84,73,94], [55,102,23,97,14,72]], pewter, '#111417', 2.8);
+    carve([[49,61], [33,62,28,80,39,91], [44,97,56,98,64,96],
+      [76,95,80,99,82,95], [85,89,76,85,65,87],
+      [68,76,62,65,49,61]], raised, '#202528', 1.8);
+    carve([[45,73], [39,79,43,87,50,89], [61,91,66,89,74,93]], null, '#989c92', 1.1, false);
+    for (let i = 0; i < 3; i++)
+      carve([[65 + i * 5,90], [69 + i * 5,91,69 + i * 5,95]], null, '#20262a', 1.4, false);
+    // Neck slopes into the shoulder, with a short swept crest and hooked beak.
+    carve([[48,28], [52,17,60,14,66,14], [62,10], [75,12], [70,6],
+      [86,10,94,16,96,23], [96,33,85,36,82,40],
+      [80,49,85,56,80,64], [66,66,53,53,48,28]], raised, '#15191c', 2.1);
+    carve([[83,20], [93,19,103,22,108,27], [110,32,106,38,101,40],
+      [102,33,96,31,91,31], [84,29]], '#777c77', '#14191d', 1.8);
+    carve([[94,24], [102,25,105,27,107,28]], null, '#b2b3a6', 1.1, false);
+    carve([[91,32], [96,33,100,34,102,35]], null, '#20262a', 1.4, false);
+    // The overhanging brow and dark eye remain readable at HUD size.
+    carve([[75,21], [81,18,88,21,90,24], [84,26], [77,25]], '#252c30');
+    circle(p, 83, 23, 1.4, '#b8b9aa', '#181d20', 0.8);
+    carve([[73,19], [80,16,86,19,90,21]], null, '#a4a79b', 1.5, false);
+    carve([[71,29], [73,35,80,36,82,35], [76,43], [80,44],
+      [73,50], [76,52], [70,56], [61,43]], '#515859', '#282f33', 1.1);
+    carve([[69,31], [69,37,72,40,75,41]], null, '#93998f', 1, false);
+    // A bent foreleg reaches inward, the talons curl over the end rail.
+    carve([[73,48], [73,59,78,69,87,68], [97,65,95,48,99,44],
+      [101,41,106,42,108,46], [111,43,108,37,104,36],
+      [95,33,88,39,87,47], [84,54], [81,44]], pewter, '#151b1e', 2);
+    carve([[80,54], [82,62,86,62,88,58], [90,43,95,39,101,39]], null, '#92988e', 1.3, false);
+    for (let i = 0; i < 3; i++)
+      carve([[97 + i * 4,39], [101 + i * 4,38,103 + i * 3,43,101 + i * 3,47]],
+        null, i === 0 ? '#b5b6a9' : '#858c84', 1.5, false);
+    // The wing is one heavy teardrop folded across the flank, with layered relief.
+    carve([[55,18], [36,10,19,29,17,49], [14,64,22,79,33,85],
+      [35,71,48,63,57,50], [68,34,66,22,55,18]], feather, '#191e22', 2.2);
+    // Broad primaries sweep diagonally back, their tips tucked against the haunch.
+    for (let i = 0; i < 5; i++) {
+      const rx = 43 + i * 2.5, ry = 27 + i * 4,
+        tx = 20 + i * 3.3, ty = 62 + i * 4;
+      carve([[rx,ry], [rx - 18,ry + 1,tx - 7,ty - 13,tx,ty],
+        [tx + 8,ty - 6,rx + 4,ry + 16,rx + 6,ry + 6],
+        [rx + 4,ry + 1,rx + 1,ry - 1,rx,ry]], feather, '#242b30', 1.2);
+      carve([[rx - 3,ry + 6], [rx - 16,ry + 9,tx - 1,ty - 13,tx + 1,ty - 5]],
+        null, '#a0a5988c', 1.2, false);
     }
-    circle(p, 72, 79, 22, stone, '#151c1b', 2);
-    for (let i = 0; i < 9; i++) {
-      const a = i * 0.6;
-      poly(
-        p,
-        [
-          [71, 81],
-          [72 + Math.cos(a) * 23, 79 + Math.sin(a) * 25],
-          [72 + Math.cos(a + 0.3) * 19, 79 + Math.sin(a + 0.3) * 20],
-        ],
-        stone,
-        '#202727',
-        1,
-      );
+    // Shoulder coverts cap the long feathers as a continuous, rounded hunch.
+    carve([[24,34], [28,16,48,10,57,20], [65,27,63,38,56,43],
+      [50,39,47,34,44,33], [37,38,29,39,24,34]], raised, '#293034', 1.3);
+    for (const [xx, yy] of [[32,26], [40,21], [49,22], [31,32], [40,29], [49,30], [55,35]]) {
+      carve([[xx - 3,yy - 2], [xx - 2,yy + 4,xx + 3,yy + 5,xx + 5,yy + 1]],
+        null, '#30383b', 1.1, false);
+      carve([[xx - 3,yy - 3], [xx,yy - 5,xx + 3,yy - 3]], null, '#a0a59883', 0.9, false);
     }
-    poly(
-      p,
-      [
-        [79, 84],
-        [65, 72],
-        [60, 53],
-        [63, 37],
-        [76, 34],
-        [87, 43],
-        [84, 52],
-        [74, 56],
-        [80, 68],
-        [94, 82],
-      ],
-      stone,
-      '#121c1d',
-      2,
-    );
-    poly(
-      p,
-      [
-        [82, 42],
-        [97, 49],
-        [85, 55],
-        [79, 52],
-      ],
-      '#c7b989',
-      '#202623',
-      2,
-    );
-    poly(
-      p,
-      [
-        [63, 37],
-        [67, 23],
-        [75, 34],
-      ],
-      stone,
-      '#172121',
-      1.5,
-    );
-    circle(p, 77, 43, 2, '#e6c46e', '#182124', 1);
-    p.strokeStyle = '#abae94';
-    p.lineWidth = 1;
-    p.beginPath();
-    p.moveTo(66, 53);
-    p.lineTo(70, 66);
-    p.lineTo(86, 83);
-    p.stroke();
-    poly(
-      p,
-      [
-        [49, 91],
-        [77, 89],
-        [89, 96],
-        [88, 104],
-        [47, 104],
-        [37, 99],
-      ],
-      stone,
-      '#131c1e',
-      2,
-    );
-    for (let i = 0; i < 3; i++) {
-      p.strokeStyle = '#bdbaa3';
-      p.beginPath();
-      p.moveTo(68 + i * 6, 96);
-      p.lineTo(69 + i * 6, 103);
-      p.stroke();
-    }
+    carve([[19,48], [17,31,32,13,46,16]], null, '#a5a99e', 1.2, false);
+    carve([[22,62], [22,71,27,78,31,81]], null, '#898f84', 1.1, false);
+    carve([[58,51], [51,64,39,69,35,81]], null, '#12191c', 2, false);
+    // Small tool marks catch the light without turning the relief into bright trim.
+    for (const [xx, yy] of [[27,23], [35,18], [23,40], [38,86], [48,93], [68,17], [76,57]])
+      carve([[xx,yy], [xx + 2,yy - 1]], null, '#b9bba76b', 0.8, false);
     p.restore();
   });
 }

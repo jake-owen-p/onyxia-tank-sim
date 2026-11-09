@@ -6,3 +6,9 @@ export function getBossPortrait(raidId, bossId, size = 128) {
   const world = acquireWorld();
   return world ? world.portrait(raidId, bossId, size) : null;
 }
+
+/** The player's own character, for the player frame. Same contract as getBossPortrait. */
+export function getPlayerPortrait(role, size = 128) {
+  const world = acquireWorld();
+  return world ? world.playerPortrait(role, size) : null;
+}

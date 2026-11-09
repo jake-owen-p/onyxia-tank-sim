@@ -21,10 +21,16 @@ checked against it again before it is marked ready. The format is documented
 in `docs/ENCOUNTER_FORMAT.md`; `node tools/validate.mjs` lints every script
 and plays it with a bot for each role.
 
-* Vanilla JavaScript ES modules, Canvas 2D, no build step, no backend, no
-  dependencies.
-* Two views of the same simulation: a top-down placement map and a
-  third-person over-the-shoulder view that matches WoW's default camera.
+* Vanilla JavaScript ES modules, no build step, no backend, no dependencies.
+  The world is hand-written WebGL2 and the interface is Canvas 2D and DOM.
+  Without WebGL2 the game falls back to its simple 2D views.
+* Real 3D rooms for every raid and a sculpted, animated model of all 62 bosses,
+  each built from screenshots of the game. All art is original procedural work;
+  fonts are SIL OFL. `tools/gallery.html` shows every boss on one contact sheet.
+* An interface in the style of the game's default UI: unit frames, action bar,
+  round minimap, boss timers, raid frames, combat log and an Encounter Journal.
+* Two views of the same simulation: a tactical map and a third-person
+  over-the-shoulder view that matches WoW's default camera.
 * 62 scripted encounters across all seven Classic raids: Onyxia's Lair, Molten
   Core, Blackwing Lair, Zul'Gurub, Ruins of Ahn'Qiraj, Temple of Ahn'Qiraj and
   Naxxramas. Fight timings come from boss mods, emulators and guides. Numbers

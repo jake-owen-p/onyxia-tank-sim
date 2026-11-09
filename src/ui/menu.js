@@ -79,7 +79,7 @@ export function menuScreen({ script, index, current, settings, history, actions 
     ));
   const hasTutorial = tutorialForRole(script, role);
 
-  const el = h('div', { class: 'panel panel-menu' },
+  const el = h('div', { class: 'panel panel-menu', 'data-hero-inset': '' },
     h('header', { class: 'journal-header' },
       h('span', { class: 'journal-seal' }, abilityIcon('taunt', 34)),
       h('div', {}, h('h1', { text: 'Encounter Journal' }), h('div', { class: 'journal-sub', text: 'Classic raid rehearsal' })),
@@ -89,12 +89,14 @@ export function menuScreen({ script, index, current, settings, history, actions 
       encounterPicker(index, current, actions.pick),
       h('main', { class: 'encounter-page' },
         h('header', { class: 'boss-hero' },
-          bossPortrait(current.raid, current.boss, 124),
+          bossPortrait(current.raid, current.boss, 68),
           h('div', { class: 'brand' },
             h('div', { class: 'brand-kicker', text: `${script.raidInfo?.name || 'Raid'} · ${script.raidInfo?.size || 40} players` }),
             h('h2', { class: 'brand-title', text: script.name }),
-            h('p', { class: 'brand-sub', text: script.arena.name }),
-            h('div', { class: 'boss-status', text: `${script.phases.length} ${script.phases.length === 1 ? 'phase' : 'phases'} · ${drillList.length} ${drillList.length === 1 ? 'drill' : 'drills'}` }),
+            h('div', { class: 'brand-details' },
+              h('p', { class: 'brand-sub', text: script.arena.name }),
+              h('div', { class: 'boss-status', text: `${script.phases.length} ${script.phases.length === 1 ? 'phase' : 'phases'} · ${drillList.length} ${drillList.length === 1 ? 'drill' : 'drills'}` }),
+            ),
           ),
         ),
         h('div', { class: 'journal-paper' },

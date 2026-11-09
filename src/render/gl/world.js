@@ -173,8 +173,8 @@ function createWorld(gl, canvas) {
   let fogScale = 1;
   function setCommon(p, eye, now, th) {
     gl.uniform3fv(p.u.uCam, eye);
-    const lift = fogScale === 0 ? 2.1 : 1;
-    gl.uniform3f(p.u.uAmbUp, th.ambUp[0] * lift + (lift > 1 ? 0.12 : 0), th.ambUp[1] * lift + (lift > 1 ? 0.12 : 0), th.ambUp[2] * lift + (lift > 1 ? 0.12 : 0)); gl.uniform3fv(p.u.uAmbDown, th.ambDown);
+    const lift = fogScale === 0 ? 1.4 : 1;
+    gl.uniform3f(p.u.uAmbUp, th.ambUp[0] * lift, th.ambUp[1] * lift, th.ambUp[2] * lift); gl.uniform3fv(p.u.uAmbDown, th.ambDown);
     const k = th.key, l = Math.hypot(k[0], k[1], k[2]) || 1;
     gl.uniform3f(p.u.uKeyDir, k[0] / l, k[1] / l, k[2] / l);
     gl.uniform3fv(p.u.uKeyCol, th.keyCol);
@@ -300,12 +300,19 @@ function createWorld(gl, canvas) {
     }
     blend.eye = eye; blend.look = look; blend.fov = fov;
     perspective(fov, w / h, 0.3, 1400, proj);
-    if (mode === 'hero' && w > 980) proj[8] = -0.56;
+    if (mode === 'hero' && w > 980) {
+      const edge = a.heroInset || w * 0.58;
+      proj[8] = -Math.min(0.7, ((edge + w) / 2 / w) * 2 - 1);
+    }
     lookAt(eye, look, [0, 0, 1], viewM);
     mul4(proj, viewM, VP);
 
-    // Boss pose.
-    const boss = wd.boss, bm = E.bossM, mem = bm.mem;
+    // Boss pose. Some bosses change form with the phase (C'Thun's Eye and body).
+    const boss = wd.boss;
+    let bm = E.bossM;
+    if (E.bossM.variants && mode !== 'hero') for (const v of E.bossM.variants) if (v.match.test(view.phaseName || '')) { bm = model(`boss:${E.key}:${v.key}`, v.make); break; }
+    if (bm !== E.bossM && !bm.mem) bm.mem = {};
+    const mem = bm.mem;
     const moved = mem.px === undefined ? 0 : Math.hypot(boss.x - mem.px, boss.y - mem.py);
     mem.speed = (mem.speed || 0) * 0.85 + (moved / Math.max(0.001, dt)) * 0.15;
     mem.px = boss.x; mem.py = boss.y;
@@ -315,7 +322,7 @@ function createWorld(gl, canvas) {
     mem.sink = (mem.sink ?? sinkTarget) + (sinkTarget - (mem.sink ?? sinkTarget)) * Math.min(1, dt * 2.2);
     const bossZ = (boss.z || 0) - mem.sink * (bm.built.maxz * bm.scale + 1);
     if (mode === 'hero') placement(E.info.cx, E.info.cy, Math.max(0, bossZ), -Math.PI / 2 + 0.55 + Math.sin(now * 0.12) * 0.16 + 0.42, bm.scale, model4);
-    else placement(boss.x, boss.y, bossZ, boss.heading, bm.scale, model4);
+    else placement(boss.x, boss.y, bossZ, bm.facePlayer ? Math.atan2(wd.player.y - boss.y, wd.player.x - boss.x) : boss.heading, bm.scale, model4);
     const mouthL = bm.pose.bonePos(bm.mouth || 'head', scratch);
     const mouth = [
       model4[0] * mouthL[0] + model4[4] * mouthL[1] + model4[12],
@@ -352,6 +359,7 @@ function createWorld(gl, canvas) {
 
     fogScale = mode === 'map' ? 0 : 1;
     buildDecals(view, script, settings, pal, now, decals);
+    if (mode !== 'hero') addContactShadows(view, script, decals, bm, bossZ, mem);
 
 
     // ---- geometry pass
@@ -394,8 +402,10 @@ function createWorld(gl, canvas) {
     gl.uniformMatrix4fv(P.lit.u.uVP, false, VP);
     setCommon(P.lit, eye, now, th);
     gl.enable(gl.CULL_FACE);
-    gl.uniform1f(P.lit.u.uCutR, mode === 'hero' ? 7 : 0);
+    // Set dressing between the camera and its subject is cut away, so nothing can block the view.
+    gl.uniform1f(P.lit.u.uCutR, mode === 'hero' ? 7 : mode === 'pov' ? 3.2 : 0);
     if (mode === 'hero') gl.uniform4f(P.lit.u.uCut, eye[0], eye[1], E.info.cx, E.info.cy);
+    else if (mode === 'pov') gl.uniform4f(P.lit.u.uCut, eye[0], eye[1], look[0], look[1]);
     if (E.props && mode !== 'map') { setMat({ noise: 0.5, scales: 0, cracks: 0, rim: 0.05, paintF: 0.9, scaleF: 1, gloss: 0.1, crackF: 1 }); placement(0, 0, 0, 0, 1, FIXED); drawMesh(E.props, IDENT_BONES, FIXED); }
     gl.uniform1f(P.lit.u.uCutR, 0);
 
@@ -535,6 +545,20 @@ function createWorld(gl, canvas) {
     });
   }
 
+  /** Dark soft discs that plant the boss, the raid and adds on the floor. */
+  function addContactShadows(view, script, D, bm, bossZ, mem) {
+    const wd = view.world, black = [0, 0, 0];
+    const disc = (x, y, r, a) => { const c = circlePoly(x, y, r, 18); D.fill(c, 0.018, black, a * 0.55); D.fill(circlePoly(x, y, r * 0.62, 14), 0.019, black, a * 0.45); };
+    if (mem.sink < 0.9) {
+      const lift = Math.max(0, wd.boss.z || 0), r = script.boss.radius * (1.05 + lift * 0.008);
+      disc(wd.boss.x, wd.boss.y, r, Math.max(0.16, 0.5 - lift * 0.012));
+    }
+    for (const d of wd.raid.dots) disc(d.x, d.y, 0.75, 0.42);
+    for (const a of wd.whelps) disc(a.x, a.y, 1, 0.42);
+    if (wd.ghost) disc(wd.ghost.x, wd.ghost.y, 0.85, 0.42);
+    disc(wd.player.x, wd.player.y, 0.85, 0.5 - Math.min(0.3, (wd.player.z || 0) * 0.1));
+  }
+
   // ---- floor telegraphs: same information as the 2D views, painted into the room.
   function colour(pal, name, boost = 1.5) { const c = cssColor(pal[name]); const v = lin(c); return [v[0] * boost, v[1] * boost, v[2] * boost, c[3]]; }
 
@@ -581,8 +605,8 @@ function createWorld(gl, canvas) {
           D.fill(poly, 0.06, HOT, 0.6 * flash, 3); D.rim(poly, 0.07, BREATH, flash, 2);
         } else {
           const col = style === 'tail' ? TAIL : CLV;
-          D.fill(poly, 0.05, flash ? HOT : col, flash ? 0.14 + 0.42 * flash : 0.05);
-          D.ring(poly, 0.055, 0.1, col, 0.3 + 0.4 * flash);
+          D.fill(poly, 0.05, flash ? HOT : col, flash ? 0.14 + 0.42 * flash : 0.018);
+          D.ring(poly, 0.055, 0.08, col, 0.2 + 0.5 * flash);
         }
       }
       const kb = Object.values(script.actions).find((a) => a.kind === 'knockback');
@@ -621,13 +645,13 @@ function createWorld(gl, canvas) {
     const ideal = wd.idealPlayer;
     if (ideal && ideal.reason !== 'wait') {
       const tol = spotTolerance(script, ideal.reason), pulse = 0.5 + 0.5 * Math.sin(now * 3);
-      D.fill(circlePoly(ideal.x, ideal.y, tol, 30), 0.1, IDEAL, 0.17);
-      D.rim(circlePoly(ideal.x, ideal.y, tol, 30), 0.11, IDEAL, 0.9, Math.min(1, tol * 0.4));
-      D.fill(circlePoly(ideal.x, ideal.y, tol * (0.35 + pulse * 0.25), 24), 0.12, IDEAL, 0.25 + pulse * 0.2);
+      D.fill(circlePoly(ideal.x, ideal.y, tol, 30), 0.1, IDEAL, 0.07);
+      D.rim(circlePoly(ideal.x, ideal.y, tol, 30), 0.11, IDEAL, 0.65, Math.min(0.7, tol * 0.3));
+      D.fill(circlePoly(ideal.x, ideal.y, Math.min(1.2, tol * (0.3 + pulse * 0.2)), 24), 0.12, IDEAL, 0.32 + pulse * 0.2);
       const d = Math.hypot(p.x - ideal.x, p.y - ideal.y);
       if (d > 2) {
-        D.line(p.x, p.y, ideal.x, ideal.y, 0.12, 1.3, IDEAL, 0.28);
-        D.line(p.x, p.y, ideal.x, ideal.y, 0.13, 0.34, IDEAL, 1, 2.2, now * 2.4);
+        D.line(p.x, p.y, ideal.x, ideal.y, 0.12, 0.7, IDEAL, 0.14);
+        D.line(p.x, p.y, ideal.x, ideal.y, 0.13, 0.2, IDEAL, 0.72, 2.2, now * 2.4);
       }
     }
 
@@ -641,8 +665,7 @@ function createWorld(gl, canvas) {
   // ---- portraits: the boss's own model, rendered once and cached as a 2D canvas
   const portraits = new Map();
   const portraitQueue = [];
-  function renderPortrait(raidId, bossId, size) {
-    const m = model(`boss:${raidId}/${bossId}`, () => makeBossModel(raidId, bossId));
+  function renderPortrait(m, size) {
     const mem = {};
     m.animate(m.pose, { t: 1.2, dt: 0.016, mem, state: 'grounded', moving: false, cast: null, engaged: false });
     const focusName = m.focusBone || (m.pose.idx('head') >= 0 ? 'head' : m.mouth || 'mouth');
@@ -690,14 +713,25 @@ function createWorld(gl, canvas) {
   function portrait(raidId, bossId, size = 128) {
     const key = `${raidId}/${bossId}/${size}`;
     if (portraits.has(key)) return portraits.get(key);
-    if (!portraitQueue.some((q) => q.key === key)) portraitQueue.push({ key, raidId, bossId, size });
+    if (!portraitQueue.some((q) => q.key === key)) portraitQueue.push({ key, size, model: () => model(`boss:${raidId}/${bossId}`, () => makeBossModel(raidId, bossId)) });
+    return null;
+  }
+  function playerPortrait(role, size = 128) {
+    const key = `player:${role}/${size}`;
+    if (portraits.has(key)) return portraits.get(key);
+    if (!portraitQueue.some((q) => q.key === key)) {
+      portraitQueue.push({ key, size, model: () => {
+        const m = model(`player:${role}`, () => ({ built: buildFigure({ ...playerLook(role), cell: 0.045 }), mat: MAT_FIGURE }));
+        return { ...m, animate: (p) => animateFigure(p, { t: 1.2, moving: false, phase: 0 }), focusBone: 'head', portraitDist: 1.05 };
+      } });
+    }
     return null;
   }
   /** Build at most one queued portrait, so a menu of bosses never stalls a frame for long. */
   function pumpPortraits() {
     const q = portraitQueue.shift();
     if (!q) return false;
-    try { portraits.set(q.key, renderPortrait(q.raidId, q.bossId, q.size)); } catch (e) { portraits.set(q.key, null); console.warn('portrait failed', q.key, e); }
+    try { portraits.set(q.key, renderPortrait(q.model(), q.size)); } catch (e) { portraits.set(q.key, null); console.warn('portrait failed', q.key, e); }
     return true;
   }
 
@@ -707,5 +741,7 @@ function createWorld(gl, canvas) {
     return (view.world.boss.z || 0) + E.bossM.built.maxz * E.bossM.scale;
   }
 
-  return { canvas, draw, setEncounter, gl, portrait, pumpPortraits, bossTop };
+  const bossStaysVisible = () => !!(E && E.bossM && E.bossM.staysVisible);
+
+  return { canvas, draw, setEncounter, gl, portrait, playerPortrait, pumpPortraits, bossTop, bossStaysVisible };
 }

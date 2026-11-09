@@ -57,8 +57,10 @@ export function createRenderer(canvas, script) {
   function drawWorld3D(which, v, settings, pal, now, dtReal, overlay) {
     ctx.clearRect(0, 0, width, height);
     const mode = overlay.idle ? 'hero' : which === 'topdown' ? 'map' : 'pov';
-    const used = world.draw({ view: v, script, settings, pal, cam, w: width, h: height, dpr, now, dtReal, mode });
-    if (mode !== 'hero') drawWorldOverlay(ctx, v, script, settings, pal, used, width, height, now, mode, world.bossTop(v));
+    let heroInset = 0;
+    if (mode === 'hero' && typeof document !== 'undefined') { const el = document.querySelector('[data-hero-inset]'); if (el) heroInset = el.getBoundingClientRect().right; }
+    const used = world.draw({ view: v, script, settings, pal, cam, w: width, h: height, dpr, now, dtReal, mode, heroInset });
+    if (mode !== 'hero') drawWorldOverlay(ctx, v, script, settings, pal, used, width, height, now, mode, world.bossTop(v), world.bossStaysVisible());
     if (mode === 'pov' && settings.minimap !== false) drawMinimap(ctx, v, script, settings, pal, width, height, now);
   }
 

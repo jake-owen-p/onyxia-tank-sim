@@ -288,15 +288,15 @@ function dressRoom(script, theme, info, wallH, seed) {
   });
   if (pr.has('hivePods')) scatter(8, (s, i, r) => {
     if (r(1) < 0.3) return;
-    const x = s.x + s.nx * (1 + r(2) * 4), y = s.y + s.ny * (1 + r(2) * 4), h = 1.8 + r(3) * 2.6;
-    m.lathe('root', [x, y, 0], [x, y, h * 1.6], [[0.8 * h, 0], [0.9 * h, 0.22], [0.55 * h, 0.72], [0.1, 1]], r(4) > 0.5 ? '#a0603a' : '#7a3c5c', { sides: 7 });
+    const x = s.x + s.nx * (1 + r(2) * 4), y = s.y + s.ny * (1 + r(2) * 4), h = 1 + r(3) * 1.5;
+    m.lathe('root', [x, y, 0], [x, y, h * 1.6], [[0.8 * h, 0], [0.9 * h, 0.22], [0.55 * h, 0.72], [0.1, 1]], r(4) > 0.5 ? '#a0603a' : '#7a3c5c', { sides: 9 });
     m.ball('root', [x, y, h * 1.58], 0.26 * h, '#e070ff', { em: 1.3, sides: 6, rings: 3 });
   });
   if (pr.has('tentaclesWall')) scatter(14, (s, i, r) => {
-    const x = s.x - s.nx * 1, y = s.y - s.ny * 1, h = H * (0.5 + r(1) * 0.6);
+    const x = s.x - s.nx * 2.5, y = s.y - s.ny * 2.5, h = H * (0.45 + r(1) * 0.5);
     const seg = [];
     for (let k = 0; k <= 6; k++) { const a = k / 6; seg.push([x + s.nx * (Math.sin(a * 3.1) * 4.2 + a * 3) + s.ny * Math.sin(a * 5 + i) * 1.8, y + s.ny * (Math.sin(a * 3.1) * 4.2 + a * 3) - s.nx * Math.sin(a * 5 + i) * 1.8, a * h]); }
-    m.tube('root', seg, seg.map((_, k) => 1.8 * (1 - k / 7)), [ '#5a2c6a', '#5a2c6a', '#7a3c7a', '#7a3c7a', '#8a4a80', '#8a4a80', '#a0587a' ], { sides: 7 });
+    m.tube('root', seg, seg.map((_, k) => 1.25 * (1 - k / 7)), [ '#5a2c6a', '#5a2c6a', '#7a3c7a', '#7a3c7a', '#8a4a80', '#8a4a80', '#a0587a' ], { sides: 7 });
   });
   if (pr.has('trees')) {
     for (let k = 0; k < 46; k++) {
