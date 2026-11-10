@@ -8,7 +8,7 @@ when to stop attacking, what to dispel and when to heal until the timings are
 reflex, then look at a scorecard that tells you exactly what to fix.
 
 It is about *when* and *where*, not about a class rotation. Each role has one
-or two buttons (Taunt; Attack; Heal and Dispel). Threat builds on its own
+to three core buttons (Attack, plus Taunt or Heal and Dispel). Threat builds on its own
 while a tank is in melee range, DPS build threat with every attack and must
 stop when the bar goes red, healers keep the raid's tank alive through the
 spikes, and the game is reacting at the right moment and moving to the right
@@ -77,7 +77,7 @@ WoW defaults. Every key is rebindable in Settings, with conflict detection.
 | Mouse turn | hold right mouse button and drag |
 | Zoom (POV view) | mouse wheel |
 | Taunt (tanks) | `1` |
-| Attack (DPS) | `2` |
+| Attack (every role) | `2`, or click/tap Attack on the action bar |
 | Heal the tank (healer) | `3` |
 | Dispel (healer, where the fight has dispels) | `4` |
 | Interrupt (where the fight has interrupts) | `5` |
@@ -89,17 +89,24 @@ Backpedalling (`S`) is slower than walking forward, as in the game. Jumping is
 a fixed arc with full air control and no gameplay effect, so you can bunny-hop
 through the fight the way everyone does.
 
+All occupied action-bar slots are clickable and support touch. Attack plays a
+complete weapon swing for tanks/melee or a casting animation for ranged/healers,
+with a weapon trail or spell projectile. Tanks and melee attack within 5 yards
+of the boss's hitbox; ranged roles use their encounter's attack range. The global
+cooldown, fear, stun and range checks still apply. Boss swings follow actual
+melee hits, and combat animations retain their timing in replays.
+
 ## Roles
 
 Pick a role on the menu. The encounter script says which roles a fight offers.
 
 | Role | Buttons | What is scored |
 |---|---|---|
-| Main tank | Taunt | position and facing, Taunting back when she turns, pickups, hazards |
-| Off-tank | Taunt | the tank's job plus picking up adds by proximity or Taunt and holding them away from the raid |
+| Main tank | Taunt, Attack | position and facing, Taunting back when she turns, pickups, hazards |
+| Off-tank | Taunt, Attack | the tank's job plus picking up adds by proximity or Taunt and holding them away from the raid |
 | Melee DPS | Attack | staying at the flank out of frontal and rear cones, attack uptime, never pulling aggro (stop when the threat bar is red), hazards |
 | Ranged DPS | Attack | standing with the raid out of her front, threat discipline, hazards, lanes |
-| Healer | Heal, Dispel | keeping the ghost tank alive through spikes (the tank's bar is on screen), dispelling what lands, wasted heals, hazards |
+| Healer | Heal, Dispel, Attack | keeping the ghost tank alive through spikes (the tank's bar is on screen), dispelling what lands, wasted heals, hazards |
 
 When you are not a tank, a ghost tank holds the boss. Your threat is measured
 against the ghost tank's; attacking into the red band pulls aggro and the ghost

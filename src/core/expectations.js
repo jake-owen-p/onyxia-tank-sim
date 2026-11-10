@@ -66,7 +66,7 @@ export function inRange(state, script) {
 export function attackRange(state, script) {
   const roleDef = script.roles && script.roles[state.role];
   if (roleDef && roleDef.attackRange != null) return roleDef.attackRange;
-  return state.role === 'melee' ? 5 : state.role === 'healer' ? 40 : 30;
+  return ['tank', 'mt', 'offtank', 'melee'].includes(state.role) ? 5 : state.role === 'healer' ? 40 : 30;
 }
 
 /** Is the player clear of every frontal cone of the boss? */

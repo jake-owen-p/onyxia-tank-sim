@@ -15,6 +15,7 @@ import { conePoly, circlePoly, localToWorld, bossFootprint } from '../shapes.js'
 import { spotTolerance } from '../topdown.js';
 import { createCamera, updateBasis } from '../projection.js';
 import { createAssetRenderer } from './assets.js';
+import { playerCombatAnimation, bossCombatAnimation } from '../combat-animation.js';
 
 const MAT_FIGURE = { noise: 0.3, scales: 0, cracks: 0, rim: 0.42, paintF: 7, scaleF: 1, gloss: 0.34, crackF: 1 };
 const lin = (c) => [Math.pow(c[0], 2.2), Math.pow(c[1], 2.2), Math.pow(c[2], 2.2)];
@@ -134,7 +135,7 @@ function createWorld(gl, canvas) {
       floor: up(env.floor), walls: up(env.walls), dome: env.dome.indices.length ? up(env.dome) : null, outerMesh: up(quad),
       props: env.props ? upload(env.props) : null,
       floorTex: bake(theme.floor), wallTex: bake(theme.wall),
-      bossM: null, raidMem: new Map(), playerMem: { lastGcd: 0, atk: 0 }, addMem: new Map(),
+      bossM: null, raidMem: new Map(), playerMem: {}, addMem: new Map(),
     };
     E.bossM = model(`boss:${E.key}`, () => makeBossModel(raid, boss));
     E.addM = model(`add:${E.key}`, () => makeAddModel(raid, boss));
@@ -360,6 +361,20 @@ function createWorld(gl, canvas) {
 
     // Effects.
     parts.step(dt);
+    const playerAction = playerCombatAnimation(view), lastAction = view.abilities?.lastUsed;
+    if (mode !== 'hero' && lastAction?.kind === 'attack' && lastAction.target && playerAction.actionProgress != null && E.playerMem.effectAt !== lastAction.at) {
+      const p=wd.player, target=lastAction.target, ranged=view.role==='ranged' || view.role==='healer';
+      const angle=Math.atan2(target.y-p.y,target.x-p.x), reach=Math.min(2.5,Math.hypot(target.x-p.x,target.y-p.y));
+      for (let i=0;i<16;i++) {
+        const a=angle-.8+i*.1, d=reach*(.65+.35*i/16);
+        parts.emit(p.x+Math.cos(a)*d,p.y+Math.sin(a)*d,(p.z||0)+1.2+i*.035,Math.cos(a)*1.2,Math.sin(a)*1.2,.3,.08,.08,ranged ? .4 : 3,ranged ? 1.6 : 1.8,ranged ? 4 : .55,0,.28,3);
+      }
+      if (ranged) {
+        const travel=.35;
+        parts.emit(p.x,p.y,(p.z||0)+1.5,(target.x-p.x)/travel,(target.y-p.y)/travel,((target.z||0)-(p.z||0))/travel,.32,.1,.5,1.8,4,0,travel,0);
+      }
+    }
+    E.playerMem.effectAt=lastAction?.at;
     if (th.ambient && mode !== 'map') emitAmbient(parts, th.ambient, E.info, dt, [px, py, 0]);
     if (mode !== 'map') for (const tc of near.slice(0, 16)) if (tc.color && tc.z < 8) emitFlame(parts, tc.x, tc.y, tc.z, 0.32, [tc.color[0] * 0.5, tc.color[1] * 0.5, tc.color[2] * 0.5], dt, 34);
     for (const v of E.env.vents) if (Math.random() < dt * 3) for (let i = 0; i < 6; i++) parts.emit(v.x, v.y, v.z, (Math.random() - 0.5) * 1.5, (Math.random() - 0.5) * 1.5, 5 + Math.random() * 7, 0.7, 1.4, 0.05, 0.04, 0.035, 0.2, 2.4, 2);
@@ -429,8 +444,9 @@ function createWorld(gl, canvas) {
     // Boss, dithered out when the camera is inside its body.
     const R = script.boss.radius, dc = Math.hypot(eye[0] - boss.x, eye[1] - boss.y);
     const nearFade = mode === 'pov' ? Math.max(0.3, Math.min(1, (dc - R * 0.8) / (R * 1.1))) : 1;
-    const hit = Math.max(0, 1 - (t - boss.lastHit) / 0.18);
-    if ((mode === 'hero' || mem.sink < 0.98) && !drawArt(E.boss, model4, now, { moving: mem.speed > 1, cast: !!cast, airborne: boss.state === 'airborne', attack: boss.engaged }, nearFade, hit * 0.09, bm.height || bm.built.maxz)) {
+    const hit = Math.max(0, 1 - (t - (boss.lastDamagedAt ?? -Infinity)) / 0.25);
+    const bossAction = mode === 'hero' ? {} : bossCombatAnimation(view, script);
+    if ((mode === 'hero' || mem.sink < 0.98) && !drawArt(E.boss, model4, now, { moving: mem.speed > 1, airborne: boss.state === 'airborne', ...bossAction }, nearFade, hit * 0.4, bm.height || bm.built.maxz)) {
       setMat(bm.mat, bm.tint || [1, 1, 1], nearFade, hit * 0.09); drawMesh(bm.mesh, bm.pose.matrices, model4);
     }
     if (bm.drawExtra) bm.drawExtra((mesh, bones, M) => drawMesh(mesh, bones, M), { boss, view, now });
@@ -536,20 +552,17 @@ function createWorld(gl, canvas) {
       if (!drawArt('tank', M2, now + 1.1, { moving: !!g.moving, attack: g.tanking }, g.tanking ? 1 : Math.max(0.15, (settings.ghostAlpha ?? 0.6) * 0.75))) drawMesh(m.mesh, m.pose.matrices, M2);
     }
     // You.
-    const p = wd.player, ps = E.playerMem;
+    const p = wd.player;
     const role = view.role || 'mt';
     const pm = model(`player:${role}`, () => ({ built: buildFigure({ ...playerLook(role), cell: 0.045 }), mat: MAT_FIGURE }));
-    const gcd = view.abilities ? view.abilities.gcdUntil : 0;
-    if (gcd > ps.lastGcd + 0.2) ps.atk = 1;
-    ps.lastGcd = gcd;
-    ps.atk = Math.max(0, ps.atk - dt * 3);
+    const action = playerCombatAnimation(view);
     const feared = p.fearedUntil > view.t;
-    animateFigure(pm.pose, { t: now, moving: !!p.moving, phase: 0, attack: ps.atk > 0 ? 1 - ps.atk : 0, feared, jump: p.z > 0.05 ? 1 : 0 });
+    animateFigure(pm.pose, { t: now, moving: !!p.moving, phase: 0, attack: action.attack ? action.actionProgress : 0, cast: action.cast ? action.actionProgress : 0, feared, jump: p.z > 0.05 ? 1 : 0 });
     placement(p.x, p.y, p.z || 0, p.heading, 1.1, M2);
     const dcp = Math.hypot(eye[0] - p.x, eye[1] - p.y, eye[2] - 1);
     setMat({ ...MAT_FIGURE, rim: 0.65 }, [1, 1, 1], mode === 'pov' ? figureAlpha(dcp) : 1);
     const playerArt = role === 'healer' || role === 'ranged' ? 'caster' : role === 'melee' ? 'rogue' : 'tank';
-    if (!drawArt(playerArt, M2, now, { moving: !!p.moving || feared, jump: p.z > .05, attack: ps.atk > 0 && playerArt !== 'caster', cast: ps.atk > 0 && playerArt === 'caster' }, mode === 'pov' ? figureAlpha(dcp) : 1)) drawMesh(pm.mesh, pm.pose.matrices, M2);
+    if (!drawArt(playerArt, M2, now, { moving: !!p.moving || feared, jump: p.z > .05, ...action }, mode === 'pov' ? figureAlpha(dcp) : 1)) drawMesh(pm.mesh, pm.pose.matrices, M2);
   }
 
   function drawAdds(view, now, dt) {

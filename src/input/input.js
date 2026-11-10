@@ -85,6 +85,8 @@ export function createInput(element, keybinds, settings) {
   const down = (action) => keybinds.get(action).some((c) => c && held.has(c));
 
   return {
+    /** Mouse/touch action buttons use the same command queue as key bindings. */
+    pressAbility(id) { if (enabled && ABILITY_ACTIONS.includes(id)) pressedAbilities.push(id); },
     /** Build the command for this frame. Abilities are those pressed since the last poll. */
     poll() {
       const cmd = { forward: 0, strafe: 0, turn: 0, mouseTurn: 0, abilities: [], jump: false };

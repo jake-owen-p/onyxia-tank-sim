@@ -19,7 +19,16 @@ export function sampleTrack(track, time, out, fallback, quaternion = false) {
 }
 
 export function chooseClip(clips, state = {}) {
-  const choices = state.dead ? [1, 0] : state.airborne ? (state.cast ? [183,184,193,135,0] : [193,135,0]) : state.jump ? [38,37,0] : state.moving ? [5,4,0] : state.cast ? [53,54,32,2,0] : state.attack ? [17,16,0] : [0];
+  let choices;
+  if (state.dead) choices = [1,0];
+  else if (state.airborne) choices = state.cast ? [183,184,193,135,0] : [193,135,0];
+  else if (state.actionProgress != null && state.cast) choices = [53,54,32,2,0];
+  else if (state.actionProgress != null && state.attack) choices = [17,16,0];
+  else if (state.jump) choices = [38,37,0];
+  else if (state.moving) choices = [5,4,0];
+  else if (state.cast) choices = [53,54,32,2,0];
+  else if (state.attack) choices = [17,16,0];
+  else choices = [0];
   return choices.find(id => clips[id]) ?? Object.keys(clips)[0];
 }
 
@@ -55,7 +64,10 @@ export class AssetPose {
   }
   evaluate(seconds, state) {
     const clip = this.meta.clips[chooseClip(this.meta.clips, state)];
-    const clock = seconds * 1000, time = ((clock % clip.duration) + clip.duration) % clip.duration;
+    const clock = seconds * 1000;
+    const time = !state?.dead && state?.actionProgress != null && (state.cast || (state.attack && !state.airborne))
+      ? Math.max(0,Math.min(clip.duration-1,state.actionProgress*clip.duration))
+      : ((clock % clip.duration) + clip.duration) % clip.duration;
     this.done.fill(0);
     const visit = (i) => {
       if (this.done[i]) return;

@@ -103,7 +103,7 @@ test('abilities outside the role are refused', () => {
   const ev = run(sim, FIXED_DT, press('taunt'));
   assert.ok(ev.some((e) => e.type === 'abilityFailed' && e.reason === 'role'));
   const sim2 = makeSim({ role: 'tank', start: 'wall', manual: true });
-  const ev2 = run(sim2, FIXED_DT, press('attack'));
+  const ev2 = run(sim2, FIXED_DT, press('heal'));
   assert.ok(ev2.some((e) => e.type === 'abilityFailed' && e.reason === 'role'));
 });
 

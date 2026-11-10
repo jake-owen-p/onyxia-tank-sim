@@ -113,6 +113,7 @@ export function createBoss(script, pos) {
     transition: null,             // { start, end, fromX, fromY, fromZ, toX, toY, toZ, toHeading }
     nextMelee: 0,
     lastHit: -Infinity,           // time of her last melee swing (render flash)
+    lastDamagedAt: -Infinity,     // player's last successful hit on the boss
     landedAt: null,               // time she last touched down (settle window)
   };
 }

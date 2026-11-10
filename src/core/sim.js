@@ -77,7 +77,8 @@ export function createSim(script, options = {}) {
     abilities: {
       gcdUntil: -Infinity,
       readyAt: Object.fromEntries(Object.keys(script.playerAbilities).map((k) => [k, -Infinity])),
-      list: (roleDef.abilities || []).filter((id) => script.playerAbilities[id]),
+      list: [...new Set([...(roleDef.abilities || []), 'attack'])].filter((id) => script.playerAbilities[id]),
+      lastUsed: null,
     },
     debuffs: [],           // outstanding debuffs: { uid, name, dispel, on:'player'|'ghost'|'raid', appliedAt, until, tickDamage, nextTickAt, actionId }
     cues: createCues(),
@@ -743,6 +744,7 @@ export function createSim(script, options = {}) {
     if (A.readyAt[id] > state.t) return fail('cooldown');
     if (def.gcd && A.gcdUntil > state.t) return fail('gcd');
     const kind = def.kind || id;
+    let target = null;
 
     switch (kind) {
       case 'taunt': {
@@ -764,6 +766,9 @@ export function createSim(script, options = {}) {
         const range = def.range ?? attackRange(state, script);
         const tgt = attackTarget(range);
         if (!tgt) return fail('range', bossLive() ? 'Out of range' : 'Nothing to hit right now');
+        if (tgt.boss && !b.engaged) engage('player');
+        const hit = tgt.add || b;
+        target = { x: hit.x, y: hit.y, z: hit.z || 0, on: tgt.add ? 'add' : 'boss' };
         addMetric('attacks', 1);
         const shielded = shieldUp() && !(tgt.add && state.shieldBossOnly);
         if (shielded) { addMetric('attacksIntoShield', 1); if (state.shieldDamage) damagePlayer(state.shieldDamage, 'shield'); toast('Shield is up. Stop attacking', 'bad'); }
@@ -775,10 +780,11 @@ export function createSim(script, options = {}) {
           break;
         }
         applyPlayerThreat(state.threat, def.threat || 0);
+        if (!shielded) b.lastDamagedAt = state.t;
         if (killTarget(state)) { addMetric('attacksOffPriority', 1); toast('Kill the add first', 'warn'); }
         if (shielded) { /* already scored above */ }
-        else if (state.feedback.holdAttack) { addMetric('attacksInRed', 1); toast('Hold! You are about to pull aggro', 'bad'); }
-        else if (holdAfterPull()) { addMetric('earlyAttacks', 1); toast('Wait for the tank to build threat', 'warn'); }
+        else if (!tankRole && state.feedback.holdAttack) { addMetric('attacksInRed', 1); toast('Hold! You are about to pull aggro', 'bad'); }
+        else if (!tankRole && holdAfterPull()) { addMetric('earlyAttacks', 1); toast('Wait for the tank to build threat', 'warn'); }
         emit('attack', { id });
         break;
       }
@@ -818,6 +824,7 @@ export function createSim(script, options = {}) {
     }
     A.readyAt[id] = state.t + (def.cooldown || 0);
     if (def.gcd) A.gcdUntil = state.t + script.gcd;
+    A.lastUsed = { id, kind, at: state.t, target };
     emit('abilityUsed', { id, label: def.label });
     const beat = onCuePress(state, script, id, state.t, 'ok');
     if (beat) emitBeat(beat);
@@ -832,7 +839,7 @@ export function createSim(script, options = {}) {
   function attackTarget(range) {
     const w = state.world, b = w.boss, p = w.player;
     const options = [];
-    if ((bossLive() || airTarget()) && playerInBossRange(range)) options.push({ boss: true, d: bossRangeTo(p.x, p.y), a: angleTo(p.x, p.y, b.x, b.y) });
+    if (((b.state === 'grounded' && !b.passive) || airTarget()) && playerInBossRange(range)) options.push({ boss: true, d: bossRangeTo(p.x, p.y), a: angleTo(p.x, p.y, b.x, b.y) });
     for (const add of w.whelps) {
       if (!add.killable) continue;
       const d = dist(p.x, p.y, add.x, add.y);

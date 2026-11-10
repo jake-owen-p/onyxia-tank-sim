@@ -111,7 +111,7 @@ async function boot() {
     settings.encounter = `${pick.raid.id}/${pick.boss.id}`;
     persist();
     audio.setScript(script);
-    renderer = createRenderer(canvas, script);
+    renderer = createRenderer(canvas, script, { onAbility: id => input.pressAbility(id) });
     renderer.resize();
     idleSim = createSim(script, { manual: true, freezeHp: true, bossPassive: true, start: 'wall', seed: 3 });
   }

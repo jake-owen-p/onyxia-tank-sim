@@ -12,13 +12,15 @@ import { threatRatio } from '../core/threat.js';
 import { clamp } from '../core/geometry.js';
 import { acquireWorld } from './gl/world.js';
 import { drawWorldOverlay } from './gl/overlay.js';
+import { createActionControls } from '../ui/action-controls.js';
 
 const FADE_SECONDS = 0.25;
 
-export function createRenderer(canvas, script) {
+export function createRenderer(canvas, script, { onAbility } = {}) {
   const ctx = canvas.getContext('2d');
   const cam = createCamera();
   const world = acquireWorld();          // null without WebGL2: the 2D views below take over
+  const controls = createActionControls(canvas, script, onAbility);
   const threatCfg = { pullMultiplier: script.threat.pullMultiplier };
   let ratioRole = true;
   const ratioFn = (threat) => threatRatio(threat, threatCfg, ratioRole);
@@ -118,9 +120,10 @@ export function createRenderer(canvas, script) {
       ctx.fillRect(0, 0, width, height);
     }
     ctx.restore();
+    controls?.update(v, width, height, abilityKeys, overlay);
   }
 
-  function destroy() { fade = null; }
+  function destroy() { fade = null; controls?.destroy(); }
 
   return {
     resize, setView, getView: () => view, zoom, frame, destroy, camera: cam,

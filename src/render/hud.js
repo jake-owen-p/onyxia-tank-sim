@@ -1,6 +1,7 @@
 // Classic-inspired HUD. Pure view reader; only presentation history is retained.
 // Static chrome and original artwork are cached by ui/art.js.
 import { getBossPortrait, getPlayerPortrait } from './portraits.js';
+import { actionLayout } from './action-bar.js';
 import {
   C,
   UI_FONT,
@@ -55,8 +56,8 @@ export function drawHUD(
   threatRatioFn = null,
 ) {
   if (overlay.idle) return;
-  const mobile = w < 680;
-  const s = mobile ? 0.8 : clamp(Math.min(w / 1440, h / 900), 0.82, 1.5);
+  const layout = actionLayout(w, h, overlay);
+  const { mobile, s } = layout;
   const state = track(ctx, view, script, !!overlay.replay);
   ctx.save();
   ctx.lineJoin = 'round';
@@ -89,7 +90,6 @@ export function drawHUD(
     !!overlay.replay,
   );
   chat(ctx, state, view, w, h, s, mobile, !!overlay.replay);
-  const layout = actionLayout(w, h, s, mobile, overlay);
   if (!overlay.replay) {
     actionChrome(ctx, layout);
     if (settings.cueLane !== false && view.cues)
@@ -720,29 +720,6 @@ function threat(c, v, script, settings, w, h, s, mobile, ratioFn, replay) {
   c.fillRect(x + 7 * s + (ww - 14 * s) * band, y + 45 * s, 1, 17 * s);
 }
 
-function actionLayout(w, h, s, mobile, overlay) {
-  const size = mobile ? Math.min(42, (w - 49) / 6) : 43 * s,
-    gap = mobile ? 3 : 4 * s,
-    cols = mobile ? 6 : 12;
-  const total = cols * size + (cols - 1) * gap,
-    x = (w - total) / 2,
-    y = h - (mobile ? size * 2 + 42 : 73 * s);
-  return {
-    w,
-    h,
-    s,
-    mobile,
-    size,
-    gap,
-    cols,
-    x,
-    y,
-    total,
-    order: [],
-    xs: [],
-    replay: overlay.replay,
-  };
-}
 function actionChrome(c, l) {
   const { x, y, total, size, gap, mobile, s, cols } = l;
   frame(
@@ -791,6 +768,11 @@ function abilities(c, v, script, settings, l, keys) {
       def = script.playerAbilities[id];
     if (!def) return;
     icon(c, id, xx + 4 * s, yy + 4 * s, size - 8 * s);
+    const used = v.abilities.lastUsed;
+    if (used?.id === id && v.t - used.at >= 0 && v.t - used.at < .25) {
+      c.fillStyle = `rgba(255,230,160,${.3 * (1-(v.t-used.at)/.25)})`;
+      c.fillRect(xx+3*s, yy+3*s, size-6*s, size-6*s);
+    }
     const cd = Math.max(0, (v.abilities.readyAt[id] ?? -Infinity) - v.t),
       onCd = cd > 0 && def.cooldown > 0;
     const gcd = def.gcd ? Math.max(0, v.abilities.gcdUntil - v.t) : 0;
