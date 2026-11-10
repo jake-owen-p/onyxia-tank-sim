@@ -24,9 +24,11 @@ and plays it with a bot for each role.
 * Vanilla JavaScript ES modules, no build step, no backend, no dependencies.
   The world is hand-written WebGL2 and the interface is Canvas 2D and DOM.
   Without WebGL2 the game falls back to its simple 2D views.
-* Real 3D rooms for every raid and a sculpted, animated model of all 62 bosses,
-  each built from screenshots of the game. All art is original procedural work;
-  fonts are SIL OFL. `tools/gallery.html` shows every boss on one contact sheet.
+* Real 3D rooms for every raid, original Classic character/equipment art and
+  34 imported animated boss models, with procedural models for the remaining
+  encounters. All seven raids use local client terrain textures. See
+  [art coverage and provenance](assets/wow/README.md). Fonts are SIL OFL.
+  `tools/gallery.html` shows every boss on one contact sheet.
 * An interface in the style of the game's default UI: unit frames, action bar,
   round minimap, boss timers, raid frames, combat log and an Encounter Journal.
 * Two views of the same simulation: a tactical map and a third-person

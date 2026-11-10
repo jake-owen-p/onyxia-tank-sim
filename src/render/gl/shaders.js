@@ -104,6 +104,37 @@ void main(){
   frag=vec4(applyFog(c,vW),1.);
 }`;
 
+export const assetVS = HEAD + `
+layout(location=0) in vec3 aPos; layout(location=1) in vec4 aWeights;
+layout(location=2) in vec4 aBones; layout(location=3) in vec3 aNormal; layout(location=4) in vec2 aUV;
+uniform mat4 uVP, uModel; uniform highp sampler2D uBones;
+out vec3 vW, vN; out vec2 vUV;
+mat4 bone(int i){ return mat4(texelFetch(uBones,ivec2(0,i),0),texelFetch(uBones,ivec2(1,i),0),texelFetch(uBones,ivec2(2,i),0),texelFetch(uBones,ivec2(3,i),0)); }
+void main(){
+  mat4 skin=bone(int(aBones.x))*aWeights.x+bone(int(aBones.y))*aWeights.y+bone(int(aBones.z))*aWeights.z+bone(int(aBones.w))*aWeights.w;
+  if(dot(aWeights,vec4(1.))<.01) skin=mat4(1.);
+  vec4 world=uModel*skin*vec4(aPos,1.);
+  vW=world.xyz; vN=normalize(mat3(uModel)*mat3(skin)*aNormal); vUV=aUV;
+  gl_Position=uVP*world;
+}`;
+
+export const assetFS = HEAD + LIGHTING + `
+in vec3 vW, vN; in vec2 vUV;
+uniform sampler2D uTex; uniform int uBlend, uUnlit, uEnvironment; uniform float uFade, uFlash;
+out vec4 frag;
+const float B[16]=float[16](0.,8.,2.,10.,12.,4.,14.,6.,3.,11.,1.,9.,15.,7.,13.,5.);
+void main(){
+  if(uFade<.995){ ivec2 q=ivec2(gl_FragCoord.xy)%4; if(uFade<(B[q.x+q.y*4]+.5)/16.) discard; }
+  vec3 N=normalize(vN); if(!gl_FrontFacing) N=-N;
+  vec2 uv=uEnvironment==1 ? reflect(normalize(vW-uCam),N).xy*.5+.5 : vUV;
+  vec4 tex=texture(uTex,uv);
+  if(uBlend==1 && tex.a<.5) discard;
+  vec3 alb=pow(tex.rgb,vec3(2.2));
+  // The painted texture carries most of the shading, as in the Classic client.
+  vec3 lit=uUnlit==1 ? alb : lightAll(vW,N,alb,.025,.025)+alb*.24;
+  frag=vec4(applyFog(lit+alb*uFlash,vW),uBlend>=2 ? tex.a : 1.);
+}`;
+
 export const envVS = HEAD + `
 layout(location=0) in vec3 aPos; layout(location=1) in vec3 aNor; layout(location=2) in vec2 aUV; layout(location=3) in vec3 aCol;
 uniform mat4 uVP;

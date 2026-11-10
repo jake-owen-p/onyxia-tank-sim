@@ -1,4 +1,14 @@
-// Original procedural artwork. No game textures, fonts, icons or silhouettes.
+// Canvas interface artwork, with local Classic spell icons and drawn fallbacks.
+import { artManifest, artURL } from '../gl/assets.js';
+
+const spellIcons = new Map();
+artManifest.then(manifest => {
+  for (const [key, path] of Object.entries(manifest?.icons || {})) {
+    const image = new Image();
+    image.onload = () => spellIcons.set(key, image);
+    image.src = artURL(path);
+  }
+});
 // Chrome is rasterised once at device resolution; the HUD only blits it.
 export const TITLE_FONT = 'Marcellus, Georgia, serif';
 export const UI_FONT = '"Noto Sans", Arial, sans-serif';
@@ -243,6 +253,9 @@ const abilityColors = {
   jump: ['#203f50', '#b5e0ee'],
 };
 export function icon(c, id, x, y, size) {
+  const school = /poison|disease|swarm|plague/i.test(id) ? 'poison' : /fire|flame|breath|eruption/i.test(id) ? 'fire' : /frost|ice/i.test(id) ? 'frost' : 'shadow';
+  const image = spellIcons.get(id) || spellIcons.get(school);
+  if (image) { c.drawImage(image, x, y, size, size); return; }
   cached(c, `icon:${id}`, x, y, size, size, (p) => {
     p.save();
     p.scale(size / 100, size / 100);

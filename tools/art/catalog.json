@@ -1,0 +1,404 @@
+{
+  "models": {
+    "onyxia": {
+      "model": "creature/dragon/dragononyxia.m2",
+      "skins": {
+        "11": "creature/dragon/dragononyxia1.blp",
+        "12": "creature/dragon/dragononyxia2.blp",
+        "13": "creature/dragon/dragononyxia3.blp"
+      }
+    },
+    "nefarian": {
+      "model": "creature/dragon/dragonnefarian.m2",
+      "skins": {
+        "11": "creature/dragon/dragonnefarian1.blp",
+        "12": "creature/dragon/dragonnefarian2.blp",
+        "13": "creature/dragon/dragonnefarian3.blp"
+      }
+    },
+    "whelp": {
+      "model": "creature/dragonwhelp/dragonwhelp.m2",
+      "skins": {
+        "11": "creature/dragonwhelp/dragonwhelpskinblack.blp"
+      }
+    },
+    "lucifron": {
+      "model": "creature/salamander/salamandermale.m2",
+      "skins": {
+        "11": "creature/salamander/salamandermaleskinblack.blp"
+      }
+    },
+    "gehennas": {
+      "model": "creature/salamander/salamandermale.m2",
+      "skins": {
+        "11": "creature/salamander/salamandermaleskindarkred.blp"
+      }
+    },
+    "shazzrah": {
+      "model": "creature/salamander/salamandermale.m2",
+      "skins": {
+        "11": "creature/salamander/salamandermaleskinblue.blp"
+      }
+    },
+    "sulfuron-harbinger": {
+      "model": "creature/salamander/salamandermale.m2",
+      "skins": {
+        "11": "creature/salamander/salamandermaleskinred.blp"
+      }
+    },
+    "majordomo-executus": {
+      "model": "creature/salamander/salamandermale.m2",
+      "skins": {
+        "11": "creature/salamander/salamandermaleskinred.blp"
+      }
+    },
+    "garr": {
+      "model": "creature/elementalearth/elementalearth.m2",
+      "skins": {
+        "11": "creature/elementalearth/rockelementalskinblack.blp"
+      }
+    },
+    "baron-geddon": {
+      "model": "creature/fireelemental/fireelemental.m2",
+      "skins": {
+        "11": "creature/fireelemental/fireelementalskin.blp"
+      }
+    },
+    "patchwerk": {
+      "model": "creature/fleshgolem/fleshgolem.m2",
+      "skins": {
+        "11": "creature/fleshgolem/fleshgolemskin1.blp",
+        "12": "creature/fleshgolem/fleshgolemskin2.blp"
+      }
+    },
+    "cthun": {
+      "model": "creature/eyeofkathune/eyeofkathune.m2",
+      "skins": {
+        "11": "creature/eyeofkathune/eyeofkathunepurple.blp"
+      }
+    },
+    "sapphiron": {
+      "model": "creature/frostwurm/frostwurm.m2",
+      "skins": {},
+      "textureOverrides": {
+        "world/khazmodan/ironforge/passivedoodads/museumexhibits/basicbone.blp": "creature/frostwurm/frostwurmbones.blp"
+      }
+    },
+    "kelthuzad": {
+      "model": "creature/kelthuzad/kelthuzad.m2",
+      "skins": {}
+    },
+    "hakkar": {
+      "model": "creature/hakkar/hakkar.m2",
+      "skins": {}
+    },
+    "four-horsemen": {
+      "model": "creature/mounteddeathknight/mounteddeathknight_mograine.m2",
+      "skins": {
+        "11": "creature/mounteddeathknight/mounteddeathknightgoldred_01.blp",
+        "12": "creature/mounteddeathknight/mounteddeathknightgoldred_02.blp",
+        "13": "creature/mounteddeathknight/mounteddeathknightgoldred_03.blp"
+      }
+    },
+    "loatheb": {
+      "model": "creature/sporecreature/sporecreature.m2",
+      "skins": {
+        "11": "creature/sporecreature/sporecreatureskin1.blp"
+      }
+    },
+    "tank-helm": {
+      "model": "item/objectcomponents/head/helm_plate_raidwarrior_a_01_hum.m2",
+      "skins": {
+        "2": "item/objectcomponents/head/helm_plate_raidwarrior_a_01blue.blp"
+      }
+    },
+    "tank-shoulder-l": {
+      "model": "item/objectcomponents/shoulder/lshoulder_plate_raidwarrior_a_01.m2",
+      "skins": {
+        "2": "item/objectcomponents/shoulder/shoulder_plate_raidwarrior_a_01blue.blp"
+      }
+    },
+    "tank-shoulder-r": {
+      "model": "item/objectcomponents/shoulder/rshoulder_plate_raidwarrior_a_01.m2",
+      "skins": {
+        "2": "item/objectcomponents/shoulder/shoulder_plate_raidwarrior_a_01blue.blp"
+      }
+    },
+    "sword": {
+      "model": "item/objectcomponents/weapon/sword_1h_long_d_03.m2",
+      "skins": {
+        "2": "item/objectcomponents/weapon/sword_1h_long_d_03_v01.blp"
+      }
+    },
+    "shield": {
+      "model": "item/objectcomponents/shield/shield_blackwing_drakeadon.m2",
+      "skins": {
+        "2": "item/objectcomponents/shield/shield_blackwing_drakeadon.blp"
+      }
+    },
+    "tank": {
+      "model": "character/human/male/humanmale.m2",
+      "skins": {
+        "1": "character/human/male/humanmaleskin00_00.blp"
+      },
+      "atlas": {
+        "AU": "item/texturecomponents/armuppertexture/plate_raidwarrior_a_01blue_sleeve_au_u.blp",
+        "AL": "item/texturecomponents/armlowertexture/plate_raidwarrior_a_01blue_glove_al_u.blp",
+        "HA": "item/texturecomponents/handtexture/plate_raidwarrior_a_01blue_glove_ha_u.blp",
+        "TU": "item/texturecomponents/torsouppertexture/plate_raidwarrior_a_01blue_chest_tu_m.blp",
+        "TL": "item/texturecomponents/torsolowertexture/plate_raidwarrior_a_01blue_chest_tl_m.blp",
+        "LU": "item/texturecomponents/leguppertexture/plate_raidwarrior_a_01blue_pant_lu_u.blp",
+        "LL": "item/texturecomponents/leglowertexture/plate_raidwarrior_a_01blue_boot_ll_u.blp",
+        "FO": "item/texturecomponents/foottexture/plate_raidwarrior_a_01blue_boot_fo_u.blp"
+      },
+      "geosets": [
+        0,
+        101,
+        201,
+        301,
+        403,
+        503,
+        701,
+        1301
+      ],
+      "equipment": [
+        {
+          "model": "sword",
+          "attachment": 1
+        },
+        {
+          "model": "shield",
+          "attachment": 0
+        },
+        {
+          "model": "tank-helm",
+          "attachment": 11
+        },
+        {
+          "model": "tank-shoulder-r",
+          "attachment": 5
+        },
+        {
+          "model": "tank-shoulder-l",
+          "attachment": 6
+        }
+      ]
+    },
+    "rogue": {
+      "model": "character/human/male/humanmale.m2",
+      "skins": {
+        "1": "character/human/male/humanmaleskin00_00.blp"
+      },
+      "atlas": {
+        "AU": "item/texturecomponents/armuppertexture/leather_raidrogue_a_01blue_sleeve_au_u.blp",
+        "AL": "item/texturecomponents/armlowertexture/leather_raidrogue_a_01blue_glove_al_u.blp",
+        "HA": "item/texturecomponents/handtexture/leather_raidrogue_a_01blue_glove_ha_u.blp",
+        "TU": "item/texturecomponents/torsouppertexture/leather_raidrogue_a_01blue_chest_tu_m.blp",
+        "TL": "item/texturecomponents/torsolowertexture/leather_raidrogue_a_01blue_chest_tl_m.blp",
+        "LU": "item/texturecomponents/leguppertexture/leather_raidrogue_a_01blue_pant_lu_u.blp",
+        "LL": "item/texturecomponents/leglowertexture/leather_raidrogue_a_01blue_boot_ll_u.blp",
+        "FO": "item/texturecomponents/foottexture/leather_raidrogue_a_01blue_boot_fo_u.blp"
+      },
+      "geosets": [
+        0,
+        101,
+        201,
+        301,
+        403,
+        503,
+        701,
+        1301
+      ],
+      "equipment": [
+        {
+          "model": "sword",
+          "attachment": 1
+        }
+      ]
+    },
+    "caster": {
+      "model": "character/human/male/humanmale.m2",
+      "skins": {
+        "1": "character/human/male/humanmaleskin00_00.blp"
+      },
+      "atlas": {
+        "AU": "item/texturecomponents/armuppertexture/robe_dungeonmage_a_01purple_sleeve_au_u.blp",
+        "AL": "item/texturecomponents/armlowertexture/robe_dungeonmage_a_01purple_glove_al_u.blp",
+        "HA": "item/texturecomponents/handtexture/robe_dungeonmage_a_01purple_glove_ha_u.blp",
+        "TU": "item/texturecomponents/torsouppertexture/robe_dungeonmage_a_01purple_chest_tu_m.blp",
+        "TL": "item/texturecomponents/torsolowertexture/robe_dungeonmage_a_01purple_chest_tl_m.blp",
+        "LU": "item/texturecomponents/leguppertexture/robe_dungeonmage_a_01purple_pant_lu_u.blp",
+        "LL": "item/texturecomponents/leglowertexture/robe_dungeonmage_a_01purple_pant_ll_u.blp",
+        "FO": "item/texturecomponents/foottexture/robe_dungeonmage_a_01purple_boot_fo_u.blp"
+      },
+      "geosets": [
+        0,
+        101,
+        201,
+        301,
+        401,
+        501,
+        701,
+        1302
+      ],
+      "equipment": []
+    },
+    "brazier": {
+      "model": "world/generic/orc/passive doodads/braziers/tallbrazier01.m2"
+    },
+    "egg": {
+      "model": "world/goober/g_dragoneggblack.m2"
+    },
+    "stalagmite": {
+      "model": "world/dungeon/cave/passivedoodads/stalagtite/stalagtite01.m2",
+      "flipZ": true
+    },
+    "anubrekhan": {
+      "model": "creature/cryptlord/cryptlord.m2",
+      "skins": {
+        "11": "creature/cryptlord/cryptlordskin.blp"
+      }
+    },
+    "skeram": {
+      "model": "creature/quirajprophet/quirajprophet.m2",
+      "skins": {
+        "11": "creature/quirajprophet/quirajprophetskin.blp"
+      }
+    },
+    "vaelastrasz": {
+      "model": "creature/dragon/dragon.m2",
+      "skins": {
+        "11": "creature/dragon/dragonskin1red.blp",
+        "12": "creature/dragon/dragonskin2red.blp",
+        "13": "creature/dragon/dragonskin3red.blp"
+      }
+    },
+    "firemaw": {
+      "model": "creature/drake/drake.m2",
+      "skins": {
+        "11": "creature/drake/drakeskinblack1.blp",
+        "12": "creature/drake/drakeskinblack2.blp",
+        "13": "creature/drake/drakeskinblack3.blp"
+      }
+    },
+    "ebonroc": {
+      "model": "creature/drake/drake.m2",
+      "skins": {
+        "11": "creature/drake/drakeskinblack1.blp",
+        "12": "creature/drake/drakeskinblack2.blp",
+        "13": "creature/drake/drakeskinblack3.blp"
+      }
+    },
+    "flamegor": {
+      "model": "creature/drake/drake.m2",
+      "skins": {
+        "11": "creature/drake/drakeskinblack1.blp",
+        "12": "creature/drake/drakeskinblack2.blp",
+        "13": "creature/drake/drakeskinblack3.blp"
+      }
+    },
+    "razorgore": {
+      "model": "creature/dragonspawncaster/dragonspawncaster.m2",
+      "skins": {
+        "11": "creature/dragonspawncaster/dragonspawncasterskinblack.blp",
+        "12": "creature/dragonspawncaster/dragonspawncasterbodyskinblack.blp"
+      }
+    },
+    "broodlord-lashlayer": {
+      "model": "creature/dragonfootsoldier/dragonfootsoldier.m2",
+      "skins": {
+        "11": "creature/dragonfootsoldier/dragonfootsoldierskinblack.blp"
+      }
+    },
+    "golemagg": {
+      "model": "creature/mountaingiant/mountaingiant.m2",
+      "skins": {
+        "11": "creature/mountaingiant/moltengiant.blp"
+      }
+    },
+    "maexxna": {
+      "model": "creature/tarantula/tarantula.m2",
+      "skins": {
+        "11": "creature/tarantula/tarantulaskinbrown.blp"
+      }
+    },
+    "kurinnaxx": {
+      "model": "creature/sandreaver/sandreaver.m2",
+      "skins": {
+        "11": "creature/sandreaver/sandreaverskin_yellow.blp",
+        "12": "creature/sandreaver/sandreaverskin_yellow2.blp"
+      }
+    },
+    "fankriss": {
+      "model": "creature/sandreaver/sandreaver.m2",
+      "skins": {
+        "11": "creature/sandreaver/sandreaverskin_orange.blp",
+        "12": "creature/sandreaver/sandreaverskin_orange2.blp"
+      }
+    },
+    "huhuran": {
+      "model": "creature/silithidwaspboss/silithidwaspboss.m2",
+      "skins": {
+        "11": "creature/silithidwaspboss/silithidwaspbossskin.blp"
+      }
+    },
+    "ayamiss": {
+      "model": "creature/silithidwaspboss/silithidwaspboss.m2",
+      "skins": {
+        "11": "creature/silithidwaspboss/silithidwaspbossskin2.blp"
+      }
+    },
+    "buru": {
+      "model": "creature/silithidtank/silithidtank.m2",
+      "skins": {
+        "11": "creature/silithidtank/silithidtankskinblue.blp"
+      }
+    },
+    "general-rajaxx": {
+      "model": "creature/quirajgladiator/quirajgladiator.m2",
+      "skins": {
+        "11": "creature/quirajgladiator/quirajgladiatorskin.blp"
+      }
+    },
+    "ossirian": {
+      "model": "creature/horisath/horisath.m2",
+      "skins": {
+        "11": "creature/horisath/horisathskin01.blp"
+      }
+    },
+    "moam": {
+      "model": "creature/obsidiandestroyer/obsidiandestroyer.m2",
+      "skins": {
+        "11": "creature/obsidiandestroyer/obsidiandestroyerskin.blp"
+      }
+    }
+  },
+  "surfaces": {
+    "onyxia-floor": "tileset/burningstepps/burningsteppsashcracks_s.blp",
+    "onyxia-wall": "tileset/burningstepps/burningsteppsrock02_s.blp",
+    "molten-core-floor": "tileset/burningstepps/burningsteppscharcoal01_s.blp",
+    "molten-core-wall": "tileset/burningstepps/burningsteppsrock01_s.blp",
+    "blackwing-lair-floor": "dungeons/textures/floor/bm_brspire_tileflr01.blp",
+    "blackwing-lair-wall": "dungeons/textures/walls/bm_brspire_stnwall01.blp",
+    "zul-gurub-floor": "dungeons/textures/floor/bm_ruins_floor.blp",
+    "zul-gurub-wall": "dungeons/textures/brian/stranglearena/stranglethornruinwall_01.blp",
+    "ruins-of-ahnqiraj-floor": "dungeons/textures/floor/bm_uldaman_sandflr01.blp",
+    "ruins-of-ahnqiraj-wall": "dungeons/textures/walls/bm_brspire_stnwall03.blp",
+    "temple-of-ahnqiraj-floor": "dungeons/textures/floor/jlo_ahive_ground.blp",
+    "temple-of-ahnqiraj-wall": "dungeons/textures/floor/jlo_ahive_groundtransition.blp",
+    "naxxramas-floor": "dungeons/textures/floor/jlo_undeadzigg_floor2.blp",
+    "naxxramas-wall": "dungeons/textures/walls/jlo_undeadzigg_wall01.blp"
+  },
+  "icons": {
+    "attack": "interface/icons/inv_sword_04.blp",
+    "taunt": "interface/icons/spell_nature_reincarnation.blp",
+    "heal": "interface/icons/spell_holy_flashheal.blp",
+    "dispel": "interface/icons/spell_holy_dispelmagic.blp",
+    "interrupt": "interface/icons/inv_gauntlets_04.blp",
+    "jump": "interface/icons/ability_rogue_sprint.blp",
+    "fire": "interface/icons/spell_fire_flamebolt.blp",
+    "frost": "interface/icons/spell_frost_frostbolt02.blp",
+    "poison": "interface/icons/spell_nature_corrosivebreath.blp",
+    "shadow": "interface/icons/spell_shadow_shadowbolt.blp"
+  }
+}

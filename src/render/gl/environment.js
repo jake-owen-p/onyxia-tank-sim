@@ -186,7 +186,7 @@ export function buildEnvironment(script, theme, seed = 1) {
   }
 
   const props = dressRoom(script, theme, info, wallH, seed);
-  return { floor: floor.arrays(), walls: walls.arrays(), dome: dome.arrays(), props: props.built, torches: props.torches, vents: props.vents, info, wallH, sky: !!sky };
+  return { floor: floor.arrays(), walls: walls.arrays(), dome: dome.arrays(), props: props.built, artProps: props.art, torches: props.torches, vents: props.vents, info, wallH, sky: !!sky };
 }
 
 function smoothNormals(mesh, base, rows, cols) {
@@ -207,7 +207,7 @@ function smoothNormals(mesh, base, rows, cols) {
 function dressRoom(script, theme, info, wallH, seed) {
   const m = new ModelBuilder();
   m.bone('root', null, [0, 0, 0]);
-  const torches = [], vents = [];
+  const torches = [], vents = [], art = [];
   const pr = new Set(theme.props || []);
   const hasFloor = script.arena.floor.map((f) => f.poly);
   const inFloor = (x, y) => hasFloor.some((p) => pointInPoly([x, y], p));
@@ -231,8 +231,7 @@ function dressRoom(script, theme, info, wallH, seed) {
   });
   if (pr.has('braziers') || theme.lights === 'torches') scatter(theme.lights === 'torches' ? 15 : 22, (s, i, r) => {
     const x = s.x + s.nx * 3.2, y = s.y + s.ny * 3.2;
-    m.lathe('root', [x, y, 0], [x, y, 3.1], [[0.72, 0], [0.5, 0.08], [0.22, 0.22], [0.2, 0.75], [0.75, 0.9], [0.95, 1]], '#2d2a2c', { sides: 7 });
-    m.ball('root', [x, y, 3.1], 0.72, theme.torchCol ? [Math.min(1, theme.torchCol[0] / 7), Math.min(1, theme.torchCol[1] / 7), Math.min(1, theme.torchCol[2] / 7)] : '#ff8030', { em: 1.1, sides: 7, rings: 3 });
+    art.push({ key: 'brazier', x, y, z: 0, heading: i, height: 3.4 });
     torches.push({ x, y, z: 3.6, color: theme.torchCol || [5, 2, 0.6], radius: 22 });
   });
   if (theme.lights === 'lavaGlow') scatter(20, (s) => torches.push({ x: s.x + s.nx * 2, y: s.y + s.ny * 2, z: 1.4, color: theme.torchCol, radius: 26 }));
@@ -241,14 +240,14 @@ function dressRoom(script, theme, info, wallH, seed) {
   if (pr.has('stalagmites')) scatter(5.5, (s, i, r) => {
     if (r(1) < 0.25) return;
     const inset = -1 + r(2) * 5, x = s.x + s.nx * inset, y = s.y + s.ny * inset, h = 2.5 + r(3) * r(3) * 11, w = 0.8 + r(4) * 1.4;
-    m.lathe('root', [x, y, -0.2], [x, y, h], [[w, 0], [w * 0.55, 0.3], [w * 0.28, 0.65], [0.02, 1]], r(5) > 0.5 ? col.a : col.b, { sides: 6 });
+    art.push({ key: 'stalagmite', x, y, z: -0.2, heading: r(5) * Math.PI * 2, height: h });
   });
   if (pr.has('eggs')) scatter(9, (s, i, r) => {
     if (r(1) < 0.3) return;
     const cnt = 1 + Math.floor(r(2) * 3);
     for (let k = 0; k < cnt; k++) {
       const x = s.x + s.nx * (2 + r(3 + k) * 3.5) + s.ny * (r(7 + k) - 0.5) * 3, y = s.y + s.ny * (2 + r(3 + k) * 3.5) - s.nx * (r(7 + k) - 0.5) * 3, h = 1 + r(11 + k) * 0.5;
-      m.lathe('root', [x, y, 0], [x, y, h * 1.75], [[0.2, 0], [0.56 * h, 0.16], [0.7 * h, 0.42], [0.52 * h, 0.76], [0.02, 1]], k % 2 ? '#3a2f33' : '#4b3a3a', { sides: 8 });
+      art.push({ key: 'egg', x, y, z: 0, heading: r(9+k) * Math.PI * 2, height: h * 1.75 });
     }
   });
   if (pr.has('lavaVents')) scatter(17, (s, i, r) => {
@@ -328,5 +327,5 @@ function dressRoom(script, theme, info, wallH, seed) {
     m.ball('root', [x, y, h + 0.45], 0.55, '#7ed0ff', { em: 2.2, sides: 6 });
   });
   const built = m.v.length ? m.build({}) : null;
-  return { built, torches, vents };
+  return { built, torches, vents, art };
 }

@@ -14,6 +14,7 @@ import { DecalStream, DECAL_STRIDE } from './decals.js';
 import { conePoly, circlePoly, localToWorld, bossFootprint } from '../shapes.js';
 import { spotTolerance } from '../topdown.js';
 import { createCamera, updateBasis } from '../projection.js';
+import { createAssetRenderer } from './assets.js';
 
 const MAT_FIGURE = { noise: 0.3, scales: 0, cracks: 0, rim: 0.42, paintF: 7, scaleF: 1, gloss: 0.34, crackF: 1 };
 const lin = (c) => [Math.pow(c[0], 2.2), Math.pow(c[1], 2.2), Math.pow(c[2], 2.2)];
@@ -47,6 +48,8 @@ function createWorld(gl, canvas) {
     comp: program(gl, S.fullVS, S.compositeFS, 'composite'), bake: program(gl, S.fullVS, S.bakeFS, 'bake'),
   };
   const emptyVAO = gl.createVertexArray();
+  const art = createAssetRenderer(gl, setCommon, () => portraits.clear());
+  const drawArt = (...args) => { const drawn = art.draw(...args); gl.useProgram(P.lit.p); return drawn; };
 
   // ---- dynamic streams
   const decals = new DecalStream();
@@ -136,6 +139,12 @@ function createWorld(gl, canvas) {
     E.bossM = model(`boss:${E.key}`, () => makeBossModel(raid, boss));
     E.addM = model(`add:${E.key}`, () => makeAddModel(raid, boss));
     E.bossM.mem = {};
+    E.artReady = art.preload([boss, 'tank', 'rogue', 'caster', 'whelp', ...env.artProps.map(p => p.key)]);
+    const encounter = E;
+    const surfaces = ['floor', 'wall'].map(surface => art.surface(`${raid}-${surface}`).then(tex => {
+      if (tex && E === encounter) { E[`${surface}Tex`] = tex; E[`${surface}Art`] = true; }
+    }).catch(error => console.warn(`Unable to load ${surface} texture`, error)));
+    E.artReady = Promise.all([E.artReady, ...surfaces]);
     parts.clear();
   }
 
@@ -394,8 +403,8 @@ function createWorld(gl, canvas) {
     else if (mode === 'map') { gl.uniform3f(P.env.u.uGlowA, th.glow[0] * 0.4, th.glow[1] * 0.4, th.glow[2] * 0.4); gl.uniform3f(P.env.u.uGlowB, th.glowB[0] * 0.3, th.glowB[1] * 0.3, th.glowB[2] * 0.3); }
     if (outerMode === 0 && mode === 'map') { /* the void around the room in the tactical view */ } else drawEnv(E.outerMesh, E.floorTex, outerMode, th.bump, 0.1, false);
     gl.uniform3fv(P.env.u.uGlowA, th.glow); gl.uniform3fv(P.env.u.uGlowB, th.glowB);
-    drawEnv(E.floor, E.floorTex, 0, th.bump, 0.22, false);
-    if (!hideShell) drawEnv(E.walls, E.wallTex, 0, th.bump * 1.2, 0.12, true);
+    drawEnv(E.floor, E.floorTex, 0, E.floorArt ? 0 : th.bump, E.floorArt ? 0.025 : 0.22, false);
+    if (!hideShell) drawEnv(E.walls, E.wallTex, 0, E.wallArt ? 0 : th.bump * 1.2, E.wallArt ? 0.025 : 0.12, true);
 
     // Characters and props.
     gl.useProgram(P.lit.p);
@@ -408,12 +417,22 @@ function createWorld(gl, canvas) {
     else if (mode === 'pov') gl.uniform4f(P.lit.u.uCut, eye[0], eye[1], look[0], look[1]);
     if (E.props && mode !== 'map') { setMat({ noise: 0.5, scales: 0, cracks: 0, rim: 0.05, paintF: 0.9, scaleF: 1, gloss: 0.1, crackF: 1 }); placement(0, 0, 0, 0, 1, FIXED); drawMesh(E.props, IDENT_BONES, FIXED); }
     gl.uniform1f(P.lit.u.uCutR, 0);
+    art.begin(VP, eye, now, th);
+    if (mode !== 'map') for (const prop of E.env.artProps) {
+      const dx=look[0]-eye[0], dy=look[1]-eye[1], length=dx*dx+dy*dy;
+      const along=length ? Math.max(0,Math.min(1,((prop.x-eye[0])*dx+(prop.y-eye[1])*dy)/length)) : 0;
+      if (along < .98 && Math.hypot(prop.x-eye[0]-along*dx,prop.y-eye[1]-along*dy) < 3) continue;
+      placement(prop.x, prop.y, prop.z, prop.heading, 1, FIXED);
+      drawArt(prop.key, FIXED, now, { prop: true }, 1, 0, prop.height);
+    }
 
     // Boss, dithered out when the camera is inside its body.
     const R = script.boss.radius, dc = Math.hypot(eye[0] - boss.x, eye[1] - boss.y);
     const nearFade = mode === 'pov' ? Math.max(0.3, Math.min(1, (dc - R * 0.8) / (R * 1.1))) : 1;
     const hit = Math.max(0, 1 - (t - boss.lastHit) / 0.18);
-    if (mem.sink < 0.98) { setMat(bm.mat, bm.tint || [1, 1, 1], nearFade, hit * 0.09); drawMesh(bm.mesh, bm.pose.matrices, model4); }
+    if ((mode === 'hero' || mem.sink < 0.98) && !drawArt(E.boss, model4, now, { moving: mem.speed > 1, cast: !!cast, airborne: boss.state === 'airborne', attack: boss.engaged }, nearFade, hit * 0.09, bm.height || bm.built.maxz)) {
+      setMat(bm.mat, bm.tint || [1, 1, 1], nearFade, hit * 0.09); drawMesh(bm.mesh, bm.pose.matrices, model4);
+    }
     if (bm.drawExtra) bm.drawExtra((mesh, bones, M) => drawMesh(mesh, bones, M), { boss, view, now });
 
     if (mode !== 'hero') { drawRaid(view, script, settings, pal, now, dt, eye, mode); drawAdds(view, now, dt); }
@@ -505,7 +524,7 @@ function createWorld(gl, canvas) {
       placement(d.x, d.y, 0, moving && st.dirSet ? st.dir : heading, 1.05, M2);
       const dc = Math.hypot(eye[0] - d.x, eye[1] - d.y, eye[2] - 1);
       setMat(MAT_FIGURE, [1, 1, 1], mode === 'pov' ? figureAlpha(dc) : 1);
-      drawMesh(m.mesh, m.pose.matrices, M2);
+      if (!drawArt(mi < 2 ? 'tank' : mi < 4 ? 'rogue' : 'caster', M2, now + phase, { moving, attack: engaged && d.melee, cast: engaged && !d.melee }, mode === 'pov' ? figureAlpha(dc) : 1)) drawMesh(m.mesh, m.pose.matrices, M2);
     });
     // Ghost tank.
     const g = wd.ghost;
@@ -514,7 +533,7 @@ function createWorld(gl, canvas) {
       animateFigure(m.pose, { t: now, moving: !!g.moving, phase: 1.1, attack: g.tanking && !g.moving ? (now * 0.65 % 1 < 0.35 ? (now * 0.65 % 1) / 0.35 : 0) : 0 });
       placement(g.x, g.y, 0, g.heading, 1.14, M2);
       if (g.tanking) setMat(MAT_FIGURE, [1, 1, 1], 1); else setMat({ ...MAT_FIGURE, rim: 1.6 }, [0.55, 0.85, 1.3], Math.max(0.15, (settings.ghostAlpha ?? 0.6) * 0.75));
-      drawMesh(m.mesh, m.pose.matrices, M2);
+      if (!drawArt('tank', M2, now + 1.1, { moving: !!g.moving, attack: g.tanking }, g.tanking ? 1 : Math.max(0.15, (settings.ghostAlpha ?? 0.6) * 0.75))) drawMesh(m.mesh, m.pose.matrices, M2);
     }
     // You.
     const p = wd.player, ps = E.playerMem;
@@ -529,7 +548,8 @@ function createWorld(gl, canvas) {
     placement(p.x, p.y, p.z || 0, p.heading, 1.1, M2);
     const dcp = Math.hypot(eye[0] - p.x, eye[1] - p.y, eye[2] - 1);
     setMat({ ...MAT_FIGURE, rim: 0.65 }, [1, 1, 1], mode === 'pov' ? figureAlpha(dcp) : 1);
-    drawMesh(pm.mesh, pm.pose.matrices, M2);
+    const playerArt = role === 'healer' || role === 'ranged' ? 'caster' : role === 'melee' ? 'rogue' : 'tank';
+    if (!drawArt(playerArt, M2, now, { moving: !!p.moving || feared, jump: p.z > .05, attack: ps.atk > 0 && playerArt !== 'caster', cast: ps.atk > 0 && playerArt === 'caster' }, mode === 'pov' ? figureAlpha(dcp) : 1)) drawMesh(pm.mesh, pm.pose.matrices, M2);
   }
 
   function drawAdds(view, now, dt) {
@@ -541,7 +561,7 @@ function createWorld(gl, canvas) {
       let mem = E.addMem.get(key); if (!mem) { mem = {}; E.addMem.set(key, mem); }
       am.animate(am.pose, { t: now + i * 0.7, dt, mem, state: 'grounded', moving: true, cast: null });
       placement(wh.x, wh.y, 0, wh.heading, am.scale, M2);
-      drawMesh(am.mesh, am.pose.matrices, M2);
+      if (E.raid !== 'onyxia' || !drawArt('whelp', M2, now + i * 0.7, { moving: true }, 1, 0, am.built.maxz)) drawMesh(am.mesh, am.pose.matrices, M2);
     });
   }
 
@@ -665,11 +685,12 @@ function createWorld(gl, canvas) {
   // ---- portraits: the boss's own model, rendered once and cached as a 2D canvas
   const portraits = new Map();
   const portraitQueue = [];
-  function renderPortrait(m, size) {
+  function renderPortrait(m, size, artKey) {
     const mem = {};
     m.animate(m.pose, { t: 1.2, dt: 0.016, mem, state: 'grounded', moving: false, cast: null, engaged: false });
     const focusName = m.focusBone || (m.pose.idx('head') >= 0 ? 'head' : m.mouth || 'mouth');
-    const focus = m.pose.bonePos(focusName, [0, 0, 0]);
+    const client = art.portraitFrame(artKey);
+    const focus = client ? client.focus : m.pose.bonePos(focusName, [0, 0, 0]);
     if (m.pose.idx(focusName) < 0) focus[2] = (m.built.maxz || 6) * 0.7;
     const tex = colorTexture(gl, size, size, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT);
     const depth = gl.createRenderbuffer();
@@ -678,7 +699,7 @@ function createWorld(gl, canvas) {
     gl.viewport(0, 0, size, size);
     gl.enable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.enable(gl.CULL_FACE); gl.depthMask(true);
     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    const dist = m.portraitDist ?? Math.max(2.4, (m.built.maxz || 6) * 0.42);
+    const dist = client?.distance ?? m.portraitDist ?? Math.max(2.4, (m.built.maxz || 6) * 0.42);
     const eye = [focus[0] + dist * 0.92, focus[1] - dist * 0.42, focus[2] + dist * 0.08];
     perspective(0.62, 1, 0.1, 400, proj); lookAt(eye, [focus[0], focus[1], focus[2] - dist * 0.04], [0, 0, 1], viewM); mul4(proj, viewM, VP);
     lightN = 0;
@@ -690,7 +711,8 @@ function createWorld(gl, canvas) {
     setMat({ ...m.mat, cracks: m.mat.cracks * 0.4 });
     emissiveScale = 1;
     placement(0, 0, 0, 0, 1, FIXED);
-    drawMesh(m.mesh, m.pose.matrices, FIXED);
+    art.begin(VP, eye, 1.2, th);
+    if (!client || !drawArt(artKey, FIXED, 1.2)) drawMesh(m.mesh, m.pose.matrices, FIXED);
     const raw = new Float32Array(size * size * 4);
     gl.readPixels(0, 0, size, size, gl.RGBA, gl.FLOAT, raw);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -713,14 +735,14 @@ function createWorld(gl, canvas) {
   function portrait(raidId, bossId, size = 128) {
     const key = `${raidId}/${bossId}/${size}`;
     if (portraits.has(key)) return portraits.get(key);
-    if (!portraitQueue.some((q) => q.key === key)) portraitQueue.push({ key, size, model: () => model(`boss:${raidId}/${bossId}`, () => makeBossModel(raidId, bossId)) });
+    if (!portraitQueue.some((q) => q.key === key)) portraitQueue.push({ key, size, artKey: bossId, model: () => model(`boss:${raidId}/${bossId}`, () => makeBossModel(raidId, bossId)) });
     return null;
   }
   function playerPortrait(role, size = 128) {
     const key = `player:${role}/${size}`;
     if (portraits.has(key)) return portraits.get(key);
     if (!portraitQueue.some((q) => q.key === key)) {
-      portraitQueue.push({ key, size, model: () => {
+      portraitQueue.push({ key, size, artKey: role === 'healer' || role === 'ranged' ? 'caster' : role === 'melee' ? 'rogue' : 'tank', model: () => {
         const m = model(`player:${role}`, () => ({ built: buildFigure({ ...playerLook(role), cell: 0.045 }), mat: MAT_FIGURE }));
         return { ...m, animate: (p) => animateFigure(p, { t: 1.2, moving: false, phase: 0 }), focusBone: 'head', portraitDist: 1.05 };
       } });
@@ -731,7 +753,7 @@ function createWorld(gl, canvas) {
   function pumpPortraits() {
     const q = portraitQueue.shift();
     if (!q) return false;
-    try { portraits.set(q.key, renderPortrait(q.model(), q.size)); } catch (e) { portraits.set(q.key, null); console.warn('portrait failed', q.key, e); }
+    try { portraits.set(q.key, renderPortrait(q.model(), q.size, q.artKey)); } catch (e) { portraits.set(q.key, null); console.warn('portrait failed', q.key, e); }
     return true;
   }
 
@@ -743,5 +765,5 @@ function createWorld(gl, canvas) {
 
   const bossStaysVisible = () => !!(E && E.bossM && E.bossM.staysVisible);
 
-  return { canvas, draw, setEncounter, gl, portrait, playerPortrait, pumpPortraits, bossTop, bossStaysVisible };
+  return { canvas, draw, setEncounter, gl, portrait, playerPortrait, pumpPortraits, bossTop, bossStaysVisible, artReady: () => E?.artReady || Promise.resolve() };
 }

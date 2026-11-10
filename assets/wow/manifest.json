@@ -1,0 +1,246 @@
+{
+  "models": {
+    "onyxia": {
+      "model": "models/onyxia.json",
+      "scale": 1
+    },
+    "nefarian": {
+      "model": "models/nefarian.json",
+      "scale": 1
+    },
+    "whelp": {
+      "model": "models/whelp.json",
+      "scale": 1
+    },
+    "lucifron": {
+      "model": "models/lucifron.json",
+      "scale": 1
+    },
+    "gehennas": {
+      "model": "models/gehennas.json",
+      "scale": 1
+    },
+    "shazzrah": {
+      "model": "models/shazzrah.json",
+      "scale": 1
+    },
+    "sulfuron-harbinger": {
+      "model": "models/sulfuron-harbinger.json",
+      "scale": 1
+    },
+    "majordomo-executus": {
+      "model": "models/majordomo-executus.json",
+      "scale": 1
+    },
+    "garr": {
+      "model": "models/garr.json",
+      "scale": 1
+    },
+    "baron-geddon": {
+      "model": "models/baron-geddon.json",
+      "scale": 1
+    },
+    "patchwerk": {
+      "model": "models/patchwerk.json",
+      "scale": 1
+    },
+    "cthun": {
+      "model": "models/cthun.json",
+      "scale": 1
+    },
+    "sapphiron": {
+      "model": "models/sapphiron.json",
+      "scale": 1
+    },
+    "kelthuzad": {
+      "model": "models/kelthuzad.json",
+      "scale": 1
+    },
+    "hakkar": {
+      "model": "models/hakkar.json",
+      "scale": 1
+    },
+    "four-horsemen": {
+      "model": "models/four-horsemen.json",
+      "scale": 1
+    },
+    "loatheb": {
+      "model": "models/loatheb.json",
+      "scale": 1
+    },
+    "tank-helm": {
+      "model": "models/tank-helm.json",
+      "scale": 1
+    },
+    "tank-shoulder-l": {
+      "model": "models/tank-shoulder-l.json",
+      "scale": 1
+    },
+    "tank-shoulder-r": {
+      "model": "models/tank-shoulder-r.json",
+      "scale": 1
+    },
+    "sword": {
+      "model": "models/sword.json",
+      "scale": 1
+    },
+    "shield": {
+      "model": "models/shield.json",
+      "scale": 1
+    },
+    "tank": {
+      "model": "models/tank.json",
+      "scale": 1,
+      "equipment": [
+        {
+          "model": "sword",
+          "attachment": 1
+        },
+        {
+          "model": "shield",
+          "attachment": 0
+        },
+        {
+          "model": "tank-helm",
+          "attachment": 11
+        },
+        {
+          "model": "tank-shoulder-r",
+          "attachment": 5
+        },
+        {
+          "model": "tank-shoulder-l",
+          "attachment": 6
+        }
+      ]
+    },
+    "rogue": {
+      "model": "models/rogue.json",
+      "scale": 1,
+      "equipment": [
+        {
+          "model": "sword",
+          "attachment": 1
+        }
+      ]
+    },
+    "caster": {
+      "model": "models/caster.json",
+      "scale": 1,
+      "equipment": []
+    },
+    "brazier": {
+      "model": "models/brazier.json",
+      "scale": 1
+    },
+    "egg": {
+      "model": "models/egg.json",
+      "scale": 1
+    },
+    "stalagmite": {
+      "model": "models/stalagmite.json",
+      "scale": 1,
+      "flipZ": true
+    },
+    "anubrekhan": {
+      "model": "models/anubrekhan.json",
+      "scale": 1
+    },
+    "skeram": {
+      "model": "models/skeram.json",
+      "scale": 1
+    },
+    "vaelastrasz": {
+      "model": "models/vaelastrasz.json",
+      "scale": 1
+    },
+    "firemaw": {
+      "model": "models/firemaw.json",
+      "scale": 1
+    },
+    "ebonroc": {
+      "model": "models/ebonroc.json",
+      "scale": 1
+    },
+    "flamegor": {
+      "model": "models/flamegor.json",
+      "scale": 1
+    },
+    "razorgore": {
+      "model": "models/razorgore.json",
+      "scale": 1
+    },
+    "broodlord-lashlayer": {
+      "model": "models/broodlord-lashlayer.json",
+      "scale": 1
+    },
+    "golemagg": {
+      "model": "models/golemagg.json",
+      "scale": 1
+    },
+    "maexxna": {
+      "model": "models/maexxna.json",
+      "scale": 1
+    },
+    "kurinnaxx": {
+      "model": "models/kurinnaxx.json",
+      "scale": 1
+    },
+    "fankriss": {
+      "model": "models/fankriss.json",
+      "scale": 1
+    },
+    "huhuran": {
+      "model": "models/huhuran.json",
+      "scale": 1
+    },
+    "ayamiss": {
+      "model": "models/ayamiss.json",
+      "scale": 1
+    },
+    "buru": {
+      "model": "models/buru.json",
+      "scale": 1
+    },
+    "general-rajaxx": {
+      "model": "models/general-rajaxx.json",
+      "scale": 1
+    },
+    "ossirian": {
+      "model": "models/ossirian.json",
+      "scale": 1
+    },
+    "moam": {
+      "model": "models/moam.json",
+      "scale": 1
+    }
+  },
+  "surfaces": {
+    "onyxia-floor": "textures/64dec1eec47edd73.png",
+    "onyxia-wall": "textures/6269d27cf6d963a0.png",
+    "molten-core-floor": "textures/c5da069a6796c4ba.png",
+    "molten-core-wall": "textures/a2eb6302df563385.png",
+    "blackwing-lair-floor": "textures/ad29a4afdac14ff6.png",
+    "blackwing-lair-wall": "textures/b61324a1a183f490.png",
+    "zul-gurub-floor": "textures/77c5e788a6423a2e.png",
+    "zul-gurub-wall": "textures/63ea42dae701ecf7.png",
+    "ruins-of-ahnqiraj-floor": "textures/0d2dd7a728463432.png",
+    "ruins-of-ahnqiraj-wall": "textures/75f3a863406cfcff.png",
+    "temple-of-ahnqiraj-floor": "textures/e67a545543cde532.png",
+    "temple-of-ahnqiraj-wall": "textures/7ee556443a85da54.png",
+    "naxxramas-floor": "textures/09c414283070b3b7.png",
+    "naxxramas-wall": "textures/0e7f35c6c1cf90c5.png"
+  },
+  "icons": {
+    "attack": "textures/970bc04ee092e3a1.png",
+    "taunt": "textures/a1c0a849f7c74b90.png",
+    "heal": "textures/be1d64b011abcc82.png",
+    "dispel": "textures/a91ac25eb4407a27.png",
+    "interrupt": "textures/068376ac7dc9138c.png",
+    "jump": "textures/215df784911065a0.png",
+    "fire": "textures/6579fb057f4eebda.png",
+    "frost": "textures/593254d0f1c8b6eb.png",
+    "poison": "textures/d5abc5f2117690b5.png",
+    "shadow": "textures/73a73695b6b7b54d.png"
+  }
+}

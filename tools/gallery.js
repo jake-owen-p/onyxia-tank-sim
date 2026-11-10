@@ -26,6 +26,8 @@ for (let i = 0; i < list.length; i++) {
     const script = await (await fetch(path)).json();
     script.raidInfo = script.raidInfo || { id: r.id, name: r.name };
     script.raidInfo.id = r.id;
+    world.setEncounter(script);
+    await world.artReady();
     const t0 = performance.now();
     const sim = createSim(script, { manual: true, freezeHp: true, bossPassive: true, start: 'wall', seed: 3 });
     const cam = createCamera();
