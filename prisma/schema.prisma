@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../server/generated/prisma"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Player {
+  id        String @id @db.Uuid
+  settings  Json?
+  keybinds  Json?
+  tutorials String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  runs      Run[]
+  bests     BestScore[]
+}
+
+model Run {
+  playerId  String @db.Uuid
+  id        String @db.Uuid
+  modeKey   String
+  score     Float
+  playedAt  DateTime
+  details   Json
+  player    Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, id])
+  @@index([playerId, playedAt(sort: Desc)])
+}
+
+model BestScore {
+  playerId String @db.Uuid
+  modeKey  String
+  score    Float
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, modeKey])
+}

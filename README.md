@@ -21,7 +21,8 @@ checked against it again before it is marked ready. The format is documented
 in `docs/ENCOUNTER_FORMAT.md`; `node tools/validate.mjs` lints every script
 and plays it with a bot for each role.
 
-* Vanilla JavaScript ES modules, no build step, no backend, no dependencies.
+* Vanilla JavaScript ES modules, bundled with esbuild. Supabase handles accounts;
+  a Vercel API uses Prisma for private cloud saves and protected encounters.
   The world is hand-written WebGL2 and the interface is Canvas 2D and DOM.
   Without WebGL2 the game falls back to its simple 2D views.
 * Real 3D rooms for every raid, original Classic character/equipment art and
@@ -40,26 +41,59 @@ and plays it with a bot for each role.
 * Pure simulation core with unit tests, kept free of DOM, Canvas and audio so
   it can later be ported to Lua for an in-game addon.
 
-**Play it now:** https://onyxia-tank-sim.vercel.app · Source: https://github.com/jake-owen-p/onyxia-tank-sim
+**Play it now:** https://www.raidrehearsal.com · Source: https://github.com/jake-owen-p/onyxia-tank-sim
 
 ## Quick start
 
-Serve the folder with any static file server and open it in a modern browser:
+Use Node 24. Copy `.env.example` to `.env.local` and fill in the Supabase project
+URL, public key, transaction pooler URL and migration connection URL. Without
+Supabase configuration, the public Onyxia demo remains available.
 
 ```sh
-npm run serve          # python3 -m http.server 8080
-# then open http://localhost:8080/
+npm ci
+npm run db:migrate     # apply committed Prisma migrations to your database
+npm run dev
+# then open http://127.0.0.1:8081/
 ```
 
-or `npx serve .`, or drop the folder on any static host.
+`npm run build` generates Prisma Client and builds `dist/`. Only the public
+index and Onyxia encounter are copied there. All other encounter scripts are
+served by `/api/encounters/:raid/:boss` after verifying a Supabase access token.
+Deploy the project through Vercel, not the source folder as a static site.
+Pushing `main` triggers deployment. Apply new Prisma migrations before deploying
+code that depends on them; production builds do not change the database.
 
-The public build is hosted on Vercel as a plain static site (no build step;
-`vercel.json` only sets response headers). Pushing to `main` on GitHub
-redeploys it, and `vercel deploy --prod` from the folder does the same by hand.
+The landing page lives at `/`, the journal at `/play`, sign-in at `/account`,
+saved runs at `/history`, and preferences at `/settings`. Raid cards have
+shareable `/play?raid=...&boss=...` links. Browser Back and direct links work.
 
-Opening `index.html` straight from `file://` works in Firefox and Safari. Chrome
-blocks `fetch()` of the encounter JSON from `file://`, so Chrome users need a
-local server (the page shows a message explaining this if it happens).
+### Accounts and saved progress
+
+Onyxia is open to guests. A free Supabase account unlocks the remaining raids.
+Email/password sign-up, confirmation, sign-in, recovery and sign-out are supported.
+Configure an SMTP provider in Supabase before opening public sign-up: Supabase's
+[default mail service only sends to project team members](https://supabase.com/docs/guides/auth/auth-smtp).
+The allowed authentication redirects are in `supabase/config.toml`.
+
+Prisma owns the app's `Player`, `Run` and `BestScore` tables. Supabase owns its
+`auth` schema. Committed Prisma migrations include the account-deletion foreign
+key and row-level security. The browser cannot query the tables directly; the
+API verifies identity and scopes every query to that user. Database connections
+verify Supabase's TLS certificate. Only public Supabase configuration reaches
+the browser; database credentials belong in Vercel's server environment variables.
+
+Each player retains the latest 50 runs, all personal bests, completed tutorials,
+settings and key bindings. Guest Onyxia progress is imported on sign-in. Separate
+local caches prevent account data from leaking after sign-out. Offline changes
+remain queued on the device and retry when connectivity returns or on **Sync**.
+Replays remain available on the current run's scorecard; full replay recordings
+are not uploaded. Clear History also clears that account's cloud history and
+best scores; Reset Everything resets only the active account's saved game data.
+
+`npm test` builds and runs the test suite. The optional `tools/check-cloud.mjs`
+integration check requires `SUPABASE_TEST_ADMIN_KEY` and a running API (or
+`TEST_BASE_URL`); it creates and removes two temporary QA accounts. Never place
+that administrative test key in the browser or production environment.
 
 Audio starts after your first click or key press, which browsers require. It
 starts muted on localhost so development stays quiet; unmute it in Settings.
@@ -237,7 +271,8 @@ D 40+, else F.
 The end screen shows the grade, the per-phase breakdown, the top three things
 to fix (ranked by the points they cost, with the tip text from the script), and
 a replay timeline you can scrub with the view following the player. Run history
-and best scores are kept in `localStorage`, with a clear reset in Settings.
+and best scores are cached on this device and synced to the signed-in account,
+with a clear reset in Settings. Guest Onyxia progress stays on this device until sign-in.
 
 ## Architecture
 
@@ -248,8 +283,11 @@ src/core/              pure simulation. No DOM, no Canvas, no audio. Unit-tested
 src/render/            projection, top-down renderer, POV renderer, HUD, minimap
 src/input/             keybind manager (rebinding, conflicts) and per-frame command polling
 src/audio/             WebAudio cue player with per-cue volume and master mute
-src/ui/                menus, settings, scorecard, replay, tutorial panel, localStorage
-src/app/               session loop, scenarios (tutorial / drills / full fight), tutorial driver
+src/ui/                landing page, account, journal, settings, scorecard, replay, local cache
+src/app/               session loop, scenarios, tutorial driver, auth and cloud synchronization
+api/                   authenticated Vercel API for protected encounters and player saves
+server/                auth validation, save validation, Prisma persistence
+prisma/                database schema and committed migrations
 data/encounters/       encounter scripts (JSON, no logic)
 tests/                 node:test suite for the core
 docs/CONTRACTS.md      the interfaces between the layers

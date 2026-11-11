@@ -8,7 +8,7 @@ import { createRenderer } from './render/renderer.js';
 import { createKeybinds } from './input/keybinds.js';
 import { createInput } from './input/input.js';
 import { createAudio } from './audio/cues.js';
-import { loadSettings, saveSettings, loadBinds, saveBinds, loadHistory, saveRun, clearHistory, resetAll } from './ui/storage.js';
+import { loadSettings, saveSettings, loadBinds, saveBinds, loadHistory, saveRun, clearHistory, resetAll, loadTutorials, saveTutorial } from './ui/storage.js';
 import { createOverlay, h, button } from './ui/overlay.js';
 import { menuScreen, historyScreen, pauseScreen } from './ui/menu.js';
 import { settingsScreen } from './ui/settings.js';
@@ -18,9 +18,11 @@ import { createTutorialPanel } from './ui/tutorialPanel.js';
 import { buildScenario } from './app/modes.js';
 import { createSession } from './app/session.js';
 import { createTutorial } from './app/tutorial.js';
+import { createAccount } from './app/account.js';
+import { accountScreen } from './ui/account.js';
+import { landingScreen, playUrl } from './ui/landing.js';
 
 const INDEX_URL = './data/encounters/index.json';
-const ENCOUNTER_DIR = './data/encounters/';
 
 async function fetchJson(url) {
   const res = await fetch(url);
@@ -39,22 +41,11 @@ async function loadIndex() {
   }
 }
 
-async function loadScript(file) {
-  try { return await fetchJson(ENCOUNTER_DIR + file); } catch (err) {
-    try {
-      const mod = await import('../data/encounters/' + file.replace(/\.json$/, '.js'));
-      if (mod && (mod.default || mod.script)) return mod.default || mod.script;
-    } catch { /* fall through */ }
-    throw err;
-  }
-}
-
 function showLoadError(root, err, what) {
   root.appendChild(h('div', { class: 'screen' }, h('div', { class: 'panel' },
     h('h2', { text: `Could not load ${what}` }),
-    h('p', { text: `The browser refused to read it (${err.message}). Chrome blocks file:// reads; serve the folder instead:` }),
-    h('pre', { text: 'cd <this folder>\npython3 -m http.server 8080\n# or: npx serve .\nthen open http://localhost:8080' }),
-    h('p', { class: 'muted', text: 'Firefox and Safari open index.html directly.' }),
+    h('p', { text: `The encounter could not be loaded (${err.message}). Reload to try again. For local development, start the game and API together:` }),
+    h('pre', { text: 'npm install\nnpm run dev\nthen open http://127.0.0.1:8081' }),
   )));
 }
 
@@ -98,18 +89,56 @@ async function boot() {
   let lastScenarioParams = null;
   let replayEl = null;
   let idleRaf = 0;
+  let ready = false, loadingEncounter = 0, menuAccountId = null;
+  let pendingEncounter = null;
+  const account = createAccount({
+    onHydrate: () => { Object.assign(settings, loadSettings()); keybinds.load(loadBinds()); },
+    onChange: async state => {
+      if (!ready) return;
+      if (!state.user && current.raid !== 'onyxia') {
+        endSession(); stopReplay(); await loadEncounter('onyxia', 'onyxia', { remember: false });
+        if (location.pathname === '/') showLanding(); else showMenu();
+      } else if (state.recovery && state.user) showAccount(true);
+      else {
+        const el = document.querySelector('[data-sync-status]');
+        if (el) el.textContent = syncLabel(state);
+        if (overlay.current === 'menu' && menuAccountId !== (state.user?.id || null)) showMenu();
+      }
+    },
+  });
+  function syncLabel(state = account.state) {
+    if (!state.user) return 'Play Onyxia as a guest, or sign in for every raid and cloud saves.';
+    return state.status === 'saved' ? 'Progress saved to your account' : state.status === 'offline' ? 'Saved on this device · cloud sync pending' : 'Saving progress…';
+  }
+  function setPage(path, replace = false) {
+    if (location.pathname + location.search !== path) window.history[replace ? 'replaceState' : 'pushState'](null, '', path);
+    const title = { '/': 'Practice WoW Classic Encounters', '/play': 'Encounter Journal', '/account': 'Your Account', '/history': 'Your Progress', '/settings': 'Settings' }[location.pathname] || 'Practice WoW Classic Encounters';
+    document.title = `Raid Rehearsal — ${title}`;
+  }
+  function showAccount(recovery = false, signup = false) {
+    const back = !overlay.current || overlay.current === 'landing' ? showLanding : showMenu;
+    // Keep a locked encounter's URL so Back returns to the page that linked it.
+    if (!pendingEncounter) setPage('/account' + (signup ? '?mode=signup' : ''));
+    overlay.show('account', { account, recovery, signup, reason: pendingEncounter ? 'Sign in to unlock this raid and save your progress.' : '', onBack: () => { pendingEncounter = null; back(); },
+      onSuccess: async () => {
+        const pick = pendingEncounter; pendingEncounter = null;
+        if (pick) { try { await loadEncounter(...pick); } catch (err) { overlay.toast(err.message, 'bad'); } }
+        showMenu();
+      } });
+  }
 
-  async function loadEncounter(raidId, bossId) {
-    const pick = pickEncounter(index, raidId && bossId ? `${raidId}/${bossId}` : settings.encounter);
-    const file = pick.raid.id === 'onyxia' && pick.boss.file === 'onyxia.json' ? 'onyxia.json' : `${pick.raid.id}/${pick.boss.file}`;
-    const s = await loadScript(file);
+  async function loadEncounter(raidId, bossId, { remember = true } = {}) {
+    let pick = pickEncounter(index, raidId && bossId ? `${raidId}/${bossId}` : settings.encounter);
+    if (!account.state.user && pick.raid.id !== 'onyxia') pick = pickEncounter(index, 'onyxia/onyxia');
+    const sequence = ++loadingEncounter;
+    const s = pick.raid.id === 'onyxia' ? await fetchJson('./data/encounters/onyxia.json') : await account.request(`encounters/${pick.raid.id}/${pick.boss.id}`);
+    if (sequence !== loadingEncounter || (pick.raid.id !== 'onyxia' && !account.state.user)) return;
     s.raidInfo = s.raidInfo || { id: pick.raid.id, name: pick.raid.name, size: pick.raid.size };
     stopIdle();
     if (renderer) renderer.destroy();
     script = s;
     current = { raid: pick.raid.id, boss: pick.boss.id };
-    settings.encounter = `${pick.raid.id}/${pick.boss.id}`;
-    persist();
+    if (remember) { settings.encounter = `${pick.raid.id}/${pick.boss.id}`; persist(); }
     audio.setScript(script);
     renderer = createRenderer(canvas, script, { onAbility: id => input.pressAbility(id) });
     renderer.resize();
@@ -129,29 +158,54 @@ async function boot() {
   window.addEventListener('resize', () => renderer && renderer.resize());
 
   // ---- screens
+  async function showLanding() {
+    endSession(); stopReplay(); tutorialPanel.hide();
+    pendingEncounter = null;
+    setPage('/');
+    if (current.raid !== 'onyxia') await loadEncounter('onyxia', 'onyxia', { remember: false });
+    startIdle();
+    overlay.show('landing', { index, account: account.state, history: loadHistory() });
+  }
+  async function enterEncounter(raidId, bossId) {
+    if (raidId !== 'onyxia' && !account.state.user) {
+      pendingEncounter = [raidId, bossId]; setPage(playUrl(raidId, bossId)); showAccount(); return;
+    }
+    pendingEncounter = null;
+    try { if (raidId !== current.raid || bossId !== current.boss) await loadEncounter(raidId, bossId); }
+    catch (err) { overlay.toast(`Could not load that encounter: ${err.message}`, 'bad', 3000); return; }
+    showMenu();
+  }
+  function showHistory(onBack = showMenu) {
+    setPage('/history');
+    overlay.show('history', { history: loadHistory(), onBack, onClear: () => { clearHistory(); showHistory(onBack); } });
+  }
   function showMenu() {
     stopReplay();
     tutorialPanel.hide();
     startIdle();
+    if (settings.encounter !== `${current.raid}/${current.boss}`) { settings.encounter = `${current.raid}/${current.boss}`; persist(); }
+    setPage(playUrl(current.raid, current.boss), location.pathname === '/play');
+    menuAccountId = account.state.user?.id || null;
     overlay.show('menu', {
-      script, index, current, settings, history: loadHistory(),
+      script, index, current, settings, history: loadHistory(), account: account.state, syncLabel: syncLabel(), tutorials: loadTutorials(),
       actions: {
-        pick: async (raidId, bossId) => {
-          if (raidId === current.raid && bossId === current.boss) { showMenu(); return; }
-          try { await loadEncounter(raidId, bossId); } catch (err) { overlay.toast(`Could not load that encounter: ${err.message}`, 'bad', 3000); return; }
-          showMenu();
-        },
+        pick: enterEncounter,
         tutorial: () => startRun({ mode: 'tutorial' }),
         drill: (id) => startRun({ mode: 'drill', drillId: id }),
         full: () => startRun({ mode: 'full' }),
         settings: () => showSettings(showMenu),
-        history: () => overlay.show('history', { history: loadHistory(), onBack: showMenu, onClear: () => { clearHistory(); showMenu(); } }),
+        history: () => showHistory(),
+        home: showLanding,
         settingsChanged: persist,
+        signIn: () => showAccount(),
+        signOut: async () => { try { await account.signOut(); if (current.raid === 'onyxia') showMenu(); } catch (err) { overlay.toast(err.message, 'bad'); } },
+        sync: () => account.sync(),
       },
     });
   }
 
   function showSettings(onBack) {
+    if (!session || session.ended) setPage('/settings');
     overlay.show('settings', {
       settings, keybinds, input, audio, script,
       onBack: () => { persist(); if (session) renderer.setView(settings.view); onBack(); },
@@ -162,6 +216,7 @@ async function boot() {
   }
 
   function startRun(params) {
+    if (current.raid !== 'onyxia' && !account.state.user) { pendingEncounter = [current.raid, current.boss]; showAccount(); return; }
     stopReplay();
     endSession();
     stopIdle();
@@ -191,6 +246,7 @@ async function boot() {
       tutorial = createTutorial({
         script, sim: session.sim, settings, panel: tutorialPanel, audio,
         onExit: (reason) => {
+          if (reason === 'complete') saveTutorial(`${script.id}:${settings.role}`);
           tutorial = null;
           endSession();
           showMenu();
@@ -231,6 +287,7 @@ async function boot() {
       overall: score.overall, grade: score.grade,
       phases: score.phases.map((p) => ({ id: p.id, total: p.total, grade: p.grade })),
       fixes: score.fixes.map((f) => f.title),
+      encounterId: `${current.raid}/${current.boss}`,
     };
     saveRun(run);
     const isNewBest = prevBest == null || score.overall > prevBest;
@@ -265,16 +322,43 @@ async function boot() {
   overlay.register('settings', settingsScreen);
   overlay.register('pause', pauseScreen);
   overlay.register('scorecard', scorecardScreen);
+  overlay.register('account', accountScreen);
+  overlay.register('landing', landingScreen);
+
+  async function renderRoute() {
+    endSession(); stopReplay(); tutorialPanel.hide(); startIdle();
+    const params = new URLSearchParams(location.search);
+    if (location.pathname === '/play') {
+      const pick = pickEncounter(index, params.has('raid') ? `${params.get('raid')}/${params.get('boss')}` : settings.encounter);
+      await enterEncounter(pick.raid.id, pick.boss.id);
+    } else if (location.pathname === '/account') showAccount(account.state.recovery && !!account.state.user, params.get('mode') === 'signup');
+    else if (location.pathname === '/history') showHistory(showLanding);
+    else if (location.pathname === '/settings') showSettings(showLanding);
+    else await showLanding();
+  }
+  window.addEventListener('popstate', () => {
+    if (location.pathname === '/' && overlay.current === 'landing') return;
+    renderRoute().catch(err => overlay.toast(err.message, 'bad'));
+  });
+  uiRoot.addEventListener('click', e => {
+    const anchor = e.target.closest('a[data-route]');
+    if (!anchor || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault(); const url = new URL(anchor.href); setPage(url.pathname + url.search);
+    renderRoute().catch(err => overlay.toast(err.message, 'bad'));
+  });
 
   // Enter on the scorecard / menu is handled by focused buttons; Esc on non-session screens goes back to the menu.
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'Escape') return;
     if (session && !session.ended) return; // a live session owns Esc (pause / resume)
-    if (overlay.current && overlay.current !== 'menu') { e.preventDefault(); persist(); endSession(); showMenu(); }
+    if (overlay.current && !['menu','landing','account'].includes(overlay.current)) { e.preventDefault(); persist(); endSession(); showMenu(); }
   });
 
-  try { await loadEncounter(); } catch (err) { showLoadError(uiRoot, err, 'the encounter script'); return; }
-  showMenu();
+  await account.init();
+  try { await loadEncounter('onyxia', 'onyxia', { remember: false }); } catch (err) { showLoadError(uiRoot, err, 'the encounter script'); return; }
+  ready = true;
+  if (account.state.recovery && account.state.user) { startIdle(); showAccount(true); }
+  else await renderRoute();
 }
 
 boot().catch((err) => {

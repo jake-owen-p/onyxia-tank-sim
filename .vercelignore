@@ -1,0 +1,9 @@
+.env*
+!.env.example
+node_modules/
+dist/
+server/generated/
+supabase/.temp/
+tests/
+docs/research/
+AGENTS.md

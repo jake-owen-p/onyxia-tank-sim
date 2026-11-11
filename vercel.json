@@ -1,6 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "regions": ["lhr1"],
+  "functions": { "api/index.js": { "includeFiles": "data/encounters/**", "maxDuration": 30 } },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api?route=:path*" },
+    { "source": "/play", "destination": "/index.html" },
+    { "source": "/account", "destination": "/index.html" },
+    { "source": "/history", "destination": "/index.html" },
+    { "source": "/settings", "destination": "/index.html" }
+  ],
   "headers": [
     { "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }] },
     { "source": "/data/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] }

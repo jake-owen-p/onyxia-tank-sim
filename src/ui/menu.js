@@ -35,13 +35,14 @@ function roleSwitch(script, settings, onChange) {
 }
 
 /** Raid tabs and the boss chips of the chosen raid. */
-function encounterPicker(index, current, onPick) {
+function encounterPicker(index, current, onPick, signedIn) {
   const raids = (index && index.raids) || [];
   const curRaid = raids.find((r) => r.id === current.raid) || raids[0];
   const tabs = raids.map((r) => {
     const ready = r.bosses.filter((b) => b.status === 'ready').length;
-    return button(h('span', { class: 'raid-tab-inner' }, bossPortrait(r.id, r.bosses[0]?.id, 30), h('span', { class: 'raid-name', text: r.name }), h('span', { class: 'raid-count', text: ready ? `${ready}/${r.bosses.length}` : 'soon' })),
-      () => onPick(r.id, (r.bosses.find((b) => b.status === 'ready') || r.bosses[0] || {}).id), { class: 'raid-tab' + (curRaid && r.id === curRaid.id ? ' on' : '') + (ready ? '' : ' empty') });
+    const locked = r.id !== 'onyxia' && !signedIn;
+    return button(h('span', { class: 'raid-tab-inner' }, bossPortrait(r.id, r.bosses[0]?.id, 30), h('span', { class: 'raid-name', text: r.name }), h('span', { class: 'raid-count', text: locked ? 'Sign in' : ready ? `${ready}/${r.bosses.length}` : 'soon' })),
+      () => onPick(r.id, (r.bosses.find((b) => b.status === 'ready') || r.bosses[0] || {}).id), { class: 'raid-tab' + (curRaid && r.id === curRaid.id ? ' on' : '') + (ready ? '' : ' empty') + (locked ? ' locked' : ''), title: locked ? `Sign in to play ${r.name}` : r.name });
   });
   const bosses = curRaid ? curRaid.bosses.map((b) => button(h('span', { class: 'boss-item' }, bossPortrait(curRaid.id, b.id, 30), h('span', { text: b.name })), () => onPick(curRaid.id, b.id), { class: 'boss-chip' + (b.id === current.boss ? ' on' : '') + (b.status === 'ready' ? '' : ' draft'), title: b.status === 'ready' ? b.name : `${b.name}: encounter data still being researched` })) : [];
   return h('section', { class: 'picker' },
@@ -57,7 +58,7 @@ const phaseTag = (d) => d.startOffset < 0 ? `P${d.startPhase}→${d.startPhase +
 /**
  * @param {object} p { script, index, current:{raid,boss}, settings, history, actions:{ pick(raid,boss), tutorial(), drill(id), full(), settings(), history(), settingsChanged() } }
  */
-export function menuScreen({ script, index, current, settings, history, actions }) {
+export function menuScreen({ script, index, current, settings, history, actions, account = {}, syncLabel = '', tutorials = [] }) {
   const role = resolveRole(script, settings.role);
   const key = (mode) => `${script.id}:${mode}:${role}`;
   const roleDef = (script.roles && script.roles[role]) || {};
@@ -83,10 +84,10 @@ export function menuScreen({ script, index, current, settings, history, actions 
     h('header', { class: 'journal-header' },
       h('span', { class: 'journal-seal' }, abilityIcon('taunt', 34)),
       h('div', {}, h('h1', { text: 'Encounter Journal' }), h('div', { class: 'journal-sub', text: 'Classic raid rehearsal' })),
-      h('span', { class: 'journal-level', text: 'Level 60' }),
+      button('Home', actions.home, { class: 'journal-home', title: 'Back to Raid Rehearsal home' }),
     ),
     h('div', { class: 'journal-body' },
-      encounterPicker(index, current, actions.pick),
+      encounterPicker(index, current, actions.pick, !!account.user),
       h('main', { class: 'encounter-page' },
         h('header', { class: 'boss-hero' },
           bossPortrait(current.raid, current.boss, 68),
@@ -116,7 +117,7 @@ export function menuScreen({ script, index, current, settings, history, actions 
               h('span', { class: 'card-kicker', text: 'Learn the encounter' }),
               h('span', { class: 'card-title', text: 'Tutorial' }),
               h('span', { class: 'card-sub', text: 'One mechanic at a time' }),
-              h('span', { class: 'best-chip empty', text: `${script.tutorial.steps.length} steps` }),
+              h('span', { class: 'best-chip empty', text: tutorials.includes(`${script.id}:${role}`) ? 'Completed' : `${script.tutorial.steps.length} steps` }),
             ), actions.tutorial, { class: 'card' }) : null,
           ),
           h('section', { class: 'drills' },
@@ -129,6 +130,10 @@ export function menuScreen({ script, index, current, settings, history, actions 
         ),
       ),
     ),
+    h('div', { class: 'account-strip' },
+      h('div', {}, account.user ? h('span', { class: 'account-email', text: account.user.email }) : null,
+        h('span', { 'data-sync-status': '', class: 'account-sync', role: 'status', text: syncLabel })),
+      account.user ? h('div', { class: 'actions' }, button('Sync', actions.sync), button('Sign out', actions.signOut)) : button('Sign in / Create account', actions.signIn, { primary: true })),
     h('nav', { class: 'journal-tabs', 'aria-label': 'Journal pages' },
       h('span', { class: 'journal-tab active', text: 'Raids', 'aria-current': 'page' }),
       button('History', actions.history, { class: 'journal-tab' }),

@@ -113,6 +113,10 @@ export function createKeybinds(stored = null) {
       rebuildIndex();
       notify();
     },
+    load(stored) {
+      Object.assign(binds, normalise(stored));
+      rebuildIndex();
+    },
     /** Codes bound to more than one action: [{ code, actions }]. */
     conflicts() {
       const out = [];

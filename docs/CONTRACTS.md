@@ -243,3 +243,28 @@ Renders a DOM panel (title, text, step n/N, "Skip step", "Exit") and advances wi
 - `scorecard.js`: end screen: grade, overall, per-phase cards (expectations list with on time / late +Xs / missed, metrics with severe flagged), top three fixes, buttons: Replay, Again, Menu. Saves the run to history.
 - `replay.js`: replay screen: scrubber over `snapshots`, play/pause, speed, view toggle; renders through `renderer.frame({ view: snapshot, overlay:{replay} })`; markers on the scrubber for expectation events.
 - `styles.css`: one stylesheet. Dark, warm, fire palette. Fonts: system stack + a display font loaded only if online (fallback safe).
+
+## Accounts, navigation and server boundary
+
+`src/ui/landing.js` is the public home. `main.js` routes `/`, `/play`, `/account`,
+`/history` and `/settings` through History API navigation. Raid deep links use
+`/play?raid=<id>&boss=<id>`; unauthenticated protected links open sign-in and
+resume the selected encounter after login. Onyxia never requires an account.
+
+`src/app/account.js` owns the Supabase client, verified session requests and the
+cloud-sync queue. `src/ui/storage.js` retains the guest `onyxia.*` keys and uses
+`raid.player.<userId>.*` for isolated account caches. Revisions prevent older
+requests from acknowledging newer local changes; requests capture the account
+identity so switching users cannot send one user's pending data into another
+account. Settings/binds use local dirty flags; runs merge by UUID and best
+scores take the maximum. Clear/reset operations persist until acknowledged.
+
+`api/index.js` exposes public `GET /api/config`, public Onyxia and authenticated
+`GET /api/encounters/:raid/:boss`, plus authenticated `GET`, `PUT`, `DELETE`
+`/api/player`. `DELETE ?all=true` resets that player's game data. All responses
+are private/no-store. The API validates Supabase tokens using `auth.getUser` and
+never accepts a user ID from request payloads. Data validation and Prisma writes
+live in `server/`; application tables and RLS changes live in Prisma migrations.
+
+`tools/build.mjs` allowlists static output; protected encounter data, server
+code, credentials, and Prisma files are never copied into `dist/`.
