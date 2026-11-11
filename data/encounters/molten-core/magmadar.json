@@ -1,13 +1,13 @@
 {
  "id": "magmadar",
  "name": "Magmadar",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "molten-core",
   "name": "Molten Core",
   "size": 40
  },
- "notes": "Numbers follow docs/research/molten-core/magmadar.md, corrected by docs/research/molten-core/VERIFICATION.md (DBM/BigWigs timers and Wowhead Classic spell data). Era 40-man: 826,088 HP, no adds, no phases; a 3-5 minute kill modelled as one 210 s phase. Frenzy is the heart of the fight: first at about 12 s then every 16-21 s (DBM/BigWigs), +150% attack speed for 8 s (19451), and while it lasts it triggers a Lava Breath every 4 s. Modelled as an 8 s `debuff` on the tank with `damageTakenMult` 1.4 (scaled: the buff is 2.5x his swing rate, but the multiplier also touches breaths and ticks and has to leave a 10,000 HP tank alive on the 480 healing per second a tank gets here). The breaths come from two chained 4 s cast windows, so Tranquilizing Shot interrupting a window stops the breaths still to come. Tranquilizing Shot: the ranged role has an `interrupt` button for it (cooldown 15, a placeholder so one player can answer every Frenzy, where real raids rotate two hunters) and is scored on `frenziesLeftUp` for each window that finishes. The engine cannot remove a debuff with an interrupt, so the 8 s damage window runs its length even after a Tranq: the Tranq stops the breaths, not the extra swing damage. Other roles have no button: every Frenzy runs in full for them, harder than a raid with hunters on point, and the tank damage is scaled so a 10,000 HP tank survives it. Panic: 8 s fear every 37-66 s (DBM; every 44, jitter 10). `targets: all` inside `radius` 24 from his edge, which is 30 yd from his centre: the guide figure every strategy uses. Wowhead Classic 19408 lists 45 yd, an open question; if that is right the outer positions here are too generous. Fear Ward, Tremor Totem and Berserker Rage are not modelled: the tank and melee get feared and the lesson is to recover facing. Lava Bomb: a 5 yd fire patch under a random player; Conflagration 400 Fire per second for 8 s (DBC) vs 3200/8 s (legacy-wow) vs 4800/12 s (wiki): using 400 per second while standing in it, patch 30 s (non-mana target) and 60 s (mana target). Cadence 12-15 s each. The 1 s warning is the flight of the bomb. Lava Breath: 1157-1343 Fire frontal, 35 yd, 1250 here, 60 degree cone (angle not in any source; placeholder). Magma Spit: 20% melee proc, 75 Fire/3 s for 30 s, stacks to 3 (guides). Modelled as a stacking non-dispellable debuff on the tank every 10 s (`maxStacks` 3, 25 per second per stack). Melee also get it in reality: engine gap (debuffs cannot target the melee dots). Positions: ranged stand beyond the fear; attack range 35 stands for +range talents. Healers stand 32 yd from him and 34 yd from the tank spot, off to the west, so they are outside Panic and inside heal range even after stepping out of fire; the bomb patches land where the raid is, so the flanks are the clean floor. Aggro pulls every ~45 s are a placeholder for a DPS overtaking a feared tank. Tuning: the raid is spread wide (radius 20) because two streams of 30 s and 60 s patches at 5 yd radius would otherwise leave no clean floor in a tight group, which is also why real raids spread on him. Standing in Lava Bomb fire costs 0.5 a second here (4 elsewhere) because a Panic fear can walk you into a patch and the bombs persist 30-60 s. A feared tank drags him round and a breath can find the raid; facing and breath penalties are deliberately light (0.6/s and 4 per breath) so the score judges the recovery after the fear, not the fear itself. Engine gaps: fear always lands inside its radius (no Fear Ward/Tremor/Berserker Rage), an interrupt cannot remove the Frenzy debuff, Magma Spit only on the tank.",
+ "notes": "Numbers follow docs/research/molten-core/magmadar.md, corrected by docs/research/molten-core/VERIFICATION.md (DBM/BigWigs timers and Wowhead Classic spell data). Era 40-man: 826,088 HP, no adds, no phases; a 3-5 minute kill modelled as one 210 s phase. Frenzy is the heart of the fight: first at about 12 s then every 16-21 s (DBM/BigWigs), +150% attack speed for 8 s (19451), and while it lasts it triggers a Lava Breath every 4 s. Modelled as an 8 s `debuff` on the tank with `damageTakenMult` 1.4 (scaled: the buff is 2.5x his swing rate, but the multiplier also touches breaths and ticks and has to leave a 10,000 HP tank alive on the 480 healing per second a tank gets here). The breaths come from two chained 4 s cast windows, so Tranquilizing Shot interrupting a window stops the breaths still to come. Tranquilizing Shot: the ranged role has an `interrupt` button for it (cooldown 15, a placeholder so one player can answer every Frenzy, where real raids rotate two hunters) and is scored on `frenziesLeftUp` for each window that finishes. The engine cannot remove a debuff with an interrupt, so the 8 s damage window runs its length even after a Tranq: the Tranq stops the breaths, not the extra swing damage. Other roles have no button: every Frenzy runs in full for them, harder than a raid with hunters on point, and the tank damage is scaled so a 10,000 HP tank survives it. Panic: 8 s fear every 37-66 s (DBM; every 44, jitter 10). `targets: all` inside `radius` 24 from his edge, which is 30 yd from his centre: the guide figure every strategy uses. Wowhead Classic 19408 lists 45 yd, an open question; if that is right the outer positions here are too generous. Fear Ward, Tremor Totem and Berserker Rage are not modelled: the tank and melee get feared and the lesson is to recover facing. Lava Bomb: a 5 yd fire patch under a random player; Conflagration 400 Fire per second for 8 s (DBC) vs 3200/8 s (legacy-wow) vs 4800/12 s (wiki): using 400 per second while standing in it, patch 30 s (non-mana target) and 60 s (mana target). Cadence 12-15 s each. The 1 s warning is the flight of the bomb. Lava Breath: 1157-1343 Fire frontal, 35 yd, 1250 here, 60 degree cone (angle not in any source; placeholder). Magma Spit: 20% melee proc, 75 Fire/3 s for 30 s, stacks to 3 (guides). Modelled as a stacking non-dispellable debuff on the tank every 10 s (`maxStacks` 3, 25 per second per stack). Melee also get it in reality: engine gap (debuffs cannot target the melee dots). Positions: ranged stand beyond the fear; attack range 35 stands for +range talents. Healers stand 32 yd from him and 34 yd from the tank spot, off to the west, so they are outside Panic and inside heal range even after stepping out of fire; the bomb patches land where the raid is, so the flanks are the clean floor. Aggro pulls every ~45 s are a placeholder for a DPS overtaking a feared tank. Tuning: the raid is spread wide (radius 20) because two streams of 30 s and 60 s patches at 5 yd radius would otherwise leave no clean floor in a tight group, which is also why real raids spread on him. Standing in Lava Bomb fire costs 0.5 a second here (4 elsewhere) because a Panic fear can walk you into a patch and the bombs persist 30-60 s. A feared tank drags him round and a breath can find the raid; facing and breath penalties are deliberately light (0.6/s and 4 per breath) so the score judges the recovery after the fear, not the fear itself. Engine gaps: fear always lands inside its radius (no Fear Ward/Tremor/Berserker Rage), an interrupt cannot remove the Frenzy debuff, Magma Spit only on the tank. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events. Fidelity correction: Frenzy is now a dispellable buff on Magmadar, increasing melee swing speed by 150% for eight seconds. Tranquilizing Shot removes the buff and cancels subsequent buff-dependent Lava Breaths; it requires no interruptible cast and has its actual 20-second cooldown. The dedicated drill spaces Frenzies 24 seconds apart for one hunter; a normal fight can require a second hunter while the player shot is cooling down.",
  "sources": [
   "docs/research/molten-core/magmadar.md",
   "https://warcraft.wiki.gg/wiki/Magmadar",
@@ -518,7 +518,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
   },
@@ -543,13 +543,17 @@
    "tip": "A large heal for the tank. Time it to land with the incoming damage."
   },
   "interrupt": {
-   "kind": "interrupt",
+   "kind": "dispel",
    "label": "Tranquilizing Shot",
-   "cooldown": 15,
+   "cooldown": 20,
    "gcd": false,
    "range": 35,
    "icon": "interrupt",
-   "tip": "Removes Frenzy and stops the Lava Breaths it triggers. The cooldown is a placeholder so one player can answer every Frenzy; real raids rotate two hunters."
+   "tip": "Remove Frenzy from Magmadar. This is an enrage dispel, not a cast interrupt. Hunters alternate shots in a raid because the cooldown is 20 seconds.",
+   "dispels": [
+    "enrage"
+   ],
+   "shortLabel": "Tranq"
   }
  },
  "actions": {
@@ -614,16 +618,16 @@
    "cue": "breath",
    "icon": "breath",
    "requires": "grounded",
-   "tip": "1157-1343 Fire to everything in a 35 yd cone in front of him. Only while he is Frenzied, every 4 s; a Tranquilizing Shot stops it."
+   "tip": "1157-1343 Fire to everything in a 35 yd cone in front of him. Only while he is Frenzied, every 4 s; a Tranquilizing Shot stops it.",
+   "conditional": "debuff:frenzy"
   },
   "frenzy": {
    "label": "Frenzy",
    "kind": "debuff",
    "cast": 0,
-   "dispel": "none",
-   "target": "tank",
+   "dispel": "enrage",
+   "target": "boss",
    "duration": 8,
-   "damageTakenMult": 1.4,
    "toast": "Magmadar goes into a killing frenzy. TRANQ SHOT!",
    "warn": true,
    "cue": "roar",
@@ -631,55 +635,17 @@
    "requires": "grounded",
    "follow": [
     {
-     "id": "frenzyWindow",
-     "delay": 0
-    }
-   ],
-   "tip": "+150% attack speed for 8 s and a Lava Breath every 4 s while it lasts. Tranquilizing Shot removes it; heal hard until it does."
-  },
-  "frenzyWindow": {
-   "label": "Frenzy",
-   "kind": "transition",
-   "cast": 4,
-   "offBoss": true,
-   "interruptible": true,
-   "completedMetric": "frenziesLeftUp",
-   "warn": false,
-   "cue": null,
-   "icon": "roar",
-   "requires": "grounded",
-   "hidden": true,
-   "follow": [
-    {
      "id": "lavaBreath",
-     "delay": 0
+     "delay": 4
     },
     {
-     "id": "frenzyWindowLate",
-     "delay": 0
-    }
-   ],
-   "tip": "He is Frenzied: Tranquilizing Shot now, before the first breath."
-  },
-  "frenzyWindowLate": {
-   "label": "Frenzy",
-   "kind": "transition",
-   "cast": 4,
-   "offBoss": true,
-   "interruptible": true,
-   "completedMetric": "frenziesLeftUp",
-   "warn": false,
-   "cue": null,
-   "icon": "roar",
-   "requires": "grounded",
-   "hidden": true,
-   "follow": [
-    {
      "id": "lavaBreath",
-     "delay": 0
+     "delay": 7.99
     }
    ],
-   "tip": "Still Frenzied: Tranquilizing Shot before the second breath."
+   "tip": "+150% attack speed for 8 s and a Lava Breath every 4 s while it lasts. Tranquilizing Shot removes it; heal hard until it does.",
+   "meleeSpeedMult": 2.5,
+   "expireMetric": "frenziesLeftUp"
   },
   "magmaSpit": {
    "label": "Magma Spit",
@@ -774,12 +740,6 @@
      "first": 16,
      "every": 10,
      "jitter": 2
-    },
-    {
-     "id": "aggroPull",
-     "first": 55,
-     "every": 45,
-     "jitter": 6
     }
    ],
    "expectations": [
@@ -856,8 +816,8 @@
      "type": "continuous",
      "metric": "frenziesLeftUp",
      "role": "ranged",
-     "label": "Tranq every Frenzy",
-     "tip": "Press Tranquilizing Shot the moment the Frenzy cast bar appears: every window that finishes is another Lava Breath."
+     "label": "Remove Frenzy when your shot is ready",
+     "tip": "Tranquilizing Shot removes Frenzy and stops its Lava Breaths. Its 20-second cooldown is why raids rotate hunters."
     },
     {
      "id": "threatDps",
@@ -1087,15 +1047,15 @@
     "id": "tranqFrenzy",
     "ability": "interrupt",
     "on": "event",
-    "event": "cast:frenzyWindow",
+    "event": "frenzy",
     "offset": 0.5,
     "early": 0.5,
     "late": 3.4,
     "role": "ranged",
     "short": "TRANQ",
     "label": "Tranquilizing Shot",
-    "tip": "He is Frenzied. Tranq now, before the first Lava Breath at 4 s.",
-    "doneBy": "interrupted"
+    "tip": "Frenzy is up. Tranq before the first Lava Breath.",
+    "doneBy": "dispelled"
    }
   ]
  },
@@ -1183,7 +1143,7 @@
   {
    "id": "tranqDrill",
    "name": "Tranquilizing Shot",
-   "description": "Frenzy every 18 s. Press Tranquilizing Shot the moment the cast bar appears, before the first breath, and keep attacking in between.",
+   "description": "Frenzy every 24 seconds. Remove the buff with Tranquilizing Shot, then keep attacking.",
    "roles": "ranged",
    "startPhase": 1,
    "duration": 70,
@@ -1193,8 +1153,8 @@
     {
      "id": "frenzy",
      "first": 5,
-     "every": 18,
-     "jitter": 1
+     "every": 24,
+     "jitter": 0
     },
     {
      "id": "aggroPull",
@@ -1204,5 +1164,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Fear Ward and Tremor Totem are not simulated. The normal fight has no second hunter to cover your Tranquilizing Shot cooldown."
+  ]
+ }
 }

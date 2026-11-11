@@ -1,13 +1,13 @@
 {
  "id": "baron-geddon",
  "name": "Baron Geddon",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "molten-core",
   "name": "Molten Core",
   "size": 40
  },
- "notes": "Numbers follow docs/research/molten-core/baron-geddon.md, corrected by docs/research/molten-core/VERIFICATION.md (DBM and BigWigs timers, which come from real combat logs). Era 40-man: 586,256 HP, no adds. Modelled as a 233 s phase to 5% and a 25 s last phase in which he casts Armageddon 12 s in, about when he reaches 2.5%; a 3-5 minute kill. Inferno is not scheduled in the last phase, so its channel cannot sit in his single cast slot when Armageddon comes due. He is `stationary` (real Geddon is pulled back to Garr's room and tanked in place; the pull and the hallway strategy are not modelled, and a stationary boss lets a tank carrying a Living Bomb actually run out, since the boss does not chase and drag the melee dots with him). Inferno: 8 s channel, Geddon rooted and pacified, pulses every 1 s in 20 yd (DBC). Cadence from DBM/BigWigs: first 11-33 s, then every 21-37 s (every 29, jitter 8). The pulse values are an open question: Ten Ton Hammer 6 pulses of 500/500/1000/1000/2000/2000 (7000 total), wiki 9 pulses, DBC scripted. Modelled as an `aoe` cast with a single 7000 pulse in 20 yd at the end of an 8 s cast: being rooted but pacified is real and walking out is the whole lesson, but a late leaver takes the full pulse rather than a smaller hit. `moveOut` walks everyone (tank included) out and back. The fire-resistance tanking variant is not modelled. Living Bomb: carried bomb, 18 yd, 3200 Fire, 8 s fuse (DBC/wiki; Ten Ton Hammer says ~10 s, an open question), cadence DBM first 11-31 s, then every 11-30 s (every 20, jitter 9). `playerChance` 0.35 instead of the fair 1/40 so a run actually gives you one. The real knock-up and fall damage are not modelled; there is no Slow Fall. Ignite Mana: DBM first 6-27 s, then every 26-44 s (every 33, jitter 8), 45 yd (DBC) vs 40 yd (Classic snippet), Magic, 5 minutes, burns 400 mana per 3 s and deals Fire equal to the mana burned. The engine has no mana: a Magic debuff ticking 133 a second that hits about a third of the time on you (random, count 8, `playerChance` 0.3), with a 12 s duration standing in for the ghost healers dispelling it. The real rule \"leave it on Warriors and Rogues\" cannot be expressed; the tip says it. Armageddon at 2%: 8 s channel, 7600-8400 Fire (8000) in 20 yd and he kills himself. 20 yd (DBC, Wowhead TBC) vs \"all players\" (wiki, wowtbc.gg), an open question; modelled at the DBC 20 yd. In the real fight the raid kills him before it lands; here the fight runs its course and the lesson is to get clear, because the engine cannot let the raid win the DPS race. Boss melee 500 per 2 s is a placeholder scaled to the 10,000 HP tank (no source gives his swing damage). Aggro pulls every ~45 s are a placeholder for DPS overtaking a tank who just lost 8 s of threat to Inferno. Engine gaps: no mana; Inferno is one pulse instead of ramping ticks; no knock-up or fall damage on bombs; no Fire Resistance; no Ice Block or Divine Shield to clear a bomb; debuffs on others only dispelled when the player is the healer.",
+ "notes": "Numbers follow docs/research/molten-core/baron-geddon.md, corrected by docs/research/molten-core/VERIFICATION.md (DBM and BigWigs timers, which come from real combat logs). Era 40-man: 586,256 HP, no adds. Modelled as a 233 s phase to 5% and a 25 s last phase in which he casts Armageddon 12 s in, about when he reaches 2.5%; a 3-5 minute kill. Inferno is not scheduled in the last phase, so its channel cannot sit in his single cast slot when Armageddon comes due. He is `stationary` (real Geddon is pulled back to Garr's room and tanked in place; the pull and the hallway strategy are not modelled, and a stationary boss lets a tank carrying a Living Bomb actually run out, since the boss does not chase and drag the melee dots with him). Inferno: 8 s channel, Geddon rooted and pacified, pulses every 1 s in 20 yd (DBC). Cadence from DBM/BigWigs: first 11-33 s, then every 21-37 s (every 29, jitter 8). The pulse values are an open question: Ten Ton Hammer 6 pulses of 500/500/1000/1000/2000/2000 (7000 total), wiki 9 pulses, DBC scripted. Modelled as an `aoe` cast with a single 7000 pulse in 20 yd at the end of an 8 s cast: being rooted but pacified is real and walking out is the whole lesson, but a late leaver takes the full pulse rather than a smaller hit. `moveOut` walks everyone (tank included) out and back. The fire-resistance tanking variant is not modelled. Living Bomb: carried bomb, 18 yd, 3200 Fire, 8 s fuse (DBC/wiki; Ten Ton Hammer says ~10 s, an open question), cadence DBM first 11-31 s, then every 11-30 s (every 20, jitter 9). `playerChance` 0.35 instead of the fair 1/40 so a run actually gives you one. The real knock-up and fall damage are not modelled; there is no Slow Fall. Ignite Mana: DBM first 6-27 s, then every 26-44 s (every 33, jitter 8), 45 yd (DBC) vs 40 yd (Classic snippet), Magic, 5 minutes, burns 400 mana per 3 s and deals Fire equal to the mana burned. The engine has no mana: a Magic debuff ticking 133 a second that hits about a third of the time on you (random, count 8, `playerChance` 0.3), with a 12 s duration standing in for the ghost healers dispelling it. The real rule \"leave it on Warriors and Rogues\" cannot be expressed; the tip says it. Armageddon at 2%: 8 s channel, 7600-8400 Fire (8000) in 20 yd and he kills himself. 20 yd (DBC, Wowhead TBC) vs \"all players\" (wiki, wowtbc.gg), an open question; modelled at the DBC 20 yd. In the real fight the raid kills him before it lands; here the fight runs its course and the lesson is to get clear, because the engine cannot let the raid win the DPS race. Boss melee 500 per 2 s is a placeholder scaled to the 10,000 HP tank (no source gives his swing damage). Aggro pulls every ~45 s are a placeholder for DPS overtaking a tank who just lost 8 s of threat to Inferno. Engine gaps: no mana; Inferno is one pulse instead of ramping ticks; no knock-up or fall damage on bombs; no Fire Resistance; no Ice Block or Divine Shield to clear a bomb; debuffs on others only dispelled when the player is the healer. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events. Fidelity correction: the grounded boss follows its target. It is no longer permanently rooted to make the practice easier; ordinary cast windows still stop movement.",
  "sources": [
   "docs/research/molten-core/baron-geddon.md",
   "https://warcraft.wiki.gg/wiki/Baron_Geddon",
@@ -448,7 +448,7 @@
   "meleeRange": 7,
   "meleeDamage": 500,
   "meleeInterval": 2,
-  "stationary": true,
+  "stationary": false,
   "cones": {},
   "enrageMultiplier": 1.3
  },
@@ -513,7 +513,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
   },
@@ -685,12 +685,6 @@
      "first": 24,
      "every": 29,
      "jitter": 8
-    },
-    {
-     "id": "aggroPull",
-     "first": 60,
-     "every": 45,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -1128,5 +1122,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Inferno lands as one hit rather than escalating pulses. Living Bomb has no knock-up or fall damage."
+  ]
+ }
 }

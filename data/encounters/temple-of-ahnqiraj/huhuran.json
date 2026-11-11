@@ -1,13 +1,13 @@
 {
  "id": "huhuran",
  "name": "Princess Huhuran",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "temple-of-ahnqiraj",
   "name": "Temple of Ahn'Qiraj",
   "size": 40
  },
- "notes": "Numbers follow docs/research/temple-of-ahnqiraj/huhuran.md. Wowhead's 5,829,623 HP is a 'Seasonal 40 Player' value, so HP here is a clock: three phases over 185 s (real kills take 3 to 4 min; the 5 min timed enrage is not reached and not simulated). ESTIMATES: the room is a 40 yd circle from prose, and melee 900 per 2 s plus Acid Spit (55 per second per stack, scaled from the real 125 per second per stack because a 10,000 HP sim tank at 10 real stacks would melt in eight seconds) is what a 10,000 HP tank must survive on passive healing (`healPerSecond` 900 player tank, 920 ghost, 140 ghost with a player healer). Tank swap: she is taunt-immune and the real swap is by threat. Like Fankriss and Kurinnaxx this is a scripted `restWindow` + `targetSwitch`: about every 50 s (about 8 Acid Spit stacks, the guides swap at 7 to 10), the player tank waits 30 s while the stacks fall off (the real rule), and Taunt stands in for building threat back, not a real Taunt. The ghost tank roles see the same empty 30 s window as a boss hitting nobody, and Acid Spit does not move to a real second tank in this model. Frenzy: a `debuff` on the tank (`dispel: enrage`), removed by the ranged role's `dispel` button limited to `enrage` by `roles.ranged.dispels` (Tranquilizing Shot), every ~15 s for 8 s (BW 14.5 s, DBM 11.3 to 25.9 s) cast first at 8 s. Poison Bolt (`aoe`, radius 14 from her edge to the 'soakers', 1,500 per bolt, every 4 s) fires only while Frenzy is up (`conditional`), so a Tranq in time prevents it; for roles without the button nobody in the sim removes it, so tanks and melee eat one or two bolts per Frenzy that a working hunter team would have prevented (the one misrepresentation here, in the direction of too much damage on those roles). The real '15 closest' targeting cannot be expressed; the 14 yd radius is its stand-in: soakers (the melee role, real 200+ nature resist) are inside it, ranged and healers outside. The hunter seat is the only role this script asks to press Tranq on a cue; real rotations are two or three hunters. Wyvern Sting: two actions because the engine dispel cannot choose. `wyvernStingTank` lands on whoever tanks (Poison; the healer cleanses it, the 3,000 damage on cleansing is not simulated; 5 s of `stun` on a player tank standing in for the time to be dispelled) and `wyvernStingRaid` on random non-tanks (`dispel: none`, 12 s `stun`, `playerChance` 0.25: the 'never dispel raiders' rule is enforced by making it undispellable, so a healer can no longer waste a dispel on it, which is the opposite of a choice). DBM's 25.9 to 59.2 s cadence is 26 s with 8 s of jitter. The real rule that damage wakes you is not modelled. Noxious Poison: 375 per second for 8 s on a random non-tank (`playerChance` 0.3) plus a `forbidAbilities` Silence on the healer role only (spell data: 750 per 2 s for 8 s, undispellable). The 15 yd splash and the spread-in-stacks rule are tips only. Acid Spit's unresistable tick is simulated as `tickDamage` per stack. Phase 3 Berserk at 30% (DBM pre-warns at 35%): `enrage` with `enrageMultiplier` 1.25 (real: +200% attack speed), Sting, Noxious and Frenzy stop as in boss mods, and Poison Bolt becomes 1,000 (800 on a ghost tank) every 3 s, unconditional, on the soak ring (real 2 to 3 s and 1,500 to 2,500, scaled to the sim's 10,000 HP soak ring). The poison-resist soak is expressed by `poisonBoltSoak`: it hits the 14 yd ring (soakers: melee role must be there, scored by `playerAtSpotBy`) and misses the raid; nothing scores it when a soaker is missing, and the real shift of bolts onto cloth when a soaker dies is not modelled. Tranq and the dispel-only-tanks rule become tips here.",
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/huhuran.md. Wowhead's 5,829,623 HP is a 'Seasonal 40 Player' value, so HP here is a clock: three phases over 185 s (real kills take 3 to 4 min; the 5 min timed enrage is not reached and not simulated). ESTIMATES: the room is a 40 yd circle from prose, and melee 900 per 2 s plus Acid Spit (55 per second per stack, scaled from the real 125 per second per stack because a 10,000 HP sim tank at 10 real stacks would melt in eight seconds) is what a 10,000 HP tank must survive on passive healing (`healPerSecond` 900 player tank, 920 ghost, 140 ghost with a player healer). Tank swap: she is taunt-immune and the real swap is by threat. Like Fankriss and Kurinnaxx this is a scripted `restWindow` + `targetSwitch`: about every 50 s (about 8 Acid Spit stacks, the guides swap at 7 to 10), the player tank waits 30 s while the stacks fall off (the real rule), and Taunt stands in for building threat back, not a real Taunt. The ghost tank roles see the same empty 30 s window as a boss hitting nobody, and Acid Spit does not move to a real second tank in this model. Frenzy: a `debuff` on the tank (`dispel: enrage`), removed by the ranged role's `dispel` button limited to `enrage` by `roles.ranged.dispels` (Tranquilizing Shot), every ~15 s for 8 s (BW 14.5 s, DBM 11.3 to 25.9 s) cast first at 8 s. Poison Bolt (`aoe`, radius 14 from her edge to the 'soakers', 1,500 per bolt, every 4 s) fires only while Frenzy is up (`conditional`), so a Tranq in time prevents it; for roles without the button nobody in the sim removes it, so tanks and melee eat one or two bolts per Frenzy that a working hunter team would have prevented (the one misrepresentation here, in the direction of too much damage on those roles). The real '15 closest' targeting cannot be expressed; the 14 yd radius is its stand-in: soakers (the melee role, real 200+ nature resist) are inside it, ranged and healers outside. The hunter seat is the only role this script asks to press Tranq on a cue; real rotations are two or three hunters. Wyvern Sting: two actions because the engine dispel cannot choose. `wyvernStingTank` lands on whoever tanks (Poison; the healer cleanses it, the 3,000 damage on cleansing is not simulated; 5 s of `stun` on a player tank standing in for the time to be dispelled) and `wyvernStingRaid` on random non-tanks (`dispel: none`, 12 s `stun`, `playerChance` 0.25: the 'never dispel raiders' rule is enforced by making it undispellable, so a healer can no longer waste a dispel on it, which is the opposite of a choice). DBM's 25.9 to 59.2 s cadence is 26 s with 8 s of jitter. The real rule that damage wakes you is not modelled. Noxious Poison: 375 per second for 8 s on a random non-tank (`playerChance` 0.3) plus a `forbidAbilities` Silence on the healer role only (spell data: 750 per 2 s for 8 s, undispellable). The 15 yd splash and the spread-in-stacks rule are tips only. Acid Spit's unresistable tick is simulated as `tickDamage` per stack. Phase 3 Berserk at 30% (DBM pre-warns at 35%): `enrage` with `enrageMultiplier` 1.25 (real: +200% attack speed), Sting, Noxious and Frenzy stop as in boss mods, and Poison Bolt becomes 1,000 (800 on a ghost tank) every 3 s, unconditional, on the soak ring (real 2 to 3 s and 1,500 to 2,500, scaled to the sim's 10,000 HP soak ring). The poison-resist soak is expressed by `poisonBoltSoak`: it hits the 14 yd ring (soakers: melee role must be there, scored by `playerAtSpotBy`) and misses the raid; nothing scores it when a soaker is missing, and the real shift of bolts onto cloth when a soaker dies is not modelled. Tranq and the dispel-only-tanks rule become tips here. Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro.",
  "sources": [
   "docs/research/temple-of-ahnqiraj/huhuran.md",
   "https://warcraft.wiki.gg/wiki/Princess_Huhuran",
@@ -440,10 +440,11 @@
   "threatPerSecond": 40,
   "meleeFlankDistance": 9,
   "whelpContactRange": 5,
-  "holdAfterPull": 5
+  "holdAfterPull": 5,
+  "holdWhileLoose": true
  },
  "boss": {
-  "looseHint": "The boss is on the raid. Rebuild threat",
+  "looseHint": "Build threat in melee range. This boss cannot be taunted.",
   "radius": 4,
   "speed": 7,
   "turnRate": 300,
@@ -451,7 +452,8 @@
   "meleeDamage": 900,
   "meleeInterval": 2,
   "cones": {},
-  "enrageMultiplier": 1.25
+  "enrageMultiplier": 1.25,
+  "tauntImmune": true
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -517,13 +519,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
-   "label": "Taunt",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 20,
+   "kind": "threat",
+   "label": "Threat burst",
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "She is taunt-immune in the real fight, so read this as building threat fast. Use it only when your stacks have fallen off."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -1441,5 +1445,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Poison Bolt Volley does not choose the nearest 15 players. Tank swaps and Frenzy removal are simplified."
+  ]
+ }
 }

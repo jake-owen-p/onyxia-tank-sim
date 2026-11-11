@@ -1,13 +1,13 @@
 {
  "id": "sulfuron-harbinger",
  "name": "Sulfuron Harbinger",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "molten-core",
   "name": "Molten Core",
   "size": 40
  },
- "notes": "Numbers follow docs/research/molten-core/sulfuron-harbinger.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 439,692 HP, 4 Flamewaker Priests (67,980 HP each). Two phases: priests alive (130 s, Sulfuron untouched) then Sulfuron (120 s). The real priest phase is about 4 minutes; shortened so a rehearsal stays under 5 minutes. Flamewaker Priests: a killFirst `adds` wave of 4 beside the tank spot 10 s in, so attacking Sulfuron while one lives is scored. The off-tank role holds them (`holdsBoss: false`) on a spot on the west side while a ghost tank has Sulfuron. Real raids tank each priest in its own corner 45 yd from Sulfuron and each other (so Inspire has no target and Dark Mending cannot reach the kill target); this room has one hold spot, as far from him as ranged can still reach from the raid. Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Dark Mending: 2 s cast (DBM 19775), heals 27,750-32,250 (DBC, wiki Sulfuron page) vs 1,069 (wiki priest page, an open question), interruptible, cast off the boss by a priest so he keeps swinging, every 12 s through phase 1 (cmangos: every 15-20 s per priest; a raid-wide middle). The cast bar raises the Kick note; a cast that finishes is scored for melee as `mendingsLanded`. Hand of Ragnaros: `knockback`, radial, 10 yd, 300-400 Fire (350), knockback pushing the player 8 yd (DBC 75-100 units; estimate), 2 s `stun` (19780), cadence 13.5 s (cmangos 12-15). Free Action Potion is not modelled. Melee on the priests are out of its reach, as in the real fight. Immolate: 20294, 760-840 + 380-420 every 3 s for 21 s, Magic. On a random player (cmangos); here random with `playerChance` 0.25, ticking 133 a second. Shadow Word: Pain: 19776, 120 Shadow every 3 s for 18 s (Wowhead Classic, tracked by DBM): 40 per second, Magic. Both every 18-20 s per priest in reality; here a single stream of each (Immolate every 18, SW:Pain every 20) standing for the four priests combined, because each priest firing its own would flood the healer far past what one player can dispel. Dark Strike on priest tanks: weapon damage +570-630 (DBC) vs +436 (wiki): as a spike on the tank (600) every 16 s, as a one-tick non-dispellable debuff. Demoralizing Shout: -300 AP, 45 yd, 30 s, no dispel: a do-nothing debuff so the timeline shows it. Inspire (+25% physical, +100% attack speed on a priest for 10 s) is not modelled because the engine has no add buffs. Flame Spear: 850-1150 (1000) with 10 yd splash, every 12-16 s, as a `projectile` with `playerChance` 0.3; the splash is why the raid spreads. Boss melee 520 per 2 s is a placeholder scaled to the 10,000 HP tank. The engine applies a `knockback` action's damage to the player only, so the ghost tank never takes Hand of Ragnaros; the placeholder melee covers that. Engine gaps: Kick is on a single cast bar rather than on a specific priest; Inspire not modelled; adds have no abilities of their own; debuffs on others only dispelled when the player is the healer.",
+ "notes": "Numbers follow docs/research/molten-core/sulfuron-harbinger.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 439,692 HP, 4 Flamewaker Priests (67,980 HP each). Two phases: priests alive (130 s, Sulfuron untouched) then Sulfuron (120 s). The real priest phase is about 4 minutes; shortened so a rehearsal stays under 5 minutes. Flamewaker Priests: a killFirst `adds` wave of 4 beside the tank spot 10 s in, so attacking Sulfuron while one lives is scored. The off-tank role holds them (`holdsBoss: false`) on a spot on the west side while a ghost tank has Sulfuron. Real raids tank each priest in its own corner 45 yd from Sulfuron and each other (so Inspire has no target and Dark Mending cannot reach the kill target); this room has one hold spot, as far from him as ranged can still reach from the raid. Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Dark Mending: 2 s cast (DBM 19775), heals 27,750-32,250 (DBC, wiki Sulfuron page) vs 1,069 (wiki priest page, an open question), interruptible, cast off the boss by a priest so he keeps swinging, every 12 s through phase 1 (cmangos: every 15-20 s per priest; a raid-wide middle). The cast bar raises the Kick note; a cast that finishes is scored for melee as `mendingsLanded`. Hand of Ragnaros: `knockback`, radial, 10 yd, 300-400 Fire (350), knockback pushing the player 8 yd (DBC 75-100 units; estimate), 2 s `stun` (19780), cadence 13.5 s (cmangos 12-15). Free Action Potion is not modelled. Melee on the priests are out of its reach, as in the real fight. Immolate: 20294, 760-840 + 380-420 every 3 s for 21 s, Magic. On a random player (cmangos); here random with `playerChance` 0.25, ticking 133 a second. Shadow Word: Pain: 19776, 120 Shadow every 3 s for 18 s (Wowhead Classic, tracked by DBM): 40 per second, Magic. Both every 18-20 s per priest in reality; here a single stream of each (Immolate every 18, SW:Pain every 20) standing for the four priests combined, because each priest firing its own would flood the healer far past what one player can dispel. Dark Strike on priest tanks: weapon damage +570-630 (DBC) vs +436 (wiki): as a spike on the tank (600) every 16 s, as a one-tick non-dispellable debuff. Demoralizing Shout: -300 AP, 45 yd, 30 s, no dispel: a do-nothing debuff so the timeline shows it. Inspire (+25% physical, +100% attack speed on a priest for 10 s) is not modelled because the engine has no add buffs. Flame Spear: 850-1150 (1000) with 10 yd splash, every 12-16 s, as a `projectile` with `playerChance` 0.3; the splash is why the raid spreads. Boss melee 520 per 2 s is a placeholder scaled to the 10,000 HP tank. The engine applies a `knockback` action's damage to the player only, so the ghost tank never takes Hand of Ragnaros; the placeholder melee covers that. Engine gaps: Kick is on a single cast bar rather than on a specific priest; Inspire not modelled; adds have no abilities of their own; debuffs on others only dispelled when the player is the healer. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events.",
  "sources": [
   "docs/research/molten-core/sulfuron-harbinger.md",
   "https://warcraft.wiki.gg/wiki/Sulfuron_Harbinger",
@@ -549,7 +549,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
   },
@@ -802,12 +802,6 @@
      "first": 18,
      "every": 12,
      "jitter": 2
-    },
-    {
-     "id": "aggroPull",
-     "first": 40,
-     "every": 45,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -943,12 +937,6 @@
      "first": 8,
      "every": 17.5,
      "jitter": 2.5
-    },
-    {
-     "id": "aggroPull",
-     "first": 30,
-     "every": 45,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -1342,5 +1330,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Priest heals are not tied to individual living adds or their positions. Interrupting does not require reaching the casting Priest."
+  ]
+ }
 }

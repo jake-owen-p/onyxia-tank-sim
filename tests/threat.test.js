@@ -39,12 +39,11 @@ test('passive threat outpaces the raid, so a tank in melee range keeps her witho
   assert.ok(script.threat.autoAttackPerSecond > script.raid.threatPerSecond * script.threat.pullMultiplier);
 });
 
-test('applyTaunt tops the table and forces the target for tauntDuration', () => {
+test('applyTaunt matches the table and forces the target for tauntDuration', () => {
   const t = createThreat();
   t.raid = 1000; t.player = 100;
   applyTaunt(t, 10, cfg);
-  assert.equal(t.player, 1000 * cfg.tauntLead + cfg.tauntBonus);
-  assert.ok(t.player * 0.65 * cfg.pullMultiplier > t.raid, 'the lead survives a Wing Buffet cut');
+  assert.equal(t.player, 1000, 'Taunt must not award an artificial threat lead');
   assert.equal(t.tauntUntil, 10 + cfg.tauntDuration);
   // Even if the raid overtakes during the taunt, the target stays on the player.
   t.raid = 5000;

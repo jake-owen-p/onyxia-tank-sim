@@ -1076,5 +1076,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "There is no Understudy mind control or Shield Wall. The tank button does not put you in control of an Understudy."
+  ]
+ }
 }

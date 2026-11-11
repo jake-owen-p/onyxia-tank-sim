@@ -1,13 +1,13 @@
 {
  "id": "vaelastrasz",
  "name": "Vaelastrasz the Corrupt",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "blackwing-lair",
   "name": "Blackwing Lair",
   "size": 40
  },
- "notes": "Numbers follow docs/research/blackwing-lair/vaelastrasz.md. Era 40-man: he starts at 30% of 3,331,000 HP (about 1,000,000 effective); the fight is a single 165 s burn from 30% to 0 (a real kill is around 2:45, soft-enraged by Essence of the Red at 3:00; the pre-pull dialogue of about 43.5 s is not simulated). He is immune to Taunt: the button is relabelled Step in and stands for the next tank in the queue taking him with Sunders. Essence of the Red (180 s, +500 mana, 50 energy, 20 rage per second) is the reason this script's numbers look large: every tank-side number has been tuned for unlimited resources. The healer heal is 3500 on the same GCD and the passive tank healing is high (1400/s on the ghost when nobody plays healer, 500/s with a healer player, 1300/s on a player tank); without unlimited mana these numbers would be fiction, and a healer who stops pressing buttons still loses the tank in under 20 s. The 3:00 enrage itself is not modelled because the phase ends at 165 s. Burning Adrenaline (random) is a carried bomb: 20 s in the real fight (kills the carrier, 4376-5001 Fire to allies within about 10 yd). Engine: `carried` hazard, radius 10, 14 s fuse (shorter than the real 20 s so the run-out is rehearsed before the bot would die), 1500 damage on the carrier so the rehearsal does not count a death. Real -5% max HP per second, +100% damage and the Ice Block rule cannot be expressed. `playerChance` 0.25 instead of the fair 1/40 so you actually practise it. Cadence: every 16 s (first at 16 s; research: 15 s to 17.8 s from logs). `roles: [ranged, healer]`: in the real fight it only goes on classes with mana (Warcraft Tavern, Warcraft Wiki), so warriors and rogues in the melee seat never get it unless they are top of his threat list. Burning Adrenaline (tank): every 45 s, first at 45 s, a `debuff` on the tank (`tankAdrenaline`, 20 s, no damage). He stays on that tank until it dies, and `follow` fires `tankSwap` (`targetSwitch` onto the raid) 18 s later: that is the moment the old tank drops and the next tank has to take him (a player tank presses Step in; the ghost tank comes back after 2.5 s). The fuse is the point: the next tank spends those seconds building threat (Warcraft Wiki, Wowhead, Warcraft Tavern; cmangos casts it on the victim with no special handling). This models the swap, not the real tank line of 4-5 warriors or the death of the outgoing tank: a player tank is its own next tank, and the hits-twice-as-hard part of the debuff cannot be expressed. Flame Breath: 2 s cast, frontal cone 45 yd (classicdb), first at 11 s then every 4-8 s (cmangos), real 3500-4500 + 938-1063 every 3 s for 15 s. Scaled to 3000 + 350/s for 10 s (refreshed by every breath, so the debuff is permanent on the tank). Fire Nova: 600 every 5 s (555-645). Cleave every 15 s (cmangos). Flame Breath is only cast while he is on the tank and not freshly Taunted (`conditional: onPlayer`), so a swap cannot point a breath at the raid in this model (the real risk of a breath on the raid at a swap is why tips say never to turn him). Tail Sweep every 20 s, 30 yd rear cone (90 degrees here; the true width is unknown), `conditional: behind` (only when someone stands there). Layout note: the Warcraft Wiki has tanks on his left and casters against the wall on his right; this rehearsal mirrors that (warrior line at his right shoulder on the north side, casters mid-room on his left), because a caster spot on the north wall leaves a Burning Adrenaline carrier nowhere to run except through his breath cone. He is `stationary`: he is never moved in the real fight, so the rehearsal cannot drag him onto the raid. Damage is scaled so a 10,000 HP tank survives on passive healing but a healer who ignores a breath loses the tank: melee 600 per 2 s plus the numbers above. Aggro pulls every ~50 s stand in for the DPS outrunning a freshly swapped tank. Boss melee is a placeholder scaled to the 10,000 HP model. Engine gaps: no resources (Essence of the Red is a tuning decision, not a mechanic); no resistance gear; no stacking or %-max-HP damage; no separate tank line; no Vanish or Feign Death to dump threat at a swap; no dialogue before the pull. Debuffs on others are only dispelled when the player is the healer, and nothing here is dispellable.",
+ "notes": "Numbers follow docs/research/blackwing-lair/vaelastrasz.md. Era 40-man: he starts at 30% of 3,331,000 HP (about 1,000,000 effective); the fight is a single 165 s burn from 30% to 0 (a real kill is around 2:45, soft-enraged by Essence of the Red at 3:00; the pre-pull dialogue of about 43.5 s is not simulated). He is immune to Taunt: the button is relabelled Step in and stands for the next tank in the queue taking him with Sunders. Essence of the Red (180 s, +500 mana, 50 energy, 20 rage per second) is the reason this script's numbers look large: every tank-side number has been tuned for unlimited resources. The healer heal is 3500 on the same GCD and the passive tank healing is high (1400/s on the ghost when nobody plays healer, 500/s with a healer player, 1300/s on a player tank); without unlimited mana these numbers would be fiction, and a healer who stops pressing buttons still loses the tank in under 20 s. The 3:00 enrage itself is not modelled because the phase ends at 165 s. Burning Adrenaline (random) is a carried bomb: 20 s in the real fight (kills the carrier, 4376-5001 Fire to allies within about 10 yd). Engine: `carried` hazard, radius 10, 14 s fuse (shorter than the real 20 s so the run-out is rehearsed before the bot would die), 1500 damage on the carrier so the rehearsal does not count a death. Real -5% max HP per second, +100% damage and the Ice Block rule cannot be expressed. `playerChance` 0.25 instead of the fair 1/40 so you actually practise it. Cadence: every 16 s (first at 16 s; research: 15 s to 17.8 s from logs). `roles: [ranged, healer]`: in the real fight it only goes on classes with mana (Warcraft Tavern, Warcraft Wiki), so warriors and rogues in the melee seat never get it unless they are top of his threat list. Burning Adrenaline (tank): every 45 s, first at 45 s, a `debuff` on the tank (`tankAdrenaline`, 20 s, no damage). He stays on that tank until it dies, and `follow` fires `tankSwap` (`targetSwitch` onto the raid) 18 s later: that is the moment the old tank drops and the next tank has to take him (a player tank presses Step in; the ghost tank comes back after 2.5 s). The fuse is the point: the next tank spends those seconds building threat (Warcraft Wiki, Wowhead, Warcraft Tavern; cmangos casts it on the victim with no special handling). This models the swap, not the real tank line of 4-5 warriors or the death of the outgoing tank: a player tank is its own next tank, and the hits-twice-as-hard part of the debuff cannot be expressed. Flame Breath: 2 s cast, frontal cone 45 yd (classicdb), first at 11 s then every 4-8 s (cmangos), real 3500-4500 + 938-1063 every 3 s for 15 s. Scaled to 3000 + 350/s for 10 s (refreshed by every breath, so the debuff is permanent on the tank). Fire Nova: 600 every 5 s (555-645). Cleave every 15 s (cmangos). Flame Breath is only cast while he is on the tank and not freshly Taunted (`conditional: onPlayer`), so a swap cannot point a breath at the raid in this model (the real risk of a breath on the raid at a swap is why tips say never to turn him). Tail Sweep every 20 s, 30 yd rear cone (90 degrees here; the true width is unknown), `conditional: behind` (only when someone stands there). Layout note: the Warcraft Wiki has tanks on his left and casters against the wall on his right; this rehearsal mirrors that (warrior line at his right shoulder on the north side, casters mid-room on his left), because a caster spot on the north wall leaves a Burning Adrenaline carrier nowhere to run except through his breath cone. He is `stationary`: he is never moved in the real fight, so the rehearsal cannot drag him onto the raid. Damage is scaled so a 10,000 HP tank survives on passive healing but a healer who ignores a breath loses the tank: melee 600 per 2 s plus the numbers above. Aggro pulls every ~50 s stand in for the DPS outrunning a freshly swapped tank. Boss melee is a placeholder scaled to the 10,000 HP model. Engine gaps: no resources (Essence of the Red is a tuning decision, not a mechanic); no resistance gear; no stacking or %-max-HP damage; no separate tank line; no Vanish or Feign Death to dump threat at a swap; no dialogue before the pull. Debuffs on others are only dispelled when the player is the healer, and nothing here is dispellable. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events. Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro. Fidelity correction: the grounded boss follows its target. It is no longer permanently rooted to make the practice easier; ordinary cast windows still stop movement.",
  "sources": [
   "docs/research/blackwing-lair/vaelastrasz.md",
   "https://warcraft.wiki.gg/wiki/Vaelastrasz_the_Corrupt",
@@ -442,7 +442,8 @@
   "threatPerSecond": 50,
   "meleeFlankDistance": 9,
   "whelpContactRange": 5,
-  "holdAfterPull": 8
+  "holdAfterPull": 8,
+  "holdWhileLoose": true
  },
  "boss": {
   "shape": "dragon",
@@ -453,7 +454,7 @@
   "meleeDamage": 600,
   "meleeInterval": 2,
   "facingCone": "breath",
-  "stationary": true,
+  "stationary": false,
   "cones": {
    "breath": {
     "angle": 60,
@@ -477,7 +478,9 @@
     "style": "tail"
    }
   },
-  "enrageMultiplier": 1.3
+  "enrageMultiplier": 1.3,
+  "tauntImmune": true,
+  "looseHint": "Build threat in melee range. This boss cannot be taunted."
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -536,13 +539,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
-   "label": "Step in",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 16,
+   "kind": "threat",
+   "label": "Threat burst",
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "Vaelastrasz cannot be Taunted. This is the next tank stepping in: your threat lead jumps while he is on you. Press it the moment the old tank dies and he turns, never while he is already on you."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -661,7 +666,6 @@
    "kind": "cone",
    "cone": "breath",
    "cast": 2,
-   "conditional": "onPlayer",
    "damage": 3000,
    "raidMetric": "raidBreathHits",
    "raidToast": "Flame Breath hit the raid",
@@ -800,12 +804,6 @@
      "id": "tankAdrenaline",
      "first": 45,
      "every": 45
-    },
-    {
-     "id": "aggroPull",
-     "first": 84,
-     "every": 50,
-     "jitter": 6
     }
    ],
    "expectations": [
@@ -1243,5 +1241,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Burning Adrenaline does not drain maximum health and kill its target. Tank succession is scripted."
+  ]
+ }
 }

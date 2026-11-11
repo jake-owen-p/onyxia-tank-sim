@@ -1,13 +1,13 @@
 {
  "id": "grobbulus",
  "name": "Grobbulus",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "naxxramas",
   "name": "Naxxramas",
   "size": 40
  },
- "notes": "Numbers follow docs/research/naxxramas/grobbulus.md. HP is a clock: 2,116,591 HP over 310 s (real kills run 5 to 8 min; the 12:00 Enrage is not reached and is a wipe, so it is not simulated). The round room radius 46 and the ring the tank walks are estimates from prose. THE KITE: Grobbulus is walked slowly around the outer wall (wiki, Wowhead, Warcraft Tavern). Each phase is one waypoint: `tankSpot` and `bossSpot` move on, so the tank really does drag him along the wall, the clouds really do trail behind him, and the raid (`raidSpot`) shuffles round the middle with him. The real walk is continuous, here it is seven hops of about 25 yards on a ring of 40 to 43 yd radius. Breaking melee range fires Slime Stream through the real `meleeEmpty` conditional (real 1,500 per second for 3 s on up to 10 players; here one 900 pulse every 5 s while the tank stays out of melee, cmangos's delay before it casts, hitting the player and the ghost), so the tank must walk at a pace he can follow: his speed is 7 yd/s (estimate). POISON CLOUD: `hazard` at the boss every ~15 s (DBM 14.5 to 16.6), 60 s (spell 28158, the damaging aura; TrinityCore despawns the cloud at 61 s; the 75 s in the research is the summon spell's duration), radius 6 (wiki says ~10 yd wide and it grows; the engine has a fixed radius), 800 per second (scaled: spell 28241, the cloud tick, is 1,110 Nature in a 30 yd radius and spell 28158 is 1 tick per second; 800 is an estimate for a raid wearing Greater Nature Protection). The clouds persist across phases as the real ones do, so up to four sit on the kite line at once. MUTATING INJECTION: a `carried` bomb, `playerChance` 0.3, 10 s (the spell), radius 8 (spell 28322 Embalming Cloud, 3,515 Nature in 8 yd, which cmangos casts on natural expiry; spell 28206 Mutagen Explosion is 2,380 to 3,220 Physical in 20 yd, which cmangos casts on dispel and TrinityCore on expiry too; the wiki's 4,500 physical on expiry matches neither), 3,000 scaled from 4,500 and `raidMetric` scoring each one that goes off in the raid. The cadence is `every: 12, jitter: 1.5`, and below 30% `every: 9` on two players (BigWigs notes the next one is sometimes applied just before the previous expires, TrinityCore's WotLK comment gives 10.8 and 12 s then about 8 and 10 s, and the wiki and Warcraft Tavern say more often at 30%; the exact timers remain estimates). Because the cleansed explosion reaches 20 yd, a cleanse must wait until the carrier is out. ENGINE GAPS: (1) the real rule is to cleanse the Injection only once the carrier is in position, because cleansing also drops the cloud at their feet and shrinks the AoE (Wowhead): the engine scores a dispel as good whenever it happens, so the healer role here has no dispel at all rather than being taught to dispel on sight, and this is the fight's biggest misrepresentation. (2) The carrier's own cloud should appear where the carrier stands when it goes off; the engine cannot anchor a follow-up to a carried bomb, so the cloud appears at one fixed spot at the end of the line (`cloudLineEnd`), which is where a disciplined raid puts them anyway. (3) On a ghost raider the Injection has no floor marker and no consequence. (4) The engine's run-out point for a carried bomb is chosen when the bomb lands and cannot see a cloud that lands on it later, so step out of one if it does; the penalty for clouds is lowered to 1.5 per second for that reason. (5) The marker only knows the nearest clear ground, not the real instruction to run to the end of the cloud line behind him; the tips carry that. SLIME SPRAY: frontal `cone` 60 degrees 45 yd (spell 28157, range and radius 45 yd; Wowhead calls it short-range in prose; the width is a guess), every 18 s (not sourced: DBM and BigWigs have no timer, the guides say 'often', and the only data point is TrinityCore's WotLK comment of about 30 s, 30 s, then 55 s, which this estimate does not follow), 2,200 scaled from 3,200 to 4,800 for a tank wearing Greater Nature Protection. It summons one Fallout Slime (`follow`) which walks into the raid (real: one slime per player hit, only the tank should be hit). A raider caught in the cone is scored by `raidMetric` (the tank's facing) and a melee player in front by `playerMetric`. Slime AoE (300 per 2 s within 10 yd, wiki) is not modelled. Fallout Slime is `killFirst` for melee only (`killFirstRoles: melee`, the real assignment; ranged stay on him) with a 16 s `lifetime` (real 48,293 HP), picked up by the player off-tank or a ghost group. The Taunt notes on `aggroClimb` are estimates: the real tank mostly just walks, but a ranged-heavy raid can out-threat a moving tank. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Boss melee 1,000 per 2 s plus Slime Spray 2,200 every 18 s runs about 620 damage per second against 200 passive healing with a player healer, so a healer who does nothing loses the tank in about 25 seconds.",
+ "notes": "Numbers follow docs/research/naxxramas/grobbulus.md. HP is a clock: 2,116,591 HP over 310 s (real kills run 5 to 8 min; the 12:00 Enrage is not reached and is a wipe, so it is not simulated). The round room radius 46 and the ring the tank walks are estimates from prose. THE KITE: Grobbulus is walked slowly around the outer wall (wiki, Wowhead, Warcraft Tavern). Each phase is one waypoint: `tankSpot` and `bossSpot` move on, so the tank really does drag him along the wall, the clouds really do trail behind him, and the raid (`raidSpot`) shuffles round the middle with him. The real walk is continuous, here it is seven hops of about 25 yards on a ring of 40 to 43 yd radius. Breaking melee range fires Slime Stream through the real `meleeEmpty` conditional (real 1,500 per second for 3 s on up to 10 players; here one 900 pulse every 5 s while the tank stays out of melee, cmangos's delay before it casts, hitting the player and the ghost), so the tank must walk at a pace he can follow: his speed is 7 yd/s (estimate). POISON CLOUD: `hazard` at the boss every ~15 s (DBM 14.5 to 16.6), 60 s (spell 28158, the damaging aura; TrinityCore despawns the cloud at 61 s; the 75 s in the research is the summon spell's duration), radius 6 (wiki says ~10 yd wide and it grows; the engine has a fixed radius), 800 per second (scaled: spell 28241, the cloud tick, is 1,110 Nature in a 30 yd radius and spell 28158 is 1 tick per second; 800 is an estimate for a raid wearing Greater Nature Protection). The clouds persist across phases as the real ones do, so up to four sit on the kite line at once. MUTATING INJECTION: a `carried` bomb, `playerChance` 0.3, 10 s (the spell), radius 8 (spell 28322 Embalming Cloud, 3,515 Nature in 8 yd, which cmangos casts on natural expiry; spell 28206 Mutagen Explosion is 2,380 to 3,220 Physical in 20 yd, which cmangos casts on dispel and TrinityCore on expiry too; the wiki's 4,500 physical on expiry matches neither), 3,000 scaled from 4,500 and `raidMetric` scoring each one that goes off in the raid. The cadence is `every: 12, jitter: 1.5`, and below 30% `every: 9` on two players (BigWigs notes the next one is sometimes applied just before the previous expires, TrinityCore's WotLK comment gives 10.8 and 12 s then about 8 and 10 s, and the wiki and Warcraft Tavern say more often at 30%; the exact timers remain estimates). Because the cleansed explosion reaches 20 yd, a cleanse must wait until the carrier is out. ENGINE GAPS: (1) the real rule is to cleanse the Injection only once the carrier is in position, because cleansing also drops the cloud at their feet and shrinks the AoE (Wowhead): the engine scores a dispel as good whenever it happens, so the healer role here has no dispel at all rather than being taught to dispel on sight, and this is the fight's biggest misrepresentation. (2) The carrier's own cloud should appear where the carrier stands when it goes off; the engine cannot anchor a follow-up to a carried bomb, so the cloud appears at one fixed spot at the end of the line (`cloudLineEnd`), which is where a disciplined raid puts them anyway. (3) On a ghost raider the Injection has no floor marker and no consequence. (4) The engine's run-out point for a carried bomb is chosen when the bomb lands and cannot see a cloud that lands on it later, so step out of one if it does; the penalty for clouds is lowered to 1.5 per second for that reason. (5) The marker only knows the nearest clear ground, not the real instruction to run to the end of the cloud line behind him; the tips carry that. SLIME SPRAY: frontal `cone` 60 degrees 45 yd (spell 28157, range and radius 45 yd; Wowhead calls it short-range in prose; the width is a guess), every 18 s (not sourced: DBM and BigWigs have no timer, the guides say 'often', and the only data point is TrinityCore's WotLK comment of about 30 s, 30 s, then 55 s, which this estimate does not follow), 2,200 scaled from 3,200 to 4,800 for a tank wearing Greater Nature Protection. It summons one Fallout Slime (`follow`) which walks into the raid (real: one slime per player hit, only the tank should be hit). A raider caught in the cone is scored by `raidMetric` (the tank's facing) and a melee player in front by `playerMetric`. Slime AoE (300 per 2 s within 10 yd, wiki) is not modelled. Fallout Slime is `killFirst` for melee only (`killFirstRoles: melee`, the real assignment; ranged stay on him) with a 16 s `lifetime` (real 48,293 HP), picked up by the player off-tank or a ghost group. The Taunt notes on `aggroClimb` are estimates: the real tank mostly just walks, but a ranged-heavy raid can out-threat a moving tank. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Boss melee 1,000 per 2 s plus Slime Spray 2,200 every 18 s runs about 620 damage per second against 200 passive healing with a player healer, so a healer who does nothing loses the tank in about 25 seconds. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events.",
  "sources": [
   "docs/research/naxxramas/grobbulus.md",
   "https://warcraft.wiki.gg/wiki/Grobbulus_(Classic)",
@@ -782,7 +782,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
   },
@@ -1008,12 +1008,6 @@
      "first": 20,
      "every": 12,
      "jitter": 1.5
-    },
-    {
-     "id": "aggroClimb",
-     "first": 26,
-     "every": 75,
-     "jitter": 8
     }
    ],
    "expectations": [
@@ -1181,12 +1175,6 @@
      "first": 12,
      "every": 12,
      "jitter": 1.5
-    },
-    {
-     "id": "aggroClimb",
-     "first": 27,
-     "every": 75,
-     "jitter": 8
     }
    ],
    "expectations": [
@@ -1354,12 +1342,6 @@
      "first": 12,
      "every": 12,
      "jitter": 1.5
-    },
-    {
-     "id": "aggroClimb",
-     "first": 28,
-     "every": 75,
-     "jitter": 8
     }
    ],
    "expectations": [
@@ -1527,12 +1509,6 @@
      "first": 12,
      "every": 12,
      "jitter": 1.5
-    },
-    {
-     "id": "aggroClimb",
-     "first": 29,
-     "every": 75,
-     "jitter": 8
     }
    ],
    "expectations": [
@@ -1700,12 +1676,6 @@
      "first": 12,
      "every": 12,
      "jitter": 1.5
-    },
-    {
-     "id": "aggroClimb",
-     "first": 30,
-     "every": 75,
-     "jitter": 8
     }
    ],
    "expectations": [
@@ -1873,12 +1843,6 @@
      "first": 12,
      "every": 12,
      "jitter": 1.5
-    },
-    {
-     "id": "aggroClimb",
-     "first": 31,
-     "every": 75,
-     "jitter": 8
     }
    ],
    "expectations": [
@@ -2046,12 +2010,6 @@
      "first": 8,
      "every": 9,
      "jitter": 1
-    },
-    {
-     "id": "aggroClimb",
-     "first": 32,
-     "every": 75,
-     "jitter": 8
     }
    ],
    "expectations": [
@@ -2543,5 +2501,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Injection’s cloud does not appear at its actual removal location. Cloud growth and movement are simplified."
+  ]
+ }
 }

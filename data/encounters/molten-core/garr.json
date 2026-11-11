@@ -1,13 +1,13 @@
 {
  "id": "garr",
  "name": "Garr",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "molten-core",
   "name": "Molten Core",
   "size": 40
  },
- "notes": "Numbers follow docs/research/molten-core/garr.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 659,538 HP, 8 Firesworn (61,040 HP each). Modelled as two phases: Firesworn alive (130 s, to 70%) then Garr frenzied (160 s), a 4-5 minute kill. Firesworn: an `adds` wave of 4 beside the tank spot 10 s in; the real fight has 8, with 3-5 banished by Warlocks and killed after Garr. The off-tank role holds them on their own spot (`holdsBoss: false`) while a ghost tank has Garr. They are not killable here: raids differ on the order (the tanked ones first, or Garr first with the rest banished), and Frenzy and Eruption cannot be tied to a kill, so they die on a timer after 120 s. Separation Anxiety is a 100 yd aura (Wowhead Classic 23487, cmangos), so it cannot trigger in this room; the 15 yd in the guides is probably Eruption. Eruption: the research has it on each Firesworn death, 15 yd around the add, 1850-2150 Fire (middle 2000) with a knockback (200-225). The engine has no trigger on an add death, so it is an `aoe` of radius 15 around Garr on a cadence (every 24 s through phase 1, four explosions in the time he is at 100-70%). It has a 4 s call-out telegraph (the raid watches add health) with `moveOut` walking melee out, and it is cast off the boss so he keeps swinging. There is no knockback on an `aoe`, so the knockback lives in the tip; melee are scored for being inside (`eruptionsTaken`). Magma Shackles: -60% movement for 15 s, Magic, 45 yd, every 11-16 s (DBM; every 13.7, jitter 2.5). The engine has no snare: it is a Magic debuff the healer removes, on `all` because the real spell hits the whole 45 yd room. Antimagic Pulse removes one Magic BUFF from everyone every 16-21 s (DBM; every 18.5, jitter 2.5). The engine has no buffs and there is nothing to dispel afterwards, so it is a non-dispellable notice on the timeline. Immolate: Garr and Firesworn use 15732 (DBM, Wowhead Classic); level-scaled to 337 + 168 every 3 s for 21 s (wiki), Magic, on the add tanks. The engine cannot target the off-tank here, so it is a Magic debuff on the tank ticking 56 per second, every 18 s through phase 1, which gives the healer the priority dispel the real fight has. The 337 direct hit is not modelled. Frenzy: +9% attack speed per Firesworn death, 30 min, stacking to 8. The engine has one permanent `enrage`, applied when phase 2 starts at 1.45x (about five dead adds; the real value depends on how many were killed before Garr). Massive Eruption (6 min, cmangos only) is not reached in this script and is not modelled. Boss melee 420 per 2 s is a placeholder scaled to the 10,000 HP tank. Engine gaps: adds have no abilities and no banish; no Eruption knockback or add-death location; no snare; no buff system; Frenzy is one step instead of stacking; debuffs on others are only dispelled when the player is the healer.",
+ "notes": "Numbers follow docs/research/molten-core/garr.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 659,538 HP, 8 Firesworn (61,040 HP each). Modelled as two phases: Firesworn alive (130 s, to 70%) then Garr frenzied (160 s), a 4-5 minute kill. Firesworn: an `adds` wave of 4 beside the tank spot 10 s in; the real fight has 8, with 3-5 banished by Warlocks and killed after Garr. The off-tank role holds them on their own spot (`holdsBoss: false`) while a ghost tank has Garr. They are not killable here: raids differ on the order (the tanked ones first, or Garr first with the rest banished), and Frenzy and Eruption cannot be tied to a kill, so they die on a timer after 120 s. Separation Anxiety is a 100 yd aura (Wowhead Classic 23487, cmangos), so it cannot trigger in this room; the 15 yd in the guides is probably Eruption. Eruption: the research has it on each Firesworn death, 15 yd around the add, 1850-2150 Fire (middle 2000) with a knockback (200-225). The engine has no trigger on an add death, so it is an `aoe` of radius 15 around Garr on a cadence (every 24 s through phase 1, four explosions in the time he is at 100-70%). It has a 4 s call-out telegraph (the raid watches add health) with `moveOut` walking melee out, and it is cast off the boss so he keeps swinging. There is no knockback on an `aoe`, so the knockback lives in the tip; melee are scored for being inside (`eruptionsTaken`). Magma Shackles: -60% movement for 15 s, Magic, 45 yd, every 11-16 s (DBM; every 13.7, jitter 2.5). The engine has no snare: it is a Magic debuff the healer removes, on `all` because the real spell hits the whole 45 yd room. Antimagic Pulse removes one Magic BUFF from everyone every 16-21 s (DBM; every 18.5, jitter 2.5). The engine has no buffs and there is nothing to dispel afterwards, so it is a non-dispellable notice on the timeline. Immolate: Garr and Firesworn use 15732 (DBM, Wowhead Classic); level-scaled to 337 + 168 every 3 s for 21 s (wiki), Magic, on the add tanks. The engine cannot target the off-tank here, so it is a Magic debuff on the tank ticking 56 per second, every 18 s through phase 1, which gives the healer the priority dispel the real fight has. The 337 direct hit is not modelled. Frenzy: +9% attack speed per Firesworn death, 30 min, stacking to 8. The engine has one permanent `enrage`, applied when phase 2 starts at 1.45x (about five dead adds; the real value depends on how many were killed before Garr). Massive Eruption (6 min, cmangos only) is not reached in this script and is not modelled. Boss melee 420 per 2 s is a placeholder scaled to the 10,000 HP tank. Engine gaps: adds have no abilities and no banish; no Eruption knockback or add-death location; no snare; no buff system; Frenzy is one step instead of stacking; debuffs on others are only dispelled when the player is the healer. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events. Fidelity correction: Magma Shackles now reduces player movement speed by 60%; removing the debuff restores normal movement.",
  "sources": [
   "docs/research/molten-core/garr.md",
   "https://warcraft.wiki.gg/wiki/Garr",
@@ -554,7 +554,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
   },
@@ -645,7 +645,8 @@
    "cue": null,
    "icon": "dispel",
    "requires": "grounded",
-   "tip": "Everyone within 45 yd moves 60% slower for 15 s. Magic: dispel it, and Free Action Potions break it. Slowed melee cannot get out of an Eruption."
+   "tip": "Everyone within 45 yd moves 60% slower for 15 s. Magic: dispel it, and Free Action Potions break it. Slowed melee cannot get out of an Eruption.",
+   "speedMult": 0.4
   },
   "antimagicPulse": {
    "label": "Antimagic Pulse",
@@ -746,12 +747,6 @@
      "first": 32,
      "every": 24,
      "jitter": 3
-    },
-    {
-     "id": "aggroPull",
-     "first": 40,
-     "every": 45,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -877,12 +872,6 @@
      "first": 12.5,
      "every": 18.5,
      "jitter": 2.5
-    },
-    {
-     "id": "aggroPull",
-     "first": 30,
-     "every": 45,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -1229,5 +1218,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Firesworn deaths do not trigger their own explosions or stack Garr’s Frenzy. Banish is not available."
+  ]
+ }
 }

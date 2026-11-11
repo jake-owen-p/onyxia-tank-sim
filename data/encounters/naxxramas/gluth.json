@@ -1,13 +1,13 @@
 {
  "id": "gluth",
  "name": "Gluth",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "naxxramas",
   "name": "Naxxramas",
   "size": 40
  },
- "notes": "Numbers follow docs/research/naxxramas/gluth.md. HP is a clock: 1,466,075 HP over 305 s. The third Decimate lands about 5:15; the Enrage follows (wiki 10 to 20 s later, BigWigs 6:00, cmangos 6:30). A run that finishes at 5:05 is comfortably inside it; the Enrage itself is a wipe and is not simulated. The room is an estimate from prose. BOSS STATIONARY: a real raid drags him to the far corner by the exit door frame at the start and never moves him again (Wowhead, Warcraft Tavern). The engine has no way to turn a tank-swap target switch off for the boss's movement, so he is placed in the corner at the pull and `boss.stationary`: the drag across the room is not rehearsed. MORTAL WOUND: `debuff` on the tank, `healingMult` 0.9 per stack, 30 s, stacking (cap 5, the guides swap at 4 to 5, Warcraft Tavern), applied every 6 s while the boss is on the tank (`conditional: onPlayer`; cmangos has 10 s; 6 s here keeps five stacks inside the 34 s window before the first swap). Gluth is taunt-immune and the real swap is by out-threating (wiki, Wowhead); like Huhuran, Fankriss and Kurinnaxx this is a scripted `restWindow` plus `targetSwitch`: about every 64 s the player tank is told to press nothing for 30 s while the stacks fall off, and Taunt then stands in for building threat back. A ghost tank in the other roles carries a stack count capped at the swap point as a stand-in for 'whoever is on him right now' and never actually swaps, so a player healer rehearses healing a tank at up to five stacks of Mortal Wound the whole fight rather than alternating two tanks (this is the second-largest gap).  DECIMATE: an `aoe` with `setHpFraction` 0.05, as the real spell: every player and the ghost tank is left at 5% of maximum health however full they were, and it can never kill (cmangos: damage equals current HP minus 5% of max). At 5% a single swing would kill the tank, so the warning arms `decimateWall`, a 5.1 s, -75% damage-taken debuff on the tank that stands for the defensive cooldowns the guides demand (Wowhead: 'Tanks need to be prepared to use defensive cooldowns right as this goes off'); the swing timer cannot be paused, so without it a real 5% tank would die to whichever swing lands first. The healer's job is entirely after the hit (wiki: 'Once Gluth casts decimate, top off the MT'). The timer is real (~105 s, wiki and Warcraft Tavern, Wowhead ~100 s, DBM's disabled ~96 s), with a `decimateWarn` 6 s before (DBM counts) to give a press window, cast 0 as the real spell has none. ZOMBIE CHOW: one every ~10 s from one of three grates (wiki, Wowhead), `killable` adds on a long `lifetime` (real 52,000 HP, classicdb); `pickup: offtank` with the player off-tank as a kiter who runs them down and holds them far from the boss; a ghost group otherwise. The real rule that a zombie reaching Gluth is eaten for +5% HP is not modelled (no add-boss contact event). Spell 28216 is 'Periodically trigger spell... 1 every 6 seconds', which implies at least one per 6 s, and the guide value of one per 10 s is kept. DPS do not stop for them. After each Decimate six zombies at 5% (`decimatedZombies`, `killFirst`, 7 s `lifetime`, the real 5% of 52,000 is about 2,600 HP) charge from the grates to a spot next to him: ranged and melee must switch onto them, and hitting the boss while they live is scored; that is the fight's real DPS decision (Wowhead: ranged AoE the zombies). The real existing kited zombies are not reset by the spell, because the engine has no way to touch a live add; only a fresh wave is shown. FRENZY: `debuff` on the tank (`dispel: enrage`), removed by the ranged role's Tranquilizing Shot (`roles.ranged.dispels`), cadence every 10 s (DBM 8.1 to 11.4 s after a 9.6 to 11.3 s first cast), real 8 s duration shortened to 4 s here because nobody else Tranqs in the sim for the other roles; the x1.5 is a scaled +100% attack speed and +50% damage (spell 28371). Terrifying Roar: `debuff` with `fear: 5` (5 s, the spell), `roles: melee` only (the tanks wear Fear Ward, which the engine cannot show), `safeSpots` door frame with a 1.8 s cast standing in for the DBM timer so the marker walks melee into the frame; the real spell is instant and a 20 yd radius, and ranged at their distance are out of it, and the `debuff` is scored by `playerMetric` when it lands. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Melee 1,000 per 2 s (the real 6,101 to 7,002 before armor is not on the wiki per-swing; this is the estimate), and against 200 passive heal with a player healer: a healer who does nothing loses the tank within about 30 seconds, faster after a Decimate. The Toxic Tunnel the raid crosses to reach him (periodic Nature damage) is not modelled.",
+ "notes": "Numbers follow docs/research/naxxramas/gluth.md. HP is a clock: 1,466,075 HP over 305 s. The third Decimate lands about 5:15; the Enrage follows (wiki 10 to 20 s later, BigWigs 6:00, cmangos 6:30). A run that finishes at 5:05 is comfortably inside it; the Enrage itself is a wipe and is not simulated. The room is an estimate from prose. BOSS STATIONARY: a real raid drags him to the far corner by the exit door frame at the start and never moves him again (Wowhead, Warcraft Tavern). The engine has no way to turn a tank-swap target switch off for the boss's movement, so he is placed in the corner at the pull and `boss.stationary`: the drag across the room is not rehearsed. MORTAL WOUND: `debuff` on the tank, `healingMult` 0.9 per stack, 30 s, stacking (cap 5, the guides swap at 4 to 5, Warcraft Tavern), applied every 6 s while the boss is on the tank (`conditional: onPlayer`; cmangos has 10 s; 6 s here keeps five stacks inside the 34 s window before the first swap). Gluth is taunt-immune and the real swap is by out-threating (wiki, Wowhead); like Huhuran, Fankriss and Kurinnaxx this is a scripted `restWindow` plus `targetSwitch`: about every 64 s the player tank is told to press nothing for 30 s while the stacks fall off, and Taunt then stands in for building threat back. A ghost tank in the other roles carries a stack count capped at the swap point as a stand-in for 'whoever is on him right now' and never actually swaps, so a player healer rehearses healing a tank at up to five stacks of Mortal Wound the whole fight rather than alternating two tanks (this is the second-largest gap).  DECIMATE: an `aoe` with `setHpFraction` 0.05, as the real spell: every player and the ghost tank is left at 5% of maximum health however full they were, and it can never kill (cmangos: damage equals current HP minus 5% of max). At 5% a single swing would kill the tank, so the warning arms `decimateWall`, a 5.1 s, -75% damage-taken debuff on the tank that stands for the defensive cooldowns the guides demand (Wowhead: 'Tanks need to be prepared to use defensive cooldowns right as this goes off'); the swing timer cannot be paused, so without it a real 5% tank would die to whichever swing lands first. The healer's job is entirely after the hit (wiki: 'Once Gluth casts decimate, top off the MT'). The timer is real (~105 s, wiki and Warcraft Tavern, Wowhead ~100 s, DBM's disabled ~96 s), with a `decimateWarn` 6 s before (DBM counts) to give a press window, cast 0 as the real spell has none. ZOMBIE CHOW: one every ~10 s from one of three grates (wiki, Wowhead), `killable` adds on a long `lifetime` (real 52,000 HP, classicdb); `pickup: offtank` with the player off-tank as a kiter who runs them down and holds them far from the boss; a ghost group otherwise. The real rule that a zombie reaching Gluth is eaten for +5% HP is not modelled (no add-boss contact event). Spell 28216 is 'Periodically trigger spell... 1 every 6 seconds', which implies at least one per 6 s, and the guide value of one per 10 s is kept. DPS do not stop for them. After each Decimate six zombies at 5% (`decimatedZombies`, `killFirst`, 7 s `lifetime`, the real 5% of 52,000 is about 2,600 HP) charge from the grates to a spot next to him: ranged and melee must switch onto them, and hitting the boss while they live is scored; that is the fight's real DPS decision (Wowhead: ranged AoE the zombies). The real existing kited zombies are not reset by the spell, because the engine has no way to touch a live add; only a fresh wave is shown. FRENZY: `debuff` on the tank (`dispel: enrage`), removed by the ranged role's Tranquilizing Shot (`roles.ranged.dispels`), cadence every 10 s (DBM 8.1 to 11.4 s after a 9.6 to 11.3 s first cast), real 8 s duration shortened to 4 s here because nobody else Tranqs in the sim for the other roles; the x1.5 is a scaled +100% attack speed and +50% damage (spell 28371). Terrifying Roar: `debuff` with `fear: 5` (5 s, the spell), `roles: melee` only (the tanks wear Fear Ward, which the engine cannot show), `safeSpots` door frame with a 1.8 s cast standing in for the DBM timer so the marker walks melee into the frame; the real spell is instant and a 20 yd radius, and ranged at their distance are out of it, and the `debuff` is scored by `playerMetric` when it lands. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Melee 1,000 per 2 s (the real 6,101 to 7,002 before armor is not on the wiki per-swing; this is the estimate), and against 200 passive heal with a player healer: a healer who does nothing loses the tank within about 30 seconds, faster after a Decimate. The Toxic Tunnel the raid crosses to reach him (periodic Nature damage) is not modelled. Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro. Fidelity correction: Decimate reduces the existing Zombie Chows to 5% and sends those same adds toward Gluth wherever he stands. There is no replacement wave and no automatic raid damage to these zombies. Contact consumes a zombie, heals 5% of boss health and extends the estimated kill clock. Their original lifetime still limits how long unconsumed adds persist. Zombie Chows now persist until killed or consumed. Simulated raid damage resumes after Decimate so NPC damage dealers help finish the weakened zombies; before Decimate the raid leaves them for the kiters. Estimated NPC damage after Decimate removes 2.5% of a zombie’s full health per second, allowing two seconds to finish a 5% zombie; player attacks can kill it sooner. This is cooperative raid damage, not an automatic despawn.",
  "sources": [
   "docs/research/naxxramas/gluth.md",
   "https://warcraft.wiki.gg/wiki/Gluth_(Classic)",
@@ -286,10 +286,11 @@
   "threatPerSecond": 40,
   "meleeFlankDistance": 9,
   "whelpContactRange": 5,
-  "holdAfterPull": 5
+  "holdAfterPull": 5,
+  "holdWhileLoose": true
  },
  "boss": {
-  "looseHint": "The boss is on someone else. Build threat",
+  "looseHint": "Build threat in melee range. This boss cannot be taunted.",
   "radius": 5,
   "speed": 7,
   "turnRate": 300,
@@ -298,7 +299,8 @@
   "meleeInterval": 2,
   "cones": {},
   "stationary": true,
-  "enrageMultiplier": 1.5
+  "enrageMultiplier": 1.5,
+  "tauntImmune": true
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -370,13 +372,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
-   "label": "Taunt",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 20,
+   "kind": "threat",
+   "label": "Threat burst",
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "Gluth is taunt-immune in the real fight, so read this as building threat back. Use it only after your stacks have fallen off."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -488,7 +492,11 @@
    "cue": "whelps",
    "icon": "whelps",
    "requires": "grounded",
-   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%."
+   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%.",
+   "group": "zombie",
+   "raidDamage": false,
+   "consumeHeal": 0.05,
+   "persistent": true
   },
   "zombieB": {
    "label": "Zombie Chow",
@@ -509,7 +517,11 @@
    "cue": "whelps",
    "icon": "whelps",
    "requires": "grounded",
-   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%."
+   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%.",
+   "group": "zombie",
+   "raidDamage": false,
+   "consumeHeal": 0.05,
+   "persistent": true
   },
   "zombieC": {
    "label": "Zombie Chow",
@@ -530,7 +542,11 @@
    "cue": "whelps",
    "icon": "whelps",
    "requires": "grounded",
-   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%."
+   "tip": "A zombie crawls out of a grate. Keep it away from Gluth: if it reaches him he eats it and heals 5%.",
+   "group": "zombie",
+   "raidDamage": false,
+   "consumeHeal": 0.05,
+   "persistent": true
   },
   "restWindow": {
    "label": "Waiting: your stacks are falling",
@@ -607,40 +623,29 @@
    "kind": "aoe",
    "cast": 0,
    "setHpFraction": 0.05,
-   "follow": [
-    {
-     "id": "decimatedZombies",
-     "delay": 0.2
-    }
-   ],
+   "follow": [],
    "warn": true,
    "cue": "eruption",
    "icon": "eruption",
    "requires": "grounded",
-   "tip": "Decimate drops everyone to 5% of their health no matter how full they are, zombies included. Heal hard the moment it lands; ranged kill the zombies charging him."
+   "tip": "Decimate drops everyone to 5% of their health no matter how full they are, zombies included. Heal hard the moment it lands; ranged kill the zombies charging him.",
+   "affectAdds": {
+    "group": "zombie",
+    "setHpFraction": 0.05,
+    "target": "boss",
+    "speed": 12,
+    "priority": true,
+    "raidDamage": true,
+    "raidDpsFraction": 0.025
+   }
   },
   "decimatedZombies": {
    "label": "Zombies at 5%",
-   "kind": "adds",
+   "kind": "transition",
    "cast": 0,
-   "count": 2,
-   "from": [
-    "grateA",
-    "grateB",
-    "grateC"
-   ],
-   "speed": 12,
-   "aggroRange": 6,
-   "lifetime": 7,
-   "heldLifetime": 7,
-   "killFirst": true,
-   "pickup": "none",
-   "holdSpot": "chargeSpot",
-   "warn": true,
-   "cue": "whelps",
+   "warn": false,
    "icon": "whelps",
-   "requires": "grounded",
-   "tip": "Every zombie left in the room just dropped to 5% and is running straight for him. Kill them now."
+   "requires": "grounded"
   }
  },
  "phases": [
@@ -1474,7 +1479,7 @@
     "id": "hitZombies",
     "ability": "attack",
     "on": "event",
-    "event": "decimatedZombies",
+    "event": "decimate",
     "offset": 0.5,
     "early": 0.3,
     "late": 5,
@@ -1649,5 +1654,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Tank swaps and Frenzy still use substitute effects. Zombie attacks, slows and crowd control are not fully simulated."
+  ]
+ }
 }

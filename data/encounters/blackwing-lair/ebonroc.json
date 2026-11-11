@@ -1,7 +1,7 @@
 {
  "id": "ebonroc",
  "name": "Ebonroc",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "blackwing-lair",
   "name": "Blackwing Lair",
@@ -334,7 +334,7 @@
    "label": "Taunt",
    "cooldown": 5,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Ebonroc can be Taunted, and the cooldown here is 5 s because in the real raid two or three tanks share the Taunting. Press it the moment Shadow of Ebonroc lands, to take him off the debuffed tank, and straight after a Wing Buffet. Never while he is already on you."
   },
@@ -398,7 +398,6 @@
    "kind": "cone",
    "cone": "breath",
    "cast": 2,
-   "conditional": "onPlayer",
    "damage": 4000,
    "raidMetric": "raidBreathHits",
    "raidToast": "Shadow Flame hit the raid",
@@ -867,5 +866,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Shadow of Ebonroc does not heal the boss. The tank swap does not yet enforce leaving the afflicted tank out."
+  ]
+ }
 }

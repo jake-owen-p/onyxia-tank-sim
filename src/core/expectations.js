@@ -86,10 +86,15 @@ export function notInFront(state, script) {
 }
 
 /** Can this role remove this debuff? A role may limit its button with `dispels` (Tranquilizing Shot only removes enrages). */
-export function canDispel(state, script, d) {
-  if (!d.dispel || d.dispel === 'none' || !state.abilities.list.includes('dispel')) return false;
-  const types = state.roleDef.dispels || (script.playerAbilities.dispel || {}).dispels;
-  return !types || types.includes(d.dispel);
+export function canDispel(state, script, d, abilityId = null) {
+  if (!d.dispel || d.dispel === 'none') return false;
+  return state.abilities.list.some((id) => {
+    if (abilityId && id !== abilityId) return false;
+    const ability = script.playerAbilities[id];
+    if ((ability?.kind || id) !== 'dispel') return false;
+    const types = state.roleDef.dispels || ability.dispels;
+    return !types || types.includes(d.dispel);
+  });
 }
 
 /** Nothing this role could remove is still up. */

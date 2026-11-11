@@ -107,6 +107,9 @@ pre { font:12px monospace; background:#090b0c; padding:12px; overflow:auto; }
 .journal-paper { flex:1 0 auto; background:radial-gradient(ellipse at center,#f3e1ab25,transparent 75%),var(--paper); color:#36291b; text-shadow:none; padding:10px 15px; box-shadow:inset 0 0 30px #3929166b; }
 .journal-paper h3 { color:#4d351d; text-shadow:0 1px 0 #ead8aa; }
 .role-row { margin-bottom:10px; }
+.practice-coverage { margin:10px 0 14px; padding:8px 10px; border:1px solid #755c3b60; background:#fff5d52b; font-size:12px; line-height:1.5; }
+.practice-coverage summary { cursor:pointer; font-weight:600; }
+.practice-coverage p { margin:8px 0 0; }
 .section-label-inline { font-size:16px; margin:0 0 7px; }
 .seg { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:7px; }
 .seg-btn { background:linear-gradient(#53514a,#262a2b); border-color:#9a885f #574a34 #343029 #95815b; padding:4px 6px; min-width:66px; color:#e2d4ae; font-size:11px; }

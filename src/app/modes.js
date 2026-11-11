@@ -50,7 +50,7 @@ export function buildScenario({ mode, drillId = null, settings, script, seed = n
     };
   }
   return {
-    name: 'Full fight', mode: 'full', modeKey: `${keyPrefix}full:${role}`, loop: false, drill: null, role,
+    name: 'Practice fight', mode: 'full', modeKey: `${keyPrefix}full:${role}`, loop: false, drill: null, role,
     simOptions: { role, seed: s, start: 'entrance', startPhase: script.phases[0].id, phaseDurations: durations },
   };
 }

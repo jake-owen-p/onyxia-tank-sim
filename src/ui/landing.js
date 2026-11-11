@@ -9,7 +9,7 @@ export function landingScreen({ index, account, history }) {
   const count = raids.reduce((n,r) => n+r.bosses.filter(b => b.status === 'ready').length, 0);
   const steps = [
     ['taunt', 'Pick your role', 'Tank, off-tank, melee, ranged or healer. Each role has its own jobs and scoring.'],
-    ['attack', 'Try the fight', 'Start with Onyxia’s tutorial, or jump into a full fight. Drills let you repeat a single mechanic.'],
+    ['attack', 'Try the fight', 'Start with Onyxia’s tutorial, or start a practice fight. Drills let you repeat a single mechanic.'],
     ['heal', 'Check your run', 'See which mechanics you missed and where you reacted late. Watch the replay, then give it another go.'],
   ];
   return h('div', { class: 'landing' },
@@ -45,7 +45,7 @@ export function landingScreen({ index, account, history }) {
           }))),
         h('section', { class: 'landing-save' },
           h('div', {}, h('p', { class: 'landing-eyebrow', text: 'Saved progress' }), h('h2', { text: account.user ? 'Your saved runs' : 'Save your runs.' }),
-            h('p', { text: account.user ? (history.runs.length ? `${history.runs.length} recent ${history.runs.length === 1 ? 'run' : 'runs'} saved. You can find your scores in Run history.` : 'Finish a drill or a full fight and your score will appear in Run history.') : 'Your account keeps your last 50 runs, best scores and tutorial progress. Your settings and keybinds carry over when you sign in on another device.' })),
+            h('p', { text: account.user ? (history.runs.length ? `${history.runs.length} recent ${history.runs.length === 1 ? 'run' : 'runs'} saved. You can find your scores in Run history.` : 'Finish a drill or a practice fight and your score will appear in Run history.') : 'Your account keeps your last 50 runs, best scores and tutorial progress. Your settings and keybinds carry over when you sign in on another device.' })),
           link(account.user ? 'Back to raids' : 'Create account', account.user ? '/play' : '/account?mode=signup', 'btn btn-primary landing-primary')))),
     h('footer', { class: 'site-footer' }, h('span', { text: 'Raid Rehearsal' }), h('span', { text: 'WoW Classic encounter practice' }), h('nav', { 'aria-label': 'Footer navigation' }, link('Choose a boss', '/play'), link('Settings', '/settings'), link('Run history', '/history'))));
 }

@@ -517,7 +517,7 @@ function debuffs(c, v, s, mobile, w) {
     );
     label(
       c,
-      `${d.on === 'ghost' ? 'Tank' : d.on === 'player' ? 'You' : 'Raid'} · ${d.dispel || 'none'}${d.stacks > 1 ? ` ×${d.stacks}` : ''}`,
+      `${d.on === 'boss' ? 'Boss' : d.on === 'ghost' ? 'Tank' : d.on === 'player' ? 'You' : 'Raid'} · ${d.dispel || 'none'}${d.stacks > 1 ? ` ×${d.stacks}` : ''}`,
       xx + size + 5 * s,
       yy + 22 * s,
       9 * s,
@@ -1327,7 +1327,7 @@ function track(c, v, script, replay) {
   for (const d of v.debuffs || []) {
     if (!st.deb.has(d.uid))
       add(
-        `${d.on === 'ghost' ? 'Tank' : d.on === 'player' ? 'You' : 'Raid'} afflicted by ${d.name}${d.dispel && d.dispel !== 'none' ? ` (${d.dispel})` : ''}.`,
+        `${d.on === 'boss' ? 'Boss gains' : d.on === 'ghost' ? 'Tank affected by' : d.on === 'player' ? 'You are affected by' : 'Raid affected by'} ${d.name}${d.dispel && d.dispel !== 'none' ? ` (${d.dispel})` : ''}.`,
         '#ce9ff0',
       );
   }

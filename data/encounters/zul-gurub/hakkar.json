@@ -1,13 +1,13 @@
 {
  "id": "hakkar",
  "name": "Hakkar the Soulflayer",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "zul-gurub",
   "name": "Zul'Gurub",
   "size": 20
  },
- "notes": "Numbers follow docs/research/zul-gurub/hakkar.md and docs/research/zul-gurub/README.md: Era 719,550 HP (priests assumed dead: their Aspects and the extra health are not modelled), 20-man, modelled as seven 90 s phases on the real 90 s Blood Siphon cycle with the Enrage at 10 minutes (600 s, BW and the guides; DBM's berserk bar shows 585 s, so this is unsettled) in the last one. Boss HP is a fixed clock, so missing the poison trick is scored, not healed: this is the largest single misrepresentation of the fight and is ranked in the report. Cause Insanity follows the boss mods (DBM and BW: every 20 to 21 s, a 10 s debuff). Corrupted Blood has no boss-mod timer (Warcraft Logs was not reachable), so its cadence is an estimate that stands; the HP steps per phase are estimates. Boss melee (360 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Blood Siphon: instant in the real fight, an 8 s channel that stuns everyone and drains 200 per second, feeding Hakkar 1,000 per player per second unless the player is carrying Poisonous Blood (then he takes 200 per second per poisoned player instead). The engine can't heal the boss, so the feed is scored, not healed. The poison trick is modelled through the debuff itself: the Son's death drops a Poison Cloud at the cloud spot (a `hazard` with `applies`, at 77.5 s, up for about 13 s), and whoever stands in it gets `poisonousBlood`, a 90 s debuff of 33 Nature per second that follows them around. The `siphonPoison` telegraph, an offBoss 8 s cast timed so it ends at 89.5 s, is an `aoe` with `safeIfDebuff` on that debuff: anyone without Poisonous Blood when it resolves counts as `siphonUnpoisoned` (the biggest single penalty in the script). Its `safeSpots` (`cloudSpot`, safeRadius 8) walk the non-tanks into the cloud for the 8 s cast, and the cloud lasts long enough to get it. `seekLead` is 0 so the marker does not walk the tank to the cloud as well (the engine's `seekLead` walk has no role filter, and the real tank stays out). Then a real 8 s `bloodSiphon` channel (Hakkar stops swinging) stuns everyone and deals 1,600 at the end. Poisonous Blood is `dispel: none` here and the healer has no Dispel in this script, so 'never cleanse it' stays a tip; the real debuff is a Poison. Corrupted Blood is a `carried` hazard: if it lands on you, run out of the raid before it goes off and hits everyone near. Non-player carriers are handled silently; the real 10 yd splash, 875 + 200 per 2 s for 10 s is condensed to one 1,000 hit on the carrier and to the metric. Cause Insanity (on the MT, 10 s charm) is a `targetSwitch` plus a 10 s tank stun standing in for the charm; the real raid has two more tanks at threat 2 and 3 and Hakkar is taunt-immune, while here the sim has one tank player who Taunts him back when free. Will of Hakkar, the Cleave and double attack, the Aspects (priests assumed dead), Mortal Strike or threat-table ordering between tanks are not modelled. Sons are killFirst `adds` held by the off-tank role, spawned 32 s before each Siphon, alternating between the left and right stair platforms as the guides describe, so they die about 12 s before it; the real timing (Son pulled, sheeped, killed 10 to 15 s before the Siphon) depends on crowd control the engine lacks. Enrage is the engine's `enrage` kind firing at 600 s (the 5% HP trigger is not modelled).",
+ "notes": "Numbers follow docs/research/zul-gurub/hakkar.md and docs/research/zul-gurub/README.md: Era 719,550 HP (priests assumed dead: their Aspects and the extra health are not modelled), 20-man, modelled as seven 90 s phases on the real 90 s Blood Siphon cycle with the Enrage at 10 minutes (600 s, BW and the guides; DBM's berserk bar shows 585 s, so this is unsettled) in the last one. Boss HP is a fixed clock, so missing the poison trick is scored, not healed: this is the largest single misrepresentation of the fight and is ranked in the report. Cause Insanity follows the boss mods (DBM and BW: every 20 to 21 s, a 10 s debuff). Corrupted Blood has no boss-mod timer (Warcraft Logs was not reachable), so its cadence is an estimate that stands; the HP steps per phase are estimates. Boss melee (360 per 2 s) is scaled so a 10,000 HP tank survives normal play and dies if the healer ignores a spike. Blood Siphon: instant in the real fight, an 8 s channel that stuns everyone and drains 200 per second, feeding Hakkar 1,000 per player per second unless the player is carrying Poisonous Blood (then he takes 200 per second per poisoned player instead). The engine can't heal the boss, so the feed is scored, not healed. The poison trick is modelled through the debuff itself: the Son's death drops a Poison Cloud at the cloud spot (a `hazard` with `applies`, at 77.5 s, up for about 13 s), and whoever stands in it gets `poisonousBlood`, a 90 s debuff of 33 Nature per second that follows them around. The `siphonPoison` telegraph, an offBoss 8 s cast timed so it ends at 89.5 s, is an `aoe` with `safeIfDebuff` on that debuff: anyone without Poisonous Blood when it resolves counts as `siphonUnpoisoned` (the biggest single penalty in the script). Its `safeSpots` (`cloudSpot`, safeRadius 8) walk the non-tanks into the cloud for the 8 s cast, and the cloud lasts long enough to get it. `seekLead` is 0 so the marker does not walk the tank to the cloud as well (the engine's `seekLead` walk has no role filter, and the real tank stays out). Then a real 8 s `bloodSiphon` channel (Hakkar stops swinging) stuns everyone and deals 1,600 at the end. Poisonous Blood is `dispel: none` here and the healer has no Dispel in this script, so 'never cleanse it' stays a tip; the real debuff is a Poison. Corrupted Blood is a `carried` hazard: if it lands on you, run out of the raid before it goes off and hits everyone near. Non-player carriers are handled silently; the real 10 yd splash, 875 + 200 per 2 s for 10 s is condensed to one 1,000 hit on the carrier and to the metric. Cause Insanity (on the MT, 10 s charm) is a `targetSwitch` plus a 10 s tank stun standing in for the charm; the real raid has two more tanks at threat 2 and 3 and Hakkar is taunt-immune, while here the sim has one tank player who Taunts him back when free. Will of Hakkar, the Cleave and double attack, the Aspects (priests assumed dead), Mortal Strike or threat-table ordering between tanks are not modelled. Sons are killFirst `adds` held by the off-tank role, spawned 32 s before each Siphon, alternating between the left and right stair platforms as the guides describe, so they die about 12 s before it; the real timing (Son pulled, sheeped, killed 10 to 15 s before the Siphon) depends on crowd control the engine lacks. Enrage is the engine's `enrage` kind firing at 600 s (the 5% HP trigger is not modelled). Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro. Fidelity correction: a Son now creates Poison Cloud on its actual death location, from player attacks or simulated raid damage. No timer creates a cloud independently. Only carrying Poisonous Blood protects the Siphon check; standing at a painted cloud marker does not.",
  "sources": [
   "docs/research/zul-gurub/hakkar.md",
   "docs/research/zul-gurub/README.md",
@@ -468,10 +468,11 @@
   "threatPerSecond": 40,
   "meleeFlankDistance": 9,
   "whelpContactRange": 5,
-  "holdAfterPull": 5
+  "holdAfterPull": 5,
+  "holdWhileLoose": true
  },
  "boss": {
-  "looseHint": "The boss is on the raid. Rebuild threat",
+  "looseHint": "Build threat in melee range. This boss cannot be taunted.",
   "radius": 4,
   "speed": 7,
   "turnRate": 240,
@@ -479,7 +480,8 @@
   "meleeDamage": 720,
   "meleeInterval": 2,
   "cones": {},
-  "enrageMultiplier": 1.5
+  "enrageMultiplier": 1.5,
+  "tauntImmune": true
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -547,13 +549,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
-   "label": "Taunt",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 16,
+   "kind": "threat",
+   "label": "Threat burst",
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -596,7 +600,8 @@
    "cue": "whelps",
    "icon": "whelps",
    "requires": "grounded",
-   "tip": "A Son of Hakkar comes in from the stairs. Hold him on the cloud spot, kill him about ten seconds before the Siphon, and the cloud he leaves poisons everyone standing in it."
+   "tip": "A Son of Hakkar comes in from the stairs. Hold him on the cloud spot, kill him about ten seconds before the Siphon, and the cloud he leaves poisons everyone standing in it.",
+   "deathHazard": "poisonCloud"
   },
   "sonOfHakkarR": {
    "label": "Son of Hakkar",
@@ -617,7 +622,8 @@
    "cue": "whelps",
    "icon": "whelps",
    "requires": "grounded",
-   "tip": "A Son of Hakkar comes in from the other stairs. Hold him on the cloud spot, kill him about ten seconds before the Siphon, and the cloud he leaves poisons everyone standing in it."
+   "tip": "A Son of Hakkar comes in from the other stairs. Hold him on the cloud spot, kill him about ten seconds before the Siphon, and the cloud he leaves poisons everyone standing in it.",
+   "deathHazard": "poisonCloud"
   },
   "poisonousBlood": {
    "label": "Poisonous Blood",
@@ -637,10 +643,7 @@
    "label": "Poison Cloud",
    "kind": "hazard",
    "cast": 0,
-   "placement": "spots",
-   "spots": [
-    "cloudSpot"
-   ],
+   "placement": "origin",
    "radius": 8,
    "warning": 0.3,
    "active": 13,
@@ -661,10 +664,6 @@
    "damage": 0,
    "safeIfDebuff": "poisonousBlood",
    "seekLead": 12,
-   "safeSpots": [
-    "cloudSpot"
-   ],
-   "safeRadius": 8,
    "safeRoles": "nontank",
    "playerMetric": "siphonUnpoisoned",
    "follow": [
@@ -796,10 +795,6 @@
      "first": 58
     },
     {
-     "id": "poisonCloud",
-     "first": 77.5
-    },
-    {
      "id": "siphonPoison",
      "first": 81.5
     },
@@ -923,10 +918,6 @@
      "first": 58
     },
     {
-     "id": "poisonCloud",
-     "first": 77.5
-    },
-    {
      "id": "siphonPoison",
      "first": 81.5
     },
@@ -1037,10 +1028,6 @@
     {
      "id": "sonOfHakkar",
      "first": 58
-    },
-    {
-     "id": "poisonCloud",
-     "first": 77.5
     },
     {
      "id": "siphonPoison",
@@ -1155,10 +1142,6 @@
      "first": 58
     },
     {
-     "id": "poisonCloud",
-     "first": 77.5
-    },
-    {
      "id": "siphonPoison",
      "first": 81.5
     },
@@ -1271,10 +1254,6 @@
      "first": 58
     },
     {
-     "id": "poisonCloud",
-     "first": 77.5
-    },
-    {
      "id": "siphonPoison",
      "first": 81.5
     },
@@ -1385,10 +1364,6 @@
     {
      "id": "sonOfHakkarR",
      "first": 58
-    },
-    {
-     "id": "poisonCloud",
-     "first": 77.5
     },
     {
      "id": "siphonPoison",
@@ -1826,11 +1801,6 @@
    "start": "wall",
    "actions": [
     {
-     "id": "poisonCloud",
-     "first": 3,
-     "every": 20
-    },
-    {
      "id": "siphonPoison",
      "first": 8,
      "every": 20
@@ -1853,16 +1823,18 @@
    "start": "wall",
    "actions": [
     {
-     "id": "poisonCloud",
-     "first": 3,
-     "every": 22
-    },
-    {
      "id": "siphonPoison",
      "first": 8,
      "every": 22
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Blood Siphon checks your poison but does not reverse healing into boss damage. Mind control and off-tank succession are simplified."
+  ]
+ }
 }

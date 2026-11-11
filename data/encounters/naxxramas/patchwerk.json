@@ -1,13 +1,13 @@
 {
  "id": "patchwerk",
  "name": "Patchwerk",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "naxxramas",
   "name": "Naxxramas",
   "size": 40
  },
- "notes": "Numbers follow docs/research/naxxramas/patchwerk.md (3.85M HP, Hateful Strike, Enrage at 5%, Berserk 7:00). The room size is an estimate. The HP clock runs 385 s to 5% plus 30 s of Enrage, a 6:55 kill, so a raid that wins does not see the real 7:00 Berserk: see the Berserk note below. The real requirement (about 9,500 raid DPS, wiki) is a kill before 7:00; this script cannot express a raid that is too slow because boss HP is a clock. HATEFUL STRIKE (the fight's defining mechanic): the real spell is ~8,000 after armor every 1.2 s (wiki; Wowhead says 1.5 to 2 s), on the highest-HP of the 2nd/3rd/4th threat in melee range. Three off-tanks trade it. The engine has one ghost tank and cannot show three targets or a highest-HP rule, so each player role sees its own honest slice: the healer role heals the ghost, which here stands for the off-tank you are assigned, and takes every third Strike as a spike (5,500 scaled, every 3.6 s = 1.2 s x 3 OTs, jitter 0.4): the Hateful Strike cadence on one OT. The player off-tank role takes the same 5,500 share every 3.6 s and must stay in melee range: `otMelee` is checked on every Hateful Strike, so each Strike you are out of range for is scored, though the engine cannot stop the Strike landing on you when you leave. The engine also has no threat rank among non-tanks, so the real 2nd-to-4th threat rule cannot be scored. The main tank role is never struck (true: Hateful Strike never hits #1 on threat). Approximations: 5,500 instead of 8,000 because the engine's healer has one target and a 3.5k heal; no highest-HP rule; no dodge/parry cooldown skip. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. The healer's real decision here is the pre-heal: the ghost must be above 5,500 when the next Strike lands, and the passive rate alone (300/s) cannot get it there, so a healer who does nothing loses the tank inside 10 seconds. Melee and ranged take no Hateful Strike because the engine cannot rank the raid; instead the red band on the threat bar is the line where you would become a Hateful Strike target (real rule: 2nd to 4th on threat, in melee range). Holding attacks in the red band is scored. The slime river (melee dipping to lower HP, Wowhead) is not modelled: the engine has no self-damage button. ENRAGE at 5% (28131: +40% attack speed, +25% damage per spell data, so x1.75 DPS) is the last phase, `enrageMultiplier` 1.75. BERSERK (26662, 7:00, +150% attack speed and +500% damage) is about x15 tank damage and a wipe in the real game. A raid that wins finishes at 6:55 and never sees it, so `berserk` is not in the fight's schedule; `berserkDrill` loops it for healers, as a x1.4 damage-taken debuff on the tank, far weaker than the real thing because the real x15 is a wipe. Slime Bolt (7:30, Poison, after Berserk) is omitted: the fight ends first. Boss melee is 700 per 1.5 s (the wiki's 1,800 to 2,700 per swing, scaled to a 10k tank and an estimated 1.5 s swing; classicdb's 12,075 to 12,498 is pre-mitigation). AggroPull events (a DPS climbing the table: the real instruction 'never let anyone pass you on threat') are estimates so the tank role has reactions; the real fight mostly has none if threat is handled. `meleeCheck` is a hidden zero-damage heartbeat every 20 s that only samples whether the DPS are in range (the off-tank is scored on every Hateful Strike instead); it is not a boss ability.",
+ "notes": "Numbers follow docs/research/naxxramas/patchwerk.md (3.85M HP, Hateful Strike, Enrage at 5%, Berserk 7:00). The room size is an estimate. The HP clock runs 385 s to 5% plus 30 s of Enrage, a 6:55 kill, so a raid that wins does not see the real 7:00 Berserk: see the Berserk note below. The real requirement (about 9,500 raid DPS, wiki) is a kill before 7:00; this script cannot express a raid that is too slow because boss HP is a clock. HATEFUL STRIKE (the fight's defining mechanic): the real spell is ~8,000 after armor every 1.2 s (wiki; Wowhead says 1.5 to 2 s), on the highest-HP of the 2nd/3rd/4th threat in melee range. Three off-tanks trade it. The engine has one ghost tank and cannot show three targets or a highest-HP rule, so each player role sees its own honest slice: the healer role heals the ghost, which here stands for the off-tank you are assigned, and takes every third Strike as a spike (5,500 scaled, every 3.6 s = 1.2 s x 3 OTs, jitter 0.4): the Hateful Strike cadence on one OT. The player off-tank role takes the same 5,500 share every 3.6 s and must stay in melee range: `otMelee` is checked on every Hateful Strike, so each Strike you are out of range for is scored, though the engine cannot stop the Strike landing on you when you leave. The engine also has no threat rank among non-tanks, so the real 2nd-to-4th threat rule cannot be scored. The main tank role is never struck (true: Hateful Strike never hits #1 on threat). Approximations: 5,500 instead of 8,000 because the engine's healer has one target and a 3.5k heal; no highest-HP rule; no dodge/parry cooldown skip. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. The healer's real decision here is the pre-heal: the ghost must be above 5,500 when the next Strike lands, and the passive rate alone (300/s) cannot get it there, so a healer who does nothing loses the tank inside 10 seconds. Melee and ranged take no Hateful Strike because the engine cannot rank the raid; instead the red band on the threat bar is the line where you would become a Hateful Strike target (real rule: 2nd to 4th on threat, in melee range). Holding attacks in the red band is scored. The slime river (melee dipping to lower HP, Wowhead) is not modelled: the engine has no self-damage button. ENRAGE at 5% (28131: +40% attack speed, +25% damage per spell data, so x1.75 DPS) is the last phase, `enrageMultiplier` 1.75. BERSERK (26662, 7:00, +150% attack speed and +500% damage) is about x15 tank damage and a wipe in the real game. A raid that wins finishes at 6:55 and never sees it, so `berserk` is not in the fight's schedule; `berserkDrill` loops it for healers, as a x1.4 damage-taken debuff on the tank, far weaker than the real thing because the real x15 is a wipe. Slime Bolt (7:30, Poison, after Berserk) is omitted: the fight ends first. Boss melee is 700 per 1.5 s (the wiki's 1,800 to 2,700 per swing, scaled to a 10k tank and an estimated 1.5 s swing; classicdb's 12,075 to 12,498 is pre-mitigation). AggroPull events (a DPS climbing the table: the real instruction 'never let anyone pass you on threat') are estimates so the tank role has reactions; the real fight mostly has none if threat is handled. `meleeCheck` is a hidden zero-damage heartbeat every 20 s that only samples whether the DPS are in range (the off-tank is scored on every Hateful Strike instead); it is not a boss ability. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events.",
  "sources": [
   "docs/research/naxxramas/patchwerk.md",
   "https://warcraft.wiki.gg/wiki/Patchwerk_(Classic)",
@@ -316,7 +316,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment the boss turns on the raid, never while it is already on you."
   },
@@ -463,12 +463,6 @@
      "first": 10,
      "every": 20,
      "jitter": 1
-    },
-    {
-     "id": "aggroClimb",
-     "first": 75,
-     "every": 90,
-     "jitter": 12
     }
    ],
    "expectations": [
@@ -959,5 +953,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Hateful Strike does not select a target using the real threat, range and current-health rules."
+  ]
+ }
 }

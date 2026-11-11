@@ -367,7 +367,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 22,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt him back when your stacks have fallen off. Never early: you will just keep stacking."
   },
@@ -1271,5 +1271,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Entangle does not create a separate tunnel encounter. Tank swaps and Spawn enrages are simplified."
+  ]
+ }
 }

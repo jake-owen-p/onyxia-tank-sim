@@ -1,13 +1,13 @@
 {
  "id": "viscidus",
  "name": "Viscidus",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "temple-of-ahnqiraj",
   "name": "Temple of Ahn'Qiraj",
   "size": 40
  },
- "notes": "Numbers follow docs/research/temple-of-ahnqiraj/viscidus.md (Wowhead's 5,329,600 HP is 'Seasonal 40 Player', and he takes 50% reduced damage, so HP here is a clock). ESTIMATES: the room is a 40 yd round pool from prose; three freeze cycles (wiki and Tavern say 3 or 4) of 30 s poison, 15 s frozen and 20 s of globs, with HP stepping 100 to 94, 94 to 70, 70 to 64, 64 to 40, 40 to 34, 34 to 0 across the 195 s model. Melee 800 per 2 s (near the wiki's ~1,000 on a nature-geared tank) plus Volley and Poison Shock is ~635 per second: a 10,000 HP tank lives on passive healing (`healPerSecond` 700 for a ghost or player tank) and is lost inside 30 s if a player healer ignores him (140 per second). Freezing and shattering are the fight but only partly simulate: the real counters (170 to 200 frost hits to freeze, 75 to 100 melee hits to shatter within 15 s) cannot be expressed, because attacks do not count toward anything but the HP clock and no event fires on a hit count. The script runs the cycles on a clock: `frozenSolid` is a 15 s `transition` cast that keeps him still and mute (`cast` blocks melee and movement, and a cast boss is still attackable), and the shatter itself is the end of that phase. A failed shatter, and the slowing at 100 and 150 hits, do not exist. Everyone runs in and swings while he is frozen (a `playerAtSpotBy` for ranged and healers); only the frozen-phase position is checked, not who actually lands the hits. Melee wait outside Poison Shock through each poison phase, the approach the wiki says most guilds use (`skipActivity: 'melee'` keeps that from costing them uptime); the wiki's alternative of high-Nature-Resistance melee staying on him with frost oil is not modelled. The ghost raid's melee dots still flank him through the poison phases, because the engine always keeps them on a grounded boss. Frost Oil, frost wands, Wand of Biting Cold and Rank 1 Frostbolt are tips only. Globs: a shatter is a `submerged` phase (no boss, nothing to melee) with eight `killFirst` adds spawning around the room's edge and crawling to the reform point (`holdSpot`), 16 s `lifetime` standing for the raid's burn (real 16.5 s DBM rejoin timer; real HP per glob 24,416 Wowhead or 10-15k wiki; real count 1 to 20, here always 8 so HP steps are fixed instead of following the kills). Killing more globs does not change the next phase's HP; that is the biggest gap against the real fight, where the number you kill IS the fight's clock. Rejoin is `threatWipe` plus `teleportBossTo` the centre at each poison phase's start. The tank has to be at the reform point and pick him up (the wiki's three post-reform theories are not modelled beyond this). He cannot be taunted (the wiki and viscidus.md say so; no spell or log data was fetched, so that is unverified), so the Taunt button is relabelled Build threat and stands in for building threat fast as he reforms. Volley (1,300 direct every 10 s plus three 250-per-second poison debuffs for 10 s, standing in for 'cleanse every target'), Poison Shock (1,050 within 15 yd every 10 s), and Toxin (telegraphed `hazard` 750 per second, 9 s, one per poison phase; wiki's 30 to 40 s cadence would mostly miss a 30 s phase, so this is an estimate) are live only during the poison phases as the spell data says.",
+ "notes": "Numbers follow docs/research/temple-of-ahnqiraj/viscidus.md (Wowhead's 5,329,600 HP is 'Seasonal 40 Player', and he takes 50% reduced damage, so HP here is a clock). ESTIMATES: the room is a 40 yd round pool from prose; three freeze cycles (wiki and Tavern say 3 or 4) of 30 s poison, 15 s frozen and 20 s of globs, with HP stepping 100 to 94, 94 to 70, 70 to 64, 64 to 40, 40 to 34, 34 to 0 across the 195 s model. Melee 800 per 2 s (near the wiki's ~1,000 on a nature-geared tank) plus Volley and Poison Shock is ~635 per second: a 10,000 HP tank lives on passive healing (`healPerSecond` 700 for a ghost or player tank) and is lost inside 30 s if a player healer ignores him (140 per second). Freezing and shattering are the fight but only partly simulate: the real counters (170 to 200 frost hits to freeze, 75 to 100 melee hits to shatter within 15 s) cannot be expressed, because attacks do not count toward anything but the HP clock and no event fires on a hit count. The script runs the cycles on a clock: `frozenSolid` is a 15 s `transition` cast that keeps him still and mute (`cast` blocks melee and movement, and a cast boss is still attackable), and the shatter itself is the end of that phase. A failed shatter, and the slowing at 100 and 150 hits, do not exist. Everyone runs in and swings while he is frozen (a `playerAtSpotBy` for ranged and healers); only the frozen-phase position is checked, not who actually lands the hits. Melee wait outside Poison Shock through each poison phase, the approach the wiki says most guilds use (`skipActivity: 'melee'` keeps that from costing them uptime); the wiki's alternative of high-Nature-Resistance melee staying on him with frost oil is not modelled. The ghost raid's melee dots still flank him through the poison phases, because the engine always keeps them on a grounded boss. Frost Oil, frost wands, Wand of Biting Cold and Rank 1 Frostbolt are tips only. Globs: a shatter is a `submerged` phase (no boss, nothing to melee) with eight `killFirst` adds spawning around the room's edge and crawling to the reform point (`holdSpot`), 16 s `lifetime` standing for the raid's burn (real 16.5 s DBM rejoin timer; real HP per glob 24,416 Wowhead or 10-15k wiki; real count 1 to 20, here always 8 so HP steps are fixed instead of following the kills). Killing more globs does not change the next phase's HP; that is the biggest gap against the real fight, where the number you kill IS the fight's clock. Rejoin is `threatWipe` plus `teleportBossTo` the centre at each poison phase's start. The tank has to be at the reform point and pick him up (the wiki's three post-reform theories are not modelled beyond this). He cannot be taunted (the wiki and viscidus.md say so; no spell or log data was fetched, so that is unverified), so the Taunt button is relabelled Build threat and stands in for building threat fast as he reforms. Volley (1,300 direct every 10 s plus three 250-per-second poison debuffs for 10 s, standing in for 'cleanse every target'), Poison Shock (1,050 within 15 yd every 10 s), and Toxin (telegraphed `hazard` 750 per second, 9 s, one per poison phase; wiki's 30 to 40 s cadence would mostly miss a 30 s phase, so this is an estimate) are live only during the poison phases as the spell data says. Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro.",
  "sources": [
   "docs/research/temple-of-ahnqiraj/viscidus.md",
   "https://warcraft.wiki.gg/wiki/Viscidus",
@@ -515,17 +515,19 @@
   "threatPerSecond": 40,
   "meleeFlankDistance": 9,
   "whelpContactRange": 5,
-  "holdAfterPull": 5
+  "holdAfterPull": 5,
+  "holdWhileLoose": true
  },
  "boss": {
-  "looseHint": "The boss is on the raid. Rebuild threat",
+  "looseHint": "Build threat in melee range. This boss cannot be taunted.",
   "radius": 5,
   "speed": 6,
   "turnRate": 260,
   "meleeRange": 7,
   "meleeDamage": 800,
   "meleeInterval": 2,
-  "cones": {}
+  "cones": {},
+  "tauntImmune": true
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -584,13 +586,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
-   "label": "Build threat",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 16,
+   "kind": "threat",
+   "label": "Threat burst",
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "Viscidus cannot be taunted in the real fight. This button stands in for building threat fast as he reforms."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -1904,5 +1908,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Frost hits do not freeze him and melee hits do not shatter him. Glob kills do not determine his remaining health."
+  ]
+ }
 }

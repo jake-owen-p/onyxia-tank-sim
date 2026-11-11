@@ -115,6 +115,7 @@ export function createSim(script, options = {}) {
     tauntLead: script.threat.tauntLead,
     tauntDuration: script.threat.tauntDuration,
     pullMultiplier: script.threat.pullMultiplier,
+    allPools: !!script.boss.tauntImmune,
   };
   const ghostTauntDelay = script.threat.ghostTauntDelay ?? 2.5;
 
@@ -520,6 +521,17 @@ export function createSim(script, options = {}) {
           if (hit != null) { if (g.tanking) g.hp -= hit; } else damageGhost(def.tankDamage ?? def.damage ?? 0, id);
         }
         emit('raidDamage', { id, label: def.label, amount: def.damage || 0 });
+        if (def.affectAdds) {
+          const effect = def.affectAdds;
+          for (const add of w.whelps.filter((a) => a.group === effect.group)) {
+            if (effect.setHpFraction != null) add.hp = Math.min(add.hp, effect.setHpFraction);
+            if (effect.target) add.target = effect.target;
+            if (effect.speed != null) add.speed = effect.speed;
+            if (effect.priority != null) add.priority = effect.priority;
+            if (effect.raidDamage != null) add.raidDamage = effect.raidDamage;
+            if (effect.raidDpsFraction != null) add.raidDpsFraction = effect.raidDpsFraction;
+          }
+        }
         break;
       }
       case 'hazard': {
@@ -527,7 +539,7 @@ export function createSim(script, options = {}) {
         if (def.placement === 'lanes') return;   // the 'action' event fires when the lane goes active
         break;
       }
-      case 'adds': spawnAdds(state, script, def); break;
+      case 'adds': spawnAdds(state, script, { ...def, id }); break;
       case 'aggroPull': {
         if (tankRole) {
           // A DPS overtakes the tank on the threat table; she turns on the next threat tick.
@@ -603,7 +615,7 @@ export function createSim(script, options = {}) {
     for (const f of def.follow || []) scheduleOnce(state.schedule, f.id, state.t + (f.delay || 0));
   }
 
-  function placeHazard(def, id) {
+  function placeHazard(def, id, origin = null) {
     const w = state.world, b = w.boss, p = w.player;
     const placement = def.placement || 'player';
     if (placement === 'lanes') {
@@ -631,7 +643,8 @@ export function createSim(script, options = {}) {
     }
     const r = def.radius || 6;
     const centres = [];
-    if (placement === 'player') { if (roleMatches(def.roles)) centres.push({ x: p.x, y: p.y, onPlayer: true }); }
+    if (placement === 'origin' && origin) centres.push({ x: origin.x, y: origin.y });
+    else if (placement === 'player') { if (roleMatches(def.roles)) centres.push({ x: p.x, y: p.y, onPlayer: true }); }
     else if (placement === 'boss') centres.push({ x: b.x, y: b.y });
     else if (placement === 'spots') {
       for (const name of def.spots || []) { if (P[name]) centres.push({ x: P[name].x, y: P[name].y }); }
@@ -679,7 +692,8 @@ export function createSim(script, options = {}) {
   function applyDebuff(def, id) {
     const tgt = def.target || 'random';
     let on;
-    if (tgt === 'tank') on = tankRole ? 'player' : 'ghost';
+    if (tgt === 'boss') on = 'boss';
+    else if (tgt === 'tank') on = tankRole ? 'player' : 'ghost';
     else if (tgt === 'player') on = 'player';
     else if (tgt === 'all') on = 'player';
     else on = pickRandomVictim(def) ? 'player' : 'raid';
@@ -703,6 +717,8 @@ export function createSim(script, options = {}) {
       appliedAt: state.t, until: state.t + (def.duration || 10),
       tickDamage: def.tickDamage || 0, nextTickAt: state.t + 1, actionId: id, tip: def.tip || '',
       stacks: 1, damageTakenMult: def.damageTakenMult ?? null, healingMult: def.healingMult ?? null,
+      speedMult: def.speedMult ?? null, expireDamage: def.expireDamage || 0,
+      meleeSpeedMult: def.meleeSpeedMult ?? null, expireMetric: def.expireMetric || null,
       safeSpots: def.safeSpots || null, shelterAt: def.shelterAt ?? null,
       forbidAbilities: !!def.forbidAbilities, breakDamage: def.breakDamage || 0, breakMetric: def.breakMetric || null,
     };
@@ -719,7 +735,16 @@ export function createSim(script, options = {}) {
   function updateDebuffs(dt) {
     for (let i = state.debuffs.length - 1; i >= 0; i--) {
       const d = state.debuffs[i];
-      if (state.t >= d.until) { state.debuffs.splice(i, 1); emit('debuffExpired', { uid: d.uid, name: d.name, on: d.on }); continue; }
+      if (state.t >= d.until) {
+        state.debuffs.splice(i, 1);
+        if (d.expireDamage) {
+          if (d.on === 'player') damagePlayer(d.expireDamage, d.actionId);
+          else if (d.on === 'ghost') damageGhost(d.expireDamage, d.actionId);
+        }
+        if (d.expireMetric && canDispel(d)) addMetric(d.expireMetric, 1);
+        emit('debuffExpired', { uid: d.uid, name: d.name, on: d.on });
+        continue;
+      }
       if (d.tickDamage && state.t >= d.nextTickAt) {
         d.nextTickAt += 1;
         if (d.on === 'player') damagePlayer(d.tickDamage, d.actionId);
@@ -819,7 +844,7 @@ export function createSim(script, options = {}) {
         if (tgt.add) {
           if (!shielded) tgt.add.hp -= def.addDamage ?? 0.06;
           addMetric('attacksOnAdds', 1);
-          if (tgt.add.hp <= 0) { w.whelps.splice(w.whelps.indexOf(tgt.add), 1); emit('addKilled', { label: tgt.add.label }); }
+          if (tgt.add.hp <= 0) { w.whelps.splice(w.whelps.indexOf(tgt.add), 1); onAddKilled(tgt.add); }
           emit('attack', { id, on: 'add' });
           break;
         }
@@ -845,8 +870,9 @@ export function createSim(script, options = {}) {
         break;
       }
       case 'dispel': {
-        const idx = state.debuffs.findIndex(canDispel);
+        const idx = state.debuffs.findIndex((d) => canDispelFor(state, script, d, id));
         if (idx < 0) return fail('nothing', 'Nothing to dispel');
+        if (state.debuffs[idx].on === 'boss' && !playerInBossRange(def.range ?? 30)) return fail('range', 'Out of range');
         const d = state.debuffs.splice(idx, 1)[0];
         applyPlayerThreat(state.threat, def.threat || 0);
         addMetric('dispels', 1);
@@ -902,6 +928,13 @@ export function createSim(script, options = {}) {
   function onWhelpPickup() {
     emit('whelpPickup');
     for (const beat of onCueEvent(state, script, 'whelpPickup', state.t)) emitBeat(beat);
+  }
+
+  function onAddKilled(add) {
+    emit('addKilled', { uid: add.uid, label: add.label, source: add.source });
+    if (add.deathHazard && script.actions[add.deathHazard]) {
+      placeHazard(script.actions[add.deathHazard], add.deathHazard, add);
+    }
   }
 
   function emitBeat(beat) {
@@ -998,14 +1031,14 @@ export function createSim(script, options = {}) {
     if (!b.engaged && !b.passive && !opts.manual && b.state === 'grounded') {
       state.phaseStart += dt; state.phaseEnd += dt;
       for (const entry of state.schedule) entry.nextAt += dt;
-      if (tankRole && script.boss.autoPull !== false && state.t >= (script.boss.pullDeadline ?? 20)) engage('raid');
+      if (tankRole && script.boss.autoPull === true && state.t >= (script.boss.pullDeadline ?? 20)) engage('raid');
     }
 
     // Phase clock and HP drain.
     if (!opts.freezeHp && state.phaseDef) {
       const def = state.phaseDef;
-      const k = clamp((state.t - state.phaseStart) / phaseDuration(def), 0, 1);
-      state.hp = lerp(def.hpFrom, def.hpTo, k);
+      const k = (state.t - state.phaseStart) / phaseDuration(def);
+      state.hp = clamp(lerp(def.hpFrom, def.hpTo, k), 0, 1);
       if (state.t >= state.phaseEnd) {
         if (state.phaseIndex + 1 < script.phases.length) enterPhase(state.phaseIndex + 1, state.t - state.phaseEnd);
         else { state.hp = 0; end('victory'); return; }
@@ -1014,6 +1047,7 @@ export function createSim(script, options = {}) {
 
     if (state.enraged && state.t >= state.enragedUntil) state.enraged = false;
     p.healMult = debuffMult('player', 'healingMult');
+    p.speedMult = debuffMult('player', 'speedMult');
     g.healMult = debuffMult('ghost', 'healingMult');
 
     // Player.
@@ -1078,7 +1112,7 @@ export function createSim(script, options = {}) {
           b.target = 'ghost';
           emit('ghostTaunt');
         }
-        if (b.target !== 'raid' || script.threat.individualRaidThreat) {
+        if (b.target !== 'raid' || script.threat.individualRaidThreat || script.boss.tauntImmune) {
           b.target = selectTargetGhostTanked(state.threat, b.target, state.t, threatCfg);
         }
         if (prev !== 'player' && b.target === 'player') { addMetric('aggroPulls', 1); emit('aggroPulled'); toast('You pulled aggro!', 'bad'); state.threat.ghostTauntAt = state.t + ghostTauntDelay; }
@@ -1089,9 +1123,10 @@ export function createSim(script, options = {}) {
       // Melee swings.
       if (state.t >= b.nextMelee && (!b.cast || b.cast.offBoss)) {
         const dmg = script.boss.meleeDamage * (state.enraged ? (script.boss.enrageMultiplier || 1.5) : 1);
-        if (b.target === 'player' && playerInBossRange(script.boss.meleeRange + 1)) { damagePlayer(dmg, 'melee'); b.lastHit = state.t; b.nextMelee = state.t + script.boss.meleeInterval; }
-        else if (b.target === 'ghost' && ghostInBossRange(script.boss.meleeRange + 1)) { damageGhost(dmg, 'melee'); b.lastHit = state.t; b.nextMelee = state.t + script.boss.meleeInterval; }
-        else if (b.target === 'raid' && dist(b.x, b.y, w.raid.anchor.x, w.raid.anchor.y) <= script.boss.meleeRange + 6) { b.lastHit = state.t; b.nextMelee = state.t + script.boss.meleeInterval; }
+        const interval = script.boss.meleeInterval / debuffMult('boss', 'meleeSpeedMult');
+        if (b.target === 'player' && playerInBossRange(script.boss.meleeRange + 1)) { damagePlayer(dmg, 'melee'); b.lastHit = state.t; b.nextMelee = state.t + interval; }
+        else if (b.target === 'ghost' && ghostInBossRange(script.boss.meleeRange + 1)) { damageGhost(dmg, 'melee'); b.lastHit = state.t; b.nextMelee = state.t + interval; }
+        else if (b.target === 'raid' && dist(b.x, b.y, w.raid.anchor.x, w.raid.anchor.y) <= script.boss.meleeRange + 6) { b.lastHit = state.t; b.nextMelee = state.t + interval; }
       }
     }
 
@@ -1102,6 +1137,20 @@ export function createSim(script, options = {}) {
       if (reach && pickupWhelps(state, script, reach) > 0) onWhelpPickup();
     }
     const wf = updateWhelps(state, script, dt);
+    for (const add of wf.died) onAddKilled(add);
+    for (const add of wf.consumed) {
+      const healed = Math.min(1 - state.hp, add.consumeHeal);
+      state.hp += healed;
+      // Healing extends the estimated raid-DPS clock; it must not disappear
+      // again on the next tick or let the original deadline kill the boss.
+      const def = state.phaseDef, hpSpan = def.hpFrom - def.hpTo;
+      if (!opts.freezeHp && hpSpan > 0) {
+        const delay = healed * phaseDuration(def) / hpSpan;
+        state.phaseStart += delay; state.phaseEnd += delay;
+      }
+      addMetric('addsConsumed', 1);
+      emit('addConsumed', { uid: add.uid, label: add.label, healed });
+    }
     if (wf.onRaid && state.role === 'offtank') addMetric('whelpsOnRaid', dt);
     for (let i = w.projectiles.length - 1; i >= 0; i--) {
       const pr = w.projectiles[i];

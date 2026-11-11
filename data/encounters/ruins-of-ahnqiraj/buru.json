@@ -1118,7 +1118,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 40,
+   "range": 5,
    "icon": "taunt",
    "tip": "Stands for: you are the new fixate. In the sim it brings him back onto you."
   },
@@ -4860,5 +4860,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Egg damage does not control the fight. Egg explosions, armour loss and fixates are scripted rather than caused by your actions."
+  ]
+ }
 }

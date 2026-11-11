@@ -13,7 +13,7 @@ import { createRenderer } from '../src/render/renderer.js';
 
 const ROOT = path.resolve(new URL('.', import.meta.url).pathname, '..');
 const KINDS = new Set(['cone', 'knockback', 'fear', 'aoe', 'hazard', 'adds', 'aggroPull', 'targetSwitch', 'threatWipe', 'debuff', 'enrage', 'shield', 'projectile', 'transition']);
-const CHECKS = new Set(['nearWall', 'threatLead', 'hasAggro', 'onTank', 'outsideLane', 'outsideHazard', 'facingAway', 'whelpsPicked', 'inRange', 'notInFront', 'noDispellable']);
+const CHECKS = new Set(['nearWall', 'threatLead', 'hasAggro', 'startedPickup', 'onTank', 'outsideLane', 'outsideHazard', 'facingAway', 'whelpsPicked', 'inRange', 'notInFront', 'noDispellable']);
 const EXP_TYPES = new Set(['bossAtSpot', 'playerAtSpotBy', 'onEvent', 'afterEvent', 'continuous']);
 const ROLES = ['tank', 'offtank', 'melee', 'ranged', 'healer'];
 
@@ -31,6 +31,7 @@ function lint(script, file) {
     if (a.kind === 'hazard' && a.placement === 'lanes' && !script[a.lanes || 'deepBreathLanes']) e(`action ${id}: lanes key missing`);
     if (a.kind === 'hazard' && a.placement === 'polys' && !script[a.polys]) e(`action ${id}: polys key ${a.polys} missing`);
     if (a.kind === 'adds') for (const s of a.from || []) if (!P[s]) e(`action ${id}: spawn spot ${s} missing`);
+    if (a.deathHazard && script.actions[a.deathHazard]?.kind !== 'hazard') e(`action ${id}: death hazard ${a.deathHazard} missing`);
     if (a.kind === 'hazard' && a.placement === 'spots') for (const s of a.spots || []) if (!P[s]) e(`action ${id}: spot ${s} missing`);
     for (const key of ['raidMetric', 'playerMetric', 'wallMetric', 'completedMetric']) if (a[key] && !script.continuousMetrics[a[key]]) e(`action ${id}: ${key} ${a[key]} is not in continuousMetrics, so it would never be scored`);
     for (const n of a.safeSpots || []) if (!P[n]) e(`action ${id}: safe spot ${n} missing`);
@@ -152,7 +153,9 @@ for (const { raid, boss, file } of targets) {
         const allWon = runs.every((r) => r.result === 'victory');
         const ok = allWon && worst.score.overall >= 70 && deaths === 0;
         renderCheck(script, role, total);
-        const idle = play(script, role, full, total, SEEDS[0], () => IDLE).score.overall;
+        // Compare inactivity after an actual pull. Waiting at the entrance no
+        // longer starts combat, so an unstarted run is not a valid baseline.
+        const idle = play(script, role, { ...full, start: 'wall' }, total, SEEDS[0], () => IDLE).score.overall;
         const gap = Math.min(...scores) - idle;
         console.log(`${ok ? '✔' : '✖'} ${key} ${role.padEnd(7)} full ${String(worst.result).padEnd(8)} ${Math.min(...scores)}-${Math.max(...scores)} ${worst.score.grade}  idle ${idle}${deaths ? `  deaths ${deaths}` : ''}${ok ? '' : '  fixes: ' + worst.score.fixes.map((f) => f.title + (f.detail ? ` (${f.detail})` : '')).join(' | ')}`);
         if (!ok) problems++;

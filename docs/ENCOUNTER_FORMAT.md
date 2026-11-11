@@ -22,8 +22,8 @@ plays the full fight and every drill with a scripted bot for each role.
 | `player` | `speed`, `turnRate`, `radius`, `hp`, `healPerSecond`, `fearDuration`, `fearSpeed`, `jump: { height, duration }` |
 | `ghostTank` | the raid's tank when the player is not one: `speed`, `turnRate`, `hp`, `healPerSecond` (passive healing when nobody plays healer), `healPerSecondWithPlayerHealer` (when the player is the healer; keep it well under the boss's damage so heals matter), `lowHp` (fraction that raises the HEAL note) |
 | `raid` | `size`, `melee` (dots at the flanks), `threatPerSecond`, `holdAfterPull`, `meleeFlankDistance`, `whelpContactRange` |
-| `boss` | `looseHint` (replaces "Taunt. The boss is on the raid" for taunt-immune bosses), `shape` (`dragon` draws wings and a tail; anything else draws a standing figure), `pullDeadline` (seconds the raid waits for a tank player before body-pulling, default 20), `radius`, `speed`, `turnRate`, `meleeRange`, `meleeDamage`, `meleeInterval`, `stationary` (never walks), `cones` (below), `facingCone` (which cone defines "facing the raid"), `enrageMultiplier`, flying-boss fields `landingDuration`, `takeoffDuration`, `settleAfterLanding`, `pickupGrace` |
-| `threat` | `autoAttackPerSecond` (tank player), `ghostTankPerSecond`, `tauntLead`, `tauntBonus`, `tauntDuration`, `buffetCut`, `pullMultiplier` (1.1), `dangerBand` (0.8), `dangerBandDps` (where DPS must stop, default `dangerBand`; lower it on bosses that cut the tank's threat), `resetOnLanding`, `landingRaidThreat`, `turnGrace`, `ghostTauntDelay` |
+| `boss` | `looseHint` (replaces "Taunt. The boss is on the raid" for taunt-immune bosses), `shape` (`dragon` draws wings and a tail; anything else draws a standing figure), `autoPull` (opt-in scripted deadline pull; absent/false waits for engagement), `pullDeadline` (deadline in seconds when `autoPull` is true), `radius`, `speed`, `turnRate`, `meleeRange`, `meleeDamage`, `meleeInterval`, `stationary` (never walks), `cones` (below), `facingCone` (which cone defines "facing the raid"), `enrageMultiplier`, flying-boss fields `landingDuration`, `takeoffDuration`, `settleAfterLanding`, `pickupGrace` |
+| `threat` | `autoAttackPerSecond` (tank player), `ghostTankPerSecond`, `tauntDuration` (`tauntLead` and `tauntBonus` are legacy fields, ignored by combat), `buffetCut`, `pullMultiplier` (1.1), `dangerBand` (0.8), `dangerBandDps` (where DPS must stop, default `dangerBand`; lower it on bosses that cut the tank's threat), `resetOnLanding`, `landingRaidThreat`, `turnGrace`, `ghostTauntDelay` |
 | `gcd` | global cooldown in seconds (1.5) |
 | `roles` | which roles this fight offers (below) |
 | `playerAbilities` | the buttons (below) |
@@ -200,3 +200,31 @@ with done types `viewToggledOrWait`, `wait`, `playerAtSpot`, `bossAtSpot {spot, 
 5. Add cues for the reactions that matter and at least one drill per role.
 6. Put every unknown in `notes` and every URL in `sources`.
 7. `node tools/validate.mjs <raid>/<boss>` must print all green.
+## Fidelity review and causal effects
+
+`fidelity: { reviewed: "YYYY-MM-DD", status: "partial", limitations: string[] }`
+records a review, not a certification. The journal displays these limitations.
+Use concrete missing interactions; a correctly named button is not evidence
+that the underlying mechanic is implemented. See [the complete audit](research/encounter-fidelity-audit.md).
+
+The following optional fields support the corrected mechanics:
+
+- Debuffs: `target: "boss"` owns an enemy buff; `meleeSpeedMult` changes its swing
+  interval. A `kind: "dispel"` ability removes compatible dispel types, including
+  an enemy enrage, regardless of its internal button ID. `expireDamage` fires
+  only on natural expiry; a dispel prevents it. `speedMult` scales player movement.
+- Adds: `group` associates existing adds with a group effect; `persistent` keeps
+  them until killed or consumed. `raidDamage: false` suspends automatic raid DPS.
+  `consumeHeal` restores that fraction of boss HP on contact within `consumeRadius`.
+  `deathHazard` creates the referenced hazard at the actual death position; that
+  hazard must use `placement: "origin"`.
+- AoE `affectAdds`: `{ group, setHpFraction?, target?, speed?, priority?,
+  raidDamage?, raidDpsFraction? }` modifies existing adds without spawning copies.
+  `target: "boss"` follows the boss's current position. `raidDpsFraction` is estimated
+  cooperative raid damage per second as a fraction of an add's full health.
+- Ground encounters wait for engagement. `boss.autoPull: true` explicitly enables
+  a deadline pull for a deliberately scripted scenario. Normal phases must not
+  schedule synthetic `aggroPull` events; named stress drills can do so.
+- `kind: "threat"` adds a fixed `threat` amount in range. It never copies the
+  highest threat or forces attention. `kind: "taunt"` matches highest threat and
+  applies a temporary target override; it does not give a permanent threat bonus.

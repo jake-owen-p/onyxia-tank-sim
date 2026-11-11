@@ -59,20 +59,19 @@ export function applyPlayerThreat(threat, amount) {
 }
 
 /**
- * Taunt by the player: jump to the top of the table with a lead (`tauntLead` x
- * the top pool, plus `tauntBonus`) so a following Wing Buffet cut does not flip
- * her straight back, and force the target for `tauntDuration`.
+ * Taunt matches the highest threat and forces attention briefly. It does not
+ * grant an extra threat lead: the tank must build that with attacks afterwards.
  */
 export function applyTaunt(threat, t, cfg) {
   const top = Math.max(threat.raid, threat.ghost);
-  threat.player = Math.max(threat.player, top * (cfg.tauntLead || 1)) + (cfg.tauntBonus || 0);
+  threat.player = Math.max(threat.player, top);
   threat.tauntUntil = t + cfg.tauntDuration;
   return threat;
 }
 
 /** Taunt by the ghost tank (after the player pulled aggro). */
 export function applyGhostTaunt(threat, t, cfg) {
-  threat.ghost = Math.max(threat.ghost, threat.player * (cfg.tauntLead || 1)) + (cfg.tauntBonus || 0);
+  threat.ghost = Math.max(threat.ghost, threat.player, threat.raid);
   threat.ghostTauntUntil = t + cfg.tauntDuration;
   threat.ghostTauntAt = null;
   return threat;
@@ -115,7 +114,7 @@ export function selectTarget(threat, current, t, cfg) {
  * aggro by out-threating the ghost tank; the ghost taunts back after a delay.
  */
 export function selectTargetGhostTanked(threat, current, t, cfg) {
-  if (threat.raidMembers?.length) {
+  if (threat.raidMembers?.length || cfg.allPools) {
     const top = ['ghost', 'player', 'raid'].reduce((a, b) => threat[b] > threat[a] ? b : a);
     if (current == null) return top;
     return threat[top] > threat[current] * cfg.pullMultiplier ? top : current;

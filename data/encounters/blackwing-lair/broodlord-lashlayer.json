@@ -1,13 +1,13 @@
 {
  "id": "broodlord-lashlayer",
  "name": "Broodlord Lashlayer",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "blackwing-lair",
   "name": "Blackwing Lair",
   "size": 40
  },
- "notes": "Numbers follow docs/research/blackwing-lair/broodlord-lashlayer.md. Era 40-man: 916,025 HP, no enrage, immune to Taunt (the button is relabelled and stands for re-establishing threat, not a real Taunt; his Taunt immunity rests on a Season of Discovery guide, and Wowhead and the Wiki are silent on it: unverified). The fight is modelled as one 270 s phase (research: 4-5 minutes). The Suppression Room before him (research README) is not modelled at all: no Suppression Devices, whelps, Hatchers or Taskmasters. Knock Away: `knockback` with `threatCut: 0.5`, every 15-30 s (cmangos), first at 12 s. Knockback distance is a placeholder (8 yd; spell data 132 at speed 125 means a long throw); the corner wall stops it, and `wallMetric` scores being knocked while not backed into the wall (Warcraft Wiki, Warcraft Tavern, Ten Ton Hammer). The real cut applies to the top-threat player only; here the threat cut lands on the tank pool in the tank roles and on the ghost in the others, and `dangerBandDps` 0.32 keeps the DPS under the halved tank (the real threat table with three tanks building threat in parallel cannot be expressed; the off-tank who holds him during the swap is modelled only as the player tank re-gaining him with the button). Mortal Strike: first ~30 s, then every 25-35 s (cmangos), 5000 on a plate tank (research: 5-8k, crits to 8k plate) as a `cone` hit on the tank followed by a `debuff` with `healingMult: 0.5` for 5 s. Placeholder magnitude scaled to the 10,000 HP tank. Blast Wave: 20 yd, first ~20 s then every 8-16 s (cmangos). Real cast is instant; engine models a 3 s `offBoss` warning bar as an `aoe` with `moveOut` for melee (the warning stands in for the boss-mod timer melee actually use), 2000 Fire on the tank (scaled from 2625) and 3000 on anyone in the radius (2625-3375 before resistance; open question: ~3000 per Wowhead). Sources disagree on the plan: Wowhead has melee stay with their backs to a wall and eat it with Fire Resistance, Icy Veins has them run or LoS it around the corner, Warcraft Tavern weaves out; this rehearsal drills the walk-out only, and line-of-sight strategies around the corner are not modelled. The -50% movement slow is not modelled. Cleave: first 8 s then every ~7 s (cmangos), frontal cone. Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 450 per 2 s, Blast Wave 2000 on the tank, Mortal Strike 5000. Without a healer player the ghost has 850 HP/s passive, with one only 200 HP/s; a player tank has 950 HP/s (the real tank is healed by a whole raid). All are placeholders. Threat and pacing: the raid pool holds for 20 s after the pull (research: DPS starts 20-30 s in, Warcraft Tavern \"about 30 seconds\"). Wand/Vanish/Feign threat dumps and the three-tank queue do not exist in the engine; pacing is expressed through `dangerBandDps` and penalties. Engine gaps: no Suppression Room; no multi-tank threat table (a Knock Away really passes him to the off-tank who was building threat, here a single tank role re-takes him); Blast Wave has no slow and no line of sight; healing is one button; nothing to dispel.",
+ "notes": "Numbers follow docs/research/blackwing-lair/broodlord-lashlayer.md. Era 40-man: 916,025 HP, no enrage, immune to Taunt (the button is relabelled and stands for re-establishing threat, not a real Taunt; his Taunt immunity rests on a Season of Discovery guide, and Wowhead and the Wiki are silent on it: unverified). The fight is modelled as one 270 s phase (research: 4-5 minutes). The Suppression Room before him (research README) is not modelled at all: no Suppression Devices, whelps, Hatchers or Taskmasters. Knock Away: `knockback` with `threatCut: 0.5`, every 15-30 s (cmangos), first at 12 s. Knockback distance is a placeholder (8 yd; spell data 132 at speed 125 means a long throw); the corner wall stops it, and `wallMetric` scores being knocked while not backed into the wall (Warcraft Wiki, Warcraft Tavern, Ten Ton Hammer). The real cut applies to the top-threat player only; here the threat cut lands on the tank pool in the tank roles and on the ghost in the others, and `dangerBandDps` 0.32 keeps the DPS under the halved tank (the real threat table with three tanks building threat in parallel cannot be expressed; the off-tank who holds him during the swap is modelled only as the player tank re-gaining him with the button). Mortal Strike: first ~30 s, then every 25-35 s (cmangos), 5000 on a plate tank (research: 5-8k, crits to 8k plate) as a `cone` hit on the tank followed by a `debuff` with `healingMult: 0.5` for 5 s. Placeholder magnitude scaled to the 10,000 HP tank. Blast Wave: 20 yd, first ~20 s then every 8-16 s (cmangos). Real cast is instant; engine models a 3 s `offBoss` warning bar as an `aoe` with `moveOut` for melee (the warning stands in for the boss-mod timer melee actually use), 2000 Fire on the tank (scaled from 2625) and 3000 on anyone in the radius (2625-3375 before resistance; open question: ~3000 per Wowhead). Sources disagree on the plan: Wowhead has melee stay with their backs to a wall and eat it with Fire Resistance, Icy Veins has them run or LoS it around the corner, Warcraft Tavern weaves out; this rehearsal drills the walk-out only, and line-of-sight strategies around the corner are not modelled. The -50% movement slow is not modelled. Cleave: first 8 s then every ~7 s (cmangos), frontal cone. Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 450 per 2 s, Blast Wave 2000 on the tank, Mortal Strike 5000. Without a healer player the ghost has 850 HP/s passive, with one only 200 HP/s; a player tank has 950 HP/s (the real tank is healed by a whole raid). All are placeholders. Threat and pacing: the raid pool holds for 20 s after the pull (research: DPS starts 20-30 s in, Warcraft Tavern \"about 30 seconds\"). Wand/Vanish/Feign threat dumps and the three-tank queue do not exist in the engine; pacing is expressed through `dangerBandDps` and penalties. Engine gaps: no Suppression Room; no multi-tank threat table (a Knock Away really passes him to the off-tank who was building threat, here a single tank role re-takes him); Blast Wave has no slow and no line of sight; healing is one button; nothing to dispel. Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro.",
  "sources": [
   "docs/research/blackwing-lair/broodlord-lashlayer.md",
   "docs/research/blackwing-lair/README.md",
@@ -257,7 +257,8 @@
   "threatPerSecond": 50,
   "meleeFlankDistance": 9,
   "whelpContactRange": 5,
-  "holdAfterPull": 20
+  "holdAfterPull": 20,
+  "holdWhileLoose": true
  },
  "boss": {
   "radius": 5,
@@ -276,7 +277,9 @@
     "style": "cleave"
    }
   },
-  "enrageMultiplier": 1.3
+  "enrageMultiplier": 1.3,
+  "tauntImmune": true,
+  "looseHint": "Build threat in melee range. This boss cannot be taunted."
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -335,13 +338,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
-   "label": "Step back in",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 16,
+   "kind": "threat",
+   "label": "Threat burst",
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "Broodlord cannot be Taunted. This is your way back to the top of his threat list after a Knock Away. Use it the moment he turns, never while he is already on you."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -826,5 +831,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Threat-loss recovery is modelled, but exact Knock Away targeting and the Suppression Room pull remain simplified."
+  ]
+ }
 }

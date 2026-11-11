@@ -66,7 +66,7 @@ export function updatePlayer(state, script, cmd, dt, rng) {
       vx = c * fwd + s * str;
       vy = s * fwd - c * str;
       const l = Math.hypot(vx, vy) || 1;
-      const speed = fwd < 0 && !str ? cfg.speed * 0.65 : cfg.speed; // backpedalling is slower, like WoW
+      const speed = cfg.speed * (p.speedMult ?? 1) * (fwd < 0 && !str ? 0.65 : 1);
       vx = (vx / l) * speed; vy = (vy / l) * speed;
     }
     dx = vx * dt; dy = vy * dt;
@@ -389,10 +389,17 @@ export function spawnAdds(state, script, actionDef) {
         speed: actionDef.speed ?? 6,
         spawnedAt: state.t,
         lifetime: actionDef.lifetime || 28,
-        diesAt: state.t + (playerPicks ? (actionDef.heldLifetime || 70) : (actionDef.lifetime || 28)),
+        persistent: !!actionDef.persistent,
+        diesAt: actionDef.persistent ? Infinity : state.t + (playerPicks ? (actionDef.heldLifetime || 70) : (actionDef.lifetime || 28)),
         holdSpot: actionDef.holdSpot || 'ghostOfftankSpot',
         onRaid: false,
         label: actionDef.label,
+        source: actionDef.id,
+        group: actionDef.group || null,
+        raidDamage: actionDef.raidDamage !== false,
+        consumeHeal: actionDef.consumeHeal || 0,
+        consumeRadius: actionDef.consumeRadius ?? script.boss.radius,
+        deathHazard: actionDef.deathHazard || null,
         killable: !!(actionDef.killable || actionDef.killFirst),
         priority: !!actionDef.killFirst && roleMatches(actionDef.killFirstRoles, state.role, state.tankRole),
         hp: 1,                       // fraction left; the raid burns it down over `lifetime`, your attacks speed that up
@@ -406,12 +413,18 @@ export function updateWhelps(state, script, dt) {
   const w = state.world;
   const ws = w.whelps;
   let onRaid = false;
+  const consumed = [];
+  const died = [];
   for (let i = ws.length - 1; i >= 0; i--) {
     const wh = ws[i];
-    if (state.t >= wh.diesAt) { ws.splice(i, 1); continue; }
-    if (wh.killable) { wh.hp -= dt / wh.lifetime; if (wh.hp <= 0) { ws.splice(i, 1); continue; } }
+    if (state.t >= wh.diesAt) { if (wh.killable) died.push(wh); ws.splice(i, 1); continue; }
+    if (wh.consumeHeal && dist(wh.x, wh.y, w.boss.x, w.boss.y) <= wh.consumeRadius) {
+      consumed.push(wh); ws.splice(i, 1); continue;
+    }
+    if (wh.killable && wh.raidDamage !== false) { wh.hp -= dt * (wh.raidDpsFraction ?? 1 / wh.lifetime); if (wh.hp <= 0) { died.push(wh); ws.splice(i, 1); continue; } }
     let tx, ty, stop;
-    if (wh.target === 'player') { tx = w.player.x; ty = w.player.y; stop = 2.5 + (wh.uid % 3) * 0.6; }
+    if (wh.target === 'boss') { tx = w.boss.x; ty = w.boss.y; stop = 0; }
+    else if (wh.target === 'player') { tx = w.player.x; ty = w.player.y; stop = 2.5 + (wh.uid % 3) * 0.6; }
     else if (wh.target === 'ghost') { const g = script.positions[wh.holdSpot] || w.ghost; tx = g.x + (wh.uid % 5) - 2; ty = g.y + (wh.uid % 3) - 1; stop = 1; }
     else {
       // head for the nearest raid dot
@@ -432,7 +445,7 @@ export function updateWhelps(state, script, dt) {
       if (dist(wh.x, wh.y, dot.x, dot.y) <= script.raid.whelpContactRange) { wh.onRaid = true; onRaid = true; break; }
     }
   }
-  return { onRaid };
+  return { onRaid, consumed, died };
 }
 
 /** Loose adds within `range` of the player switch to the player and die on their normal timer. Returns how many did. */
@@ -442,7 +455,7 @@ export function pickupWhelps(state, script, range) {
   for (const wh of state.world.whelps) {
     if (wh.target === 'raid' && dist(wh.x, wh.y, p.x, p.y) <= range) {
       wh.target = 'player';
-      wh.diesAt = Math.min(wh.diesAt, state.t + wh.lifetime);
+      if (!wh.persistent) wh.diesAt = Math.min(wh.diesAt, state.t + wh.lifetime);
       n++;
     }
   }

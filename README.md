@@ -16,8 +16,12 @@ place.
 
 Encounters live in `data/encounters/<raid>/<boss>.json` and are listed in
 `data/encounters/index.json`; the menu has a raid tab and a boss chip for each.
-Every script is built from the research under `docs/research/<raid>/` and
-checked against it again before it is marked ready. The format is documented
+All 62 scripts have a source-and-code audit, but none is certified as a complete
+Classic encounter simulation. Several defining interactions still use scripted
+substitutes. `ready` in the index means the encounter can be loaded, not that its
+mechanics are complete. The menu exposes the remaining limits for each boss;
+see the [fidelity audit](docs/research/encounter-fidelity-audit.md) for coverage,
+sources, corrections and unresolved work. The format is documented
 in `docs/ENCOUNTER_FORMAT.md`; `node tools/validate.mjs` lints every script
 and plays it with a bot for each role.
 

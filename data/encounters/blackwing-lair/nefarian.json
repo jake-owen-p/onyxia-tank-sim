@@ -1,13 +1,13 @@
 {
  "id": "nefarian",
  "name": "Nefarian",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "blackwing-lair",
   "name": "Blackwing Lair",
   "size": 40
  },
- "notes": "Numbers follow docs/research/blackwing-lair/nefarian.md. Era 40-man: HP 2,100,000 (classicdb, flagged suspect in the research, likely a lower bound) on three phases: 175 s of drakonids (`submerged`, HP held at 100%), 270 s of Nefarian to 20% (real 6-10 minutes; compressed), 90 s of phase 3 with Bone Constructs to 0% (real last stretch is the phase 2 pattern; research: a 20-30 minute fight in all). He cannot be Taunted on one guide's word (Millenium); Wowhead and the Wiki are silent on it, so treat that as unverified (the button is relabelled Step in and stands for re-establishing threat; he actually lands on the tank). Phase 1: Lord Victor Nefarius (immune) on the throne; two tunnels each spawn drakonids until 42 have died (cmangos, Warcraft Wiki, Warcraft Tavern). Engine: 2 adds per wave (one per tunnel) every 8 s for 175 s (about 44 adds), generic and without colours; the colour resistances, Brood Powers, Chromatics, kill order and the kill-count trigger for phase 2 are not modelled (HP is a clock; here phase 1 simply runs out). Tanks hold the west tunnel exit, the off-tank role (`holdsBoss: false`) holds the east one; the ghost group takes the other side; adds on the kiter are a repeating `aoe` with `tankDamage` (placeholder) so a healer has something to do. Nefarius' spells are placeholders with the research cadences: Shadow Bolt Volley every 19-28 s, Shadow Command (15 s MC, +300% damage) every 24-30 s as an undispellable debuff (dispel type n/a on Wowhead Classic and classicdb) that takes control 5 s; real raids polymorph or root the victim; plain Shadow Bolt, Silence and Polymorph are omitted (a debuff queue that never reaches the player would add noise). Landing: on the phase change he emerges, a `threatWipe` plus a room-wide `aoe` of 2500. The damage is a placeholder: sources range from about 1000 (Wiki, modern text) to about 4000-5000 (research estimate) and cmangos casts no landing breath at all; without the Onyxia Scale Cloak it is a lethal DoT, and the cloak is assumed. Behind the throne (`throneBack`, radius 5, hidden from the boss spot by the throne wall drawn at y=44 and within 40 yards of the tank, checked by computation) is the only safe place in the room (Warcraft Wiki, Millenium); it stays an option rather than a drill, because the landing is instant and the marker only walks to cover for casts, so it is not scored. Phase 2: Shadow Flame cone every ~12 s (cmangos; logs 8-37 s, irregular), 4000 Shadow, `conditional: onPlayer`, a 2 s cast. Bellowing Roar: 1.5 s cast, 4 s fear, 35 yd radius around him, every ~30 s (cmangos, BigWigs 32 s, logs 27-90 s); ranged stand beyond it (attack range extended to 38 yd so that is possible; the real raid has Tremor Totem and Fear Ward, which the engine cannot express, so the tank takes the fear). Veil of Shadow: tank `debuff`, Curse, 6 s, `healingMult 0.25`, every ~15 s (cmangos), dispellable by the healer; Tail Lash (cone) with `conditional: behind`; Cleave cone. Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 650 per 2 s, Shadow Flame 4000, Cleave 350, class-call debuffs below; placeholders. Passive healing is 1350 HP/s on a player tank, 1300 on the ghost without a healer player, 220 with one (the class-call durations are 30 s now and the ghost tank has no way to answer a Veil of Shadow; the raid's healers are represented by this number). Class calls (every ~30 s in the research: 30 s DBM/BigWigs, 25-35 Warcraft Wiki, 35-40 cmangos; 30 s used) are approximations, one per class call, cycling Warrior, Priest, Mage, Paladin, Rogue, Hunter, Shaman, Warlock across a 240 s rotation: Warrior = `debuff` +30% damage taken on the tank (30 s; +30% spell data, +10% Millenium, an open question); Priest = a Shadow DoT on the tank (`debuff`, no dispel, 30 s) standing in for Corrupted Healing, since the engine has no healing penalty based on who casts; Mage = random Magic debuff with a 4 s stun for Wild Polymorph (playerChance 0.3); Paladin = `shield` (`roles: melee`, 10 s) for Siphon Blessing putting physical immunity on him; Rogue = a 30 s `debuff` on the melee role standing for the root, which does not stop attacks (the teleport into his arcs is not modelled; the real MT has to turn him); Hunter = no effect (the free call); Shaman = Corrupted Totems, three stationary `killFirst` adds near his flank (`speed` 0.01 because the engine reads 0 as unset) that must die before phase 3; Warlock = Infernals, three `killFirst` adds from the raid side (fire-immune and stunning in the real fight, neither expressible). The Druid call is left out: it only matters for a Druid main tank. The choose-of-nine random roll is replaced by a fixed rotation so a rehearsal covers each one. The \"stop at 21%, push on a Hunter or Paladin call\" tactic cannot be expressed. He is `stationary` in phases 2 and 3 (tanked where he lands, no knockback of the tank into the raid, an approximation: the real tank repositions and turns him for class calls). Phase 3 (20%): Bone Constructs (HP 6,104 each; roughly 42 in the real fight) as one `adds` wave of 12 from the old tunnel exits, `killFirst`, 24 s lifetime (placeholder; the real count is tied to kills in phase 1, and they scatter where the drakonids fell, which the engine cannot express). Off-tank role holds two of the spawn points; the rest go to the ghost group. Engine gaps: the marker cannot walk anyone to cover for an instant such as the landing Shadow Flame, no Fear Ward or Tremor, no mind control, adds without abilities or colours, one tank in the rehearsal, no Taunt immunity, class calls are fixed and simplified.",
+ "notes": "Numbers follow docs/research/blackwing-lair/nefarian.md. Era 40-man: HP 2,100,000 (classicdb, flagged suspect in the research, likely a lower bound) on three phases: 175 s of drakonids (`submerged`, HP held at 100%), 270 s of Nefarian to 20% (real 6-10 minutes; compressed), 90 s of phase 3 with Bone Constructs to 0% (real last stretch is the phase 2 pattern; research: a 20-30 minute fight in all). He cannot be Taunted on one guide's word (Millenium); Wowhead and the Wiki are silent on it, so treat that as unverified (the button is relabelled Step in and stands for re-establishing threat; he actually lands on the tank). Phase 1: Lord Victor Nefarius (immune) on the throne; two tunnels each spawn drakonids until 42 have died (cmangos, Warcraft Wiki, Warcraft Tavern). Engine: 2 adds per wave (one per tunnel) every 8 s for 175 s (about 44 adds), generic and without colours; the colour resistances, Brood Powers, Chromatics, kill order and the kill-count trigger for phase 2 are not modelled (HP is a clock; here phase 1 simply runs out). Tanks hold the west tunnel exit, the off-tank role (`holdsBoss: false`) holds the east one; the ghost group takes the other side; adds on the kiter are a repeating `aoe` with `tankDamage` (placeholder) so a healer has something to do. Nefarius' spells are placeholders with the research cadences: Shadow Bolt Volley every 19-28 s, Shadow Command (15 s MC, +300% damage) every 24-30 s as an undispellable debuff (dispel type n/a on Wowhead Classic and classicdb) that takes control 5 s; real raids polymorph or root the victim; plain Shadow Bolt, Silence and Polymorph are omitted (a debuff queue that never reaches the player would add noise). Landing: on the phase change he emerges, a `threatWipe` plus a room-wide `aoe` of 2500. The damage is a placeholder: sources range from about 1000 (Wiki, modern text) to about 4000-5000 (research estimate) and cmangos casts no landing breath at all; without the Onyxia Scale Cloak it is a lethal DoT, and the cloak is assumed. Behind the throne (`throneBack`, radius 5, hidden from the boss spot by the throne wall drawn at y=44 and within 40 yards of the tank, checked by computation) is the only safe place in the room (Warcraft Wiki, Millenium); it stays an option rather than a drill, because the landing is instant and the marker only walks to cover for casts, so it is not scored. Phase 2: Shadow Flame cone every ~12 s (cmangos; logs 8-37 s, irregular), 4000 Shadow, `conditional: onPlayer`, a 2 s cast. Bellowing Roar: 1.5 s cast, 4 s fear, 35 yd radius around him, every ~30 s (cmangos, BigWigs 32 s, logs 27-90 s); ranged stand beyond it (attack range extended to 38 yd so that is possible; the real raid has Tremor Totem and Fear Ward, which the engine cannot express, so the tank takes the fear). Veil of Shadow: tank `debuff`, Curse, 6 s, `healingMult 0.25`, every ~15 s (cmangos), dispellable by the healer; Tail Lash (cone) with `conditional: behind`; Cleave cone. Damage is scaled so a 10,000 HP tank survives normal play but dies if the healer ignores a spike: melee 650 per 2 s, Shadow Flame 4000, Cleave 350, class-call debuffs below; placeholders. Passive healing is 1350 HP/s on a player tank, 1300 on the ghost without a healer player, 220 with one (the class-call durations are 30 s now and the ghost tank has no way to answer a Veil of Shadow; the raid's healers are represented by this number). Class calls (every ~30 s in the research: 30 s DBM/BigWigs, 25-35 Warcraft Wiki, 35-40 cmangos; 30 s used) are approximations, one per class call, cycling Warrior, Priest, Mage, Paladin, Rogue, Hunter, Shaman, Warlock across a 240 s rotation: Warrior = `debuff` +30% damage taken on the tank (30 s; +30% spell data, +10% Millenium, an open question); Priest = a Shadow DoT on the tank (`debuff`, no dispel, 30 s) standing in for Corrupted Healing, since the engine has no healing penalty based on who casts; Mage = random Magic debuff with a 4 s stun for Wild Polymorph (playerChance 0.3); Paladin = `shield` (`roles: melee`, 10 s) for Siphon Blessing putting physical immunity on him; Rogue = a 30 s `debuff` on the melee role standing for the root, which does not stop attacks (the teleport into his arcs is not modelled; the real MT has to turn him); Hunter = no effect (the free call); Shaman = Corrupted Totems, three stationary `killFirst` adds near his flank (`speed` 0.01 because the engine reads 0 as unset) that must die before phase 3; Warlock = Infernals, three `killFirst` adds from the raid side (fire-immune and stunning in the real fight, neither expressible). The Druid call is left out: it only matters for a Druid main tank. The choose-of-nine random roll is replaced by a fixed rotation so a rehearsal covers each one. The \"stop at 21%, push on a Hunter or Paladin call\" tactic cannot be expressed. He is `stationary` in phases 2 and 3 (tanked where he lands, no knockback of the tank into the raid, an approximation: the real tank repositions and turns him for class calls). Phase 3 (20%): Bone Constructs (HP 6,104 each; roughly 42 in the real fight) as one `adds` wave of 12 from the old tunnel exits, `killFirst`, 24 s lifetime (placeholder; the real count is tied to kills in phase 1, and they scatter where the drakonids fell, which the engine cannot express). Off-tank role holds two of the spawn points; the rest go to the ghost group. Engine gaps: the marker cannot walk anyone to cover for an instant such as the landing Shadow Flame, no Fear Ward or Tremor, no mind control, adds without abilities or colours, one tank in the rehearsal, no Taunt immunity, class calls are fixed and simplified. Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro. Fidelity correction: the grounded boss follows its target. It is no longer permanently rooted to make the practice easier; ordinary cast windows still stop movement.",
  "sources": [
   "docs/research/blackwing-lair/nefarian.md",
   "https://warcraft.wiki.gg/wiki/Nefarian_(tactics)",
@@ -564,7 +564,8 @@
   "threatPerSecond": 50,
   "meleeFlankDistance": 10,
   "whelpContactRange": 5,
-  "holdAfterPull": 5
+  "holdAfterPull": 5,
+  "holdWhileLoose": true
  },
  "boss": {
   "shape": "dragon",
@@ -575,7 +576,7 @@
   "meleeDamage": 650,
   "meleeInterval": 2,
   "facingCone": "breath",
-  "stationary": true,
+  "stationary": false,
   "cones": {
    "breath": {
     "angle": 60,
@@ -599,7 +600,9 @@
     "style": "tail"
    }
   },
-  "enrageMultiplier": 1.3
+  "enrageMultiplier": 1.3,
+  "tauntImmune": true,
+  "looseHint": "Build threat in melee range. This boss cannot be taunted."
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -668,13 +671,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
-   "label": "Step in",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 16,
+   "kind": "threat",
+   "label": "Threat burst",
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "Nefarian cannot be Taunted. This is your way back on top of his threat list after a fear or when something else has his attention. Also picks up drakonids in phase 1."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -829,7 +834,6 @@
    "kind": "cone",
    "cone": "breath",
    "cast": 2,
-   "conditional": "onPlayer",
    "damage": 4000,
    "raidMetric": "raidBreathHits",
    "raidToast": "Shadow Flame hit the raid",
@@ -1928,5 +1932,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Drakonid kills do not trigger the landing. Class calls and the resurrection of dead adds are simplified."
+  ]
+ }
 }

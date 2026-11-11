@@ -857,7 +857,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 20,
+   "range": 5,
    "icon": "taunt",
    "tip": "Used only to pick up tentacles."
   },
@@ -2823,5 +2823,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "The stomach and Flesh Tentacles are not separate objectives. Killing them does not trigger the weakened phase."
+  ]
+ }
 }

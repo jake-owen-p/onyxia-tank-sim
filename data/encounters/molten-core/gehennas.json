@@ -1,13 +1,13 @@
 {
  "id": "gehennas",
  "name": "Gehennas",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "molten-core",
   "name": "Molten Core",
   "size": 40
  },
- "notes": "Numbers follow docs/research/molten-core/gehennas.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 351,780 HP, two Flamewaker guards (77,700 HP each). Two phases: guards alive (~55 s) then Gehennas (~120 s); a 2-4 minute kill. Gehennas' Curse: -75% healing taken for 5 min, 45 yd, Curse (`healingMult` 0.25). Cadence every 26-36 s per DBM/BigWigs (every 30, jitter 5). It is put on the tank, where the healing reduction matters; the rest of the raid carries it in the real fight too. Debuffs on others are only dispelled when the player is the healer, so the 8 s `duration` stands for the raid's decursers clearing it; left to run for 5 minutes it would kill a player tank nobody can decurse. Rain of Fire: 10 yd radius for 6 s on a random player; tick 925-1075 per 2 s (DBC) vs 368 per 2 s (wiki) vs 700+/s (Ten Ton Hammer): using 500 per second (the middle), 1.5 s warning (the rain starts falling). Cadence: DBM has only a 4.8 s minimum, cmangos 6-12 s; every 7, jitter 2 here, low confidence. Shadow Bolt on the tank: 2250-2750 every 3-6 s is too much for a 10,000 HP tank on passive healing; scaled to 1200 every 7 s as a non-dispellable 1.5 s debuff that ticks once. Shadow Bolt on a random player: a projectile for 2500 with a 7% chance to pick you. Flamewaker guards: killFirst adds, so attacking Gehennas while one lives is scored, and the off-tank role holds them (`holdsBoss: false`) on their own spot while a ghost tank has Gehennas. They are present from the start in the real fight; here they arrive 12 s in beside the tank spot. They are held at one spot south-west where ranged can reach them from the raid; real raids keep the two apart so their stuns do not overlap, which a single hold spot cannot show. Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Sunder Armor and Strike are not modelled (adds have no abilities). Fist of Ragnaros: instant, 8 yd radius around a guard, 4 s stun (20277), frequent. The engine has no AoE centred on an add and a debuff has no role filter, so it is a random 4 s stun on 12 of the raid (`count` 12, the melee and off-tanks who would be in reach) every 10 s while the guards live (cadence a placeholder). Ranged and healers, who in the real fight are out of reach, can also draw it at those odds: a known approximation. Engine gaps: debuffs on others only dispelled when the player is the healer, adds without abilities, no AoE centred on an add, no Free Action Potion, Dispel always takes the oldest debuff.",
+ "notes": "Numbers follow docs/research/molten-core/gehennas.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 351,780 HP, two Flamewaker guards (77,700 HP each). Two phases: guards alive (~55 s) then Gehennas (~120 s); a 2-4 minute kill. Gehennas' Curse: -75% healing taken for 5 min, 45 yd, Curse (`healingMult` 0.25). Cadence every 26-36 s per DBM/BigWigs (every 30, jitter 5). It is put on the tank, where the healing reduction matters; the rest of the raid carries it in the real fight too. Debuffs on others are only dispelled when the player is the healer, so the 8 s `duration` stands for the raid's decursers clearing it; left to run for 5 minutes it would kill a player tank nobody can decurse. Rain of Fire: 10 yd radius for 6 s on a random player; tick 925-1075 per 2 s (DBC) vs 368 per 2 s (wiki) vs 700+/s (Ten Ton Hammer): using 500 per second (the middle), 1.5 s warning (the rain starts falling). Cadence: DBM has only a 4.8 s minimum, cmangos 6-12 s; every 7, jitter 2 here, low confidence. Shadow Bolt on the tank: 2250-2750 every 3-6 s is too much for a 10,000 HP tank on passive healing; scaled to 1200 every 7 s as a non-dispellable 1.5 s debuff that ticks once. Shadow Bolt on a random player: a projectile for 2500 with a 7% chance to pick you. Flamewaker guards: killFirst adds, so attacking Gehennas while one lives is scored, and the off-tank role holds them (`holdsBoss: false`) on their own spot while a ghost tank has Gehennas. They are present from the start in the real fight; here they arrive 12 s in beside the tank spot. They are held at one spot south-west where ranged can reach them from the raid; real raids keep the two apart so their stuns do not overlap, which a single hold spot cannot show. Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Sunder Armor and Strike are not modelled (adds have no abilities). Fist of Ragnaros: instant, 8 yd radius around a guard, 4 s stun (20277), frequent. The engine has no AoE centred on an add and a debuff has no role filter, so it is a random 4 s stun on 12 of the raid (`count` 12, the melee and off-tanks who would be in reach) every 10 s while the guards live (cadence a placeholder). Ranged and healers, who in the real fight are out of reach, can also draw it at those odds: a known approximation. Engine gaps: debuffs on others only dispelled when the player is the healer, adds without abilities, no AoE centred on an add, no Free Action Potion, Dispel always takes the oldest debuff. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events.",
  "sources": [
   "docs/research/molten-core/gehennas.md",
   "https://warcraft.wiki.gg/wiki/Gehennas",
@@ -535,7 +535,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
   },
@@ -739,12 +739,6 @@
      "first": 16,
      "every": 10,
      "jitter": 2
-    },
-    {
-     "id": "aggroPull",
-     "first": 40,
-     "every": 45,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -877,12 +871,6 @@
      "first": 8,
      "every": 7,
      "jitter": 2
-    },
-    {
-     "id": "aggroPull",
-     "first": 35,
-     "every": 45,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -1248,5 +1236,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "The guards do not cast from their own positions. Curse coverage and the guards’ stuns are simplified."
+  ]
+ }
 }

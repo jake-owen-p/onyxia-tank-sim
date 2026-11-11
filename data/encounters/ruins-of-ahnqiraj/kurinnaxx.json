@@ -518,7 +518,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 20,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt him back when your stacks have fallen off. Never earlier."
   },
@@ -1168,5 +1168,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Tank swaps are scripted rather than driven by separate tanks’ threat and Mortal Wound stacks."
+  ]
+ }
 }

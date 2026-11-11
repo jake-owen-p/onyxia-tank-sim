@@ -1,7 +1,7 @@
 {
  "id": "flamegor",
  "name": "Flamegor",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "blackwing-lair",
   "name": "Blackwing Lair",
@@ -340,7 +340,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
   },
@@ -422,7 +422,6 @@
    "kind": "cone",
    "cone": "breath",
    "cast": 2,
-   "conditional": "onPlayer",
    "damage": 4000,
    "raidMetric": "raidBreathHits",
    "raidToast": "Shadow Flame hit the raid",
@@ -933,5 +932,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Tranquilizing Shot removes a substitute effect on the tank. Frenzy does not change the boss’s actual swing speed."
+  ]
+ }
 }

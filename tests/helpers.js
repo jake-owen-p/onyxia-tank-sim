@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createSim, FIXED_DT } from '../src/core/sim.js';
 import { dist, angleTo, angleDelta } from '../src/core/geometry.js';
 import { killTarget } from '../src/core/ideal.js';
+import { canDispel } from '../src/core/expectations.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -78,8 +79,8 @@ export function roleBot(role) {
     const kick = sim.script.playerAbilities.interrupt;
     if (castDef && castDef.interruptible && kick && s.abilities.list.includes('interrupt') && s.abilities.readyAt.interrupt <= s.t && (castDef.offBoss || dist(p.x, p.y, b.x, b.y) - sim.script.boss.radius <= (kick.range ?? 8))) cmd.abilities.push('interrupt');
     if (!gcdReady) return cmd;
-    const types = s.roleDef.dispels || (sim.script.playerAbilities.dispel || {}).dispels;
-    if (s.abilities.list.includes('dispel') && s.debuffs.some((d) => d.dispel !== 'none' && (!types || types.includes(d.dispel)))) { cmd.abilities.push('dispel'); return cmd; }
+    const dispel = s.abilities.list.find((id) => s.abilities.readyAt[id] <= s.t && s.debuffs.some((d) => canDispel(s, sim.script, d, id)));
+    if (dispel) { cmd.abilities.push(dispel); return cmd; }
     if (role === 'healer') {
       if (g.hp / g.maxHp < 0.8) cmd.abilities.push('heal');
       return cmd;

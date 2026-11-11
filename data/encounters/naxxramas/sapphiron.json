@@ -1,13 +1,13 @@
 {
  "id": "sapphiron",
  "name": "Sapphiron",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "naxxramas",
   "name": "Naxxramas",
   "size": 40
  },
- "notes": "Numbers follow docs/research/naxxramas/sapphiron.md. The lair is a 60 yd round room, an estimate; only the shape and 'spread like C'Thun' are sourced. HP is a clock: about 5 minutes of ground time plus four air phases, about 6:50 in all (classicdb 2.6M vs wiki 3.16M, kills run 6 to 10 min per the research), so the 15:00 Berserk (Frost Aura x6) is out of reach and not scheduled: noted, not modelled. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Frost Aura is 300 per 2 s on everyone (the real 600 per 2 s halved for about 150 frost resistance plus Greater Frost Protection; the research leaves resistance per raider open and the spell data ('Deals 600 frost damage a second', periodic dummy 601 every 1 second) vs the wiki's and Wowhead's every 2 s is unresolved; the 2 s reading is used, and a later log check should settle the scaling). Melee 850 per 2 s plus Cleave 1,100 is scaled from 10,680-12,258 pre-mitigation so a healer who does nothing loses the tank in about 20 seconds: passive healing with a player healer is 250 per second against about 700 per second incoming (the ghost tank is not hit by Frost Breath, it stands in for the tank hiding like everyone else). Air phase timing is DBM's where it has one: first lift-off 45 s (wiki/WT, DBM Era 31 to 46 s), later lift-off 67 s after landing (DBM 54 to 71 s), landing 28.5 s after lift-off, Frost Breath's cast 12.5 s before landing. The interval between the five Icebolts is not in any source: 2.5 s here is an estimate (the research implies 3 to 4 s and the air phase has about 13 s for all five before the cast). Ice blocks are random players in the real fight; the engine's cover uses fixed named spots, so each air phase has five block spots in a ring around the centre rotated between phases (a generated list, positions and their spread are placeholders). The ranged, healer and melee air spots and the tank's per-phase landing spot (`pickup1` to `pickup4`) are placed clear of every Icebolt splash of that phase. Icebolt lands on those spots as a telegraphed 10 yd hazard, and a green Ice Block circle marks each block. `iceboltYou` (playerChance 0.28, once per air phase, at the fifth bolt so a Chill laid earlier in the phase cannot catch a frozen player who cannot be damaged in the real game) is the Icebolt landing on the player: a stun until the breath lands and full cover from it, which is how the real ice block behaves (immune while frozen); the engine cannot make a frozen player immune to other damage. Icebolt's splash on neighbours is the hazard the others dodge. Frost Breath is 20,000 scaled (real 75,000 to 125,000 Frost, a one-shot either way); cover is a `safeSpots` circle 3 yd behind each block (`coverN_M`, radially away from the bomb's impact point at the hover spot, `safeRadius` 3.5): it accepts from about 0.5 yd in front of the block to 6.5 yd behind it and 3.5 yd to each side, and rejects the side facing the bomb. The engine cannot compute real line of sight, so this is the closest approximation; the wiki rule of moving after the third Icebolt is taught in the tips, not enforced. Life Drain is three copies of a curse per cast (the real spell hits 10 players; the engine has one debuff per action and the three copies keep the dispel decisions honest), 600 per second on the player when it lands (the wiki's 1,750 to 2,250 per 3 s), 12 s; the heal it gives Sapphiron cannot be expressed so it only hurts the raid and is scored as `debuffSeconds`. Mages/Druids decurse: the ranged role carries Dispel (curse only), which is the real assignment. Chill (Blizzard, real 3,063 to 3,907 per 2 s plus a 65% slow) is a stationary telegraphed zone every 12 s on the ground and once per air phase (cadence unknown in the sources, estimate; the air-phase count is low so that it cannot sit on the block a player must hide behind, which the marker cannot avoid) that never roams and does not slow; the engine has no moving hazards and no slow effect. Life Drain's second and third copies only land on non-tank roles so a lone tank player is not drained twice at once; the raid still spends the dispel. Sapphiron cannot be taunted: the tank's Taunt button is relabelled Threat burst and stands for the Heroic Strike and Sunder burst that takes him back after the landing. Landing grabs are scored with `hasAggro`. Whether DPS can keep hitting him in the air: Wowhead says ranged 'can cheat next to the cube', which implies yes, so ranged keep DPS (`attackableInAir`) and melee stand down; the research does not state this outright. Below 10% he stops flying; the script's last air phase is at 21% to 18% and the final phase runs to 0 grounded, so the real 'no air below 10%' rule is met by the clock. Cleave every 7.5 s, Tail Sweep every 11 s (conditional on someone standing behind him) and the 12 yd lift-off knockback radius are estimates; the sources give no cadence.",
+ "notes": "Numbers follow docs/research/naxxramas/sapphiron.md. The lair is a 60 yd round room, an estimate; only the shape and 'spread like C'Thun' are sourced. HP is a clock: about 5 minutes of ground time plus four air phases, about 6:50 in all (classicdb 2.6M vs wiki 3.16M, kills run 6 to 10 min per the research), so the 15:00 Berserk (Frost Aura x6) is out of reach and not scheduled: noted, not modelled. Damage is scaled to a 10,000 HP tank, so a tank survives normal play but dies if the healer ignores a spike. Frost Aura is 300 per 2 s on everyone (the real 600 per 2 s halved for about 150 frost resistance plus Greater Frost Protection; the research leaves resistance per raider open and the spell data ('Deals 600 frost damage a second', periodic dummy 601 every 1 second) vs the wiki's and Wowhead's every 2 s is unresolved; the 2 s reading is used, and a later log check should settle the scaling). Melee 850 per 2 s plus Cleave 1,100 is scaled from 10,680-12,258 pre-mitigation so a healer who does nothing loses the tank in about 20 seconds: passive healing with a player healer is 250 per second against about 700 per second incoming (the ghost tank is not hit by Frost Breath, it stands in for the tank hiding like everyone else). Air phase timing is DBM's where it has one: first lift-off 45 s (wiki/WT, DBM Era 31 to 46 s), later lift-off 67 s after landing (DBM 54 to 71 s), landing 28.5 s after lift-off, Frost Breath's cast 12.5 s before landing. The interval between the five Icebolts is not in any source: 2.5 s here is an estimate (the research implies 3 to 4 s and the air phase has about 13 s for all five before the cast). Ice blocks are random players in the real fight; the engine's cover uses fixed named spots, so each air phase has five block spots in a ring around the centre rotated between phases (a generated list, positions and their spread are placeholders). The ranged, healer and melee air spots and the tank's per-phase landing spot (`pickup1` to `pickup4`) are placed clear of every Icebolt splash of that phase. Icebolt lands on those spots as a telegraphed 10 yd hazard, and a green Ice Block circle marks each block. `iceboltYou` (playerChance 0.28, once per air phase, at the fifth bolt so a Chill laid earlier in the phase cannot catch a frozen player who cannot be damaged in the real game) is the Icebolt landing on the player: a stun until the breath lands and full cover from it, which is how the real ice block behaves (immune while frozen); the engine cannot make a frozen player immune to other damage. Icebolt's splash on neighbours is the hazard the others dodge. Frost Breath is 20,000 scaled (real 75,000 to 125,000 Frost, a one-shot either way); cover is a `safeSpots` circle 3 yd behind each block (`coverN_M`, radially away from the bomb's impact point at the hover spot, `safeRadius` 3.5): it accepts from about 0.5 yd in front of the block to 6.5 yd behind it and 3.5 yd to each side, and rejects the side facing the bomb. The engine cannot compute real line of sight, so this is the closest approximation; the wiki rule of moving after the third Icebolt is taught in the tips, not enforced. Life Drain is three copies of a curse per cast (the real spell hits 10 players; the engine has one debuff per action and the three copies keep the dispel decisions honest), 600 per second on the player when it lands (the wiki's 1,750 to 2,250 per 3 s), 12 s; the heal it gives Sapphiron cannot be expressed so it only hurts the raid and is scored as `debuffSeconds`. Mages/Druids decurse: the ranged role carries Dispel (curse only), which is the real assignment. Chill (Blizzard, real 3,063 to 3,907 per 2 s plus a 65% slow) is a stationary telegraphed zone every 12 s on the ground and once per air phase (cadence unknown in the sources, estimate; the air-phase count is low so that it cannot sit on the block a player must hide behind, which the marker cannot avoid) that never roams and does not slow; the engine has no moving hazards and no slow effect. Life Drain's second and third copies only land on non-tank roles so a lone tank player is not drained twice at once; the raid still spends the dispel. Sapphiron cannot be taunted: the tank's Taunt button is relabelled Threat burst and stands for the Heroic Strike and Sunder burst that takes him back after the landing. Landing grabs are scored with `hasAggro`. Whether DPS can keep hitting him in the air: Wowhead says ranged 'can cheat next to the cube', which implies yes, so ranged keep DPS (`attackableInAir`) and melee stand down; the research does not state this outright. Below 10% he stops flying; the script's last air phase is at 21% to 18% and the final phase runs to 0 grounded, so the real 'no air below 10%' rule is met by the clock. Cleave every 7.5 s, Tail Sweep every 11 s (conditional on someone standing behind him) and the 12 yd lift-off knockback radius are estimates; the sources give no cadence. Fidelity correction: Threat burst now adds a fixed amount of threat in melee range. It no longer copies the top threat or forces a target. The automated raid holds damage while a tank recovers aggro. Fidelity correction: Frost Aura does not damage an iceblocked player, consistent with Blizzard’s Classic clarification. See docs/research/aq40-and-naxx-fidelity.md.",
  "sources": [
   "docs/research/naxxramas/sapphiron.md",
   "https://warcraft.wiki.gg/wiki/Sapphiron_(Classic)",
@@ -740,7 +740,8 @@
   "threatPerSecond": 40,
   "meleeFlankDistance": 13,
   "whelpContactRange": 5,
-  "holdAfterPull": 5
+  "holdAfterPull": 5,
+  "holdWhileLoose": true
  },
  "boss": {
   "shape": "dragon",
@@ -773,7 +774,8 @@
   "takeoffDuration": 2.5,
   "pickupGrace": 6,
   "settleAfterLanding": 2.5,
-  "looseHint": "He cannot be taunted. Burst threat to get him back"
+  "looseHint": "Build threat in melee range. This boss cannot be taunted.",
+  "tauntImmune": true
  },
  "threat": {
   "autoAttackPerSecond": 80,
@@ -839,13 +841,15 @@
  },
  "playerAbilities": {
   "taunt": {
-   "kind": "taunt",
+   "kind": "threat",
    "label": "Threat burst",
-   "cooldown": 10,
-   "gcd": false,
-   "range": 16,
+   "cooldown": 6,
+   "gcd": true,
+   "range": 5,
    "icon": "taunt",
-   "tip": "Sapphiron cannot be taunted. This button stands for the Heroic Strike and Sunder burst that takes him back after a landing."
+   "tip": "Build threat with melee attacks. This practice button combines several attacks; it cannot taunt or guarantee that the boss switches to you.",
+   "shortLabel": "Threat",
+   "threat": 1200
   },
   "attack": {
    "kind": "attack",
@@ -911,7 +915,8 @@
    "icon": "eruption",
    "requires": "any",
    "hidden": true,
-   "tip": "Frost Aura hits everyone in the room every 2 seconds. It never stops. Frost resistance and potions are the answer."
+   "tip": "Frost Aura hits everyone in the room every 2 seconds. It never stops. Frost resistance and potions are the answer.",
+   "safeIfDebuff": "iceboltYou"
   },
   "lifeDrain": {
    "label": "Life Drain",
@@ -3603,5 +3608,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Ice blocks use scripted positions and cover areas. Blizzard does not move or slow players."
+  ]
+ }
 }

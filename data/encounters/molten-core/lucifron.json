@@ -1,13 +1,13 @@
 {
  "id": "lucifron",
  "name": "Lucifron",
- "version": "1.1.0",
+ "version": "1.2.0",
  "raidInfo": {
   "id": "molten-core",
   "name": "Molten Core",
   "size": 40
  },
- "notes": "Numbers follow docs/research/molten-core/lucifron.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 351,780 HP, two Flamewaker Protectors (90,650 HP each). Fight modelled as two phases: Protectors alive (~60 s) then Lucifron alone (~100 s); a 2-3 minute kill. Impending Doom: 2000 Shadow landing 10 s after application if not dispelled. The engine only has per-second ticks, so it is a 10 s Magic debuff ticking 200/s (2000 total) that the healer removes. Radius: DBC 45 yd vs guides 40 yd; the stack strategy puts everyone inside it, so target is the whole raid (`all`). Lucifron's Curse: +100% power cost cannot be expressed (no resources); it is a Curse debuff (no damage) that the healer must remove. In the real raid Mages and Druids decurse; here the healer's Dispel covers both Magic and Curse. Dispel always takes the oldest debuff, so the priority rules (healers first for Doom, tank first for the curse) are in the tips only. Shadow Shock: single target, 419-485 Shadow on his current target every 3-6 s (Wowhead Classic 19460, cmangos): a one-tick 450 non-dispellable debuff on the tank every 4.5 s. Dominate Mind (Protectors): 2 s cast, 15 s charm, Magic, cast off the boss so he keeps swinging. The engine has no mind control: it is a Magic debuff on 2 random raid members (one per Protector) that fears you for 6 s if you are the victim (an approximation of losing control until a priest dispels you). Interruptibility unknown: not interruptible here. Cadences follow DBM/BigWigs logs: Impending Doom every 21-27 s (every 24, jitter 3), Curse 21-25.9 s (every 23.5, jitter 2.5). `first` values include the walk to the pull. Protectors: killFirst adds, so attacking Lucifron while one lives is scored; the off-tank role holds them (`holdsBoss: false`) on their own spot while a ghost tank has Lucifron. They are present from the pull in reality; here they spawn 12 s in beside the tank spot, and the hold spot sits where ranged can reach them from the raid. Their Cleave cannot be modelled (adds have no abilities or facing). Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Aggro pulls every ~40 s stand in for the curse doubling rage costs and a geared DPS overtaking the tank. Engine gaps: no mind control, debuffs on others are only dispelled when the player is the healer (other roles see them run their course), adds without abilities, no cone on the adds, no line-of-sight pillar logic. Boss melee 350 per 2 s is scaled so a 10,000 HP tank lives on passive healing.",
+ "notes": "Numbers follow docs/research/molten-core/lucifron.md, corrected by docs/research/molten-core/VERIFICATION.md. Era 40-man: 351,780 HP, two Flamewaker Protectors (90,650 HP each). Fight modelled as two phases: Protectors alive (~60 s) then Lucifron alone (~100 s); a 2-3 minute kill. Impending Doom: 2000 Shadow landing 10 s after application if not dispelled. The engine only has per-second ticks, so it is a 10 s Magic debuff ticking 200/s (2000 total) that the healer removes. Radius: DBC 45 yd vs guides 40 yd; the stack strategy puts everyone inside it, so target is the whole raid (`all`). Lucifron's Curse: +100% power cost cannot be expressed (no resources); it is a Curse debuff (no damage) that the healer must remove. In the real raid Mages and Druids decurse; here the healer's Dispel covers both Magic and Curse. Dispel always takes the oldest debuff, so the priority rules (healers first for Doom, tank first for the curse) are in the tips only. Shadow Shock: single target, 419-485 Shadow on his current target every 3-6 s (Wowhead Classic 19460, cmangos): a one-tick 450 non-dispellable debuff on the tank every 4.5 s. Dominate Mind (Protectors): 2 s cast, 15 s charm, Magic, cast off the boss so he keeps swinging. The engine has no mind control: it is a Magic debuff on 2 random raid members (one per Protector) that fears you for 6 s if you are the victim (an approximation of losing control until a priest dispels you). Interruptibility unknown: not interruptible here. Cadences follow DBM/BigWigs logs: Impending Doom every 21-27 s (every 24, jitter 3), Curse 21-25.9 s (every 23.5, jitter 2.5). `first` values include the walk to the pull. Protectors: killFirst adds, so attacking Lucifron while one lives is scored; the off-tank role holds them (`holdsBoss: false`) on their own spot while a ghost tank has Lucifron. They are present from the pull in reality; here they spawn 12 s in beside the tank spot, and the hold spot sits where ranged can reach them from the raid. Their Cleave cannot be modelled (adds have no abilities or facing). Adds lose health to the raid over their lifetime and each of your attacks takes 6% more, so DPS who switch to them finish them sooner. Aggro pulls every ~40 s stand in for the curse doubling rage costs and a geared DPS overtaking the tank. Engine gaps: no mind control, debuffs on others are only dispelled when the player is the healer (other roles see them run their course), adds without abilities, no cone on the adds, no line-of-sight pillar logic. Boss melee 350 per 2 s is scaled so a 10,000 HP tank lives on passive healing. Fidelity correction: normal encounter schedules no longer inject artificial DPS aggro pulls; threat changes through combat and actual encounter mechanics. Dedicated aggro drills retain their explicit stress events. Fidelity correction: Impending Doom is now delayed damage at expiry, fully prevented by a timely dispel, instead of a damage-over-time substitute.",
  "sources": [
   "docs/research/molten-core/lucifron.md",
   "https://warcraft.wiki.gg/wiki/Lucifron",
@@ -567,7 +567,7 @@
    "label": "Taunt",
    "cooldown": 10,
    "gcd": false,
-   "range": 16,
+   "range": 5,
    "icon": "taunt",
    "tip": "Taunt forces the boss onto you for a few seconds and puts you on top of the threat table. Press it the moment he turns on the raid, never while he is already on you."
   },
@@ -614,12 +614,13 @@
    "dispel": "magic",
    "target": "all",
    "duration": 10,
-   "tickDamage": 200,
+   "tickDamage": 0,
    "warn": true,
    "cue": null,
    "icon": "dispel",
    "requires": "grounded",
-   "tip": "Everyone within 40-45 yd gets a 10 s Magic debuff; when it runs out it deals 2000 Shadow (here 200 per second). Priests and Paladins dispel it in time."
+   "tip": "Impending Doom deals 2,000 Shadow damage after 10 seconds. Dispel it before it expires to prevent the damage.",
+   "expireDamage": 2000
   },
   "lucifronsCurse": {
    "label": "Lucifron's Curse",
@@ -748,12 +749,6 @@
      "first": 20,
      "every": 15,
      "jitter": 2
-    },
-    {
-     "id": "aggroPull",
-     "first": 42,
-     "every": 40,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -880,12 +875,6 @@
      "first": 15,
      "every": 23.5,
      "jitter": 2.5
-    },
-    {
-     "id": "aggroPull",
-     "first": 30,
-     "every": 40,
-     "jitter": 5
     }
    ],
    "expectations": [
@@ -1256,5 +1245,12 @@
     }
    ]
   }
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "The Protectors do not have their own attacks or mind-control behaviour. Dispel targeting and curse resource costs are simplified."
+  ]
+ }
 }

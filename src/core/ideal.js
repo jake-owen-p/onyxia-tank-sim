@@ -163,7 +163,8 @@ export function idealPlayerPos(state, script) {
     if (best) return { x: best.x, y: best.y, reason: 'los' };
   }
   // Something coming that a debuff protects you from: go and get it from its cloud.
-  for (const u of state.upcoming) {
+  const imminent = b.cast ? [...state.upcoming, { id: b.cast.id, in: b.cast.end - state.t }] : state.upcoming;
+  for (const u of imminent) {
     const def = script.actions[u.id];
     if (!def || !def.safeIfDebuff || u.in > (def.seekLead ?? 12)) continue;
     if (!roleMatches(def.seekRoles ?? 'nontank', state.role, state.tankRole)) continue;   // whoever holds the boss stays put unless the script says otherwise

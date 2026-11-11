@@ -1653,5 +1653,12 @@
  },
  "sources": [
   "docs/research/onyxia/onyxia.md (Wowhead Classic spell data, DBM/BigWigs timers, cmangos/vmangos scripts, Classic wiki and guides)"
- ]
+ ],
+ "fidelity": {
+  "reviewed": "2026-11-11",
+  "status": "partial",
+  "limitations": [
+   "Warrior attacks and the Berserker Rage stance change are combined into practice buttons."
+  ]
+ }
 }
