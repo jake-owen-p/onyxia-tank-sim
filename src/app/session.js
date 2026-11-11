@@ -45,7 +45,7 @@ export function createSession({ script, scenario, settings, renderer, audio, inp
     }
     if (input.consume('pause')) { if (hooks.onPauseKey) hooks.onPauseKey(api); else api.togglePause('user'); }
     for (const n of [1, 2, 3]) {
-      if (input.consume('phase' + n) && !paused && !scenario.simOptions.manual) {
+      if (input.consume('phase' + n) && !paused && scenario.mode !== 'tutorial' && !scenario.simOptions.manual) {
         sim.setPhase(n);
         routeEvents();
         if (hooks.onPhaseSkip) hooks.onPhaseSkip(n);

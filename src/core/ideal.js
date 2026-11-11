@@ -94,6 +94,14 @@ export function idealTankPos(state, script, who = 'player') {
   if (b.passive || b.state === 'submerged') return dodgeHazards(ts.x, ts.y, state, 'tankSpot');
   const mine = who === 'player' ? 'player' : 'ghost';
   if (!b.engaged || b.target !== mine) {
+    if (b.engaged && script.boss.tauntImmune) {
+      // Rebuild from a flank. Chasing her tail while she faces a raider gets
+      // the tank swept away before they can land a threat-generating attack.
+      const side = Math.sin(angleTo(b.x, b.y, me.x, me.y) - b.heading) >= 0 ? 1 : -1;
+      const range = script.boss.radius + (script.playerAbilities.taunt?.range || 5) - 1;
+      const a = b.heading + side * Math.PI / 2;
+      return dodgeHazards(b.x + Math.cos(a) * range, b.y + Math.sin(a) * range, state, 'approach');
+    }
     // Go and take her: a point at taunt range on the near side of the boss.
     const range = Math.min((script.playerAbilities.taunt || { range: 16 }).range, script.boss.meleeRange) - 1;
     const a = angleTo(b.x, b.y, me.x, me.y);

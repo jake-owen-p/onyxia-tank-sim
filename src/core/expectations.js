@@ -26,6 +26,11 @@ export function hasAggro(state) {
   return b.state === 'grounded' && b.target === 'player';
 }
 
+/** A landing reaction can build threat without immediately winning aggro. */
+export function startedPickup(state) {
+  return state.landedAt != null && (hasAggro(state) || state.lastThreatAbilityAt >= state.landedAt);
+}
+
 /** Is the boss on the tank (the player in a tank role, the ghost tank otherwise)? */
 export function onTank(state) {
   const b = state.world.boss;
@@ -122,7 +127,7 @@ export function bossFacingRaid(state, script) {
   return inCone(r.x, r.y, b.x, b.y, b.heading, rad(c.angle), c.range);
 }
 
-export const CHECKS = { nearWall, threatLead, hasAggro, onTank, outsideLane, outsideHazard, facingAway, whelpsPicked, inRange, notInFront, noDispellable };
+export const CHECKS = { nearWall, threatLead, hasAggro, startedPickup, onTank, outsideLane, outsideHazard, facingAway, whelpsPicked, inRange, notInFront, noDispellable };
 
 /** Evaluate a named check. */
 export function runCheck(name, state, script) {

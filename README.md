@@ -3,7 +3,7 @@
 A standalone browser app for rehearsing WoW Classic raid encounters, one boss
 at a time, as a tank, an off-tank, a melee DPS, a ranged DPS or a healer. The
 simulator plays the boss and a ghost raid; you play your role. It never
-connects to the game. Practise where to stand, when to move, when to Taunt,
+connects to the game. Practise where to stand, when to move, when to build threat,
 when to stop attacking, what to dispel and when to heal until the timings are
 reflex, then look at a scorecard that tells you exactly what to fix.
 
@@ -110,7 +110,8 @@ WoW defaults. Every key is rebindable in Settings, with conflict detection.
 | Jump | `Space` |
 | Mouse turn | hold right mouse button and drag |
 | Zoom (POV view) | mouse wheel |
-| Taunt (tanks) | `1` |
+| Threat burst / Taunt (tanks, by encounter) | `1` |
+| Berserker Rage (Onyxia tanks) | `6` |
 | Attack (every role) | `2`, or click/tap Attack on the action bar |
 | Heal the tank (healer) | `3` |
 | Dispel (healer, where the fight has dispels) | `4` |
@@ -144,27 +145,34 @@ Pick a role on the menu. The encounter script says which roles a fight offers.
 
 When you are not a tank, a ghost tank holds the boss. Your threat is measured
 against the ghost tank's; attacking into the red band pulls aggro and the ghost
-tank Taunts her back a few seconds later. When you are the healer the ghost
+tank rebuilds threat on Onyxia; tauntable encounters use a taunt after a delay. When you are the healer the ghost
 tank's passive healing is low, so your heals are what keeps it up.
 
 ## Modes
 
-**Tutorial.** A guided walkthrough of about five minutes. It introduces the
-room, then one mechanic at a time with the ghost tank switched on: moving to
-the tank spot, the pull and positioning, when to Taunt (a DPS pulls aggro and
-a NOW note drops into the lane), Flame Breath, Wing Buffet and keeping her on
-you, Phase 2 and the Deep Breath lane, the Phase 3 landing and recovering from
-Bellowing Roar. Boss HP is frozen and the boss only does what the current step
-triggers. Steps are defined in the encounter script under `tutorial.steps`.
+**Tutorial.** Onyxia's full encounter with a coaching panel. The tutorial uses
+exactly the same simulation options, raid-DPS clock, action scheduler, movement,
+threat and damage as a full run. Lessons observe events; they never disable the
+boss, teleport the player, force a phase or inject an attack. The panel follows
+phase changes even if a lesson is unfinished. Skip changes only the panel;
+Esc pauses the entire encounter. Completion is saved after victory.
+
+Classic Onyxia is taunt-immune. Threat burst adds a fixed amount of threat in
+melee range, so build a lead rather than saving every press for an aggro loss.
+Fireballs clear their primary target's threat, leaving other players' threat
+intact; landing does not zero the table. Berserker Rage prevents or breaks fear
+for ten seconds with a thirty-second cooldown. Its stance change is combined
+into the practice button. [The fidelity audit](docs/research/onyxia/tutorial-fidelity.md)
+records sources and remaining approximations.
 
 **Drills.** Short loops for one mechanic, defined under `drills` in the script:
 
 | Drill | What it loops |
 |---|---|
-| Pull and Wing Buffet | Pull from the ramp to the wall, hold through three Buffets, Taunt her back if she turns. 75 s. |
-| When to Taunt | Already at the wall. DPS keep pulling aggro and Buffets cut your threat. Taunt the instant she turns, never before. 60 s. |
+| Pull and Wing Buffet | Pull from the ramp to the wall, hold through three Buffets, Build threat if she turns. 75 s. |
+| Getting aggro back | Already at the wall. DPS keep pulling aggro and Knock Away cuts your threat. Build a lead and recover if she turns. 60 s. |
 | Bellowing Roar recovery | Already at the wall in Phase 3. Each Roar fears you off her. Get back between her and the raid before she turns. 105 s. |
-| Phase 3 pickup | She lands in five seconds. Taunt, pick her up, drag her to the wall between the cracks. 45 s. |
+| Phase 3 pickup | She lands in five seconds. Build threat, pick her up, drag her to the wall between the cracks. 45 s. |
 
 Each loop ends on a scorecard; `Enter` runs it again with a fresh random seed.
 
@@ -223,12 +231,12 @@ she is held on you; a short timeline strip of upcoming events; your HP.
 **The Taunt lane.** Above the Taunt key is a rhythm-game lane. A note drops
 when a Taunt is due and must be pressed when it reaches the key: a red pulsing
 note marked NOW the moment she turns on the raid (a DPS pulled aggro, or a
-Wing Buffet cut your threat under them), a LANDED note a second after she
-touches down in Phase 3 with her threat table empty, and for the off-tank a
+Knock Away cut your threat under them), a LANDED note a second after she
+touches down in Phase 3, when Fireballs may have cleared your threat, and for the off-tank a
 WHELPS note that is satisfied by running into the wave. Presses grade as
 PERFECT (within 0.3 s), GOOD (inside the note's window) or MISS, build a
 streak, and feed the scorecard. A note is only shown when Taunt can be ready
-for it; pressing Taunt with no note up is a wasted cooldown. The lane can be
+for it; Onyxia’s Threat burst also builds a useful lead between notes. The lane can be
 hidden and its lead time changed in Settings. Each warning has its own audio cue
 plus a spoken countdown. Live feedback: a subtle red edge flash while she is
 facing the raid, an orange edge while you stand in a hazard, a green tick when
@@ -306,7 +314,7 @@ Core modules:
 |---|---|
 | `sim.js` | fixed-timestep orchestrator, phases, boss actions, abilities, metrics, events |
 | `geometry.js` | angles, cones, point-in-polygon, lane rectangles, wall collision |
-| `threat.js` | two-pool threat model with taunt, buffet cut and target hysteresis |
+| `threat.js` | player, tank and raid threat, optional per-raider tables, additive threat, taunts and target hysteresis |
 | `hazards.js` | Deep Breath lanes and Eruption cracks with warning/active lifecycles |
 | `scheduler.js` | per-phase action timers with seeded jitter |
 | `expectations.js` | the named checks the script refers to |
@@ -395,7 +403,7 @@ The action ids are fixed: `flameBreath`, `cleave`, `tailSweep`, `wingBuffet`,
 
 Boss HP drains linearly from `hpFrom` to `hpTo` over `duration` seconds, then
 the next phase starts. `bossState` `airborne` triggers a takeoff when the phase
-begins; `grounded` after an airborne phase triggers a landing (threat reset,
+begins; `grounded` after an airborne phase triggers a landing (an optional script-defined threat reset,
 she targets the raid). Each action fires `first` seconds into the phase, then
 every `every` seconds, each time shifted by up to `jitter` seconds.
 
@@ -458,18 +466,17 @@ phase") set the clock; `start` is a position preset (`entrance`, `wall`,
 ### Tutorial steps
 
 ```json
-{ "id": "buffet", "title": "Wing Buffet", "text": "...",
-  "setup": { "bossPassive": false, "ghost": true, "phase": 3, "start": "wall" },
-  "trigger": "wingBuffet",
-  "done": { "type": "expectation", "id": "rebuild" } }
+{ "id": "pull", "title": "Pull her to the back wall", "text": "...",
+  "phase": 1,
+  "done": { "type": "bossAtSpot", "spot": "bossSpot", "playerSpot": "tankSpot", "hold": 3 } }
 ```
 
-`setup` can wake or calm the boss, jump to a phase, teleport to a preset and
-force the ghost tank on. `trigger` fires one boss action after the text has
-been on screen for a moment. `done` types: `viewToggledOrWait {seconds}`,
-`playerAtSpot {spot}`, `bossAtSpot {spot, hold}`, `eventLanded {event,
-metricUnchanged}`, `expectation {id}` (resolved on time or late), `wait
-{seconds}`.
+Tutorials are observation-only. `phase` scopes each lesson to the actual
+encounter phase. `done` supports `viewToggledOrWait`, `wait`, `playerAtSpot`,
+`bossAtSpot` (also requires the boss to be engaged and targeting the player),
+`eventLanded`, `expectation`, `phaseEnd` and `victory`. Phase-end and victory
+lessons remain visible until the simulation advances. No `setup` or `trigger`
+mutation is supported. Use drills for isolated mechanic practice.
 
 ## Adding a boss
 
@@ -503,25 +510,18 @@ its own placeholders in the script `notes` and in `docs/research/<raid>/`:
 | Flame Breath cadence / cast | every 20 s ± 2, 3 s cast, first at 16 s | `phases[].actions`, `actions.flameBreath` | combat log timestamps between casts; cast bar length |
 | Flame Breath cone | 60°, 60 yd | `boss.cones.breath` | who gets hit at the flanks and at range |
 | Cleave cadence / cone | every 7 s ± 1; 90°, 15 yd | `actions.cleave`, `boss.cones.cleave` | hits on melee standing at the flanks |
-| Wing Buffet cadence, cast, knockback, threat cut | every 25 s ± 2, 1 s cast, 22 yd, 35% | `actions.wingBuffet`, `threat.buffetCut` | knockback distance on open floor; threat meter drop |
-| Tail Sweep arc, range, knockback | 120°, 18 yd, 10 yd | `boss.cones.tail`, `actions.tailSweep` | the angle behind her that still gets swept |
-| Phase thresholds and lengths | 65% / 40%; 110 s, 80 s, 130 s | `phases[].hpTo`, `phases[].duration` | your raid's actual DPS timeline |
-| Deep Breath warning and lane | 5 s warning, 3 s burn, 22 yd wide, every 26 s ± 3 | `actions.deepBreath`, `deepBreathLanes` | emote-to-fire delay; lane width; which hover points she uses |
-| Fireball cadence | every 3 s ± 1 | `actions.fireball` | cosmetic only |
-| Whelp waves | every 34 s ± 3, 6 per cave, speed 6 | `actions.whelpWave` | wave size and timing; whether both caves spawn together |
-| Bellowing Roar cadence / cast / fear | every 32 s ± 1, 1.5 s cast, 3 s fear | `actions.bellowingRoar`, `player.fearDuration` | cast bar length; how long the tank is actually feared (Fear Ward would make it zero) |
-| Aggro pulls | Phase 1 first at 45 s then every 40 s ± 6; Phase 3 first at 50 s then every 45 s ± 6; raid jumps to 115% of the tank | `phases[].actions`, `actions.aggroPull.threatMultiplier` | how often your DPS actually overtake the tank |
-| Taunt note windows | perfect ±0.3 s; Taunt on turn +3 s; Taunt on landing −1/+4 s around 1 s; whelps −2/+6 s around 3 s | `cues` | how tight your raid leader wants the reactions |
-| Eruption pulse | every 9 s ± 1, 2 s warning, 2 s burn | `actions.eruption` | crack telegraph timing |
-| Landing / takeoff | 2.5 s each; threat reset on landing; 2.5 s settle before she walks | `boss.landingDuration`, `boss.takeoffDuration`, `threat.resetOnLanding`, `boss.settleAfterLanding` | whether threat truly resets and how long she is untargetable |
-| Grace windows | raid holds DPS 6 s after the pull; facing not charged for 6 s after the pull and 5 s after a landing | `raid.holdAfterPull`, `boss.pickupGrace` | how long your raid really holds, and how fast the pickup must be |
-| Threat numbers | tank 80/s in melee, raid 50/s, pull at 110%, regain at 110%, Taunt sets tank to 1.6 x raid + 200, raid starts at 300 on landing | `threat`, `raid.threatPerSecond` | threat meter values for a tank's steady threat vs raid DPS; how long a Taunt lead survives a Buffet |
-| Boss movement | 9 yd/s, 180°/s turn, 11 yd melee range, 9 yd body | `boss` | how fast she turns onto the raid; where the tank stands relative to her hitbox |
-| Player | 7 yd/s, 200°/s keyboard turn, 8000 HP, 320 HP/s healing, 1.4 yd jump over 0.8 s | `player` | tank HP pool and incoming healing at your gear level |
-| Damage | breath 1500, cleave 600, tail 600, melee 260 / 2 s, lane 4000, crack 1500 | `actions`, `boss.meleeDamage` | combat log; with no mitigation buttons these only matter for the HP bar and death count |
-| Taunt cooldown | 10 s, 16 yd, holds her 3 s | `playerAbilities.taunt`, `threat.tauntDuration` | your class's Taunt (Growl is the same) |
-| Expectation windows | pull 15 s + 6, pickup 5 s + 4, drag 25 s + 10, keep her after Buffet 6 s + 4 (judged from 1 s), Taunt back after a pull 3 s + 3, Roar recovery 8 s + 6 (judged from 3.5 s) | `phases[].expectations` | what your raid leader actually expects |
-| Positions | tank spot (0, 50), boss spot (0, 40) facing north, pickup (0, 19), landing (0, 6) | `positions` | your guild's chosen wall and the real landing point |
+| Wing Buffet / Knock Away | Separate attacks: Buffet has no threat cut; Knock Away removes 25% of its victim's threat | `actions.wingBuffet`, `actions.knockAway` | exact knockback distances remain estimates |
+| Fireball | 3 s cast, tracks primary target, 8 yd splash; only primary target's threat is wiped | `actions.fireball` | projectile travel time and target selection distribution |
+| Deep Breath | Reposition, 5 s warning, then traverse the room with a moving fire front | `actions.deepBreath`, `deepBreathLanes` | exact coordinates, width and flight speed |
+| Phase changes | 65% / 40%; ground walk before liftoff; preserve remaining threat on landing | `phases`, `boss.walkToTakeoff`, `threat.resetOnLanding` | raid-DPS clock is configurable and synthetic |
+| Threat | 80/s tank auto-attacks, up to 50/s per automated raider, 1200 additive threat per burst | `threat`, `raid`, `playerAbilities.taunt` | teaching values, not a class rotation or combat-log fit |
+| Fear | 1.5 s cast, 3 s fear; Berserker Rage breaks/prevents it for 10 s, 30 s cooldown | `actions.bellowingRoar`, `playerAbilities.rage` | stance management is combined into the button |
+| Coaching scores | Pickup rewards starting threat generation; repositioning clock starts after gaining control | `phases[].expectations` | score windows are practice targets, not Blizzard rules |
+
+See [the Onyxia fidelity audit](docs/research/onyxia/tutorial-fidelity.md) for
+primary sources and uncertainty. No claim is made that estimated damage,
+geometry, automated raid behaviour or compressed controls exactly reproduce
+the WoW server.
 
 ## Testing
 

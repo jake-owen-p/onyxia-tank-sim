@@ -2,11 +2,14 @@
 // cue share of the score and the snapshot shape.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIXED_DT } from '../src/core/sim.js';
+import { setRaidThreat } from '../src/core/threat.js';
+import { FIXED_DT, createSim } from '../src/core/sim.js';
 import { snapshot } from '../src/core/snapshot.js';
 import { computeScore } from '../src/core/scoring.js';
 import { tallyCues, bestComboOf } from '../src/core/presscues.js';
-import { script, makeSim, run, idle, perfectTank } from './helpers.js';
+import { script, run, idle, perfectTank } from './helpers.js';
+
+const makeSim = (options) => createSim({ ...script, boss: { ...script.boss, stationary: true } }, { seed: 7, ...options });
 
 const press = (...ids) => () => ({ ...idle(), abilities: ids });
 const beats = (events, status) => events.filter((e) => e.type === 'beat' && (!status || e.status === status));
@@ -17,7 +20,7 @@ const perfect = script.cues.windows.perfect;
 /** Put her on the raid at the wall: a threatLost event and a NOW note. */
 function loseHer(sim) {
   const s = sim.state;
-  s.threat.player = 100; s.threat.raid = 3000;
+  s.threat.player = 2600; setRaidThreat(s.threat, 3000);
   return run(sim, FIXED_DT);
 }
 
@@ -68,7 +71,7 @@ test('a late Taunt inside the window is good; none at all is missed and breaks t
 test('no note is raised when Taunt cannot be ready inside the window', () => {
   const sim = makeSim({ start: 'wall', manual: true });
   run(sim, FIXED_DT, press('taunt'));                  // burn the cooldown
-  run(sim, script.threat.tauntDuration + 0.1);          // let the hold expire
+  run(sim, 0.1);          // let the hold expire
   loseHer(sim);
   assert.ok(sim.state.abilities.readyAt.taunt > sim.state.t + cueDef('tauntLost').late, 'still on cooldown past the window');
   assert.equal(pendingFor(sim, 'tauntLost'), undefined);

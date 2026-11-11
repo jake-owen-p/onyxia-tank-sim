@@ -15,7 +15,7 @@ import { rad, dist, angleTo, inCone, angleDelta, lerp, clamp, circlePoints, onFl
 import { createRng } from './rng.js';
 import {
   createThreat, tickThreat, applyTaunt, applyGhostTaunt, applyBuffet, applyAggroPull, applyPlayerThreat,
-  resetThreat, selectTarget, selectTargetGhostTanked, threatRatio,
+  resetThreat, setRaidThreat, wipeTargetThreat, cutTargetThreat, selectTarget, selectTargetGhostTanked, threatRatio,
 } from './threat.js';
 import { createCues, planCues, onCueEvent, onCuePress, clearPendingCues } from './presscues.js';
 import { createLane, createZone, createCracks, pulseCracks, updateHazards, hazardAt } from './hazards.js';
@@ -37,11 +37,11 @@ const DEFAULTS = {
   startOffset: 0,         // seconds relative to that phase's end when negative, start when positive
   start: 'entrance',      // position preset: 'entrance' | 'wall' | 'pickup'
   actions: null,          // override action list applied to every phase (drills)
-  bossPassive: false,     // boss ignores everyone (tutorial)
-  manual: false,          // no automatic schedule (tutorial drives actions)
+  bossPassive: false,     // boss ignores everyone (idle menu backdrop)
+  manual: false,          // no automatic schedule (isolated simulation fixtures)
   duration: null,         // end the run after this many seconds (drills)
   phaseDurations: null,   // { [phaseId]: seconds } overrides
-  freezeHp: false,        // hold HP so phases never advance on their own (tutorial)
+  freezeHp: false,        // hold HP (idle backdrop / isolated fixtures)
 };
 
 const LEGACY_ROLE = { mt: 'tank' };
@@ -73,7 +73,7 @@ export function createSim(script, options = {}) {
       idealBoss: null,
       coneFlash: Object.fromEntries(Object.keys(script.boss.cones || {}).map((k) => [k, -Infinity]).concat([['knockback', -Infinity]])),
     },
-    threat: createThreat(),
+    threat: createThreat(script.threat.individualRaidThreat ? script.raid.size : 0),
     abilities: {
       gcdUntil: -Infinity,
       readyAt: Object.fromEntries(Object.keys(script.playerAbilities).map((k) => [k, -Infinity])),
@@ -244,6 +244,10 @@ export function createSim(script, options = {}) {
     // Boss state transitions.
     if (def.bossState === 'airborne' && (b.state === 'grounded')) {
       beginTakeoff(state, script);
+      if (script.boss.walkToTakeoff) {
+        const delay = b.transition.end - state.t;
+        for (const entry of state.schedule) if (!entry.once && script.actions[entry.id]?.requires === 'airborne') entry.nextAt += delay;
+      }
       emit('action', { id: 'takeoff', label: (script.actions.takeoff || {}).label || 'Takeoff' });
       b.engaged = true;
     } else if ((def.bossState || 'grounded') === 'grounded' && (b.state === 'airborne' || b.state === 'takeoff')) {
@@ -319,6 +323,7 @@ export function createSim(script, options = {}) {
   function onActionEvent(id) {
     for (const e of activeExpectationDefs()) {
       if (e.event !== id) continue;
+      if (e.onlyWhileTanking && state.world.boss.target !== tankTarget()) continue;
       if (e.type === 'onEvent') {
         if (state.world.player.fearedUntil > state.t) continue;   // feared: the position is not yours to choose
         const inst = createInstance(e, state.phase, state.t, { deadline: state.t, graceEnd: state.t + (e.grace || 0), event: id });
@@ -404,6 +409,8 @@ export function createSim(script, options = {}) {
     const requires = def.requires || 'grounded';
     if (requires === 'grounded' && (b.state !== 'grounded' || (!b.engaged && !force) || b.passive)) return false;
     if (requires === 'airborne' && b.state !== 'airborne') return false;
+    if (requires === 'airborne' && b.breathFlight && def.kind !== 'adds') return false;
+    if (def.placement === 'lanes' && b.cast) return false;
     if (requires === 'submerged' && b.state !== 'submerged') return false;
     if (def.kind === 'hazard' && def.placement === 'lanes' && !opts.freezeHp && state.phaseEnd - state.t < (def.warning || 0) + (def.active || 0) + 2) return false;
     if (def.conditional === 'behind' && !anyoneBehind()) return false;
@@ -467,7 +474,7 @@ export function createSim(script, options = {}) {
         w.coneFlash.knockback = state.t;
         const d = bossRangeTo(p.x, p.y);
         const front = def.radial || Math.abs(angleDelta(b.heading, angleTo(b.x, b.y, p.x, p.y))) <= Math.PI / 2;
-        if (d <= def.knockbackRange && front) {
+        if (d <= def.knockbackRange && front && (!def.targetOnly || b.target === 'player')) {
           if (def.damage) damagePlayer(def.damage, id);
           if (def.playerMetric) addMetric(def.playerMetric, 1);
           stunPlayer(def.stun);
@@ -478,6 +485,10 @@ export function createSim(script, options = {}) {
           emit('knockback', { source: id, offWall: !!offWall });
         }
         if (!tankRole && b.target === 'ghost') applyBuffet(state.threat, def.threatCut || 0, false);
+        if (def.targetOnly && b.target === 'raid' && state.threat.raidMembers.length) {
+          const victim = w.raid.dots[state.threat.raidTarget];
+          if (bossRangeTo(victim.x, victim.y) <= def.knockbackRange) cutTargetThreat(state.threat, 'raid', def.threatCut || 0, state.threat.raidTarget);
+        }
         if (def.damage && ghostInBossRange(def.knockbackRange)) damageGhost(def.damage, id);
         break;
       }
@@ -485,7 +496,8 @@ export function createSim(script, options = {}) {
         const who = def.targets || 'all';
         const reach = (!def.radius || bossRangeTo(p.x, p.y) <= def.radius) && roleMatches(def.roles);
         const me = reach && (who === 'all' || (who === 'tank' && tankRole) || (who === 'random' && pickRandomVictim(def)));
-        if (me) {
+        if (me && p.fearImmuneUntil > state.t) emit('fearResisted', { source: id });
+        else if (me) {
           p.fearedUntil = state.t + (def.duration || script.player.fearDuration);
           p.wanderTimer = 0;
           emit('feared', { duration: def.duration || script.player.fearDuration });
@@ -540,7 +552,7 @@ export function createSim(script, options = {}) {
       }
       case 'threatWipe': {
         resetThreat(state.threat);
-        state.threat.raid = script.threat.landingRaidThreat || 0;
+        setRaidThreat(state.threat, script.threat.landingRaidThreat || 0);
         b.target = 'raid';
         if (!tankRole) state.threat.ghostTauntAt = state.t + ghostTauntDelay;
         else { addMetric('threatLostCount', 1); state.lastTurnAt = state.t; emit('threatLost', { by: id }); for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
@@ -564,8 +576,12 @@ export function createSim(script, options = {}) {
       }
       case 'projectile': {
         const dots = w.raid.dots;
-        const target = rng.next() < (def.playerChance ?? 0.12) ? p : rng.pick(dots);
-        w.projectiles.push({ x0: b.x, y0: b.y, z0: b.z, tx: target.x, ty: target.y, t0: state.t, t1: state.t + (def.travel || 1), splash: def.splash || 5, damage: def.damage || 0, hit: false });
+        const victim = rng.next() < (def.playerChance ?? 0.12) ? 'player'
+          : w.ghost.tanking && rng.next() < 1 / (dots.length + 1) ? 'ghost' : 'raid';
+        const raidIndex = victim === 'raid' ? Math.floor(rng.next() * dots.length) : null;
+        const target = victim === 'player' ? p : victim === 'ghost' ? w.ghost : dots[raidIndex];
+        w.projectiles.push({ x0: b.x, y0: b.y, z0: b.z, tx: target.x, ty: target.y, t0: state.t, t1: state.t + (def.travel || 1), splash: def.splash || 5, damage: def.damage || 0, hit: false,
+          source: id, target: victim, raidIndex, tracksTarget: !!def.tracksTarget, wipesThreat: !!def.wipesTargetThreat });
         break;
       }
       default: break;
@@ -594,6 +610,12 @@ export function createSim(script, options = {}) {
       const lanes = script[def.lanes || 'deepBreathLanes'] || [];
       if (!lanes.length) return;
       const lane = rng.pick(lanes);
+      if (def.flyThrough) {
+        b.breathFlight = { stage: 'positioning', lane, actionId: id };
+        b.hover = { x: lane.from[0], y: lane.from[1] };
+        b.faceAlong = angleTo(...lane.from, ...lane.to);
+        return;
+      }
       const h = createLane(lane, def, state.t);
       h.source = id;
       w.hazards.push(h);
@@ -710,14 +732,17 @@ export function createSim(script, options = {}) {
   function onLanded() {
     const b = state.world.boss;
     state.landedAt = state.t;
-    if (script.threat.resetOnLanding) { resetThreat(state.threat); state.threat.raid = script.threat.landingRaidThreat || 0; }   // healers and DPS are already on her table
-    b.target = 'raid';
+    if (script.threat.resetOnLanding) { resetThreat(state.threat); setRaidThreat(state.threat, script.threat.landingRaidThreat || 0); }
+    b.target = script.threat.resetOnLanding ? 'raid' : tankRole
+      ? (state.threat.player >= state.threat.raid ? 'player' : 'raid')
+      : selectTargetGhostTanked(state.threat, null, state.t, threatCfg);
     b.engaged = true;
     if (!tankRole) state.threat.ghostTauntAt = state.t + (script.threat.ghostPickupDelay ?? 1.5);
     emit('action', { id: 'landing', label: (script.actions.landing || {}).label || 'Landing' });
     onActionEvent('landing');
     for (const beat of onCueEvent(state, script, 'landing', state.t)) emitBeat(beat);
     spawnExpectationsFor('landing', state.phase);
+    if (b.target === tankTarget()) spawnExpectationsFor('control', state.phase);
   }
 
   // ------------------------------------------------------------ player abilities
@@ -739,7 +764,7 @@ export function createSim(script, options = {}) {
       if (watched.breakDamage) damagePlayer(watched.breakDamage, watched.actionId);
       toast(`You acted under ${watched.name}`, 'bad');
     }
-    if (p.fearedUntil > state.t) return fail('feared', 'Feared');
+    if (p.fearedUntil > state.t && def.kind !== 'fearImmunity') return fail('feared', 'Feared');
     if (p.stunnedUntil > state.t) return fail('stunned', 'Stunned');
     if (A.readyAt[id] > state.t) return fail('cooldown');
     if (def.gcd && A.gcdUntil > state.t) return fail('gcd');
@@ -747,7 +772,26 @@ export function createSim(script, options = {}) {
     let target = null;
 
     switch (kind) {
+      case 'fearImmunity': {
+        p.fearedUntil = -Infinity;
+        p.fearImmuneUntil = state.t + def.duration;
+        emit('fearImmunity', { duration: def.duration });
+        toast(`Immune to fear for ${def.duration}s`, 'good');
+        break;
+      }
+      case 'threat': {
+        if (b.state === 'grounded' && !b.passive && playerInBossRange(def.range)) {
+          engage('player');
+          applyPlayerThreat(state.threat, def.threat || 0);
+          state.lastThreatAbilityAt = state.t;
+          b.lastDamagedAt = state.t;
+          target = { x: b.x, y: b.y, z: b.z || 0, on: 'boss' };
+        } else if (pickupWhelps(state, script, def.range) > 0) onWhelpPickup();
+        else return fail('range', b.state === 'grounded' ? 'Out of range' : 'No target in melee range');
+        break;
+      }
       case 'taunt': {
+        if (script.boss.tauntImmune && b.state === 'grounded') return fail('immune', 'The boss is immune to taunts');
         if (!tankRole) {
           if (pickupWhelps(state, script, def.range) > 0) onWhelpPickup();
           else return fail('range', 'No adds in range');
@@ -830,7 +874,7 @@ export function createSim(script, options = {}) {
     if (beat) emitBeat(beat);
   }
 
-  const airTarget = () => state.world.boss.state === 'airborne' && !!script.boss.attackableInAir && state.role !== 'melee';
+  const airTarget = () => state.world.boss.state === 'airborne' && !!script.boss.attackableInAir && attackRange(state, script) > 5;
   const shieldUp = () => state.t < state.shieldUntil && roleMatches(state.shieldRoles);
   /** Is there nothing worth attacking? A boss-only shield still leaves any killable adds to hit. */
   const shieldBlocksAttacks = () => shieldUp() && !(state.shieldBossOnly && state.world.whelps.some((a) => a.killable));
@@ -922,7 +966,7 @@ export function createSim(script, options = {}) {
       if (bossLive() && b.target !== 'player') return set(script.boss.looseHint || 'Taunt. The boss is on the raid', 'fix');
       if (ideal.reason === 'whelps') return set('Pick up the adds', 'fix');
       if (soon) { state.nextExpected = expectation; return; }
-      if (ideal.reason === 'approach') return set('Taunt the boss and pull it into position', 'hint');
+      if (ideal.reason === 'approach') return set(script.boss.tauntImmune ? 'Get into melee range, build threat and pull her into position' : 'Taunt the boss and pull it into position', 'hint');
       if (state.world.idealBoss && !state.world.idealBoss.satisfied && b.engaged) return set('Move the boss onto its spot, facing away', 'fix');
       if (ideal.reason === 'holdWhelps') return set('Hold the adds away from the raid', 'hold');
     } else {
@@ -954,7 +998,7 @@ export function createSim(script, options = {}) {
     if (!b.engaged && !b.passive && !opts.manual && b.state === 'grounded') {
       state.phaseStart += dt; state.phaseEnd += dt;
       for (const entry of state.schedule) entry.nextAt += dt;
-      if (tankRole && state.t >= (script.boss.pullDeadline ?? 20)) engage('raid');
+      if (tankRole && script.boss.autoPull !== false && state.t >= (script.boss.pullDeadline ?? 20)) engage('raid');
     }
 
     // Phase clock and HP drain.
@@ -986,11 +1030,20 @@ export function createSim(script, options = {}) {
     if (b.cast && state.t >= b.cast.end) { const id = b.cast.id; b.cast = null; resolveAction(id); }
     for (const id of dueActions(state.schedule, state.t, rng)) {
       // A cast that comes due while another is running waits its turn instead of vanishing.
-      if (!startAction(id) && b.cast && (script.actions[id] || {}).cast > 0) scheduleOnce(state.schedule, id, b.cast.end + 0.2);
+      const def = script.actions[id] || {};
+      if (!startAction(id) && b.cast && (def.cast > 0 || def.placement === 'lanes')) scheduleOnce(state.schedule, id, b.cast.end + 0.2);
     }
 
     const flags = updateBoss(state, script, dt);
     if (flags.landed) onLanded();
+    if (flags.breathReady) {
+      const flight = b.breathFlight, def = script.actions[flight.actionId];
+      const h = createLane(flight.lane, def, state.t);
+      h.source = flight.actionId;
+      w.hazards.push(h);
+      flight.stage = 'warning';
+      emit('hazardWarn', { kind: 'lane', id: flight.lane.id, label: def.label, in: def.warning });
+    }
     if (state.pendingTrigger) {
       // A tutorial/drill trigger issued during takeoff or landing fires once she is ready.
       if (startAction(state.pendingTrigger.id, true) || state.t > state.pendingTrigger.until) state.pendingTrigger = null;
@@ -1000,24 +1053,32 @@ export function createSim(script, options = {}) {
     const live = bossLive();
     const attacking = live && tankRole && playerInBossRange(script.boss.meleeRange + 1) && p.fearedUntil <= state.t;
     const ghostTanking = live && !tankRole && ghostInBossRange(script.boss.meleeRange + 1);
-    // The raid holds its damage for a few seconds after the pull (not after a landing).
-    const raidHolding = holdAfterPull();
+    // The automated raid can hold damage for the pull and for a tank pickup.
+    const raidHolding = holdAfterPull()
+      || (script.raid.holdBeforeLanding && state.phaseDef.bossState === 'airborne' && state.phaseEnd - state.t <= script.raid.holdBeforeLanding)
+      || (script.raid.holdWhileLoose && live && b.target !== tankTarget());
     const inControl = p.fearedUntil <= state.t && p.stunnedUntil <= state.t;
-    tickThreat(state.threat, dt, threatCfg, live && tankRole && !raidHolding, attacking, ghostTanking);
+    const airThreat = script.threat.individualRaidThreat && b.state === 'airborne';
+    tickThreat(state.threat, dt, threatCfg, (live || airThreat) && (tankRole || script.threat.individualRaidThreat) && !raidHolding, attacking, ghostTanking);
     if (live) {
       const prev = b.target;
       if (tankRole) {
         b.target = selectTarget(state.threat, b.target, state.t, threatCfg);
-        if (prev === 'player' && b.target === 'raid') { addMetric('threatLostCount', 1); state.lastTurnAt = state.t; emit('threatLost'); toast('The boss turned on the raid. Taunt!', 'bad'); for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
-        else if (prev === 'raid' && b.target === 'player') { state.lastRegainAt = state.t; emit('threatRegained', { by: 'threat' }); }
+        if (prev === 'player' && b.target === 'raid') { addMetric('threatLostCount', 1); state.lastTurnAt = state.t; emit('threatLost'); toast(script.boss.tauntImmune ? 'The boss turned on the raid. Build threat!' : 'The boss turned on the raid. Taunt!', 'bad'); for (const beat of onCueEvent(state, script, 'threatLost', state.t)) emitBeat(beat); }
+        else if (prev === 'raid' && b.target === 'player') { state.lastRegainAt = state.t; emit('threatRegained', { by: 'threat' }); spawnExpectationsFor('control', state.phase); }
       } else {
-        // The ghost tank taunts back after a delay whenever she is off it.
+        // Taunt-immune encounters require the ghost tank to build threat too.
+        if (script.boss.tauntImmune && ghostInBossRange(script.playerAbilities.taunt.range) && state.t >= (state.nextGhostThreatAt ?? 0)) {
+          state.threat.ghost += script.playerAbilities.taunt.threat || 0;
+          state.nextGhostThreatAt = state.t + script.playerAbilities.taunt.cooldown;
+        }
         if (b.target !== 'ghost' && state.threat.ghostTauntAt == null) state.threat.ghostTauntAt = state.t + ghostTauntDelay;
-        if (state.threat.ghostTauntAt != null && state.t >= state.threat.ghostTauntAt && ghostInBossRange(script.boss.meleeRange + 3)) {
+        if (!script.boss.tauntImmune && state.threat.ghostTauntAt != null && state.t >= state.threat.ghostTauntAt && ghostInBossRange(script.boss.meleeRange + 3)) {
           applyGhostTaunt(state.threat, state.t, threatCfg);
           b.target = 'ghost';
           emit('ghostTaunt');
-        } else if (b.target !== 'raid') {
+        }
+        if (b.target !== 'raid' || script.threat.individualRaidThreat) {
           b.target = selectTargetGhostTanked(state.threat, b.target, state.t, threatCfg);
         }
         if (prev !== 'player' && b.target === 'player') { addMetric('aggroPulls', 1); emit('aggroPulled'); toast('You pulled aggro!', 'bad'); state.threat.ghostTauntAt = state.t + ghostTauntDelay; }
@@ -1044,7 +1105,19 @@ export function createSim(script, options = {}) {
     if (wf.onRaid && state.role === 'offtank') addMetric('whelpsOnRaid', dt);
     for (let i = w.projectiles.length - 1; i >= 0; i--) {
       const pr = w.projectiles[i];
-      if (!pr.hit && state.t >= pr.t1) { pr.hit = true; if (pr.damage && dist(p.x, p.y, pr.tx, pr.ty) <= pr.splash) damagePlayer(pr.damage, 'projectile'); }
+      if (!pr.hit && pr.tracksTarget) {
+        const target = pr.target === 'player' ? p : pr.target === 'ghost' ? g : w.raid.dots[pr.raidIndex];
+        if (target) { pr.tx = target.x; pr.ty = target.y; }
+      }
+      if (!pr.hit && state.t >= pr.t1) {
+        pr.hit = true;
+        if (pr.damage && dist(p.x, p.y, pr.tx, pr.ty) <= pr.splash) damagePlayer(pr.damage, pr.source || 'projectile');
+        if (pr.damage && dist(g.x, g.y, pr.tx, pr.ty) <= pr.splash) damageGhost(pr.damage, pr.source || 'projectile');
+        if (pr.wipesThreat) {
+          wipeTargetThreat(state.threat, pr.target, pr.raidIndex);
+          emit('threatWiped', { source: pr.source, target: pr.target, raidIndex: pr.raidIndex });
+        }
+      }
       if (state.t > pr.t1 + 0.7) w.projectiles.splice(i, 1);
     }
     updateDebuffs(dt);
@@ -1062,16 +1135,23 @@ export function createSim(script, options = {}) {
           if (caught && h.raidMetric) { addMetric(h.raidMetric, 1); toast(`${h.label} went off in the raid`, 'bad'); }
           emit('carriedDetonated', { label: h.label, caught });
         }
-        if (h.kind === 'lane') { emit('action', { id: 'deepBreath', label: h.label }); onActionEvent('deepBreath'); }
+        if (h.kind === 'lane') {
+          if (b.breathFlight?.stage === 'warning') {
+            Object.assign(b.breathFlight, { stage: 'sweeping', start: h.activeAt, end: h.endsAt });
+            b.hover = null;
+          }
+          emit('action', { id: 'deepBreath', label: h.label }); onActionEvent('deepBreath');
+        }
       } else if (tr.to === 'ended' && h.kind === 'lane') {
-        if (P.hoverIdle) b.hover = { ...P.hoverIdle };
+        if (b.breathFlight) { b.hover = { x: h.to[0], y: h.to[1] }; b.breathFlight = null; }
+        else if (P.hoverIdle) b.hover = { ...P.hoverIdle };
         b.faceAlong = null;
       }
     }
     let inHazard = false;
     for (const h of w.hazards) {
       if (h.state !== 'active' && h.kind !== 'crack') continue;
-      const inside = hazardAt([h], p.x, p.y);
+      const inside = hazardAt([h], p.x, p.y, null, null, true);
       if (!inside) continue;
       if (h.applies) {
         // A cloud you stand in on purpose: Hakkar's poison.
@@ -1112,7 +1192,7 @@ export function createSim(script, options = {}) {
           const inR = !!aim;
           state.feedback.inRangeOk = inR;
           state.feedback.target = aim ? (aim.add ? { add: aim.add.uid } : { boss: true }) : null;
-          if (!inR && inControl) addMetric('outOfRange', dt);
+          if (!inR && inControl && !raidHolding && b.target === 'ghost') addMetric('outOfRange', dt);
           const attackReady = (state.abilities.readyAt.attack ?? -Infinity) <= state.t && state.abilities.gcdUntil <= state.t;
           if (inR && attackReady && !state.feedback.holdAttack && !raidHolding && b.target === 'ghost' && inControl) addMetric('dpsIdle', dt);
         }
@@ -1181,8 +1261,8 @@ export function createSim(script, options = {}) {
     if (preset === 'wall') {
       const ts = P.tankSpot, bs = P.bossSpot;
       Object.assign(b, { x: bs.x, y: bs.y, z: 0, heading: rad(bs.heading ?? 90), state: 'grounded', engaged: true, target: tankTarget(), cast: null, transition: null });
-      if (tankRole) { Object.assign(w.player, { x: ts.x, y: ts.y, heading: rad(270) }); state.threat.player = 6000; state.threat.raid = 3000; }
-      else { Object.assign(g, { x: ts.x, y: ts.y, heading: rad(270) }); state.threat.ghost = 6000; state.threat.player = 0; state.threat.raid = 0; }
+      if (tankRole) { Object.assign(w.player, { x: ts.x, y: ts.y, heading: rad(270) }); state.threat.player = 6000; setRaidThreat(state.threat, 3000); }
+      else { Object.assign(g, { x: ts.x, y: ts.y, heading: rad(270) }); state.threat.ghost = 6000; state.threat.player = 0; setRaidThreat(state.threat, 0); }
       state.engagedAt = state.t - script.raid.holdAfterPull;   // already tanking: the raid is not holding any more
       placeRaid(state.phaseDef ? state.phaseDef.raidSpot : 'raidSpotP1');
       if (!tankRole) {

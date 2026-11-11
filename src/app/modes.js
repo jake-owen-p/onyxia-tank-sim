@@ -32,7 +32,7 @@ export function buildScenario({ mode, drillId = null, settings, script, seed = n
   if (mode === 'tutorial') {
     return {
       name: 'Tutorial', mode, modeKey: `${keyPrefix}tutorial:${role}`, loop: false, drill: null, role,
-      simOptions: { role, seed: s, manual: true, freezeHp: true, bossPassive: true, start: 'entrance', startPhase: script.phases[0].id },
+      simOptions: { role, seed: s, start: 'entrance', startPhase: script.phases[0].id, phaseDurations: durations },
     };
   }
   if (mode === 'drill') {

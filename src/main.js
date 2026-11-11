@@ -262,7 +262,7 @@ async function boot() {
 
   function showPause() {
     overlay.show('pause', {
-      settings,
+      settings, allowPhaseSkip: session?.scenario.mode !== 'tutorial',
       onResume: () => session && session.resume(),
       onRestart: () => startRun(lastScenarioParams),
       onSettings: () => showSettings(showPause),

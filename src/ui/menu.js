@@ -5,7 +5,7 @@ import { h, button, arrowNav } from './overlay.js';
 import { bossPortrait, abilityIcon } from './art.js';
 import { drillsForRole, tutorialForRole, resolveRole } from '../app/modes.js';
 
-const HINTS = [['WASD', 'move'], ['Q / E', 'strafe'], ['Space', 'jump'], ['Right-drag', 'turn'], ['1–5', 'abilities'], ['Tab', 'view'], ['Esc', 'menu']];
+const HINTS = [['WASD', 'move'], ['Q / E', 'strafe'], ['Space', 'jump'], ['Right-drag', 'turn'], ['1–6', 'abilities'], ['Tab', 'view'], ['Esc', 'menu']];
 
 function hintBar(hints) {
   return h('footer', { class: 'hint-bar' },
@@ -116,7 +116,7 @@ export function menuScreen({ script, index, current, settings, history, actions,
             hasTutorial ? button(h('span', { class: 'card-inner' },
               h('span', { class: 'card-kicker', text: 'Step by step' }),
               h('span', { class: 'card-title', text: 'Tutorial' }),
-              h('span', { class: 'card-sub', text: 'Follow the on-screen steps' }),
+              h('span', { class: 'card-sub', text: 'The full fight with on-screen guidance' }),
               h('span', { class: 'best-chip empty', text: tutorials.includes(`${script.id}:${role}`) ? 'Completed' : `${script.tutorial.steps.length} steps` }),
             ), actions.tutorial, { class: 'card' }) : null,
           ),
@@ -187,7 +187,7 @@ export function historyScreen({ history, onBack, onClear }) {
 }
 
 /** Pause menu. */
-export function pauseScreen({ settings, onResume, onRestart, onSettings, onQuit, onSpeed }) {
+export function pauseScreen({ settings, onResume, onRestart, onSettings, onQuit, onSpeed, allowPhaseSkip = true }) {
   const speed = h('input', { type: 'range', min: 0.25, max: 1, step: 0.05, value: settings.speed, class: 'slider', 'aria-label': 'Speed' });
   const speedVal = h('span', { class: 'val', text: pct(settings.speed) });
   speed.addEventListener('input', () => { settings.speed = parseFloat(speed.value); speedVal.textContent = pct(settings.speed); if (onSpeed) onSpeed(settings.speed); });
@@ -201,7 +201,7 @@ export function pauseScreen({ settings, onResume, onRestart, onSettings, onQuit,
       button('End run', onQuit, { class: 'btn-ghost' }),
     ),
     h('div', { class: 'field field-pause' }, h('label', { text: 'Fight speed' }), speed, speedVal),
-    hintBar([['Tab', 'view'], ['F1–F3', 'skip phase'], ['Esc', 'resume']]),
+    hintBar([['Tab', 'view'], ...(allowPhaseSkip ? [['F1–F3', 'skip phase']] : []), ['Esc', 'resume']]),
   );
   return arrowNav(el);
 }

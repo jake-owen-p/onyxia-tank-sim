@@ -171,7 +171,8 @@ export function stepBossFX(P, ctx) {
   mem.prevCast = cast ? cast.id : null;
 
   // Ground hazards.
-  for (const hz of wd.hazards) {
+  for (const hazard of wd.hazards) {
+    const hz = hazard.damagePoly ? { ...hazard, poly: hazard.damagePoly } : hazard;
     if (hz.state !== 'active') continue;
     const [a, b, c, d] = polyBounds(hz.poly);
     const area = Math.max(4, (c - a) * (d - b));

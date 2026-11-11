@@ -13,11 +13,11 @@ export function snapshot(state) {
     role: state.role,
     tankRole: state.tankRole,
     world: {
-      player: { x: w.player.x, y: w.player.y, z: w.player.z, heading: w.player.heading, hp: w.player.hp, maxHp: w.player.maxHp, fearedUntil: w.player.fearedUntil, stunnedUntil: w.player.stunnedUntil, moving: w.player.moving, backpedal: w.player.backpedal },
+      player: { x: w.player.x, y: w.player.y, z: w.player.z, heading: w.player.heading, hp: w.player.hp, maxHp: w.player.maxHp, fearedUntil: w.player.fearedUntil, fearImmuneUntil: w.player.fearImmuneUntil, stunnedUntil: w.player.stunnedUntil, moving: w.player.moving, backpedal: w.player.backpedal },
       boss: { x: w.boss.x, y: w.boss.y, z: w.boss.z, heading: w.boss.heading, state: w.boss.state, target: w.boss.target, engaged: w.boss.engaged, cast: w.boss.cast ? { ...w.boss.cast } : null, lastHit: w.boss.lastHit, lastDamagedAt: w.boss.lastDamagedAt },
       raid: { anchor: { ...w.raid.anchor }, dots: w.raid.dots.map((d) => ({ x: d.x, y: d.y, melee: d.melee })) },
       whelps: w.whelps.map((x) => ({ uid: x.uid, x: x.x, y: x.y, heading: x.heading, target: x.target, onRaid: x.onRaid, killable: !!x.killable, priority: !!x.priority, hp: x.hp, label: x.label })),
-      hazards: w.hazards.map((h) => ({ uid: h.uid, id: h.id, kind: h.kind, label: h.label, poly: h.poly, state: h.state, warnAt: h.warnAt, activeAt: h.activeAt, endsAt: h.endsAt, radius: h.radius || null, centroid: h.centroid ? { ...h.centroid } : null, carried: !!h.carried, applies: h.harmful ? null : (h.applies || null) })),
+      hazards: w.hazards.map((h) => ({ uid: h.uid, id: h.id, kind: h.kind, label: h.label, poly: h.poly, damagePoly: h.damagePoly, state: h.state, warnAt: h.warnAt, activeAt: h.activeAt, endsAt: h.endsAt, radius: h.radius || null, centroid: h.centroid ? { ...h.centroid } : null, carried: !!h.carried, applies: h.harmful ? null : (h.applies || null) })),
       projectiles: w.projectiles.map((p) => ({ ...p })),
       ghost: { ...w.ghost },
       idealPlayer: { ...w.idealPlayer },
@@ -25,7 +25,7 @@ export function snapshot(state) {
       idealBoss: w.idealBoss ? { ...w.idealBoss } : null,
       coneFlash: { ...w.coneFlash },
     },
-    threat: { ...state.threat },
+    threat: { ...state.threat, raidMembers: [...(state.threat.raidMembers || [])] },
     abilities: {
       gcdUntil: state.abilities.gcdUntil,
       readyAt: { ...state.abilities.readyAt },

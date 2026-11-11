@@ -65,7 +65,7 @@ export function settingsScreen({ settings, keybinds, input, audio, script, onBac
         b.title = 'Click then press a key. Right-click to clear.';
         return b;
       });
-      bindTable.appendChild(h('div', { class: 'bind-row' }, h('span', { class: 'bind-label', text: a.label }), ...cells));
+      bindTable.appendChild(h('div', { class: 'bind-row' }, h('span', { class: 'bind-label', text: script.playerAbilities[a.id]?.label || a.label }), ...cells));
     }
     conflictBox.textContent = '';
     for (const c of conflicts) {

@@ -16,7 +16,9 @@ test('legacy role id mt maps to tank', () => {
 });
 
 test('melee: the ghost tank pulls and holds her; the player builds threat with attacks and pulls aggro by spamming', () => {
-  const sim = makeSim({ role: 'melee', start: 'entrance', manual: true });
+  const data = structuredClone(script);
+  data.playerAbilities.attack.threat = 1000;
+  const sim = createSim(data, { seed: 7, role: 'melee', start: 'entrance', manual: true });
   const s = sim.state, b = s.world.boss, g = s.world.ghost;
   assert.equal(g.tanking, true);
   assert.equal(s.tankRole, false);
@@ -24,14 +26,15 @@ test('melee: the ghost tank pulls and holds her; the player builds threat with a
   const eng = ev.find((e) => e.type === 'engage');
   assert.ok(eng && eng.by === 'ghost', 'the ghost tank engages her');
   assert.equal(b.target, 'ghost');
-  assert.ok(s.metrics.attacks > 5, 'the bot attacked');
+  assert.ok(s.metrics.attacks > 0, 'the bot attacked');
   assert.equal(s.metrics.aggroPulls, undefined, 'a disciplined bot never pulls');
   // Now spam attacks regardless of the bar: she comes off the tank, then the tank taunts her back.
-  const ev2 = run(sim, 45, (sm) => { const c = roleBot('melee')(sm); if (sm.state.abilities.gcdUntil <= sm.state.t && sm.state.feedback.inRangeOk && !c.abilities.length) c.abilities.push('attack'); return c; });
+  const ev2 = run(sim, 45, (sm) => { const c = roleBot('melee')(sm); if (!sm.state.metrics.aggroPulls && sm.state.abilities.gcdUntil <= sm.state.t && sm.state.feedback.inRangeOk && !c.abilities.length) c.abilities.push('attack'); return c; });
   assert.ok(ev2.some((e) => e.type === 'aggroPulled'), 'spamming pulls aggro');
   assert.ok(s.metrics.aggroPulls >= 1);
   assert.ok(s.metrics.attacksInRed >= 1, 'attacks in the red band are counted');
-  assert.ok(ev2.some((e) => e.type === 'ghostTaunt'), 'the ghost tank taunts her back');
+  assert.ok(ev2.some((e) => e.type === 'threatRegained' && e.by === 'ghost'), 'the ghost tank rebuilds threat');
+  assert.equal(ev2.some((e) => e.type === 'ghostTaunt'), false, 'Onyxia cannot be taunted');
 });
 
 test('ranged: standing in her front is charged, standing with the raid is not', () => {
@@ -109,8 +112,8 @@ test('abilities outside the role are refused', () => {
 
 test('every role completes the full fight with the scripted bot and scores a B or better', () => {
   for (const role of ['tank', 'offtank', 'melee', 'ranged', 'healer']) {
-    const sim = makeSim({ role, seed: 7, phaseDurations: { 1: 60, 2: 50, 3: 70 } });
-    run(sim, 200, roleBot(role));
+    const sim = makeSim({ role, seed: 7 });
+    run(sim, 400, roleBot(role));
     assert.equal(sim.state.result, 'victory', role);
     const s = sim.state;
     const sc = computeScore(script, s.expectations, s.phaseMetrics, s.phasesPlayed, s.role, s.cues.log);

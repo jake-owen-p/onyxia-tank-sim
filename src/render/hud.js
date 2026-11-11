@@ -767,7 +767,7 @@ function abilities(c, v, script, settings, l, keys) {
       yy = y + Math.floor(i / cols) * (size + gap),
       def = script.playerAbilities[id];
     if (!def) return;
-    icon(c, id, xx + 4 * s, yy + 4 * s, size - 8 * s);
+    icon(c, def.icon || id, xx + 4 * s, yy + 4 * s, size - 8 * s);
     const used = v.abilities.lastUsed;
     if (used?.id === id && v.t - used.at >= 0 && v.t - used.at < .25) {
       c.fillStyle = `rgba(255,230,160,${.3 * (1-(v.t-used.at)/.25)})`;
@@ -810,7 +810,8 @@ function abilities(c, v, script, settings, l, keys) {
           'center',
         );
     }
-    const active = id === 'taunt' && v.threat.tauntUntil > v.t,
+    const activeUntil = def.kind === 'fearImmunity' ? v.world.player.fearImmuneUntil : id === 'taunt' ? v.threat.tauntUntil : -Infinity;
+    const active = activeUntil > v.t,
       hold = id === 'attack' && v.feedback.holdAttack;
     if (active) {
       c.strokeStyle = '#ffe068';
@@ -822,7 +823,7 @@ function abilities(c, v, script, settings, l, keys) {
         yy + size - 6 * s,
         size - 8 * s,
         3 * s,
-        (v.threat.tauntUntil - v.t) / (script.threat.tauntDuration || 1),
+        (activeUntil - v.t) / (def.duration || script.threat.tauntDuration || 1),
         '#ffdc56',
       );
     }
@@ -853,7 +854,7 @@ function abilities(c, v, script, settings, l, keys) {
     );
     label(
       c,
-      SHORT[id] || def.label,
+      def.shortLabel || SHORT[id] || def.label,
       xx + size / 2,
       yy + size + 7 * s,
       8 * s,
@@ -1308,19 +1309,19 @@ function track(c, v, script, replay) {
   const hit = v.cues?.lastHit;
   if (hit && st.hit !== hit.t) {
     add(
-      `${SHORT[hit.ability] || hit.ability}: ${hit.status}${hit.delta != null ? ` (${hit.delta > 0 ? '+' : ''}${hit.delta.toFixed(2)}s)` : ''}`,
+      `${script.playerAbilities[hit.ability]?.label || SHORT[hit.ability] || hit.ability}: ${hit.status}${hit.delta != null ? ` (${hit.delta > 0 ? '+' : ''}${hit.delta.toFixed(2)}s)` : ''}`,
       hit.status === 'missed' ? '#ff7c6d' : '#91dbff',
     );
     st.hit = hit.t;
   }
   const early = v.cues?.lastEarly;
   if (early && st.early !== early.t) {
-    add(`${SHORT[early.ability] || early.ability}: too early.`, '#c2c1ee');
+    add(`${script.playerAbilities[early.ability]?.label || SHORT[early.ability] || early.ability}: too early.`, '#c2c1ee');
     st.early = early.t;
   }
   for (const [id, at] of Object.entries(v.abilities?.readyAt || {})) {
     if (st.ready[id] != null && at > st.ready[id] && at > v.t)
-      add(`You use ${SHORT[id] || id}.`, '#e8dfa9');
+      add(`You use ${script.playerAbilities[id]?.label || SHORT[id] || id}.`, '#e8dfa9');
     st.ready[id] = at;
   }
   for (const d of v.debuffs || []) {

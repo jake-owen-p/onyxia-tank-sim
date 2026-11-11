@@ -2,7 +2,7 @@
 // with a lifecycle: 'warning' (telegraphed), 'active' (hurts), then removed or
 // back to 'idle' (cracks persist as idle polygons between pulses).
 
-import { laneRect, pointInPoly, polyCentroid } from './geometry.js';
+import { laneRect, pointInPoly, polyCentroid, lerp, clamp } from './geometry.js';
 
 let uid = 0;
 
@@ -22,6 +22,7 @@ export function createLane(laneDef, actionDef, t) {
     activeAt: t + actionDef.warning,
     endsAt: t + actionDef.warning + actionDef.active,
     damage: actionDef.damage,
+    travelling: !!actionDef.flyThrough,
     hitPlayer: false,
   };
 }
@@ -90,6 +91,13 @@ export function updateHazards(hazards, t) {
       h.state = 'active';
       transitions.push({ hazard: h, to: 'active' });
     }
+    if (h.state === 'active' && h.travelling) {
+      // Keep the full path for coaching, but damage only the passing fire front.
+      const length = Math.hypot(h.to[0] - h.from[0], h.to[1] - h.from[1]);
+      const k = clamp((t - h.activeAt) / (h.endsAt - h.activeAt), 0, 1);
+      const at = (v) => [lerp(h.from[0], h.to[0], v), lerp(h.from[1], h.to[1], v)];
+      h.damagePoly = laneRect(at(k - 12 / length), at(k + 12 / length), h.width);
+    }
     if (h.state === 'active' && t >= h.endsAt) {
       if (h.kind === 'crack') {
         h.state = 'idle';
@@ -108,11 +116,11 @@ export function pointInHazard(h, x, y) {
 }
 
 /** First hazard of `kind` (any state unless `states` given) containing the point. */
-export function hazardAt(hazards, x, y, kind, states = null) {
+export function hazardAt(hazards, x, y, kind, states = null, damageOnly = false) {
   for (const h of hazards) {
     if (kind && h.kind !== kind) continue;
     if (states && !states.includes(h.state)) continue;
-    if (pointInPoly(x, y, h.poly)) return h;
+    if (pointInPoly(x, y, damageOnly && h.damagePoly ? h.damagePoly : h.poly)) return h;
   }
   return null;
 }

@@ -153,7 +153,8 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   }
 
   // --- hazards
-  for (const hz of w.hazards) {
+  for (const hazard of w.hazards) {
+    const hz = hazard.damagePoly ? { ...hazard, poly: hazard.damagePoly } : hazard;
     if (hz.kind === 'crack' && hz.state === 'idle') {
       ctx.fillStyle = withAlpha(pal.crackIdle, 0.22 * hazAlpha + 0.05);
       ctx.beginPath(); tracePoly(ctx, hz.poly); ctx.fill();
@@ -289,7 +290,7 @@ export function drawMapWorld(ctx, view, script, settings, pal, tr, now, opts = {
   }
 
   // --- boss
-  const airborne = boss.state !== 'grounded';
+  const airborne = boss.state === 'airborne' || boss.z > 0.1;
   if (boss.state === 'submerged') {
     drawBossFlat(ctx, boss.x, boss.y, boss.heading, R, { shape: script.boss.shape, stroke: withAlpha(pal.bossStroke, 0.35), dashed: true, lineWidth: lw(1.5) });
     if (!compact) worldText(ctx, tr, 'SUBMERGED', boss.x, boss.y - R * 1.6, Math.max(10, s * 3), pal.bossStroke, pal.fontDisplay);

@@ -2,13 +2,44 @@
 // tank (who holds the boss when the player is not a tank). All functions are
 // pure over a plain { player, raid, ghost, tauntUntil, ghostTauntUntil } object.
 
-export function createThreat() {
-  return { player: 0, raid: 0, ghost: 0, tauntUntil: -Infinity, ghostTauntUntil: -Infinity, ghostTauntAt: null };
+export function createThreat(raidSize = 0) {
+  return { player: 0, raid: 0, ghost: 0, raidMembers: Array(raidSize).fill(0), raidTarget: 0, tauntUntil: -Infinity, ghostTauntUntil: -Infinity, ghostTauntAt: null };
+}
+
+/** The displayed raid threat is its highest individual member, not their sum. */
+function syncRaid(threat) {
+  if (!threat.raidMembers?.length) return;
+  threat.raidTarget = threat.raidMembers.reduce((top, value, i, all) => value > all[top] ? i : top, 0);
+  threat.raid = threat.raidMembers[threat.raidTarget];
+}
+
+/** Seed a practice preset. Normal combat grows each member independently. */
+export function setRaidThreat(threat, amount) {
+  threat.raid = amount;
+  threat.raidMembers?.forEach((_, i, all) => { all[i] = amount * (1 - 0.3 * i / all.length); });
+  syncRaid(threat);
+}
+
+/** Fireball removes only its primary target's threat. */
+export function wipeTargetThreat(threat, target, raidIndex = null) {
+  return cutTargetThreat(threat, target, 1, raidIndex);
+}
+
+export function cutTargetThreat(threat, target, fraction, raidIndex = null) {
+  if (target === 'raid' && raidIndex != null && threat.raidMembers?.length) {
+    threat.raidMembers[raidIndex] *= 1 - fraction;
+    syncRaid(threat);
+  } else if (target === 'player' || target === 'ghost') threat[target] *= 1 - fraction;
 }
 
 /** Steady threat growth for one tick. */
 export function tickThreat(threat, dt, cfg, raidActive, playerAttacking, ghostTanking = false) {
-  if (raidActive) threat.raid += cfg.raidPerSecond * dt;
+  if (raidActive) {
+    if (threat.raidMembers?.length) {
+      threat.raidMembers.forEach((value, i, all) => { all[i] = value + cfg.raidPerSecond * (1 - 0.3 * i / all.length) * dt; });
+      syncRaid(threat);
+    } else threat.raid += cfg.raidPerSecond * dt;
+  }
   if (playerAttacking) threat.player += cfg.autoAttackPerSecond * dt;
   if (ghostTanking) threat.ghost += (cfg.ghostTankPerSecond || cfg.autoAttackPerSecond) * dt;
   return threat;
@@ -17,6 +48,7 @@ export function tickThreat(threat, dt, cfg, raidActive, playerAttacking, ghostTa
 /** A DPS overtakes the tank: the raid pool jumps to `multiplier` x the tank's. */
 export function applyAggroPull(threat, multiplier) {
   threat.raid = Math.max(threat.raid, threat.player * multiplier);
+  if (threat.raidMembers?.length) threat.raidMembers[threat.raidTarget] = threat.raid;
   return threat;
 }
 
@@ -56,6 +88,8 @@ export function resetThreat(threat) {
   threat.player = 0;
   threat.raid = 0;
   threat.ghost = 0;
+  threat.raidMembers?.fill(0);
+  threat.raidTarget = 0;
   threat.tauntUntil = -Infinity;
   threat.ghostTauntUntil = -Infinity;
   threat.ghostTauntAt = null;
@@ -81,6 +115,11 @@ export function selectTarget(threat, current, t, cfg) {
  * aggro by out-threating the ghost tank; the ghost taunts back after a delay.
  */
 export function selectTargetGhostTanked(threat, current, t, cfg) {
+  if (threat.raidMembers?.length) {
+    const top = ['ghost', 'player', 'raid'].reduce((a, b) => threat[b] > threat[a] ? b : a);
+    if (current == null) return top;
+    return threat[top] > threat[current] * cfg.pullMultiplier ? top : current;
+  }
   if (threat.ghostTauntUntil > t) return 'ghost';
   if (threat.tauntUntil > t) return 'player';
   if (current === 'ghost' || current == null) {

@@ -118,7 +118,8 @@ export function drawPOV(ctx, view, script, settings, pal, cam, w, h, now) {
   ctx.globalAlpha = 1;
 
   // --- hazards on the floor
-  for (const hz of wd.hazards) {
+  for (const hazard of wd.hazards) {
+    const hz = hazard.damagePoly ? { ...hazard, poly: hazard.damagePoly } : hazard;
     const poly3 = hz.poly.map(([x, y]) => [x, y, 0.02]);
     if (hz.kind === 'crack' && hz.state === 'idle') {
       floorPoly(ctx, cam, poly3, w, h, withAlpha(pal.crackIdle, 0.22 * hazAlpha + 0.05), pal.crackIdleStroke, 1);
@@ -457,7 +458,7 @@ function drawBoss(ctx, cam, view, script, pal, w, h, now) {
   const z = boss.z || 0;
   const parts = bossFootprint(R);
   const hit = Math.max(0, 1 - (t - boss.lastHit) / 0.25);
-  const airborne = boss.state !== 'grounded';
+  const airborne = boss.state === 'airborne' || boss.z > 0.1;
   const lift = airborne ? Math.sin(now * 2.2) * 0.8 : 0;   // gentle hover bob
   const base = z + lift;
   const stroke = hit ? pal.bossFront : pal.bossStroke;

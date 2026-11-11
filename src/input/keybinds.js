@@ -15,11 +15,12 @@ export const ACTIONS = [
   { id: 'heal',        label: 'Heal the tank', group: 'Abilities' },
   { id: 'dispel',      label: 'Dispel',        group: 'Abilities' },
   { id: 'interrupt',   label: 'Interrupt',     group: 'Abilities' },
+  { id: 'rage',        label: 'Berserker Rage', group: 'Abilities' },
   { id: 'toggleView',  label: 'Switch view',   group: 'Interface' },
   { id: 'pause',       label: 'Pause / menu',  group: 'Interface' },
 ];
 
-export const ABILITY_ACTIONS = ['taunt', 'attack', 'heal', 'dispel', 'interrupt'];
+export const ABILITY_ACTIONS = ['taunt', 'attack', 'heal', 'dispel', 'interrupt', 'rage'];
 export const MOVE_ONESHOT_ACTIONS = ['jump'];
 export const ONESHOT_ACTIONS = ['toggleView', 'pause'];
 
@@ -36,6 +37,7 @@ export const DEFAULT_BINDS = {
   heal:        ['Digit3', null],
   dispel:      ['Digit4', null],
   interrupt:   ['Digit5', null],
+  rage:        ['Digit6', null],
   toggleView:  ['Tab', null],
   pause:       ['Escape', null],
 };

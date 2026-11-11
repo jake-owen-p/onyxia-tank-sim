@@ -349,7 +349,8 @@ function createWorld(gl, canvas) {
       addLight(mouth[0], mouth[1], mouth[2], [c2[0] * k * 3, c2[1] * k * 3, c2[2] * k * 3], 34);
     }
     if (bm.glow) addLight(boss.x, boss.y, bossZ + (bm.height || 8) * bm.scale * 0.6, bm.glow, (bm.glowR || 42));
-    for (const hz of wd.hazards) {
+    for (const hazard of wd.hazards) {
+    const hz = hazard.damagePoly ? { ...hazard, poly: hazard.damagePoly } : hazard;
       if (hz.state !== 'active' || lightN >= 4) continue;
       let cx = 0, cy = 0; for (const [x, y] of hz.poly) { cx += x; cy += y; } cx /= hz.poly.length; cy /= hz.poly.length;
       const sc = SCHOOLS[hz.applies ? 'holy' : schoolOf(`${hz.id} ${hz.label}`, bm.school)];
@@ -446,7 +447,7 @@ function createWorld(gl, canvas) {
     const nearFade = mode === 'pov' ? Math.max(0.3, Math.min(1, (dc - R * 0.8) / (R * 1.1))) : 1;
     const hit = Math.max(0, 1 - (t - (boss.lastDamagedAt ?? -Infinity)) / 0.25);
     const bossAction = mode === 'hero' ? {} : bossCombatAnimation(view, script);
-    if ((mode === 'hero' || mem.sink < 0.98) && !drawArt(E.boss, model4, now, { moving: mem.speed > 1, airborne: boss.state === 'airborne', ...bossAction }, nearFade, hit * 0.4, bm.height || bm.built.maxz)) {
+    if ((mode === 'hero' || mem.sink < 0.98) && !drawArt(E.boss, model4, now, { moving: mem.speed > 1, airborne: boss.state === 'airborne' || boss.z > 0.1, ...bossAction }, nearFade, hit * 0.4, bm.height || bm.built.maxz)) {
       setMat(bm.mat, bm.tint || [1, 1, 1], nearFade, hit * 0.09); drawMesh(bm.mesh, bm.pose.matrices, model4);
     }
     if (bm.drawExtra) bm.drawExtra((mesh, bones, M) => drawMesh(mesh, bones, M), { boss, view, now });
@@ -600,7 +601,8 @@ function createWorld(gl, canvas) {
     const wd = view.world, t = view.t, boss = wd.boss, p = wd.player, R = script.boss.radius, ha = settings.hazardOpacity ?? 0.7;
     const WARN = colour(pal, 'hazardWarn', 1.9), HOT = colour(pal, 'hazardActive', 2.6), GOOD = colour(pal, 'good', 2.2), CRACK = colour(pal, 'crackIdleStroke', 1.2), IDEAL = colour(pal, 'ideal', 2.4), IB = colour(pal, 'idealBoss', 2), FRONT = colour(pal, 'bossFront', 2.2), TAIL = colour(pal, 'coneTailStroke', 1.6), CLV = colour(pal, 'coneCleaveStroke', 1.6), BREATH = colour(pal, 'coneBreathStroke', 2.4), BUFFET = colour(pal, 'buffetRing', 2.4), ROUTE = colour(pal, 'route', 2), BAD = colour(pal, 'bad', 2.4);
 
-    for (const hz of wd.hazards) {
+    for (const hazard of wd.hazards) {
+    const hz = hazard.damagePoly ? { ...hazard, poly: hazard.damagePoly } : hazard;
       if (hz.kind === 'crack' && hz.state === 'idle') { D.fill(hz.poly, 0.03, CRACK, 0.16 * ha + 0.06); D.ring(hz.poly, 0.04, 0.09, CRACK, 0.4); continue; }
       if (hz.state === 'warning') {
         const left = Math.max(0, hz.activeAt - t), urg = 1 - Math.min(1, left / Math.max(0.5, hz.activeAt - hz.warnAt));

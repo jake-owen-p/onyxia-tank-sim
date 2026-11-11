@@ -14,6 +14,7 @@ export function createPlayer(script, pos) {
     x: pos.x, y: pos.y, heading: rad(pos.heading ?? 90),
     hp: script.player.hp, maxHp: script.player.hp,
     fearedUntil: -Infinity, wanderTimer: 0,
+    fearImmuneUntil: -Infinity,
     stunnedUntil: -Infinity,
     knock: null,            // { vx, vy, until }
     moving: false, backpedal: false, speed: 0,
@@ -110,6 +111,7 @@ export function createBoss(script, pos) {
     cast: null,                   // { id, label, start, end }
     hover: null,                  // { x, y } flight destination while airborne
     faceAlong: null,              // heading to hold while hovering at a lane start
+    breathFlight: null,           // position at the edge, warn, then sweep to the opposite side
     transition: null,             // { start, end, fromX, fromY, fromZ, toX, toY, toZ, toHeading }
     nextMelee: 0,
     lastHit: -Infinity,           // time of her last melee swing (render flash)
@@ -121,7 +123,7 @@ export function createBoss(script, pos) {
 /** The point the boss is attacking: the player, the ghost tank or the raid anchor. */
 export function bossTargetPos(state) {
   const w = state.world, b = w.boss;
-  if (b.target === 'raid') return w.raid.anchor;
+  if (b.target === 'raid') return state.threat.raidMembers?.length ? w.raid.dots[state.threat.raidTarget] : w.raid.anchor;
   if (b.target === 'ghost') return w.ghost;
   return w.player;
 }
@@ -153,6 +155,15 @@ export function updateBoss(state, script, dt) {
     }
   } else if (b.state === 'takeoff' || b.state === 'landing') {
     const tr = b.transition;
+    if (tr.walkUntil != null && state.t < tr.walkUntil) {
+      const d = dist(b.x, b.y, tr.toX, tr.toY);
+      const a = angleTo(b.x, b.y, tr.toX, tr.toY);
+      const step = Math.min(cfg.speed * dt, d);
+      b.x += Math.cos(a) * step; b.y += Math.sin(a) * step;
+      b.heading = turnToward(b.heading, a, rad(cfg.turnRate) * dt);
+      b.z = 0;
+      return flags;
+    }
     const k = clamp((state.t - tr.start) / (tr.end - tr.start), 0, 1);
     const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; // ease in-out
     b.x = lerp(tr.fromX, tr.toX, e);
@@ -165,6 +176,14 @@ export function updateBoss(state, script, dt) {
       b.transition = null;
     }
   } else if (b.state === 'airborne') {
+    const flight = b.breathFlight;
+    if (flight?.stage === 'sweeping') {
+      const k = clamp((state.t - flight.start) / (flight.end - flight.start), 0, 1);
+      b.x = lerp(flight.lane.from[0], flight.lane.to[0], k);
+      b.y = lerp(flight.lane.from[1], flight.lane.to[1], k);
+      b.heading = angleTo(...flight.lane.from, ...flight.lane.to);
+      return flags;
+    }
     const h = b.hover;
     if (h) {
       const d = dist(b.x, b.y, h.x, h.y);
@@ -176,6 +195,7 @@ export function updateBoss(state, script, dt) {
         b.heading = turnToward(b.heading, a, rad(cfg.turnRate) * dt);
       } else if (b.faceAlong != null) {
         b.heading = turnToward(b.heading, b.faceAlong, rad(cfg.turnRate) * dt);
+        if (flight?.stage === 'positioning' && Math.abs(normAngle(b.heading - b.faceAlong)) < 0.05) flags.breathReady = true;
       } else {
         // idle hover: slowly face the raid
         const a = angleTo(b.x, b.y, w.raid.anchor.x, w.raid.anchor.y);
@@ -190,10 +210,13 @@ export function beginTakeoff(state, script) {
   const b = state.world.boss;
   const hover = script.positions.hoverIdle;
   b.cast = null;
+  b.breathFlight = null;
   b.state = 'takeoff';
+  const walk = script.boss.walkToTakeoff ? dist(b.x, b.y, hover.x, hover.y) / script.boss.speed : 0;
   b.transition = {
-    start: state.t, end: state.t + script.boss.takeoffDuration,
-    fromX: b.x, fromY: b.y, fromZ: 0,
+    start: state.t + walk, end: state.t + walk + script.boss.takeoffDuration,
+    walkUntil: walk ? state.t + walk : null,
+    fromX: walk ? hover.x : b.x, fromY: walk ? hover.y : b.y, fromZ: 0,
     toX: hover.x, toY: hover.y, toZ: script.hoverHeight,
     toHeading: null,
   };
@@ -203,6 +226,7 @@ export function beginLanding(state, script) {
   const b = state.world.boss;
   const land = script.positions.landSpot;
   b.cast = null;
+  b.breathFlight = null;
   b.hover = null; b.faceAlong = null;
   b.state = 'landing';
   b.transition = {
@@ -268,7 +292,9 @@ export function updateRaid(state, script, dt) {
   const meleeOnBoss = b.state === 'grounded' && b.engaged && !b.passive;
   let spare = 0;
   for (const d of r.dots) {
-    if (d.melee && meleeOnBoss) {
+    if (b.target === 'raid' && state.threat.raidMembers?.length && d === r.dots[state.threat.raidTarget]) {
+      d.tx = d.x; d.ty = d.y;
+    } else if (d.melee && meleeOnBoss) {
       const p = offsetPoint(b.x, b.y, b.heading, d.slot, d.side * script.raid.meleeFlankDistance);
       d.tx = p.x; d.ty = p.y;
     } else if (r.spacing) {
@@ -343,8 +369,6 @@ export function updateGhost(state, script, dt, ideal) {
 
 // ---------------------------------------------------------------- adds
 
-let addUid = 0;
-
 /**
  * Spawn one wave of adds from the named spots. `pickup` says which role takes
  * them: the player when their role matches, otherwise the ghost off-tank.
@@ -358,7 +382,7 @@ export function spawnAdds(state, script, actionDef) {
     const playerPicks = roleMatches(actionDef.pickup || 'offtank', state.role, state.tankRole) && (!actionDef.playerFrom || actionDef.playerFrom.includes(name));
     for (let i = 0; i < (actionDef.count || actionDef.perCave || 1); i++) {
       state.world.whelps.push({
-        uid: ++addUid,
+        uid: state.nextAddId = (state.nextAddId || 0) + 1,
         x: c.x + rng.range(-3, 3), y: c.y + rng.range(-3, 3),
         heading: 0,
         target: playerPicks ? 'raid' : 'ghost',
