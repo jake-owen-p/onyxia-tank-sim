@@ -546,7 +546,7 @@
    "gcd": true,
    "icon": "attack",
    "threat": 140,
-   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls him off the tank."
+   "tip": "Attacks generate threat. Stop when the threat bar turns red so the boss stays on the tank."
   },
   "heal": {
    "kind": "heal",
@@ -557,7 +557,7 @@
    "icon": "heal",
    "amount": 2500,
    "threat": 25,
-   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+   "tip": "A large heal for the tank. Time it to land with the incoming damage."
   },
   "dispel": {
    "kind": "dispel",
@@ -813,7 +813,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "curseDispel",
@@ -913,7 +913,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "curseDispel",
@@ -964,7 +964,7 @@
    "penaltyPerUnit": 2,
    "severe": 3,
    "roles": "dps",
-   "tip": "In the red band one more hit can pull him. Wait for the tank."
+   "tip": "Stop attacking in the red band so the tank can regain a threat lead."
   },
   "earlyAttacks": {
    "label": "Attacks before the tank had him",
@@ -987,7 +987,7 @@
    "penaltyPerSecond": 0.4,
    "severe": 15,
    "roles": "dps",
-   "tip": "Every global you can safely use, use. Stop only when the bar is red or he is not on the tank."
+   "tip": "Keep attacking when it's safe. Stop if the threat bar turns red or the boss leaves the tank."
   },
   "outOfRange": {
    "label": "Seconds out of range",
@@ -1024,7 +1024,7 @@
    "penaltyPerUnit": 0.5,
    "severe": 10,
    "roles": "healer",
-   "tip": "A heal on a full tank is a heal you did not have for the spike."
+   "tip": "Avoid healing the tank at full health. Save the heal for incoming damage."
   },
   "debuffSeconds": {
    "label": "Seconds with a dispellable debuff up",
@@ -1035,7 +1035,7 @@
    "tip": "Dispel the moment it lands. Tanks first."
   },
   "attacksOffPriority": {
-   "label": "Attacks on the boss while a priority add lived",
+   "label": "Boss attacks while a priority add was alive",
    "unit": "count",
    "penaltyPerUnit": 1.5,
    "severe": 4,
@@ -1122,7 +1122,7 @@
     "role": "healer",
     "short": "TANK LOW",
     "label": "Heal the tank when they drop low",
-    "tip": "Under half with a spike coming is where tanks die. Heal now."
+    "tip": "The tank is below half health and a big hit is coming. Heal now."
    },
    {
     "id": "tauntGuards",

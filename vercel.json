@@ -7,10 +7,10 @@
   "functions": { "api/index.js": { "includeFiles": "data/encounters/**", "maxDuration": 30 } },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api?route=:path*" },
-    { "source": "/play", "destination": "/index.html" },
-    { "source": "/account", "destination": "/index.html" },
-    { "source": "/history", "destination": "/index.html" },
-    { "source": "/settings", "destination": "/index.html" }
+    { "source": "/play", "destination": "/" },
+    { "source": "/account", "destination": "/" },
+    { "source": "/history", "destination": "/" },
+    { "source": "/settings", "destination": "/" }
   ],
   "headers": [
     { "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }] },

@@ -107,19 +107,19 @@ async function boot() {
     },
   });
   function syncLabel(state = account.state) {
-    if (!state.user) return 'Play Onyxia as a guest, or sign in for every raid and cloud saves.';
-    return state.status === 'saved' ? 'Progress saved to your account' : state.status === 'offline' ? 'Saved on this device · cloud sync pending' : 'Saving progress…';
+    if (!state.user) return 'Playing as a guest. Sign in for the other raids and saved runs.';
+    return state.status === 'saved' ? 'Saved to your account' : state.status === 'offline' ? 'Saved on this device. We’ll retry the account save when you reconnect.' : 'Saving…';
   }
   function setPage(path, replace = false) {
     if (location.pathname + location.search !== path) window.history[replace ? 'replaceState' : 'pushState'](null, '', path);
-    const title = { '/': 'Practice WoW Classic Encounters', '/play': 'Encounter Journal', '/account': 'Your Account', '/history': 'Your Progress', '/settings': 'Settings' }[location.pathname] || 'Practice WoW Classic Encounters';
+    const title = { '/': 'Practice WoW Classic Encounters', '/play': 'Encounter Journal', '/account': 'Your Account', '/history': 'Run History', '/settings': 'Settings' }[location.pathname] || 'Practice WoW Classic Encounters';
     document.title = `Raid Rehearsal — ${title}`;
   }
   function showAccount(recovery = false, signup = false) {
     const back = !overlay.current || overlay.current === 'landing' ? showLanding : showMenu;
     // Keep a locked encounter's URL so Back returns to the page that linked it.
     if (!pendingEncounter) setPage('/account' + (signup ? '?mode=signup' : ''));
-    overlay.show('account', { account, recovery, signup, reason: pendingEncounter ? 'Sign in to unlock this raid and save your progress.' : '', onBack: () => { pendingEncounter = null; back(); },
+    overlay.show('account', { account, recovery, signup, reason: pendingEncounter ? 'Sign in to play this raid. Your runs will be saved to your account.' : '', onBack: () => { pendingEncounter = null; back(); },
       onSuccess: async () => {
         const pick = pendingEncounter; pendingEncounter = null;
         if (pick) { try { await loadEncounter(...pick); } catch (err) { overlay.toast(err.message, 'bad'); } }
@@ -210,7 +210,7 @@ async function boot() {
       settings, keybinds, input, audio, script,
       onBack: () => { persist(); if (session) renderer.setView(settings.view); onBack(); },
       onChange: persist,
-      onResetHistory: () => { clearHistory(); overlay.toast('History cleared'); },
+      onResetHistory: () => { clearHistory(); overlay.toast('Run history cleared'); },
       onResetAll: () => { resetAll(); location.reload(); },
     });
   }
@@ -250,7 +250,7 @@ async function boot() {
           tutorial = null;
           endSession();
           showMenu();
-          overlay.toast(reason === 'complete' ? 'Tutorial complete. Try a drill next.' : 'Tutorial closed', 'info', 2500);
+          overlay.toast(reason === 'complete' ? 'Tutorial complete. Choose a drill or try the full fight.' : 'Tutorial closed', 'info', 2500);
         },
       });
       session.start();

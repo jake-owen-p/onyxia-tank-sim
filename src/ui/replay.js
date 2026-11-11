@@ -28,10 +28,10 @@ export function replayScreen({ snapshots, expectations = [], renderer, settings,
   const playBtn = button('Pause', () => { playing = !playing; playBtn.textContent = playing ? 'Pause' : 'Play'; }, { title: 'Space' });
   const speedSel = h('select', { 'aria-label': 'Replay speed' }, ...[0.25, 0.5, 1, 2, 4].map((v) => h('option', { value: v, text: `${v}×`, selected: v === 1 })));
   speedSel.addEventListener('change', () => { speed = parseFloat(speedSel.value); });
-  const viewBtn = button('View: ' + (renderer.getView() === 'pov' ? 'POV' : 'Map'), () => {
+  const viewBtn = button('View: ' + (renderer.getView() === 'pov' ? 'Shoulder' : 'Map'), () => {
     const v = renderer.getView() === 'pov' ? 'topdown' : 'pov';
     renderer.setView(v);
-    viewBtn.textContent = 'View: ' + (v === 'pov' ? 'POV' : 'Map');
+    viewBtn.textContent = 'View: ' + (v === 'pov' ? 'Shoulder' : 'Map');
   }, { title: 'Tab' });
 
   // Markers for expectation results on the scrubber.

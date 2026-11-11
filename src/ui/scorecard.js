@@ -46,7 +46,7 @@ export function scorecardScreen({ score, scenario, sim, best, isNewBest, onRepla
         f.tip ? h('div', { class: 'fix-tip', text: f.tip }) : null,
       ),
     ))
-    : [h('li', { class: 'fix' }, h('div', { class: 'fix-title', text: 'Nothing to fix. Clean run.' }))];
+    : [h('li', { class: 'fix' }, h('div', { class: 'fix-title', text: 'Clean run.' }))];
 
   const isDrill = scenario.mode === 'drill';
   const el = h('div', { class: 'panel panel-wide panel-score' },
@@ -55,7 +55,7 @@ export function scorecardScreen({ score, scenario, sim, best, isNewBest, onRepla
         h('div', { class: 'kicker', text: `${scenario.name} · ${roleLabel(sim.script, sim.state.role)}` }),
         h('h2', { text: sim.state.result === 'victory' ? `${sim.script.name} down` : isDrill ? 'Drill complete' : 'Run ended' }),
         h('div', { class: 'muted', text: `${formatTime(sim.state.t)} · ${isNewBest ? 'New best' : best != null ? `Best ${best}` : ''}` }),
-        score.cues && score.cues.total ? h('div', { class: 'muted', text: `${score.cues.perfect}/${score.cues.total} abilities on the note · best streak ${score.cues.bestCombo}` }) : null,
+        score.cues && score.cues.total ? h('div', { class: 'muted', text: `${score.cues.perfect}/${score.cues.total} abilities timed perfectly · best streak ${score.cues.bestCombo}` }) : null,
       ),
       h('div', { class: 'overall' },
         h('div', { class: 'grade grade-big grade-' + score.grade, text: score.grade }),
@@ -63,11 +63,11 @@ export function scorecardScreen({ score, scenario, sim, best, isNewBest, onRepla
       ),
     ),
     h('div', { class: 'phase-grid' }, ...phaseCards),
-    h('section', { class: 'fixes' }, h('h3', { text: 'Top three things to fix' }), h('ol', { class: 'fix-list' }, ...fixes)),
+    h('section', { class: 'fixes' }, h('h3', { text: 'What to work on' }), h('ol', { class: 'fix-list' }, ...fixes)),
     h('div', { class: 'actions' },
-      button(isDrill && scenario.loop ? 'Again' : 'Run again', onAgain, { primary: true, autofocus: true, title: 'Enter' }),
-      button('Replay', onReplay),
-      button('Menu', onMenu),
+      button('Try again', onAgain, { primary: true, autofocus: true, title: 'Enter' }),
+      button('Watch replay', onReplay),
+      button('Back to raids', onMenu),
     ),
   );
   return arrowNav(el);

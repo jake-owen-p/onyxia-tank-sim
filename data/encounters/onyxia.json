@@ -258,7 +258,7 @@
    "gcd": false,
    "range": 16,
    "icon": "taunt",
-   "tip": "Onyxia cannot be taunted: this is your biggest threat dump (Sunder, Revenge, Heroic Strike at once). Press it the moment she turns on the raid or lands, never while she is already on you."
+   "tip": "Onyxia can't be taunted. This button combines Sunder, Revenge and Heroic Strike to generate threat. Use it when she turns toward the raid or lands; save it while she's attacking you."
   },
   "attack": {
    "kind": "attack",
@@ -646,7 +646,7 @@
      "within": 6,
      "grace": 4,
      "label": "Keep her on you after Knock Away",
-     "tip": "Knock Away throws you back and cuts a quarter of your threat. Back to the wall at once, and burst threat the moment she turns toward the raid.",
+     "tip": "Knock Away knocks you back and removes a quarter of your threat. Return to the wall and use Threat burst if Onyxia turns toward the raid.",
      "role": "tanks"
     },
     {
@@ -657,7 +657,7 @@
      "within": 3,
      "grace": 3,
      "label": "Take her back when a DPS pulls aggro",
-     "tip": "Someone will pull aggro. Watch the threat bar and the warning: the moment she turns, burst threat. Every second she faces the raid is a Flame Breath waiting to happen.",
+     "tip": "Watch the threat bar and the warning. Use Threat burst as soon as Onyxia turns toward the raid.",
      "role": "tanks"
     },
     {
@@ -847,7 +847,7 @@
      "within": 5,
      "grace": 4,
      "label": "Pick her up within 5s of landing",
-     "tip": "The moment she lands, burst threat. Stay on her for a few seconds so she settles on you before you move.",
+     "tip": "Use Threat burst when Onyxia lands. Stay in melee range until she targets you, then move her back to the wall.",
      "role": "tanks"
     },
     {
@@ -906,7 +906,7 @@
      "within": 6,
      "grace": 4,
      "label": "Keep her on you after Knock Away",
-     "tip": "Knock Away throws you back and cuts a quarter of your threat. Back to the wall at once, and burst threat the moment she turns toward the raid.",
+     "tip": "Knock Away knocks you back and removes a quarter of your threat. Return to the wall and use Threat burst if Onyxia turns toward the raid.",
      "role": "tanks"
     },
     {
@@ -917,7 +917,7 @@
      "within": 3,
      "grace": 3,
      "label": "Take her back when a DPS pulls aggro",
-     "tip": "Someone will pull aggro. Watch the threat bar and the warning: the moment she turns, burst threat. Every second she faces the raid is a Flame Breath waiting to happen.",
+     "tip": "Watch the threat bar and the warning. Use Threat burst as soon as Onyxia turns toward the raid.",
      "role": "tanks"
     },
     {
@@ -1205,7 +1205,7 @@
   {
    "id": "pullBuffet",
    "name": "Pull and Wing Buffet",
-   "description": "Pull from the ramp to the wall, then hold position through three Wing Buffets and burst threat her back if she turns.",
+   "description": "Pull Onyxia from the ramp to the back wall. Hold your position through three Wing Buffets, and use Threat burst if she turns toward the raid.",
    "startPhase": 1,
    "duration": 75,
    "loop": true,
@@ -1239,8 +1239,8 @@
   },
   {
    "id": "taunt",
-   "name": "When to burst threat",
-   "description": "Already at the wall. DPS keep pulling aggro and Wing Buffet cuts your threat. burst threat her back the instant she turns, never before.",
+   "name": "Getting aggro back",
+   "description": "Start at the wall. DPS will pull aggro; use Threat burst as soon as Onyxia turns toward them.",
    "startPhase": 1,
    "duration": 60,
    "loop": true,
@@ -1276,7 +1276,7 @@
   {
    "id": "roar",
    "name": "Bellowing Roar recovery",
-   "description": "Already at the wall in Phase 3. Each Roar fears you off her. Get back between her and the raid and walk her onto the wall before she turns.",
+   "description": "Start at the wall in Phase 3. After each fear, get back between Onyxia and the raid, then lead her back to the wall.",
    "startPhase": 3,
    "duration": 105,
    "loop": true,
@@ -1306,7 +1306,7 @@
   {
    "id": "pickup",
    "name": "Phase 3 pickup",
-   "description": "She lands in five seconds. burst threat, pick her up, and drag her to the wall between the cracks.",
+   "description": "Onyxia lands in five seconds. Tanks: use Threat burst and take her back to the wall. DPS and healers: stay clear of her front and the lava cracks.",
    "startPhase": 2,
    "startOffset": -5,
    "duration": 45,
@@ -1341,7 +1341,7 @@
   {
    "id": "threatDps",
    "name": "Threat discipline",
-   "description": "Already on her. Attack on every global but stop when the bar goes red: Wing Buffets cut the tank's threat and a landing resets it.",
+   "description": "Attack while it's safe. Stop when the threat bar turns red, and wait for the tank to build a lead.",
    "startPhase": 1,
    "duration": 60,
    "loop": true,
@@ -1377,7 +1377,7 @@
   {
    "id": "healBreath",
    "name": "Healing through Flame Breath",
-   "description": "Already on her. Keep the tank above half through a Breath every 14 seconds; wasted heals count against you.",
+   "description": "Keep the tank above half health through a Flame Breath every 14 seconds. Avoid wasting heals when they're already at full health.",
    "startPhase": 1,
    "duration": 60,
    "loop": true,
@@ -1410,7 +1410,7 @@
    {
     "id": "welcome",
     "title": "Onyxia's Lair",
-    "text": "This is Onyxia's Lair. You came down the ramp from the south. The raid will gather in the centre. The back wall is where you will tank her.\n\nPress Tab to switch between the top-down map and the over-the-shoulder view.",
+    "text": "You'll tank Onyxia at the back wall, away from the raid in the centre. You're starting at the entrance ramp to the south.\n\nPress Tab to switch between the map and the over-the-shoulder view.",
     "setup": {
      "bossPassive": true,
      "phase": 1,
@@ -1424,7 +1424,7 @@
    {
     "id": "move",
     "title": "Move to the tank spot",
-    "text": "Move with W A S D. Q and E strafe. Hold the right mouse button to turn with the mouse. Space jumps.\n\nFollow the glowing path and the ghost tank to the tank spot on the back wall.",
+    "text": "Use W, A, S and D to move, Q and E to strafe, and Space to jump. Hold the right mouse button to turn.\n\nFollow the glowing path and the ghost tank to the spot at the back wall.",
     "setup": {
      "ghost": true
     },
@@ -1436,7 +1436,7 @@
    {
     "id": "pull",
     "title": "Pull and position",
-    "text": "Onyxia faces whoever she is attacking. Walk to her, press your threat burst (1), then walk back to the wall. She will follow you and face the wall, away from the raid.\n\nStay in melee range: your threat builds on its own while you are on her. Dotted outlines show where she should stand and face.",
+    "text": "Walk up to Onyxia and use Threat burst (1), then walk back to the wall. She'll follow you, facing away from the raid.\n\nStay in melee range to keep building threat. The dotted outlines show where she should stand and face.",
     "setup": {
      "bossPassive": false,
      "ghost": true
@@ -1449,8 +1449,8 @@
    },
    {
     "id": "taunt",
-    "title": "When to burst threat",
-    "text": "The threat bar shows how close the raid is to pulling her off you. When someone does, she turns on the raid and a red burst threat note marked NOW drops into the lane above your bar.\n\nyour threat burst (1) the moment she turns. Pressing it early wastes the cooldown; pressing it late costs the raid a Flame Breath.",
+    "title": "Getting aggro back",
+    "text": "Watch the threat bar. If someone pulls aggro, Onyxia will turn toward the raid and a red NOW cue will appear above your ability bar.\n\nUse Threat burst (1) as soon as she turns. Using it early wastes the cooldown; waiting gives her time to hit the raid.",
     "done": {
      "type": "expectation",
      "id": "retaunt"
@@ -1465,7 +1465,7 @@
    {
     "id": "breath",
     "title": "Flame Breath",
-    "text": "Flame Breath is a two second cast that hits a cone in front of her. You take it. The raid must not.\n\nHold your position between her and the wall and let it land on you.",
+    "text": "Flame Breath has a two-second cast and hits everyone in front of Onyxia. Only the tank should take it.\n\nStay between her and the back wall so the breath misses the raid.",
     "trigger": "flameBreath",
     "done": {
      "type": "eventLanded",
@@ -1476,7 +1476,7 @@
    {
     "id": "buffet",
     "title": "Wing Buffet and Knock Away",
-    "text": "Wing Buffet knocks you back a long way. With the wall behind you the knockback goes nowhere. Knock Away is the one that also cuts a quarter of your threat.\n\nAfter either lands, get straight back into melee range so your threat rebuilds, and burst threat if she turns.",
+    "text": "Wing Buffet knocks you back. Keep your back to the wall so you stay in place. Knock Away also removes a quarter of your threat.\n\nAfter either hit, get back into melee range. Use Threat burst if Onyxia turns toward the raid.",
     "trigger": "knockAway",
     "done": {
      "type": "expectation",
@@ -1486,7 +1486,7 @@
    {
     "id": "takeoff",
     "title": "Phase 2: airborne",
-    "text": "At 65% she takes off. Fireballs hit random raid members. Move to the pickup spot north of the centre and wait.",
+    "text": "At 65% health, Onyxia takes off and starts throwing fireballs at the raid. Move to the pickup spot north of the centre so you can catch her when she lands.",
     "setup": {
      "phase": 2,
      "ghost": true
@@ -1499,7 +1499,7 @@
    {
     "id": "lane",
     "title": "Deep Breath",
-    "text": "Deep Breath has a five second warning, then fire fills a lane across the room. Step sideways out of the lane, then return to the pickup spot.",
+    "text": "You have five seconds to move before Deep Breath fills the marked lane with fire. Step sideways out of it, then return to the pickup spot.",
     "trigger": "deepBreath",
     "done": {
      "type": "expectation",
@@ -1509,7 +1509,7 @@
    {
     "id": "landing",
     "title": "Phase 3: the landing",
-    "text": "At 40% she lands in the centre with her threat reset. burst threat her within five seconds, hold still for a moment so she settles on you, then walk backwards to the wall between the cracks.",
+    "text": "At 40% health, Onyxia lands and her threat resets. Use Threat burst within five seconds. Hold still until she turns to you, then walk backwards to the wall, avoiding the lava cracks.",
     "setup": {
      "phase": 3,
      "ghost": true
@@ -1523,7 +1523,7 @@
    {
     "id": "roar",
     "title": "Bellowing Roar",
-    "text": "Bellowing Roar fears the whole raid, you included. You will run off her for three seconds.\n\nAs soon as the fear ends, get back between her and the raid and walk her onto the wall spot before she turns on them.",
+    "text": "Bellowing Roar fears everyone for three seconds, including you.\n\nWhen it ends, get back between Onyxia and the raid. Lead her to the wall before she turns toward them.",
     "trigger": "bellowingRoar",
     "done": {
      "type": "expectation",
@@ -1532,8 +1532,8 @@
    },
    {
     "id": "done",
-    "title": "You are ready",
-    "text": "That is the whole fight. Try a drill to repeat one mechanic, or run the full fight and look at your scorecard.",
+    "title": "Tutorial complete",
+    "text": "You've covered the main tank mechanics. Choose a drill to repeat one, or try the full fight and check your score afterwards.",
     "done": {
      "type": "wait",
      "seconds": 6
@@ -1558,7 +1558,7 @@
     "late": 3.0,
     "label": "Burst threat when she turns on the raid",
     "short": "ON RAID",
-    "tip": "The moment she turns, burst threat. Every second she faces the raid is a Flame Breath waiting to happen.",
+    "tip": "Use Threat burst as soon as Onyxia turns toward the raid.",
     "role": "tanks"
    },
    {
@@ -1572,7 +1572,7 @@
     "role": "tank",
     "label": "Burst threat as she lands",
     "short": "LANDED",
-    "tip": "Her threat table is empty when she lands. burst threat inside the first seconds, then hold still so she settles on you."
+    "tip": "Her threat resets when she lands. Use Threat burst straight away and hold still until she targets you."
    },
    {
     "id": "tauntWhelps",
@@ -1585,7 +1585,7 @@
     "role": "offtank",
     "label": "Pick up the whelps",
     "short": "WHELPS",
-    "tip": "Meet the whelps at the cave mouths and burst threat or run into them before they reach the raid.",
+    "tip": "Meet the whelps at the cave mouths. Use Threat burst or move into them to pick them up before they reach the raid.",
     "doneBy": "whelpPickup"
    },
    {
@@ -1625,7 +1625,7 @@
   "tank": {
    "label": "Main tank",
    "short": "Tank",
-   "description": "Pull her to the wall, hold her facing away from the raid, burst threat when she turns on the raid, pick her up when she lands. She cannot be taunted, so threat is everything.",
+   "description": "Pull Onyxia to the back wall and keep her facing away from the raid. Use Threat burst when she turns or lands. She can't be taunted.",
    "abilities": [
     "taunt"
    ]
@@ -1633,7 +1633,7 @@
   "offtank": {
    "label": "Whelp off-tank",
    "short": "Off-tank",
-   "description": "Tank as the main tank does, and in Phase 2 pick up the whelp waves and hold them away from the raid.",
+   "description": "Tank Onyxia as usual. In Phase 2, pick up the whelps and hold them away from the raid.",
    "abilities": [
     "taunt"
    ]
@@ -1641,7 +1641,7 @@
   "melee": {
    "label": "Melee DPS",
    "short": "Melee",
-   "description": "Stay on her flank at the shoulder, clear of the breath cone and the tail, hold your threat under the tank, and spread with the raid in Phase 2.",
+   "description": "Attack from her flank, near the shoulder. Stay clear of her breath and tail, keep your threat below the tank's, and spread out in Phase 2.",
    "abilities": [
     "attack"
    ],
@@ -1650,7 +1650,7 @@
   "ranged": {
    "label": "Ranged DPS",
    "short": "Ranged",
-   "description": "Stand in the wall pocket at her flank out of her front and her tail, manage threat, spread 8 yd in Phase 2 and dodge the Deep Breath lanes.",
+   "description": "Stand in the wall pocket beside Onyxia, clear of her head and tail. Watch your threat, spread 8 yards apart in Phase 2, and dodge Deep Breath.",
    "abilities": [
     "attack"
    ],
@@ -1659,7 +1659,7 @@
   "healer": {
    "label": "Healer",
    "short": "Healer",
-   "description": "Stand in the wall pocket at her flank within range of the tank, keep the tank up through Flame Breath and the landing, stay out of the lanes.",
+   "description": "Stay in the wall pocket beside Onyxia, within healing range of the tank. Keep the tank alive through Flame Breath and her landing, and avoid the Deep Breath lanes.",
    "abilities": [
     "heal"
    ],

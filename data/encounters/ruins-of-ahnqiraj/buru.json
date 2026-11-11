@@ -1068,7 +1068,7 @@
   "tank": {
    "label": "Main tank",
    "short": "Tank",
-   "description": "You are the fixated kiter (the rogue, mage or druid whose name he emoted). Run counter-clockwise from the South egg, around the pool and over each egg; he gains 25% speed every 9 s since the last egg, so keep moving. Stay ahead of him: Dismember only lands in melee, 1,248 every 2 seconds and stacking. Press Taunt only when his eye comes back to you after an egg, which stands for 'you are the new fixate, get moving': he is immune to Taunt in the real fight. In the last phase a warrior would pick him up at the transform; here you do.",
+   "description": "Buru is fixated on you. Start at the South egg and run counter-clockwise around the pool, leading him over each egg. He gains 25% speed every 9 seconds after an egg breaks, so keep moving.\n\nStay out of melee range: Dismember stacks and deals 1,248 damage every 2 seconds. Use Taunt when his eye returns to you after an egg. Here, that button means you've become the new fixate target; the real boss is immune to Taunt. In the last phase, you also take over the warrior's job of picking him up after the transformation.",
    "abilities": [
     "taunt"
    ],
@@ -1129,7 +1129,7 @@
    "gcd": true,
    "icon": "attack",
    "threat": 140,
-   "tip": "Every attack adds threat. Watch the bar: in the red band one more hit pulls the boss off the tank.",
+   "tip": "Attacks generate threat. Stop when the threat bar turns red so the boss stays on the tank.",
    "addDamage": 0
   },
   "heal": {
@@ -1141,7 +1141,7 @@
    "icon": "heal",
    "amount": 2500,
    "threat": 25,
-   "tip": "A big heal on the tank. Have it landing as the spike hits, not after."
+   "tip": "A large heal for the tank. Time it to land with the incoming damage."
   }
  },
  "actions": {
@@ -1731,7 +1731,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 1, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "eggBurstOut1",
@@ -1768,7 +1768,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -1853,7 +1853,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 2, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "hatch2Pick",
@@ -1889,7 +1889,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -1958,7 +1958,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 2, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run22",
@@ -1983,7 +1983,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2052,7 +2052,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 2, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run23",
@@ -2077,7 +2077,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2146,7 +2146,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 2, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run24",
@@ -2171,7 +2171,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2255,7 +2255,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 2, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "eggBurstOut2",
@@ -2292,7 +2292,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2377,7 +2377,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 3, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "hatch3Pick",
@@ -2413,7 +2413,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2482,7 +2482,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 3, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run32",
@@ -2507,7 +2507,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2576,7 +2576,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 3, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run33",
@@ -2601,7 +2601,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2670,7 +2670,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 3, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run34",
@@ -2695,7 +2695,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2779,7 +2779,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 3, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "eggBurstOut3",
@@ -2816,7 +2816,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -2901,7 +2901,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 4, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "hatch4Pick",
@@ -2937,7 +2937,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3006,7 +3006,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 4, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run42",
@@ -3031,7 +3031,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3100,7 +3100,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 4, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run43",
@@ -3125,7 +3125,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3194,7 +3194,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 4, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run44",
@@ -3219,7 +3219,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3303,7 +3303,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 4, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "eggBurstOut4",
@@ -3340,7 +3340,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3425,7 +3425,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 5, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "hatch5Pick",
@@ -3461,7 +3461,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3530,7 +3530,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 5, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run52",
@@ -3555,7 +3555,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3624,7 +3624,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 5, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run53",
@@ -3649,7 +3649,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3718,7 +3718,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 5, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run54",
@@ -3743,7 +3743,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3827,7 +3827,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 5, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "eggBurstOut5",
@@ -3864,7 +3864,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -3949,7 +3949,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 6, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "hatch6Pick",
@@ -3985,7 +3985,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -4054,7 +4054,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 6, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run62",
@@ -4079,7 +4079,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -4148,7 +4148,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 6, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run63",
@@ -4173,7 +4173,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -4242,7 +4242,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 6, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "run64",
@@ -4267,7 +4267,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -4351,7 +4351,7 @@
      "metric": "attacksOffPriority",
      "role": "dps",
      "label": "Kill Egg 6, not Buru",
-     "tip": "The shell takes 99% reduced damage. Everything on the egg."
+     "tip": "The shell reduces damage by 99%. Attack the egg instead."
     },
     {
      "id": "eggBurstOut6",
@@ -4388,7 +4388,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -4469,7 +4469,7 @@
      "metric": "aggroPulls",
      "role": "dps",
      "label": "Never pull aggro off the tank",
-     "tip": "When the threat bar is in the red band, stop attacking until the tank is clear again."
+     "tip": "Stop attacking while the threat bar is red. Resume when it leaves the red band."
     },
     {
      "id": "tankUp",
@@ -4517,7 +4517,7 @@
    "penaltyPerUnit": 2,
    "severe": 3,
    "roles": "dps",
-   "tip": "In the red band one more hit can pull. Wait for the tank."
+   "tip": "Stop attacking in the red band so the tank can regain a threat lead."
   },
   "earlyAttacks": {
    "label": "Attacks before the tank had the boss",
@@ -4540,7 +4540,7 @@
    "penaltyPerSecond": 0.3,
    "severe": 15,
    "roles": "dps",
-   "tip": "Every global you can safely use, use. Stop only when the bar is red or the boss is not on the tank."
+   "tip": "Keep attacking when it's safe. Stop if the threat bar turns red or the boss leaves the tank."
   },
   "outOfRange": {
    "label": "Seconds out of range",
@@ -4554,7 +4554,7 @@
    "unit": "s",
    "penaltyPerSecond": 4,
    "severe": 1,
-   "tip": "Nothing on the ground is worth a global. Step out, then carry on."
+   "tip": "Move out of the ground effect before attacking again."
   },
   "tankDeaths": {
    "label": "Tank deaths",
@@ -4577,10 +4577,10 @@
    "penaltyPerUnit": 0.4,
    "severe": 12,
    "roles": "healer",
-   "tip": "A heal on a full tank is a heal you did not have for the spike."
+   "tip": "Avoid healing the tank at full health. Save the heal for incoming damage."
   },
   "attacksOffPriority": {
-   "label": "Attacks on the boss while a priority add lived",
+   "label": "Boss attacks while a priority add was alive",
    "unit": "count",
    "penaltyPerUnit": 1,
    "severe": 4,
@@ -4670,7 +4670,7 @@
     "role": "tank",
     "short": "ON RAID",
     "label": "Taunt when Buru turns on the raid",
-    "tip": "The moment the boss turns, Taunt. Every second it is on the raid someone is dying."
+    "tip": "Taunt as soon as the boss turns toward the raid."
    },
    {
     "id": "healLow",
@@ -4683,7 +4683,7 @@
     "role": "healer",
     "short": "TANK LOW",
     "label": "Heal the tank when they drop low",
-    "tip": "Under half with a spike coming is where tanks die. Heal now."
+    "tip": "The tank is below half health and a big hit is coming. Heal now."
    },
    {
     "id": "grabHatch1",
@@ -4841,7 +4841,7 @@
   {
    "id": "plagueDrill",
    "name": "Heal through the transform",
-   "description": "Plague stacks climbing every 3 s. Heal the kiter on the way down.",
+   "description": "Creeping Plague stacks every 3 seconds. Keep healing the kiter through Plague and Dismember.",
    "roles": "healer",
    "startPhase": 27,
    "duration": 28,
